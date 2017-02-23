@@ -200,6 +200,13 @@ class PlaylistClass {
 	}
 
 	/**
+	  * get the Array of Tracks
+	  */
+	public inline function toArray():Array<Track> {
+		return l;
+	}
+
+	/**
 	  * report a change in [this] Playlist
 	  */
 	private inline function change(c : PlaylistChange):Void {
