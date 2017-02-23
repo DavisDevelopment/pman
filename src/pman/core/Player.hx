@@ -22,10 +22,12 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
 import pman.ui.*;
+import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
+import haxe.extern.EitherType;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -90,8 +92,8 @@ class Player {
 	/**
 	  * post a Message to the message board
 	  */
-	public inline function message(text : String):Void {
-		view.messageBoard.post( text );
+	public inline function message(msg : EitherType<String, MessageOptions>):Void {
+		view.messageBoard.post( msg );
 	}
 
 	/**
