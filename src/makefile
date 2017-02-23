@@ -1,6 +1,17 @@
 
-all: build
+all: build test
+	#cd ../dist/ && electron .
+
+test:
 	cd ../dist/ && electron .
 
 build:
 	haxe build.hxml && cd ../dist/ && sh build.sh
+
+install_deps:
+	git clone http://github.com/DavisDevelopment/tnative tannus
+	git clone http://github.com/DavisDevelopment/jsgryf gryffin
+	haxelib install slambda
+	haxelib install actuate
+
+
