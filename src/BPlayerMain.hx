@@ -1,5 +1,9 @@
 package ;
 
+import tannus.io.*;
+import tannus.ds.*;
+import tannus.graphics.Color;
+
 import crayon.*;
 
 import electron.ext.*;
@@ -84,7 +88,7 @@ class BPlayerMain extends Application {
 	public inline function errorMessage(error : Dynamic):Void {
 		player.message({
 			text: Std.string( error ),
-			color: '#F00',
+			color: new Color(255, 0, 0),
 			fontSize: '10pt'
 		});
 	}
@@ -99,19 +103,19 @@ class BPlayerMain extends Application {
 	}
 
 	/**
-	  * create the Window's menus
+	  * create [this] Window's Toolbar Menu
 	  */
 	private function __buildMenus():Void {
 		// wait for the Player to be ready
 		player.onReady(function() {
 			// create toolbar menu
-			var items:Array<MenuItem> = new Array();
-			var mediaItem = new MenuItem({
+			var items : Array<MenuItem> = new Array();
+			var mediaItem:MenuItem = new MenuItem({
 				label : 'Media',
 				submenu : [
 				{
 					label: 'Open File(s)',
-					accelerator: 'CtrlOrCmd+O',
+					//accelerator: 'CtrlOrCmd+O',
 					click: function(item, window, event) {
 						player.selectAndOpenFiles();
 						//player.selectFilesToPlaylist(function( tracks ) {
@@ -121,7 +125,7 @@ class BPlayerMain extends Application {
 				},
 				{
 					label: 'Open Directory',
-					accelerator: 'CtrlOrCmd+F',
+					//accelerator: 'CtrlOrCmd+F',
 					click: function(item, window, event) {
 						player.selectAndOpenDirectory();
 					}
@@ -142,7 +146,7 @@ class BPlayerMain extends Application {
 				submenu: [
 				{
 					label: 'Playlist',
-					accelerator: 'CtrlOrCmd+L',
+					//accelerator: 'CtrlOrCmd+L',
 					click: function(item, window, event) {
 						player.togglePlaylist();
 					}
