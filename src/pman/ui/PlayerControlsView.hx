@@ -96,10 +96,12 @@ class PlayerControlsView extends Ent {
 		hovered = (mp != null && containsPoint( mp ));
 		var events = ['mousemove', 'click', 'keydown'];
 		var times = events.map( stage.mostRecentOccurrenceTime  ).filter.fn(_ != null).map.fn(now - _);
+		/*
 		if (!times.empty()) {
 			var last = times.min.fn( _ );
 			uiEnabled = (hovered || last <= uiHideDelay);
 		}
+		*/
 	}
 
 	/**
@@ -194,7 +196,7 @@ class PlayerControlsView extends Ent {
 	public var seekBar : SeekBar;
 
 	public var hovered : Bool = false;
-	public var uiEnabled(default, null): Bool;
+	public var uiEnabled : Bool;
 	public var uiHideDelay : Float;
 
 	private var cidm : Map<String, Int>;
