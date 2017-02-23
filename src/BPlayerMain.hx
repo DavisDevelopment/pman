@@ -56,26 +56,17 @@ class BPlayerMain extends Application {
 		dragManager = new DragDropManager( this );
 		dragManager.init();
 
-		tray = new Tray(NativeImage.createFromPath(App.getAppPath().plusString('assets/icon16.png')));
 		initTray();
 
 		//testSockets();
-	}
-
-	private function testSockets():Void {
-		var bus = IpcBus.get();
-		var ping = bus.createSocket( 'ping' );
-		ping.on('test', function( m ) {
-			trace('message: ${m.data}');
-			trace('responding..');
-			m.reply( 'ping' );
-		});
 	}
 
 	/**
 	  * open PornHub window
 	  */
 	private function initTray():Void {
+		tray = new Tray(NativeImage.createFromPath(App.getAppPath().plusString('assets/icon32.png')));
+
 		var trayMenu:Menu = Menu.buildFromTemplate(Ct.executeFile( 'res/trayTemplate.js' ));
 		tray.setContextMenu( trayMenu );
 	}
@@ -90,14 +81,18 @@ class BPlayerMain extends Application {
 	/**
 	  * display an error message
 	  */
-	public function errorMessage(error : Dynamic):Void {
-		win.alert(Std.string( error ));
+	public inline function errorMessage(error : Dynamic):Void {
+		player.message({
+			text: Std.string( error ),
+			color: '#F00',
+			fontSize: '10pt'
+		});
 	}
 
 	/**
 	  * create and display FileSystem prompt
 	  */
-	public function fileSystemPrompt(options:FSPromptOptions, callback:Array<String>->Void):Void {
+	public inline function fileSystemPrompt(options:FSPromptOptions, callback:Array<String>->Void):Void {
 		Dialog.showOpenDialog(_convertFSPromptOptions(_fillFSPromptOptions( options )), function(paths : Array<String>):Void {
 			callback( paths );
 		});
@@ -141,6 +136,20 @@ class BPlayerMain extends Application {
 				]
 			});
 			items.push( mediaItem );
+
+			var viewItem = new MenuItem({
+				label: 'View',
+				submenu: [
+				{
+					label: 'Playlist',
+					accelerator: 'CtrlOrCmd+L',
+					click: function(item, window, event) {
+						player.togglePlaylist();
+					}
+				}
+				]
+			});
+			items.push( viewItem );
 
 			var toolbarMenu:Menu = new Menu();
 			for (item in items) {
