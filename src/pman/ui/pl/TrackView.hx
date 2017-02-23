@@ -27,6 +27,7 @@ class TrackView extends Pane {
 	/* Constructor Function */
 	public function new(v:PlaylistView, t:Track):Void {
 		super();
+
 		addClass( 'track' );
 
 		list = v;
@@ -53,6 +54,9 @@ class TrackView extends Pane {
 		el.plugin( 'disableSelection' );
 
 		configureDragAndDropRearrangement();
+
+		var a = this.el.attributes;
+		a['title'] = track.title;
 	}
 
 	/**
@@ -158,6 +162,10 @@ class TrackView extends Pane {
 			});
 		});
 
+		list.on('click', function(event) {
+			dragging = false;
+		});
+
 		list.on('mousemove', function(event : MouseEvent) {
 			if ( dragging ) {
 				var tvOver:Null<TrackView> = list.findTrackViewByPoint( event.position );
@@ -166,7 +174,7 @@ class TrackView extends Pane {
 					var hwm = (r.y + (r.h / 2));
 
 					di.remove();
-					di = '<li><div class="drop-indicator"></div></li>';
+					//di = '<li><div class="drop-indicator"></div></li>';
 
 					(event.position.y > hwm ? tvOver.li.after : tvOver.li.before)( di );
 				}
