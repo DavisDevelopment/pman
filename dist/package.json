@@ -1,0 +1,14 @@
+{
+	"name": "pmanui",
+	"version": "0.0.1",
+	"description": "",
+	"main": "scripts/background.js",
+	"keywords": [
+		"game",
+		"zombie",
+		"shooter",
+		"survival"
+	],
+	"author": "Ryan Davis",
+	"license": "ISC"
+}

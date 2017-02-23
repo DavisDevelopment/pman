@@ -1,0 +1,86 @@
+body {
+  overflow: hidden;
+}
+canvas {
+  background-color: black;
+}
+.block-center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+.right-panel {
+  display: block;
+  position: absolute;
+  right: 0px;
+  top: 0px;
+  width: 30vw;
+  height: 100vh;
+  color: #222;
+  background-color: #222222;
+  font-family: Ubuntu;
+  border-right: solid #f27a48 0.75px;
+}
+.playlist {
+  overflow-y: scroll;
+}
+.playlist .search-box {
+  margin-left: auto;
+  margin-right: auto;
+  width: 100%;
+}
+.playlist .search-box input[type=text] {
+  font-size: 10pt;
+  width: 100%;
+  height: auto;
+}
+.playlist ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.playlist ul li .track {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  width: 96%;
+  border: solid grey 0.5px;
+  margin-top: 5px;
+  color: white;
+  cursor: pointer;
+  /* highlighted */
+}
+.playlist ul li .track .title {
+  padding: 5px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  font-size: 10pt;
+}
+.playlist ul li .track.focused,
+.playlist ul li .track.hovered,
+.playlist ul li .track:hover {
+  background-color: #f27a48;
+}
+.playlist ul li .track.being-dragged {
+  position: absolute;
+  z-index: 100;
+}
+.playlist ul li .drop-indicator {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 5px;
+  width: 96%;
+  border-top: solid #f27a48 1.5px;
+  border-bottom: solid #f27a48 1.5px;
+}
+@font-face {
+  font-family: Ubuntu;
+  src: url('../assets/fonts/Ubuntu-Regular.ttf');
+}
+@font-face {
+  font-family: UbuntuLight;
+  src: url('../assets/fonts/Ubuntu-Light.ttf');
+}

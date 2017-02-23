@@ -1,0 +1,108 @@
+
+@color_bg: #444444;
+@color_fg: orange;
+
+@primary: rgb(34, 34, 34);
+@secondary: rgb(242, 122, 72);
+
+body {
+	overflow: hidden;
+}
+
+canvas {
+	background-color: black;
+}
+
+.block-center {
+	display: block;
+	margin-left: auto;
+	margin-right: auto;
+}
+
+.right-panel {
+	display: block;
+	position: absolute;
+	right: 0px;
+	top: 0px;
+	width: 30vw;
+	height: 100vh;
+	color: #222;
+	background-color: @primary;
+	font-family: Ubuntu;
+	border-right: solid @secondary 0.75px;
+}
+
+.playlist {
+	overflow-y: scroll;
+
+	// The search widget
+	.search-box {
+		margin-left: auto;
+		margin-right: auto;
+		width: 100%;
+
+		input[type=text] {
+			font-size: 10pt;
+			width: 100%;
+			height: auto;
+		}
+	}
+
+	// the Track list widget
+	ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+
+		li .track {
+			.block-center;
+
+			width: 96%;
+			border: solid grey 0.5px;
+			margin-top: 5px;
+			color: white;
+			cursor: pointer;
+
+			.title {
+				padding: 5px;
+				display: -webkit-box;
+				-webkit-line-clamp: 1;
+				-webkit-box-orient: vertical;
+				//max-height: 18px;
+				overflow: hidden;
+				font-size: 10pt;
+			}
+
+
+
+			/* highlighted */
+			&.focused, &.hovered, &:hover {
+				background-color: @secondary;
+			}
+
+			&.being-dragged {
+				position: absolute;
+				z-index: 100;
+			}
+		}
+
+		li .drop-indicator {
+			.block-center;
+			
+			margin-top: 5px;
+			width: 96%;
+			border-top: solid @secondary 1.5px;
+			border-bottom: solid @secondary 1.5px;
+		}
+	}
+}
+
+@font-face {
+	font-family: Ubuntu;
+	src: url('../assets/fonts/Ubuntu-Regular.ttf');
+}
+
+@font-face {
+	font-family: UbuntuLight;
+	src: url('../assets/fonts/Ubuntu-Light.ttf');
+}

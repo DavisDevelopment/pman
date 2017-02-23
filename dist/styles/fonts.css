@@ -1,0 +1,10 @@
+
+@font-face {
+    font-family: Ubuntu;
+    src: url('../res/fonts/Ubuntu-Regular.ttf');
+}
+
+@font-face {
+    font-family: UbuntuLight;
+    src: url('../res/fonts/Ubuntu-Light.ttf');
+}

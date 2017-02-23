@@ -1,0 +1,37 @@
+
+-cp tannus/
+-cp gryffin/
+-cp foundation/src/
+-cp crayon/
+-cp ida/
+-cp vex/
+
+-lib slambda
+-lib actuate
+#-lib closure
+
+-D tannus
+-D node
+-D electron
+-D gryffin
+-D ida
+-D vex
+
+--each
+
+-main Background
+-D main_process
+-js ../dist/scripts/background.js
+
+--next
+
+-main BPlayerMain
+#-debug
+-D debug
+-D renderer_process
+-js ../dist/scripts/content.js
+
+#--next
+
+#-main WorkerMain
+#-js ../dist/scripts/worker.js

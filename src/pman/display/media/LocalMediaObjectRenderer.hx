@@ -1,0 +1,65 @@
+package pman.display.media;
+
+import tannus.io.*;
+import tannus.ds.*;
+import tannus.geom.*;
+import tannus.sys.*;
+
+import gryffin.core.*;
+import gryffin.display.*;
+import gryffin.media.MediaObject;
+
+import pman.core.*;
+import pman.media.*;
+
+import foundation.Tools.defer;
+import Std.*;
+import tannus.math.TMath.*;
+
+using tannus.math.TMath;
+using StringTools;
+using tannus.ds.StringUtils;
+using Lambda;
+using tannus.ds.ArrayTools;
+using Slambda;
+
+/**
+  * base-class for all MediaRenderer implementations making use of a MediaObject
+  */
+class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
+	/* Constructor Function */
+	public function new(m:Media, c:MediaController):Void {
+		super( m );
+
+		this.mediaController = c;
+	}
+
+/* === Instance Methods === */
+
+	/**
+	  * unlink and deallocate [this]'s memory
+	  */
+	override function dispose():Void {
+		super.dispose();
+
+		m.destroy();
+	}
+
+/* === Computed Instance Fields === */
+
+	// more specifically-typed reference to [mediaController]
+	private var tc(get, never):LocalMediaObjectPlaybackDriver<T>;
+	private inline function get_tc():LocalMediaObjectPlaybackDriver<T> {
+		return cast mediaController;
+	}
+
+	// shorthand reference to the mediaObject being rendered
+	private var mediaObject(get, never):T;
+	private inline function get_mediaObject():T return tc.m;
+
+	// shorthand reference to the mediaObject being rendered
+	private var m(get, never):T;
+	private inline function get_m():T return tc.m;
+
+/* === Instance Fields === */
+}
