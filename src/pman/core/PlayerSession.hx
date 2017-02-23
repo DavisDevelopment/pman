@@ -46,6 +46,7 @@ class PlayerSession {
 		trackChanged = new Signal();
 		focusedTrack = null;
 		playlist = new Playlist();
+		sub_playlist = null;
 	}
 
 /* === Instance Methods === */
@@ -383,6 +384,13 @@ class PlayerSession {
 		}
 	}
 
+	/**
+	  * get the playlist object that should be used for things like 'next' and 'previous'
+	  */
+	public inline function cpl():Playlist {
+		return (sub_playlist == null ? playlist : sub_playlist);
+	}
+
 /* === Computed Instance Fields === */
 
 	// shorthand name for [mediaContext]
@@ -423,6 +431,13 @@ class PlayerSession {
 
 	public var playbackProperties : PlayerPlaybackProperties;
 	public var playlist : Playlist;
+	/*
+	   the 'sub_playlist' refers to a subset of [playlist], and will only have a value when:
+	    - the player has made a search from within the playlist view
+	    ... seems like there should be more. I'm sure I'll think of more later
+	*/
+	public var sub_playlist : Null<Playlist>;
+
 
 	//public var trackChange : Signal<Delta<Null<Track>>>;
 	// fired after the change in focus has been made
