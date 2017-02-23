@@ -19,6 +19,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.media.PlaylistChange;
 import pman.ui.pl.*;
+import pman.search.SearchEngine.Match as SearchMatch;
 
 using StringTools;
 using Lambda;
@@ -44,6 +45,7 @@ class PlaylistView extends Pane {
 	  */
 	public function open():Void {
 		player.page.append( this );
+		searchWidget.searchInput.focus();
 
 		player.session.trackChanged.on( on_track_change );
 		player.session.playlist.changeEvent.on( on_playlist_change );
@@ -70,12 +72,14 @@ class PlaylistView extends Pane {
 		buildTrackList();
 
 		forwardEvents(['click', 'mousedown', 'mouseup', 'mousemove', 'mouseleave'], null, MouseEvent.fromJqEvent);
-		on('mouseleave', function(event) {
+		function ddi(event){
 			var dil = new Element( 'div.drop-indicator' ).toArray();
 			for (di in dil) {
 				di.parent( 'li' ).remove();
 			}
-		});
+		}
+		on('mouseleave', ddi);
+		on('mouseup', ddi);
 	}
 
 	/**
@@ -131,8 +135,34 @@ class PlaylistView extends Pane {
 	  * rebuild the TrackList
 	  */
 	public function rebuildTracks():Void {
+		searchResultsMode = false;
 		undoTrackList();
 		buildTrackList();
+	}
+
+	/**
+	  * rebuild the TrackList to show search results
+	  */
+	public function showSearchResults(matches : Array<SearchMatch<Track>>):Void {
+		searchResultsMode = true;
+		undoTrackList();
+		buildMatchList( matches );
+	}
+
+	/**
+	  * build the track list for the search-results view
+	  */
+	private function buildMatchList(matches : Array<SearchMatch<Track>>):Void {
+		list = new List();
+		listRow.append( list );
+		list.el.plugin('disableSelection');
+		for (match in matches) {
+			var view = new TrackView(this, match.item);
+			if (player.track == match.item) {
+				view.focused( true );
+			}
+			addTrack( view );
+		}
 	}
 
 	/**
@@ -222,6 +252,7 @@ class PlaylistView extends Pane {
 
 	public var player : Player;
 	public var tracks : Array<TrackView>;
+	public var searchResultsMode : Bool = false;
 
 	public var hedRow : Row;
 	public var searchRow : Row;
