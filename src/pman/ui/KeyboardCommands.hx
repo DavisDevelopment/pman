@@ -92,6 +92,9 @@ class KeyboardCommands {
 			case LetterL:
 				p.togglePlaylist();
 
+			case LetterH:
+				p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
+
 			// Right Arrow key
 			case Right:
 				var n:Float = seekTimeDelta( event );
