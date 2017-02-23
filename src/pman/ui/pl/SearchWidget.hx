@@ -17,6 +17,10 @@ import electron.ext.Dialog;
 
 import pman.core.*;
 import pman.media.*;
+import pman.search.TrackSearchEngine;
+
+import Slambda.fn;
+import tannus.ds.SortingTools.*;
 
 using StringTools;
 using Lambda;
@@ -24,6 +28,7 @@ using tannus.ds.StringUtils;
 using tannus.ds.ArrayTools;
 using tannus.ds.AnonTools;
 using Slambda;
+using tannus.ds.SortingTools;
 
 class SearchWidget extends Pane {
 	/* Constructor Function */
@@ -72,6 +77,7 @@ class SearchWidget extends Pane {
 		switch ( event.key ) {
 			case Enter:
 				submit();
+				searchInput.iel.blur();
 
 			default:
 				null;
@@ -85,10 +91,22 @@ class SearchWidget extends Pane {
 		var d:SearchData = getData();
 		
 		if (d.search != null) {
-			//TODO parse the search term and perform the search
+			var engine = new TrackSearchEngine();
+			engine.setContext(player.session.playlist.toArray());
+			engine.setSearch( d.search );
+			var matches = engine.getMatches();
+			// sort the matches by relevancy
+			matches.sort(function(x, y) {
+				return -Reflect.compare(x.score, y.score);
+			});
+			playlistView.showSearchResults( matches );
+			//player.session.sub_playlist = new Playlist(matches.map.fn( _.item ));
 		}
 		else {
-			//TODO reset the view to displaying the playlist
+			if ( playlistView.searchResultsMode ) {
+				playlistView.refresh();
+				player.session.sub_playlist = null;
+			}
 		}
 	}
 
