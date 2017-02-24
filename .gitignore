@@ -1,4 +1,9 @@
 
 *.swp
+
 src/borner
+
+dist/scripts/content.js
+dist/scripts/background.js
+dist/styles/theme.css
 
