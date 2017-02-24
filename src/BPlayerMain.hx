@@ -2,6 +2,7 @@ package ;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.math.Random;
 import tannus.graphics.Color;
 
 import crayon.*;
@@ -17,6 +18,7 @@ import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
 import pman.events.*;
+import pman.media.*;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
@@ -61,19 +63,9 @@ class BPlayerMain extends Application {
 		dragManager.init();
 
 		initTray();
-
-		//testSockets();
 	}
 
-	/**
-	  * open PornHub window
-	  */
-	private function initTray():Void {
-		tray = new Tray(NativeImage.createFromPath(App.getAppPath().plusString('assets/icon32.png')));
-
-		var trayMenu:Menu = Menu.buildFromTemplate(Ct.executeFile( 'res/trayTemplate.js' ));
-		tray.setContextMenu( trayMenu );
-	}
+	
 
 	/**
 	  * quit this shit
@@ -100,6 +92,18 @@ class BPlayerMain extends Application {
 		Dialog.showOpenDialog(_convertFSPromptOptions(_fillFSPromptOptions( options )), function(paths : Array<String>):Void {
 			callback( paths );
 		});
+	}
+
+    /**
+	  * open PornHub window
+	  */
+	private function initTray():Void {
+		tray = new Tray(NativeImage.createFromPath(App.getAppPath().plusString('assets/icon32.png')));
+
+        // build main menu part
+		var trayMenu:Menu = Menu.buildFromTemplate(Ct.executeFile( 'res/trayTemplate.js' ));
+		
+		tray.setContextMenu( trayMenu );
 	}
 
 	/**
@@ -134,7 +138,7 @@ class BPlayerMain extends Application {
 				{
 					label: 'Save Playlist',
 					click: function(item, window, event) {
-						trace('not yet implemented');
+					    player.savePlaylist();
 					}
 				}
 				]
@@ -155,10 +159,71 @@ class BPlayerMain extends Application {
 			});
 			items.push( viewItem );
 
+			var plItem = new MenuItem({
+                label: 'Playlist',
+                submenu: [
+                {
+                    label: 'Clear Playlist',
+                    click: function(i,w,e){
+                        player.clearPlaylist();
+                    }
+                },
+                {
+                    label: 'Shuffle Playlist',
+                    click: function(i,w,e){
+                        var pl = player.session.playlist.toArray();
+                        player.clearPlaylist();
+                        var r = new Random();
+                        for (i in 0...r.randint(1, 3)) {
+                            r.ishuffle( pl );
+                        }
+                        player.addItemList( pl );
+                    }
+                },
+                {
+                    label: 'Save Playlist',
+                    click: function(i,w,e){
+                        player.savePlaylist();
+                    }
+                }
+                ]
+			});
+			items.push( plItem );
+
+            var sessItemOpts:MenuItemOptions = {
+                label: 'Sessions',
+                //accelerator: 'Ctrl+S',
+                submenu: [
+                {
+                    label: 'Save Current Session',
+                    click: function(i,w,e){
+                        player.saveState();
+                    }
+                },
+                {type: 'separator'}
+                ]
+            };
+            var sil:Array<MenuItemOptions> = sessItemOpts.submenu;
+            var sessNames = appDir.allSavedSessionNames();
+            for (name in sessNames) {
+                var sessBtnOpts:MenuItemOptions = {
+                    label: name,
+                    click: function(i,w,e) {
+                        player.loadState(name, function() {
+                            player.message('$name was restored');
+                        });
+                    }
+                }
+                sil.push( sessBtnOpts );
+            }
+            var sessItem:MenuItem = new MenuItem( sessItemOpts );
+            items.push( sessItem );
+
 			var toolbarMenu:Menu = new Menu();
 			for (item in items) {
 				toolbarMenu.append( item );
 			}
+
 			Menu.setApplicationMenu( toolbarMenu );
 		});
 	}
