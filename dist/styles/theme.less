@@ -50,41 +50,56 @@ canvas {
 
 	// the Track list widget
 	ul {
+		background-color: lighten(@primary, 12%);
 		list-style-type: none;
 		margin: 0;
 		padding: 0;
 
-		li .track {
-			.block-center;
+		li {
 
-			width: 96%;
-			border: solid grey 0.5px;
-			margin-top: 5px;
-			color: white;
-			cursor: pointer;
+            &:nth-child(even) .track {
+                background-color: lighten(@primary, 18%);
+            }
+            &:nth-child(odd) .track {
+                box-shadow: inset 0px 0px 8px 2px #444;
+            }
 
-			.title {
-				padding: 5px;
-				display: -webkit-box;
-				-webkit-line-clamp: 1;
-				-webkit-box-orient: vertical;
-				//max-height: 18px;
-				overflow: hidden;
-				font-size: 10pt;
-			}
+            .track {
+                .block-center;
 
 
+                width: 96%;
+                border: solid grey 0.5px;
+                /*margin-top: 5px;*/
+                color: white;
+                cursor: pointer;
 
-			/* highlighted */
-			&.focused, &.hovered, &:hover {
-				background-color: @secondary;
-			}
+                .title {
+                    padding: 5px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    //max-height: 18px;
+                    overflow: hidden;
+                    font-size: 10pt;
+                }
 
-			&.being-dragged {
-				position: absolute;
-				z-index: 100;
-			}
-		}
+
+
+                /* highlighted */
+                &.focused, &.hovered, &:hover {
+                    background-color: @secondary;
+                }
+
+                &.being-dragged {
+                    position: absolute;
+                    z-index: 100;
+                }
+            }
+        }
+
+
+		
 
 		li .drop-indicator {
 			.block-center;
