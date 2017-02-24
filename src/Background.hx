@@ -4,70 +4,85 @@ import tannus.ds.tuples.*;
 import tannus.sys.Path;
 
 import electron.ext.*;
-import electron.ipc.*;
 
 class Background {
 	/* Constructor Function */
 	public function new():Void {
-		ipcBus = IpcBus.get();
+		playerWindows = new Array();
 	}
 
-/* === Instance Methods === */
+	/* === Instance Methods === */
 
 	/**
-	  * start [this] Background script
-	  */
+	 * start [this] Background script
+	 */
 	public function start():Void {
-		App.onReady(function() {
-			var appDir = App.getAppPath();
-			var win = new BrowserWindow({
-				icon: appDir.plusString('assets/icon64.png').toString(),
-				show: false,
-				width: 640,
-				height: 480
-			});
-			var dir:Path = appDir.plusString( 'pages/index.html' );
-			win.loadURL( 'file://$dir' );
-			win.once('ready-to-show', function() {
-				win.show();
-				win.maximize();
-				//win.webContents.openDevTools();
-				win.focus();
-			});
-		});
-
-		//ipcBus.socketConnected.on( onSocketConnected );
+		App.onReady( _ready );
 	}
 
 	/**
-	  * Build the application's Tray
+	  * open a new Player window
 	  */
-	private function initTray():Void {
-		var appDir = App.getAppPath();
-		var icon = NativeImage.createFromPath(appDir.plusString('assets/icon32.png').toString());
-		var tray = new Tray( icon );
-		var trayMenu = Menu.buildFromTemplate([
-			{
-				label: 'Test Button'
+	public function openPlayerWindow(?cb : BrowserWindow -> Void):Void {
+		var win:BrowserWindow = new BrowserWindow({
+			show: false,
+			icon: ap('assets/icon64.png').toString(),
+			width: 640,
+			height: 480
+		});
+		var dir:Path = ap( 'pages/index.html' );
+		win.loadURL( 'file://$dir' );
+		win.once('ready-to-show', function() {
+			win.show();
+			win.maximize();
+			//win.webContents.openDevTools();
+			win.focus();
+			playerWindows.push( win );
+			if (cb != null) {
+				cb( win );
 			}
-		]);
-		tray.setContextMenu( trayMenu );
-	}
-
-	/**
-	  * initialize a newly connected socket
-	  */
-	private function onSocketConnected(socket : IpcSocket):Void {
-		socket.send('test', 'message from main process', function( response ) {
-			trace('reply: ${response}');
 		});
 	}
 
-/* === Instance Fields === */
+	/* === Event Handlers === */
 
-	public var ipcBus : IpcBus;
+	/**
+	 * when the Application is ready to start doing stuff
+	 */
+	private function _ready():Void {
+		trace(' -- background process ready -- ');
 
-/* === Class Methods === */
+		_ipcListen();
+
+		openPlayerWindow(function( bw ) {
+			null;
+		});
+	}
+
+	/**
+	 * listen for ipc messages
+	 */
+	private function _ipcListen():Void {
+		IpcMain.on('command:open-window', function(event, values) {
+			return ;
+		});
+	}
+
+	/* === Utility Methods === */
+
+	private function ap(?s : String):Path {
+		var p:Path = (_p != null ? _p : (_p = App.getAppPath()));
+		if (s != null)
+			p = p.plusString( s );
+		return p;
+	}
+
+	/* === Instance Fields === */
+
+	public var playerWindows : Array<BrowserWindow>;
+	private var _p:Null<Path> = null;
+
+	/* === Class Methods === */
 
 	public static function main():Void {
 		new Background().start();
