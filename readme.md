@@ -14,15 +14,16 @@ PMan is just a prototype at this stage, and plays only those codecs which are su
 
 - sleek user interface
 - reasonable performance
-- save your session (currently only one saved session allowed, and it is automatically restored on-launch)
+- save your player sessions, restorable from the window menu under "Sessions"
 - open entire directory (always recursive, need to change that)
 - drag 'n drop files onto window to open them
 - freely rearrange your playlist
 - shuffle
+- supports importing playlists in several popular formats (m3u, pls, and xspf)
+- save your playlist (currently only supports saving as m3u)
 
 #### Planned Features
 
-- allowing multiple saved sessions
 - drag 'n drop folders to open them
 - history
 - bookmarks
