@@ -53,62 +53,35 @@ class MediaTools {
 	}
 
 	/**
-	  * given a MediaProvider, load the Media, and PlaybackDriver associated with it
+	  * parse the given URI to a MediaProvider
 	  */
-	public static function buildContextInfoFromProvider(provider : MediaProvider):Promise<MediaContextInfo> {
-		//TODO actually catch and handle errors
-		return Promise.create({
-			var mediaPromise = provider.getMedia();
-			mediaPromise.then(function(media : Media) {
-				var driverPromise = media.getPlaybackDriver();
-				driverPromise.then(function(driver : PlaybackDriver) {
-					//return inf(provider, media, driver);
-					media.getRenderer( driver )
-						.then(function( renderer ) {
-							return inf(provider, media, driver, renderer);
-						})
-						.unless(function( error ) {
-							throw error;
-						});
-				});
-				driverPromise.unless(function(error : Dynamic) {
-					throw error;
-				});
-			});
-			mediaPromise.unless(function(error : Dynamic) {
-				throw error;
-			});
-		});
+	public static function uriToMediaProvider(uri : String):MediaProvider {
+	    if (uri.startsWith('/')) {
+	        return cast new LocalFileMediaProvider(new File( uri ));
+	    }
+        else {
+            var protocol:String = uri.before(':');
+            switch ( protocol ) {
+                case 'file':
+                    return cast new LocalFileMediaProvider(new File(new Path(stripSlashSlash(uri.after(':')))));
+
+                case 'http', 'https':
+                    return cast new HttpAddressMediaProvider( uri );
+
+                default:
+                    throw 'Error: Malformed media URI "$uri"';
+            }
+        }
 	}
 
-	public static function buildContextInfoFromMedia(media : Media):Promise<MediaContextInfo> {
-		return Promise.create({
-			var driverPromise:Promise<PlaybackDriver> = media.getPlaybackDriver();
-			driverPromise.then(function(driver : PlaybackDriver) {
-				//return inf(media.provider, media, driver);
-				var viewPromise:Promise<MediaRenderer> = media.getRenderer( driver );
-				viewPromise.then(function( renderer ) {
-					return inf(media.provider, media, driver, renderer);
-				});
-				viewPromise.unless(function(error : Dynamic) {
-					throw error;
-				});
-			});
-			driverPromise.unless(function(error : Dynamic) {
-				throw error;
-			});
-		});
+	public static inline function parseToTrack(uri : String):Track {
+	    return new Track(uriToMediaProvider( uri ));
 	}
 
-	/**
-	  * shorthand to create a MediaContextInfo object
-	  */
-	private static inline function inf(p:MediaProvider, m:Media, d:PlaybackDriver, v:MediaRenderer):MediaContextInfo {
-		return {
-			mediaProvider : p,
-			media : m,
-			playbackDriver : d,
-			mediaRenderer : v
-		};
+	private static function stripSlashSlash(s : String):String {
+	    if (s.startsWith('//')) {
+	        s = s.slice( 2 );
+	    }
+	    return s;
 	}
 }
