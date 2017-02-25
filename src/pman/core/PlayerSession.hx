@@ -431,6 +431,9 @@ class PlayerSession {
 
 	public var playbackProperties : PlayerPlaybackProperties;
 	public var playlist : Playlist;
+
+	// session name, assigned when session is saved or loaded
+	public var name : Null<String>;
 	/*
 	   the 'sub_playlist' refers to a subset of [playlist], and will only have a value when:
 	    - the player has made a search from within the playlist view
