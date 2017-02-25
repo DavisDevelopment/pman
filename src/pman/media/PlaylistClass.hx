@@ -16,6 +16,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.media.MediaTools;
 
 /**
   * PlaylistClass -- Object used to hold an ordered list of multiple Track objects
@@ -229,7 +230,7 @@ class PlaylistClass {
 	  * Convert [this] to a JSON Array
 	  */
 	public function toJSON():Array<String> {
-		return map.fn(Serializer.run( _ ));
+	    return map.fn(_.provider.getURI());
 	}
 
 /* === Computed Instance Fields === */
@@ -252,11 +253,7 @@ class PlaylistClass {
 	  * Build a Playlist from a JSON array
 	  */
 	public static function fromJSON(dataStrings : Array<String>):PlaylistClass {
-		var tracks:Array<Track> = new Array();
-		for (ds in dataStrings) {
-			var track:Track = Unserializer.run( ds );
-			tracks.push( track );
-		}
+		var tracks:Array<Track> = dataStrings.map.fn(_.parseToTrack());
 		return new PlaylistClass( tracks );
 	}
 }
