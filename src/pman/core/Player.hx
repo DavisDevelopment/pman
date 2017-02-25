@@ -14,6 +14,8 @@ import tannus.math.Random;
 import gryffin.core.*;
 import gryffin.display.*;
 
+import electron.ext.App;
+import electron.ext.Dialog;
 import electron.ext.FileFilter;
 
 import pman.core.PlayerSession;
@@ -78,15 +80,15 @@ class Player {
 	  * initialize [this] Player, once it has been given a view
 	  */
 	private function initialize(stage : Stage):Void {
-		if (app.appDir.hasSavedSession()) {
-			var savedState = app.appDir.loadSession();
-			session.pullJson(savedState, function() {
-				readyEvent.fire();
-			});
-		}
-		else {
-			readyEvent.fire();
-		}
+	    var ad = app.appDir;
+	    if (ad.hasSavedPlaybackSettings()) {
+	        ad.loadPlaybackSettings(this, function() {
+	            readyEvent.fire();
+	        });
+	    }
+        else {
+            defer( readyEvent.fire );
+        }
 	}
 
 	/**
@@ -116,6 +118,7 @@ class Player {
 			}
 			box.close();
 		});
+		box.focus();
 	}
 
 	/**
@@ -143,31 +146,81 @@ class Player {
 	/**
 	  * save current player-state to the filesystem
 	  */
-	public function saveState():Void {
-		app.appDir.saveSession(session.toJson());
-		message( 'Session saved!' );
+	public function saveState(saveAs:Bool=false, ?done:Void->Void):Void {
+	    inline function finish()
+	        if (done != null)
+	            defer( done );
+	    if (session.name == null || saveAs) {
+            prompt('session title', null, function(title) {
+                if (title == null) {
+                    finish();
+                }
+                else {
+                    _saveState( title );
+                    session.name = title;
+                    finish();
+                }
+            });
+        }
+        else {
+            _saveState( session.name );
+        }
 	}
 
 	/**
 	  * load the saved player-state from the filesystem
 	  */
-	public function loadState(?callback : Void->Void):Void {
-		var state = app.appDir.loadSession();
-		if (state != null) {
-			session.pullJson(state, function() {
-				message( 'Session loaded!' );
-				if (callback != null) {
-					callback();
-				}
-			});
-		}
-		else {
-			defer(function() {
-				if (callback != null) {
-					callback();
-				}
-			});
-		}
+	public inline function loadState(name:String, ?done:Void->Void):Void {
+	    _loadState(name, done);
+	}
+
+	/**
+	  * save the current session to the filesystem
+	  */
+	public inline function _saveState(name : String):Void {
+	    app.appDir.saveSession(name, session.toJson());
+	}
+	public inline function _loadState(name:String, ?done:Void->Void):Void {
+	    session.pullJson(app.appDir.loadSession(name), function() {
+	        session.name = name;
+	        if (page.playlistView != null) {
+	            page.playlistView.refresh();
+	        }
+	        if (done != null)
+	            done();
+	    });
+	}
+
+	/**
+	  * save the current playlist to a file
+	  */
+	public function savePlaylist(?done : Void->Void):Void {
+	    Dialog.showSaveDialog({
+            title: 'Export a Muthafuckin\' Playlist',
+            buttonLabel: 'Save',
+            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.m3u' )),
+            filters: [FileFilter.PLAYLIST]
+	    }, function( spath ) {
+	        var path:Path = new Path( spath );
+	        if (path.extension == '') {
+	            path.extension = 'm3u';
+	        }
+            else if (path.extension != 'm3u') {
+                throw 'not implemented';
+            }
+            else {
+                var file = new File( path );
+                var encoder = new pman.format.m3u.Writer();
+                file.write(encoder.encode( session.playlist ));
+                message({
+                    text: 'Playlist exported',
+                    fontSize: '10pt'
+                });
+                if (done != null) {
+                    defer(done);
+                }
+            }
+	    });
 	}
 
 /* === Media Methods === */
@@ -241,12 +294,14 @@ class Player {
 	public function selectFiles(callback : Array<File> -> Void):Void {
 		// middle-man callback to map the paths to File objects
 		function _callback(paths : Array<String>):Void {
-			callback(paths.filter( Fs.exists ).map.fn([path] => new File(new Path( path ))));
+			// ... why did I do this?
+			//callback(paths.filter( Fs.exists ).map.fn([path] => new File(new Path( path ))));
+			callback(paths.map.fn([path] => new File(new Path( path ))));
 		}
 		app.fileSystemPrompt({
 			title: 'Select one or more files to open',
 			buttonLabel: 'Open That Shit',
-			filters: [FileFilter.VIDEO, FileFilter.AUDIO]
+			filters: [FileFilter.ALL, FileFilter.VIDEO, FileFilter.AUDIO, FileFilter.PLAYLIST]
 		}, _callback);
 	}
 
@@ -302,8 +357,10 @@ class Player {
 	  * prompt user to select some files, and build Playlist out of results
 	  */
 	public function selectFilesToPlaylist(callback : Array<Track>->Void):Void {
-		selectFiles(function(files) {
-			callback(files.map.fn(Track.fromFile( _ )));
+		selectFiles(function( files ) {
+			var flc = new FileListConverter();
+			var tracks = flc.convert( files ).toArray();
+			callback( tracks );
 		});
 	}
 
@@ -435,6 +492,7 @@ class Player {
 	  * get a media item by it's index in the playlist
 	  */
 	public inline function getTrack(index : Int):Null<Track> {
+		//return session.playlist[index];
 		return session.playlist[index];
 	}
 
@@ -479,6 +537,7 @@ class Player {
 				trace( row );
 			});
 		}
+		app.appDir.savePlaybackSettings( this );
 	}
 
 	private function _onTrackChanging(delta : Delta<Null<Track>>):Void {
