@@ -15,6 +15,8 @@ import gryffin.display.*;
 import electron.ext.*;
 import electron.ext.Dialog;
 
+import electron.Tools.*;
+
 import pman.core.*;
 import pman.media.*;
 import pman.media.PlaylistChange;
@@ -45,10 +47,13 @@ class PlaylistView extends Pane {
 	  */
 	public function open():Void {
 		player.page.append( this );
-		searchWidget.searchInput.focus();
 
 		player.session.trackChanged.on( on_track_change );
 		player.session.playlist.changeEvent.on( on_playlist_change );
+
+		defer(function() {
+            searchWidget.searchInput.focus();
+		});
 	}
 
 	/**
