@@ -1,10 +1,11 @@
-package pman.utils;
+package pman.format.m3u;
 
 import tannus.ds.*;
 import tannus.io.*;
 import tannus.sys.*;
 
 import pman.core.*;
+import pman.media.*;
 
 import Slambda.fn;
 
@@ -13,9 +14,9 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.ds.StringUtils;
 using Slambda;
-using pman.commands.Tools;
+using pman.media.MediaTools;
 
-class M3UEncoder {
+class Writer {
 	/* Constructor Function */
 	public function new():Void {
 
@@ -23,23 +24,23 @@ class M3UEncoder {
 
 /* === Instance Methods === */
 
-	public function encode(files : Array<File>):ByteArray {
+	public function encode(pl : Playlist):ByteArray {
 		buffer = new ByteArrayBuffer();
 		buffer.addString( '#EXTM3U\n' );
-		for (file in files) {
-			addFile( file );
+		for (t in pl) {
+			addTrack( t );
 		}
 		return buffer.getByteArray();
 	}
-	private inline function addFile(file : File):Void {
+	private inline function addTrack(track : Track):Void {
 		buffer.addString('\n#EXTINF:');
-		buffer.addString('123,${file.path.name}\n');
-		buffer.addString(file.path.toString() + '\n');
+		buffer.addString('123,${track.title}\n');
+		buffer.addString(track.provider.getURI() + '\n');
 	}
 
 	private var buffer : ByteArrayBuffer;
 
-	public static inline function run(files : Array<File>):ByteArray {
-		return new M3UEncoder().encode( files );
+	public static inline function run(pl : Playlist):ByteArray {
+	    return new Writer().encode( pl );
 	}
 }
