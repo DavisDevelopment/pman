@@ -1,10 +1,11 @@
-package pman.utils;
+package pman.format.m3u;
 
 import tannus.ds.*;
 import tannus.io.*;
 import tannus.sys.*;
 
 import pman.core.*;
+import pman.media.*;
 
 import Slambda.fn;
 
@@ -13,13 +14,13 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.ds.StringUtils;
 using Slambda;
-using pman.commands.Tools;
+using pman.media.MediaTools;
 
-class M3UDecoder {
+class Reader {
 	/* Constructor Function */
 	public function new():Void {
 		buffer = new Stack();
-		playlist = new Array();
+		playlist = new Playlist();
 	}
 
 /* === Instance Methods === */
@@ -27,16 +28,16 @@ class M3UDecoder {
 	/**
 	  * decode the given String
 	  */
-	public inline function decodeString(s : String):Array<Path> {
-		return decode(s.split( '\n' ));
+	public inline function readString(s : String):Playlist {
+		return read(s.split( '\n' ));
 	}
 
 	/**
 	  * decode the given Array of Strings
 	  */
-	public function decode(lines : Array<String>):Array<Path> {
+	public function read(lines : Array<String>):Playlist {
 		buffer = new Stack( lines );
-		playlist = new Array();
+		playlist = new Playlist();
 
 		parse();
 
@@ -69,7 +70,8 @@ class M3UDecoder {
 				var infoLine:String = line.after( '#EXTINF:' );
 				line = nextLine();
 				if (!line.empty()) {
-					playlist.push(Path.fromString( line ));
+					var track:Track = line.parseToTrack();
+					playlist.push( track );
 				}
 				nextLine();
 			}
@@ -88,11 +90,14 @@ class M3UDecoder {
 /* === Instance Fields === */
 
 	private var buffer : Stack<String>;
-	private var playlist : Array<Path>;
+	private var playlist : Playlist;
 
 /* === Class Methods === */
 
-	public static inline function run(s : String):Array<Path> {
-		return new M3UDecoder().decodeString( s );
+	/**
+	  * shorthand to create a new Reader instance, and use it to decode the given String
+	  */
+	public static inline function run(s : String):Playlist {
+		return new Reader().readString( s );
 	}
 }
