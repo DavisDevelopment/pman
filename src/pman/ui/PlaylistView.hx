@@ -36,6 +36,7 @@ class PlaylistView extends Pane {
 
 		player = p;
 		tracks = new Array();
+		_tc = new Map();
 
 		build();
 	}
@@ -115,7 +116,7 @@ class PlaylistView extends Pane {
 		listRow.append( list );
 		list.el.plugin( 'disableSelection' );
 		for (track in playlist) {
-			var trackView:TrackView = new TrackView(this, track);
+			var trackView:TrackView = tview( track ); 
 			if (player.track == track) {
 				trackView.focused( true );
 			}
@@ -128,7 +129,7 @@ class PlaylistView extends Pane {
 	  */
 	private function undoTrackList():Void {
 		for (track in tracks) {
-			track.destroy();
+			track.detach();
 		}
 		tracks = new Array();
 		if (list != null)
@@ -162,7 +163,7 @@ class PlaylistView extends Pane {
 		listRow.append( list );
 		list.el.plugin('disableSelection');
 		for (match in matches) {
-			var view = new TrackView(this, match.item);
+		    var view = tview( match.item );
 			if (player.track == match.item) {
 				view.focused( true );
 			}
@@ -184,6 +185,20 @@ class PlaylistView extends Pane {
 	public inline function addTrack(tv : TrackView):Void {
 		tracks.push( tv );
 		list.addItem( tv );
+	}
+
+	/**
+	  * create or get a TrackView for the given Track
+	  */
+	private function tview(t : Track):TrackView {
+	    if (_tc.exists( t.uri )) {
+	        return _tc[t.uri];
+	    }
+        else {
+            var view = new TrackView(this, t);
+            _tc[t.uri] = view;
+            return view;
+        }
 	}
 
 	/**
@@ -264,4 +279,6 @@ class PlaylistView extends Pane {
 	public var searchWidget : SearchWidget;
 	public var listRow : Row;
 	public var list : Null<List> = null;
+
+	private var _tc : Map<String, TrackView>;
 }
