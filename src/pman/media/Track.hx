@@ -38,6 +38,7 @@ class Track {
 	  * get the name of [this] Track
 	  */
 	public inline function getName():String return provider.getName();
+	public inline function getURI():String return provider.getURI();
 
 	/**
 	  * nullify the m,d,r fields
@@ -110,6 +111,9 @@ class Track {
 
 	public var title(get, never):String;
 	private inline function get_title():String return getName();
+
+	public var uri(get, never):String;
+	private inline function get_uri():String return getURI();
 
 /* === Instance Fields === */
 
