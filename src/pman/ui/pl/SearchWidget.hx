@@ -79,6 +79,9 @@ class SearchWidget extends Pane {
 				submit();
 				searchInput.iel.blur();
 
+			case Escape:
+			    searchInput.iel.blur();
+
 			default:
 				null;
 		}
