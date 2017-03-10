@@ -64,7 +64,9 @@ class PlaylistClass {
 	  * filter [this] Playlist
 	  */
 	public function filter(f : Track -> Bool):Playlist {
-		return new Playlist(l.filter( f ));
+		var list = new Playlist(l.filter( f ));
+		list.parent = this;
+		return list;
 	}
 
 	/**
@@ -174,7 +176,9 @@ class PlaylistClass {
 	  * get a slice of [this] Playlist
 	  */
 	public function slice(pos:Int, ?end:Int):Playlist {
-		return new Playlist(l.slice(pos, end));
+		var list = new Playlist(l.slice(pos, end));
+		list.parent = this;
+		return list;
 	}
 
 	/**
@@ -190,7 +194,9 @@ class PlaylistClass {
 	  */
 	public function splice(pos:Int, len:Int):Playlist {
 		var sub = l.splice(pos, len);
-		return new Playlist( sub );
+		var list = new Playlist( sub );
+		list.parent = this;
+		return list;
 	}
 
 	/**
@@ -212,6 +218,52 @@ class PlaylistClass {
 	  */
 	private inline function change(c : PlaylistChange):Void {
 		changeEvent.call( c );
+	}
+
+    /**
+      * check whether [this] Playlist is a child playlist
+      */
+	public inline function isChildPlaylist():Bool {
+	    return (parent != null);
+	}
+	public inline function isRootPlaylist():Bool {
+	    return !isChildPlaylist();
+	}
+
+	public inline function parentPlaylist():Null<PlaylistClass> {
+	    return parent;
+	}
+
+	public function parentPlaylistUntil(f : Playlist->Bool):Null<PlaylistClass> {
+	    var p = parentPlaylist();
+	    if (p == null) {
+	        return null;
+	    }
+        else {
+            while (p.parent != null) {
+                if (f( p )) {
+                    return p;
+                }
+                p = p.parent;
+            }
+            return null;
+        }
+	}
+
+    /**
+      * get the root Playlist
+      */
+	public function getRootPlaylist():PlaylistClass {
+	    if (isRootPlaylist()) {
+	        return this;
+	    }
+        else {
+            var p = parent;
+            while (p.parent != null) {
+                p = p.parent;
+            }
+            return p;
+        }
 	}
 
 /* === Serialization Methods === */
@@ -243,6 +295,7 @@ class PlaylistClass {
 
 	// the Signal fired when [this] Playlist changes
 	public var changeEvent : Signal<PlaylistChange>;
+	public var parent : Null<PlaylistClass> = null;
 
 	// the Array of Tracks in [this] Playlist
 	private var l : Array<Track>;
