@@ -51,17 +51,23 @@ class FileListConverter {
 			case 'm3u':
 				var reader = new M3UReader();
 				var tracks = reader.read(file.lines());
-				pl = pl.concat( tracks );
+				for (t in tracks) {
+				    pl.push( t );
+				}
 
 			case 'xspf':
 				var reader = new XSPFReader();
 				var tracks = reader.read(file.read().toString());
-				pl = pl.concat( tracks );
+				for (t in tracks) {
+				    pl.push( t );
+				}
 
 			case 'pls':
 				var reader = new PLSReader();
 				var tracks = reader.read(file.lines());
-				pl = pl.concat( tracks );
+				for (t in tracks) {
+				    pl.push( t );
+				}
 
 			default:
 				throw 'what the fuck';
