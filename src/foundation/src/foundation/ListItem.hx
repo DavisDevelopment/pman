@@ -20,6 +20,17 @@ class ListItem extends Widget {
 		super();
 
 		el = '<li></li>';
-		if (c != null) append( c );
+		if (c != null) {
+		    setContent( c );
+        }
 	}
+
+	public inline function setContent(c : Dynamic):Void {
+	    append( c );
+	    content = c;
+	}
+
+/* === Instance Fields === */
+
+    public var content : Dynamic;
 }
