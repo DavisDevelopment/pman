@@ -79,7 +79,7 @@ class SearchWidget extends Pane {
 				submit();
 				searchInput.iel.blur();
 
-			case Escape:
+			case Esc:
 			    searchInput.iel.blur();
 
 			default:
@@ -102,14 +102,13 @@ class SearchWidget extends Pane {
 			matches.sort(function(x, y) {
 				return -Reflect.compare(x.score, y.score);
 			});
-			playlistView.showSearchResults( matches );
-			//player.session.sub_playlist = new Playlist(matches.map.fn( _.item ));
+			var resultList:Playlist = new Playlist(matches.map.fn( _.item ));
+			resultList.parent = player.session.playlist;
+			player.session.setPlaylist( resultList );
 		}
 		else {
-			if ( playlistView.searchResultsMode ) {
-				playlistView.refresh();
-				player.session.sub_playlist = null;
-			}
+		    var pl = player.session.playlist;
+		    player.session.setPlaylist(pl.getRootPlaylist());
 		}
 	}
 
