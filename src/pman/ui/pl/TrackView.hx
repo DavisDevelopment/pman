@@ -18,10 +18,12 @@ import pman.core.*;
 import pman.media.*;
 
 import Slambda.fn;
+import tannus.math.TMath.*;
 
 using StringTools;
 using Lambda;
 using Slambda;
+using tannus.math.TMath;
 
 class TrackView extends Pane {
 	/* Constructor Function */
@@ -47,7 +49,22 @@ class TrackView extends Pane {
 		title.text = track.title;
 		append( title );
 
-		forwardEvents(['click', 'contextmenu', 'mousedown', 'mouseup', 'mousemove'], null, MouseEvent.fromJqEvent);
+		if ( !eventInitted ) {
+		    __events();
+		}
+
+		var a = this.el.attributes;
+		a['title'] = track.title;
+		a['data-uri'] = track.uri;
+
+		needsRebuild = false;
+	}
+
+	/**
+	  * configure events and such
+	  */
+	private function __events():Void {
+        forwardEvents(['click', 'contextmenu', 'mousedown', 'mouseup', 'mousemove'], null, MouseEvent.fromJqEvent);
 		on('click', onLeftClick);
 		on('contextmenu', onRightClick);
 
@@ -55,8 +72,7 @@ class TrackView extends Pane {
 
 		configureDragAndDropRearrangement();
 
-		var a = this.el.attributes;
-		a['title'] = track.title;
+		eventInitted = true;
 	}
 
 	/**
@@ -86,7 +102,8 @@ class TrackView extends Pane {
 			{
 				label: 'Play Next',
 				click: function(x,y,z) {
-					playlist.move(track, fn(session.indexOfCurrentMedia() + 1));
+                    playlist.move(track, fn(session.indexOfCurrentMedia() + 1));
+					//playlist.moveToAfter(track, session.focusedTrack);
 				}
 			},
 			{
@@ -118,7 +135,6 @@ class TrackView extends Pane {
 	  */
 	private function configureDragAndDropRearrangement():Void {
 		var di:Element = '<li><div class="drop-indicator"></div></li>';
-		var dragging:Bool = false;
 
 		on('mousedown', function(event : MouseEvent) {
 			if ( menuOpen ) {
@@ -143,6 +159,10 @@ class TrackView extends Pane {
 
 				if ( dragging ) {
 					var tvOver:Null<TrackView> = list.findTrackViewByPoint( event.position );
+					if (list.tracks[0] != null && tvOver == null) {
+					    tvOver = list.tracks[0];
+					}
+
 					if (tvOver != null) {
 						var t:Track = tvOver.track;
 						var r = tvOver.rect();
@@ -152,18 +172,32 @@ class TrackView extends Pane {
 						dragging = false;
 
 						if (event.position.y > hwm) {
-							playlist.move(track, fn(playlist.indexOf( t ) + 1));
+                            //playlist.move(track, fn(min((playlist.indexOf( t ) + 1), (playlist.length - 1))));
+                            playlist.move(track, function() {
+                                return (playlist.indexOf( t ) + 1).clamp(0, playlist.length);
+                            });
+							//playlist.moveToAfter(track, t);
 						}
 						else {
-							playlist.move(track, fn(playlist.indexOf( t ) - 1));
+                            //playlist.move(track, fn(max(playlist.indexOf( t ) - 1, 0)));
+                            playlist.move(track, function() {
+                                return (playlist.indexOf( t ) - 1).clamp(0, playlist.length);
+                            });
+							//playlist.moveToBefore(track, t);
 						}
 					}
 				}
 			});
+
+			//list.list.once('mouseleave', function(event : MouseEvent) {
+				//dragging = false;
+				//di.remove();
+			//});
 		});
 
 		list.on('click', function(event) {
-			dragging = false;
+			//dragging = false;
+			list.stopDragging();
 		});
 
 		list.on('mousemove', function(event : MouseEvent) {
@@ -180,6 +214,22 @@ class TrackView extends Pane {
 				}
 			}
 		});
+	}
+
+    /**
+      * permanently destroy [this] TrackView
+      */
+	override function destroy():Void {
+        super.detach();
+        //needsRebuild = true;
+	}
+	
+	/**
+	  * detach [this] TrackView
+	  */
+	override function detach():Void {
+        super.detach();
+		//needsRebuild = true;
 	}
 
 	/**
@@ -233,10 +283,14 @@ class TrackView extends Pane {
 
 /* === Instance Fields === */
 
+    public var needsRebuild:Bool = false;
 	public var list : PlaylistView;
 	public var track : Track;
 
 	public var title : Pane;
 
 	private var menuOpen : Bool = false;
+	private var eventInitted : Bool = false;
+	@:allow( pman.ui.PlaylistView )
+	private var dragging : Bool = false;
 }

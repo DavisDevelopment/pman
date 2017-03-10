@@ -56,16 +56,13 @@ class PlayerPage extends Page {
 	public function openPlaylistView():Bool {
 		if (playlistView == null) {
 			playlistView = new PlaylistView( player );
-			playlistView.open();
-			playlistView.once('close', untyped function() {
-				playlistView = null;
-			});
-			stage.calculateGeometry();
-			return true;
 		}
-		else {
-			return false;
+		if ( !playlistView.isOpen ) {
+		    playlistView.open();
+		    stage.calculateGeometry();
+		    return true;
 		}
+		return false;
 	}
 
 	/**
@@ -74,7 +71,22 @@ class PlayerPage extends Page {
 	public function closePlaylistView():Void {
 		if (playlistView != null) {
 			playlistView.close();
+			stage.calculateGeometry();
 		}
+	}
+
+	/**
+	  * check whether the PlaylistView is open
+	  */
+	public inline function isPlaylistViewOpen():Bool {
+	    return (playlistView != null && playlistView.isOpen);
+	}
+
+    /**
+      * toggle the visibility of the playlistView
+      */
+	public inline function togglePlaylistView():Void {
+	    (isPlaylistViewOpen()?closePlaylistView:openPlaylistView)();
 	}
 
 /* === Instance Fields === */

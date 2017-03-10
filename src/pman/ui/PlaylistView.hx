@@ -64,7 +64,7 @@ class PlaylistView extends Pane {
 		player.session.trackChanged.off( on_track_change );
 		player.session.playlist.changeEvent.off( on_playlist_change );
 		dispatch('close', null);
-		destroy();				
+		detach();
 	}
 
 	/**
@@ -115,10 +115,14 @@ class PlaylistView extends Pane {
 		list = new List();
 		listRow.append( list );
 		list.el.plugin( 'disableSelection' );
+		bindList();
 		for (track in playlist) {
 			var trackView:TrackView = tview( track ); 
 			if (player.track == track) {
 				trackView.focused( true );
+			}
+			if ( trackView.needsRebuild ) {
+			    trackView.build();
 			}
 			addTrack( trackView );
 		}
@@ -129,11 +133,12 @@ class PlaylistView extends Pane {
 	  */
 	private function undoTrackList():Void {
 		for (track in tracks) {
-			track.detach();
+			detachTrack( track );
 		}
 		tracks = new Array();
-		if (list != null)
+		if (list != null) {
 			list.destroy();
+        }
 		list = null;
 	}
 
@@ -162,6 +167,7 @@ class PlaylistView extends Pane {
 		list = new List();
 		listRow.append( list );
 		list.el.plugin('disableSelection');
+		bindList();
 		for (match in matches) {
 		    var view = tview( match.item );
 			if (player.track == match.item) {
@@ -185,6 +191,14 @@ class PlaylistView extends Pane {
 	public inline function addTrack(tv : TrackView):Void {
 		tracks.push( tv );
 		list.addItem( tv );
+	}
+
+	/**
+	  * detach a TrackView from [this]
+	  */
+	public inline function detachTrack(view : TrackView):Void {
+	    tracks.remove( view );
+	    list.removeItemFor( view );
 	}
 
 	/**
@@ -223,7 +237,27 @@ class PlaylistView extends Pane {
 	  * react to playlist-changes
 	  */
 	private function on_playlist_change(change : PlaylistChange):Void {
-		refresh();
+        refresh();
+		/*
+		switch ( change ) {
+            case PCRemove( track ):
+                detachTrack(tview( track ));
+
+            case PCPop( track ):
+                detachTrack(tview( track ));
+
+            case PCPush( track ):
+                addTrack(tview( track ));
+
+            case PCClear:
+                for (view in tracks) {
+                    detachTrack( view );
+                }
+
+            default:
+                refresh();
+		}
+		*/
 	}
 
 	private function viewFor(track : Track):Null<TrackView> {
@@ -260,6 +294,45 @@ class PlaylistView extends Pane {
 		else return null;
 	}
 
+    /**
+      * check whether any trackviews are being dragged
+      */
+	public function areAnyDragging():Bool {
+	    for (t in tracks) {
+	        if ( t.dragging ) {
+	            return true;
+	        }
+	    }
+	    return false;
+	}
+
+	/**
+	  * set the dragging field on all active trackviews
+	  */
+	public function setAllDragging(v : Bool):Void {
+	    for (t in tracks) {
+	        t.dragging = v;
+	    }
+	}
+
+    /**
+      * stop all trackviews from dragging
+      */
+	public function stopDragging():Void {
+	    setAllDragging( false );
+	    clearDropIndicators();
+	}
+
+	private function bindList():Void {
+	    if (list != null) {
+	        list.forwardEvents(['mousemove', 'mouseleave', 'mouseenter'], null, MouseEvent.fromJqEvent);
+	    }
+	}
+
+	private function clearDropIndicators():Void {
+	    Element.fromString('div.drop-indicator').remove();
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
@@ -267,6 +340,11 @@ class PlaylistView extends Pane {
 
 	public var playlist(get, never):Playlist;
 	private inline function get_playlist():Playlist return session.playlist;
+
+	public var isOpen(get, never):Bool;
+	private inline function get_isOpen():Bool {
+	    return childOf( 'body' );
+	}
 
 /* === Instance Fields === */
 
