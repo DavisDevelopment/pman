@@ -107,6 +107,24 @@ class Track {
 		provider = u.unserialize();
 	}
 
+	/**
+	  * create a clone of [this]
+	  */
+	public function clone(deep:Bool = false):Track {
+	    var copy = new Track( provider );
+	    if (deep && next != null) {
+	        copy.next = next.clone();
+	    }
+	    return copy;
+	}
+
+    /**
+      * check for equality
+      */
+    public inline function equals(other : Track):Bool {
+        return (provider == other.provider);
+    }
+
 /* === Computed Instance Fields === */
 
 	public var title(get, never):String;
@@ -118,6 +136,7 @@ class Track {
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
+	public var next : Null<Track> = null;
 
 	public var media(default, null): Null<Media>;
 	public var driver(default, null): Null<PlaybackDriver>;
