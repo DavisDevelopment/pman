@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.math.Random;
 import tannus.graphics.Color;
+import tannus.node.ChildProcess;
 
 import crayon.*;
 
@@ -13,12 +14,14 @@ import electron.ext.MenuItem;
 import electron.ipc.*;
 import electron.ipc.IpcAddressType;
 import electron.ipc.IpcTools.*;
+import electron.Tools.defer;
 
 import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
 import pman.events.*;
 import pman.media.*;
+import pman.ww.Worker;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
@@ -33,28 +36,43 @@ class BPlayerMain extends Application {
 	/* Constructor Function */
 	public function new():Void {
 		super();
+
+		_ready = false;
+		_rs = new VoidSignal();
+		_rs.once(function() {
+		    _ready = true;
+		});
 	}
 
 /* === Instance Methods === */
 
+    /**
+      * initialize [this] shit
+      */
+    private function init(cb : Void->Void):Void {
+        onready( cb );
+
+        // need to find a better way to do this
+		browserWindow = BrowserWindow.getAllWindows()[0];
+
+        appDir = new AppDir( this );
+
+        db = new PManDatabase();
+        db.init(function() {
+            _rs.fire();
+        });
+    }
+
 	/**
 	  * start the Application
 	  */
+	@:access( pman.db.StoredModel )
 	override function start():Void {
 		title = 'BPlayer';
 
-		appDir = new AppDir( this );
-		db = new PManDatabase( this );
-		db.init(function() {
-			trace('Database initialized');
-		});
-
-		browserWindow = BrowserWindow.getAllWindows()[0];
 		playerPage = new PlayerPage( this );
 
 		body.open( playerPage );
-
-		__buildMenus();
 
 		keyboardCommands = new KeyboardCommands( this );
 		keyboardCommands.bind();
@@ -62,15 +80,13 @@ class BPlayerMain extends Application {
 		dragManager = new DragDropManager( this );
 		dragManager.init();
 
-		initTray();
+		__buildMenus();
 	}
-
-	
 
 	/**
 	  * quit this shit
 	  */
-	public function quit():Void {
+	public inline function quit():Void {
 		App.quit();
 	}
 
@@ -89,21 +105,19 @@ class BPlayerMain extends Application {
 	  * create and display FileSystem prompt
 	  */
 	public inline function fileSystemPrompt(options:FSPromptOptions, callback:Array<String>->Void):Void {
-		Dialog.showOpenDialog(_convertFSPromptOptions(_fillFSPromptOptions( options )), function(paths : Array<String>):Void {
+		Dialog.showOpenDialog(_convertFSPromptOptions(_fillFSPromptOptions( options )), function(paths : Null<Array<String>>):Void {
+		    if (paths == null) {
+		        paths = [];
+		    }
+
+			var mr:Null<String> = paths.last();
+			if (mr != null) {
+			    trace('lastDirectory: $mr');
+			    db.configInfo.lastDirectory = mr;
+			}
+
 			callback( paths );
 		});
-	}
-
-    /**
-	  * open PornHub window
-	  */
-	private function initTray():Void {
-		tray = new Tray(NativeImage.createFromPath(App.getAppPath().plusString('assets/icon32.png')));
-
-        // build main menu part
-		var trayMenu:Menu = Menu.buildFromTemplate(Ct.executeFile( 'res/trayTemplate.js' ));
-		
-		tray.setContextMenu( trayMenu );
 	}
 
 	/**
@@ -145,6 +159,9 @@ class BPlayerMain extends Application {
 			});
 			items.push( mediaItem );
 
+            /*
+               View Menu Item
+            */
 			var viewItem = new MenuItem({
 				label: 'View',
 				submenu: [
@@ -159,6 +176,9 @@ class BPlayerMain extends Application {
 			});
 			items.push( viewItem );
 
+            /*
+               Playlist Menu Item
+            */
 			var plItem = new MenuItem({
                 label: 'Playlist',
                 submenu: [
@@ -190,6 +210,9 @@ class BPlayerMain extends Application {
 			});
 			items.push( plItem );
 
+            /*
+               Sessions Menu Item
+            */
             var sessItemOpts:MenuItemOptions = {
                 label: 'Sessions',
                 //accelerator: 'Ctrl+S',
@@ -250,17 +273,35 @@ class BPlayerMain extends Application {
 			filters: o.filters,
 			properties: (o.directory ? [OpenDirectory] : [OpenFile, MultiSelections])
 		};
+		if (res.defaultPath == null) {
+		    res.defaultPath = db.configInfo.lastDirectory;
+		}
 		return res;
+	}
+
+	/**
+	  * ensure that the app has been initialized before running [task]
+	  */
+	public function onready(task : Void->Void):Void {
+	    if ( _ready ) {
+	        defer( task );
+	    }
+        else {
+            _rs.once( task );
+        }
 	}
 
 /* === Compute Instance Fields === */
 
+    // reference to the Player object
 	public var player(get, never):Player;
-	private inline function get_player():Player return playerPage.player;
+	private inline function get_player():Null<Player> {
+	    return (playerPage != null ? playerPage.player : null);
+    }
 
 /* === Instance Fields === */
 
-	public var playerPage : PlayerPage;
+	public var playerPage : Null<PlayerPage>;
 	public var browserWindow : BrowserWindow;
 	public var keyboardCommands : KeyboardCommands;
 	public var appDir : AppDir;
@@ -268,11 +309,16 @@ class BPlayerMain extends Application {
 	public var dragManager : DragDropManager;
 	public var tray : Tray;
 
+	private var _ready : Bool;
+	// ready signal
+	private var _rs : VoidSignal;
+
 /* === Class Methods === */
 
 	/* main function */
 	public static function main():Void {
-		new BPlayerMain().start();
+	    var app = new BPlayerMain();
+	    app.init( app.start );
 	}
 }
 
