@@ -1,13 +1,17 @@
 {
-	"name": "pmanui",
+	"name": "pman",
 	"version": "0.0.1",
-	"description": "",
+	"description": "Cross-Platform Media Player/Manager",
 	"main": "scripts/background.js",
 	"keywords": [
-		"game",
-		"zombie",
-		"shooter",
-		"survival"
+		"media",
+		"video",
+		"audio",
+		"movie", "movies",
+		"music",
+		"player",
+		"manager",
+		"cross-platform"
 	],
 	"author": "Ryan Davis",
 	"license": "ISC"
