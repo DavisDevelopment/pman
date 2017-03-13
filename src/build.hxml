@@ -31,7 +31,7 @@
 -D renderer_process
 -js ../dist/scripts/content.js
 
-#--next
+--next
 
-#-main WorkerMain
-#-js ../dist/scripts/worker.js
+-main WorkerMain
+-js ../dist/scripts/worker.js
