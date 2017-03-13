@@ -13,10 +13,12 @@ import tannus.math.Random;
 
 import gryffin.core.*;
 import gryffin.display.*;
+import gryffin.media.MediaObject;
 
 import electron.ext.App;
 import electron.ext.Dialog;
 import electron.ext.FileFilter;
+import electron.ext.NativeImage;
 
 import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
@@ -127,20 +129,31 @@ class Player {
 	public inline function showPlaylist():Void {
 		page.openPlaylistView();
 	}
+
+	/**
+	  * hide playlist view
+	  */
 	public inline function hidePlaylist():Void {
 		page.closePlaylistView();
 	}
+
+	/**
+	  * test whether the playlist view is open
+	  */
 	public inline function isPlaylistOpen():Bool {
-		return (page.playlistView != null);
+		return page.isPlaylistViewOpen();
 	}
+
+	/**
+	  * toggle the playlist view
+	  */
 	public inline function togglePlaylist():Void {
-		if (isPlaylistOpen()) {
-			hidePlaylist();
-		}
-		else {
-			showPlaylist();
-		}
+	    page.togglePlaylistView();
 	}
+
+	/**
+	  * obtain reference to playlist view
+	  */
 	public inline function getPlaylistView():Null<PlaylistView> return page.playlistView;
 
 	/**
@@ -180,6 +193,10 @@ class Player {
 	public inline function _saveState(name : String):Void {
 	    app.appDir.saveSession(name, session.toJson());
 	}
+
+	/**
+	  * load a saved session by name
+	  */
 	public inline function _loadState(name:String, ?done:Void->Void):Void {
 	    session.pullJson(app.appDir.loadSession(name), function() {
 	        session.name = name;
@@ -237,6 +254,7 @@ class Player {
 
 		// load the new Track
 		session.load(track, {
+            trigger: 'user',
 			attached: function() {
 				if (cb.attached != null) {
 					cb.attached();
@@ -286,6 +304,38 @@ class Player {
 	  */
 	public function addPathsToSession(paths : Array<String>):Void {
 		trace( paths );
+	}
+
+	/**
+	  * capture snapshot of media
+	  */
+	public function snapshot():Void {
+	    // first off, check whether there's even anything to take a 'snapshot' of
+	    if (session.hasMedia()) {
+	        var vid:Null<Video> = (untyped gmo());
+	        if (vid != null) {
+	            var snapshotCanvas:Canvas = vid.capture(0, 0, vid.width, vid.height);
+	            var ssd = snapshotCanvas.context.getImageData(0, 0, snapshotCanvas.width, snapshotCanvas.height);
+	            
+	        }
+	    }
+	}
+
+    // get media object
+    @:access( pman.media.LocalMediaObjectPlaybackDriver )
+	private function gmo():Null<MediaObject> {
+	    var pd = session.playbackDriver;
+	    if (pd == null) {
+	        return null;
+	    }
+        else {
+            if (Std.is(pd, pman.media.LocalMediaObjectPlaybackDriver)) {
+                return cast(cast(pd, LocalMediaObjectPlaybackDriver<Dynamic>).mediaObject, MediaObject);
+            }
+            else {
+                return null;
+            }
+        }
 	}
 
 	/**
@@ -500,7 +550,8 @@ class Player {
 	  * get the media item by offset from current media item
 	  */
 	public inline function getTrackByOffset(offset : Int):Null<Track> {
-		return getTrack(session.indexOfCurrentMedia() + offset);
+        return getTrack(session.indexOfCurrentMedia() + offset);
+		//return session.playlist.getByOffset(session.focusedTrack, offset);
 	}
 
 	/**
@@ -529,38 +580,52 @@ class Player {
 			app.title = 'PMan | ${newTrack.title}';
 
 			// update the database regarding the Track that has just come into focus
-			app.db.editMediaRow(newTrack, function(row) {
-				row.views++;
-				return row;
-			}, function(row) {
-				trace( 'edit complete' );
-				trace( row );
+			var ms = app.db.mediaStore;
+			var mip = ms.cogMediaItem( newTrack.uri );
+			mip.then(function( item ) {
+			    trace( item );
+			    item.getInfo(function(info) {
+			        if (info.time.last != null) {
+			            defer(function() {
+			                currentTime = info.time.last;
+			            });
+			        }
+                    else if (info.time.start != null) {
+                        defer(function() {
+			                currentTime = info.time.start;
+                        });
+                    }
+			    });
+			});
+			mip.unless(function(error) {
+			    app.errorMessage( error );
 			});
 		}
 		app.appDir.savePlaybackSettings( this );
 	}
 
+    /**
+      * current Track is about to lose focus and be replaced by a new one
+      */
 	private function _onTrackChanging(delta : Delta<Null<Track>>):Void {
 		if (delta.previous == null) {
 			null;
 		}
 		else {
-			var t:Track = delta.previous;
-			function updateRow(row : MediaRow) {
-				trace( durationTime );
-				trace( currentTime );
-				row.timing.duration = durationTime;
-				if ( !ended ) {
-					row.timing.last_time = currentTime;
-				}
-				else {
-					row.timing.last_time = null;
-				}
-				return row;
-			}
-			app.db.editMediaRow(t, updateRow, function(row : MediaRow) {
-				trace( 'edit complete' );
-				trace( row );
+            var track:Track = delta.previous;
+			var nums:Array<Float> = [currentTime, durationTime];
+
+			var ms = app.db.mediaStore;
+			var mip = ms.cogMediaItem( track.uri );
+			mip.then(function( item ) {
+			    item.getInfo(function( info ) {
+			        info.time.last = nums[0];
+
+			        info.push(function() null);
+			    });
+			});
+			mip.unless(function( error ) {
+			    app.errorMessage( error );
 			});
 		}
 	}
