@@ -35,7 +35,7 @@ class IDBCursorWalker {
 	  */
 	private function __onsuccess(event : Dynamic):Void {
 		var _cursor:Null<Cursor> = event.target.result;
-		trace( _cursor );
+		//trace( _cursor );
 		if (_cursor == null) {
 			complete.fire();
 		}
@@ -52,10 +52,15 @@ class IDBCursorWalker {
 		null;
 	}
 
+	public function abort():Void {
+	    aborted = true;
+	}
+
 /* === Instance Fields === */
 
 	public var complete : VoidSignal;
 	public var error : Signal<Dynamic>;
 
 	private var r : Request;
+	private var aborted : Bool = false;
 }
