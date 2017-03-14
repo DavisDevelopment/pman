@@ -5,6 +5,7 @@ import tannus.sys.Path;
 import tannus.http.Url;
 
 import pman.core.*;
+//import pman.media.LinkedPlaylist as Cpl;
 import pman.media.PlaylistClass as Cpl;
 
 using StringTools;
@@ -14,6 +15,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 
 @:forward
+//abstract Playlist (LinkedPlaylist) from LinkedPlaylist to LinkedPlaylist {
 abstract Playlist (PlaylistClass) from PlaylistClass to PlaylistClass {
 	/* Constructor Function */
 	public inline function new(?tracks : Array<Track>):Void {
