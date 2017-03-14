@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.Promise;
 import tannus.sys.Path;
 import tannus.http.Url;
+import tannus.math.Random;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -140,6 +141,13 @@ class PlaylistClass {
 		var n = l.push( track );
 		change(PCPush( track ));
 		return n;
+	}
+
+	/**
+	  * randomly insert the given Track into [this] Playlist
+	  */
+	public inline function shuffledPush(track : Track):Void {
+	    insert((new Random()).randint(0, length), track);
 	}
 
 	/**
