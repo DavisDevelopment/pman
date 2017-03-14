@@ -13,6 +13,7 @@ import js.Browser.console;
 import Slambda.fn;
 import tannus.math.TMath.*;
 import electron.Tools.defer;
+import haxe.extern.EitherType;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -22,11 +23,14 @@ using Slambda;
 
 class PManDatabase {
 	/* Constructor Function */
-	public function new(main : BPlayerMain):Void {
-		app = main;
+	public function new():Void {
+		//app = main;
 
 		or = new VoidSignal();
 		or.once(function() reddy = true);
+
+		configInfo = new ConfigInfo( this );
+		mediaStore = new MediaStore( this );
 	}
 
 /* === Instance Methods === */
@@ -34,41 +38,74 @@ class PManDatabase {
 	/**
 	  * Get a media entry by its uri/id
 	  */
-	public function getMediaRow(uri : String):Promise<Null<MediaRow>> {
+	/*
+	public function getMediaRow(key : EitherType<String, Int>):Promise<Null<MediaRow>> {
 		return Promise.create({
-			function query() {
-				var p = tl('media').get( uri );
-				p.unless(function(error) {
-					console.error( error );
-					throw error;
-				});
-				p.then(function(row) {
-					return row;
-				});
-			}
-			onready( query );
+		    if (Std.is(key, Int)) {
+		        var id:Int = cast key;
+                function query():Void {
+                    var p = tl('media_items').get( id );
+                    p.unless(function(error) {
+                        console.error( error );
+                        throw error;
+                    });
+                    p.then(function( row ) {
+                        return row;
+                    });
+                }
+                onready( query );
+		    }
+            else if (Std.is(key, String)) {
+                var uri:String = cast key;
+                var row:Null<Dynamic> = null;
+                function search(cursor:Cursor, walker) {
+                    trace( cursor.entry );
+                    if (cursor.entry != null) {
+                        var ro = cursor.entry;
+                        if (ro.uri == uri) {
+                            walker.abort();
+                            return untyped ro;
+                        }
+                    }
+                }
+                trace('starting cursor iteration');
+                var c = tl('media_items').openCursor( search );
+                c.complete.once(function() {
+                    trace('cursor iteration complete');
+
+                });
+                c.error.once(function(err) {
+                    trace('Error: $err');
+                });
+            }
+            else {
+                throw 'fuck me';
+            }
 		});
 	}
+	*/
 
 	/**
 	  * create/update the given row
 	  */
+	/*
 	public function putMediaRow(row : MediaRow):Promise<MediaRow> {
 		return Promise.create({
 			function query() {
-				var table = tl('media', 'readwrite');
+				var table = tl('media_items', 'readwrite');
 				var p = table.put( row );
 				p.unless(function(error) {
 					console.error( error );
 					throw error;
 				});
-				p.then(function(uri : Dynamic) {
-					@forward getMediaRow(cast uri);
+				p.then(function(id : Int) {
+					@forward getMediaRow( id );
 				});
 			}
 			onready( query );
 		});
 	}
+	*/
 
 	/**
 	  * attempt to get the MediaRow for the given Track
@@ -76,6 +113,7 @@ class PManDatabase {
 	  -- if unsuccessful, create new MediaRow for that Track,
 	     PUT it onto the table, and yield the result of that action
 	  */
+	/*
 	public function cogMediaRow(track : Track):Promise<MediaRow> {
 		return Promise.create({
 			var uri:String = track.provider.getURI();
@@ -91,20 +129,14 @@ class PManDatabase {
 				else {
 					// create the new MediaRow
 					var row:MediaRow = {
-						uri: uri,
-						title: track.title,
-						views: 0,
-						starred: false,
-						timing: {
-							duration : null,
-							last_time : null
-						}
+						uri: uri
 					};
 					@forward putMediaRow( row );
 				}
 			});
 		});
 	}
+	*/
 
 	/**
 	  * push the given MediaRow onto the database (simplified)
@@ -112,6 +144,7 @@ class PManDatabase {
 	     just a nice Boolean callback to let you know whether the push
 	     was successful
 	  */
+	/*
 	public function pushMediaRow(row:MediaRow, done:Bool->Void):Void {
 		var p = putMediaRow( row );
 		p.then(function(nrow : MediaRow) {
@@ -122,10 +155,12 @@ class PManDatabase {
 			done( false );
 		});
 	}
+	*/
 
 	/**
 	  * a super-simplified pull/modify/push operation method
 	  */
+	/*
 	public function editMediaRow(track:Track, edit:MediaRow->MediaRow, done:MediaRow->Void):Void {
 		var p = cogMediaRow( track );
 		p.unless( rat ).then(function(row : MediaRow) {
@@ -134,6 +169,7 @@ class PManDatabase {
 			p.unless( rat ).then( done );
 		});
 	}
+	*/
 
 	/**
 	  * wait for [this] to be ready, and invoke [action]
@@ -161,28 +197,89 @@ class PManDatabase {
 		});
 	}
 
+/* === Database-Creation Methods === */
+
 	/**
-	  * construct the database
+	  * construct the database as a whole
 	  */
 	private function build_db(db : Database):Void {
-		var media = db.createObjectStore('media', {
-			keyPath: 'uri'
+	    var tablBuilders:Array<Database->Void> = [build_tagsTable, build_actorsTable, build_mediaItemsTable, build_mediaInfoTable];
+
+	    for (f in tablBuilders) {
+	        f( db );
+	    }
+	}
+
+    /**
+      * build the 'media_items' table
+      */
+	private function build_mediaItemsTable(db : Database):Void {
+		var media = db.createObjectStore('media_items', {
+			keyPath: 'id',
+			autoIncrement: true
 		});
 		inline function i(n, k, ?o) {
 			media.createIndex(n, k, o);
 		}
 
+        i('id', 'id', {
+            unique: true
+        });
 		i('uri', 'uri', {
 			unique: true
 		});
-		i('title', 'title');
-		i('views', 'views');
-		i('starred', 'starred');
-
-		i('timing', 'timing');
-		//i('duration', 'timing/duration');
-		//i('last_time', 'timing/last_time');
 	}
+
+    /**
+      * build the 'media_info' table
+      */
+	private function build_mediaInfoTable(db : Database):Void {
+	    var info = db.createObjectStore('media_info', {
+            keyPath: 'id'
+	    });
+	    inline function i(n, k, ?o) info.createIndex(n,k,o);
+	    // foreign-key reference to media_items.id
+	    i('id', 'id', {
+            unique: true
+	    });
+	    i('views', 'views');
+	    i('rating', 'rating');
+	    i('favorite', 'favorite');
+	    i('time', 'time');
+	    i('tags', 'tags');
+	    i('actors', 'actors');
+	}
+
+    /**
+      * build the 'tags' table
+      */
+	private function build_tagsTable(db : Database):Void {
+	    var tags = db.createObjectStore('tags', {
+            keyPath: 'name'
+            //autoIncrement: true
+	    });
+	    inline function i(n, k, ?o) tags.createIndex(n,k,o);
+		//i('id', 'id', {unique: true});
+	    i('name', 'name', {unique: true});
+	    i('type', 'type');
+	    i('data', 'data');
+	}
+
+    /**
+      * build the 'actors' table
+      */
+	private function build_actorsTable(db : Database):Void {
+	    var actors = db.createObjectStore('actors', {
+            keyPath: 'id',
+            autoIncrement: true
+	    });
+	    inline function i(n, k, ?o) actors.createIndex(n,k,o);
+
+        i('id', 'id', {unique: true});
+        i('name', 'name', {unique: true});
+	}
+
+/* === Utility Methods === */
 
 	/**
 	  * get a Transaction object
@@ -207,8 +304,10 @@ class PManDatabase {
 
 /* === Instance Fields === */
 
-	public var app : BPlayerMain;
+	//public var app : BPlayerMain;
 	public var db : Database;
+	public var configInfo : ConfigInfo;
+	public var mediaStore : MediaStore;
 
 	private var or : VoidSignal;
 	private var reddy : Bool = false;
@@ -219,13 +318,3 @@ class PManDatabase {
 	private static inline var DBVERSION:Int = 1;
 }
 
-typedef MediaRow = {
-	uri : String,
-	title : String,
-	views : Int,
-	starred : Bool,
-	timing : {
-		duration : Null<Float>,
-		last_time : Null<Float>
-	}
-};
