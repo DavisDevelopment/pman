@@ -41,6 +41,27 @@ class KeyboardCommands {
 			case Space:
 				p.togglePlayback();
 
+            // Backspace
+			case Backspace:
+			    // go forward
+			    if ( event.shiftKey ) {
+			        var possible = sess.history.canGoForward();
+			        trace('it is ${possible?'':' not '} possible to go forward');
+			        if ( possible ) {
+			            trace('navigating forward');
+			            sess.history.goForward();
+			        }
+			    }
+			    // go backward
+                else {
+			        var possible = sess.history.canGoBack();
+			        trace('it is ${possible?'':' not '} possible to go backward');
+			        if ( possible ) {
+			            trace('navigating backward');
+			            sess.history.goBack();
+			        }
+                }
+
 			// N
 			case LetterN:
 				//p.gotoNext();
@@ -49,6 +70,14 @@ class KeyboardCommands {
 			// P
 			case LetterP:
 				p.gotoPrevious();
+
+			// X
+			case LetterX:
+			    var ct = sess.focusedTrack;
+			    if (ct != null) {
+			        p.gotoByOffset( 1 );
+			        sess.playlist.remove( ct );
+			    }
 
 			// Ctrl+Shift+O
 			case LetterO if ((event.ctrlKey || event.metaKey) && event.shiftKey):
@@ -88,6 +117,31 @@ class KeyboardCommands {
 			case LetterS if (event.metaKey || event.ctrlKey):
 				//app.appDir.saveSession(p.session.toJson());
 				p.saveState();
+
+            // snapshot
+			case LetterS if ( event.shiftKey ):
+			    //TODO take a snapshot
+			    p.snapshot();
+
+            /*
+               jump to the end of the current media, skipping to the next one,
+               and resetting the info such that the media will start at the beginning
+               the next time that it's played
+            */
+			case LetterG if ( event.shiftKey ):
+			    if (sess.hasMedia()) {
+			        var ct = sess.focusedTrack;
+			        p.currentTime = p.durationTime;
+			        p.gotoNext({
+                        manipulate: function(mc) {
+                            ct.getDbMediaInfo(p.app.db, function( info ) {
+                                info.time.last = null;
+
+                                info.push(function() null);
+                            });
+                        }
+			        });
+			    }
 
 			case LetterL:
 				p.togglePlaylist();
@@ -225,6 +279,9 @@ class KeyboardCommands {
 
 	private var p(get, never):Player;
 	private inline function get_p():Player return app.player;
+
+	private var sess(get, never):PlayerSession;
+	private inline function get_sess():PlayerSession return p.session;
 
 /* === Instance Fields === */
 
