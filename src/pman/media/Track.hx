@@ -8,6 +8,7 @@ import tannus.http.Url;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
+import pman.db.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -123,6 +124,21 @@ class Track {
       */
     public inline function equals(other : Track):Bool {
         return (provider == other.provider);
+    }
+
+    /**
+      * obtain a reference to the MediaInfo attached to [this] Track in the database
+      */
+    public function getDbMediaItem(db:PManDatabase, callback:MediaItem->Void):Void {
+        var mip = db.mediaStore.cogMediaItem( uri );
+        mip.then( callback ).unless(function(error : Dynamic) {
+            throw error;
+        });
+    }
+    public function getDbMediaInfo(db:PManDatabase, callback:MediaInfo->Void):Void {
+        getDbMediaItem(db, function(item) {
+            item.getInfo( callback );
+        });
     }
 
 /* === Computed Instance Fields === */
