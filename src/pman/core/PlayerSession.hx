@@ -17,7 +17,8 @@ import electron.ext.FileFilter;
 import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
-import pman.core.PlayerMediaContext;
+import pman.core.history.PlayerHistoryItem;
+import pman.core.history.PlayerHistoryItem as PHItem;
 
 import foundation.Tools.*;
 
@@ -46,7 +47,7 @@ class PlayerSession {
 		trackChanged = new Signal();
 		focusedTrack = null;
 		playlist = new Playlist();
-		sub_playlist = null;
+		history = new PlayerHistory( this );
 	}
 
 /* === Instance Methods === */
@@ -90,7 +91,8 @@ class PlayerSession {
 	  */
 	private function plpush(track : Track):Void {
 		if ( shuffle ) {
-			playlist.insert([0, playlist.length].randint(), track);
+			//playlist.insert([0, playlist.length].randint(), track);
+			playlist.shuffledPush( track );
 		}
 		else {
 			playlist.push( track );
@@ -172,10 +174,19 @@ class PlayerSession {
 		}
 	}
 
+    /**
+      * load the given Track
+      */
 	public function load(t:Track, ?cb:LoadCallbackOptions):Void {
-		if (cb == null) {
-			cb = {};
+	    // ensure that [cb] is not null
+	    cb = fill_lcbo( cb );
+
+		// push history state
+		if (cb.trigger != History) {
+		    history.push(Media(LoadTrack( t )));
 		}
+
+		// shift focus to [t]
 		focus(t, function() {
 			if (cb.attached != null) {
 				defer( cb.attached );
@@ -203,78 +214,15 @@ class PlayerSession {
 	}
 
 	/**
-	  * switch context to the given (Media|MediaProvider)
+	  * reassign the playlist field
 	  */
-	/*
-	public function _load(m:EitherType<MediaProvider, Media>, ?cb:LoadCallbackOptions):Void {
-		if (cb == null) cb = {};
-		// get the Promise of the MediaContextInfo
-		var infoPromise:Promise<MediaContextInfo> = (
-			if (Std.is(m, MediaProvider)) {
-				cast(m, MediaProvider).buildContextInfoFromProvider();
-			}
-			else {
-				cast(m, Media).buildContextInfoFromMedia();
-			}
-		);
-		// when the requested info is retrieved
-		infoPromise.then(function(info : MediaContextInfo) {
-			// copy it onto [mediaContext]
-			mc.set( info );
-
-			// inform callback that the given media has been linked to the player
-			if (cb.attached != null) {
-				defer( cb.attached );
-			}
-
-			// handle the callback shit
-			var d = info.playbackDriver;
-			// wait to be able to meaningfully manipulate the media
-			if (cb.manipulate != null) {
-				d.getLoadedMetadataSignal().once(function() {
-					defer(function() {
-						cb.manipulate( d );
-					});
-				});
-			}
-			// wait for the media to be ready to play
-			if (cb.ready != null) {
-				d.getCanPlaySignal().once(function() {
-					defer( cb.ready );
-				});
-			}
-		});
-		// if the task raises an error at any point
-		infoPromise.unless(function(error : Dynamic) {
-			// report that error by means of the callback
-			if (cb.error != null) {
-				cb.error( error );
-			}
-			else {
-				throw error;
-			}
-		});
+	public function setPlaylist(pl : Playlist):Void {
+	    playlist = pl;
+	    var plv = player.page.playlistView;
+	    if (plv != null && plv.isOpen) {
+	        plv.refresh();
+	    }
 	}
-	*/
-
-	/**
-	  * set the context info
-	  */
-	/*
-	public function setCtx(ctx : MediaContextInfo):MediaContextInfo {
-		mc.set( ctx );
-		return mc.get();
-	}
-	*/
-
-	/**
-	  * get the context info
-	  */
-	/*
-	public inline function getCtx():MediaContextInfo {
-		return mc.get();
-	}
-	*/
 
 	/**
 	  * check whether [this] Session has any media
@@ -349,13 +297,6 @@ class PlayerSession {
 				mc.setCurrentTime( state.time );
 			}
 		});
-		/*
-		player.gotoTrack(state.track, {
-			manipulate: function(mc:MediaController) {
-				mc.setCurrentTime( state.time );
-			}
-		});
-		*/
 	}
 
 	/**
@@ -385,10 +326,14 @@ class PlayerSession {
 	}
 
 	/**
-	  * get the playlist object that should be used for things like 'next' and 'previous'
+	  * fill in a LoadCallbackOptions object
 	  */
-	public inline function cpl():Playlist {
-		return (sub_playlist == null ? playlist : sub_playlist);
+	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
+	    if (cb == null) cb = {};
+	    if (cb.trigger == null) {
+	        cb.trigger = User;
+	    }
+	    return cb;
 	}
 
 /* === Computed Instance Fields === */
@@ -431,16 +376,10 @@ class PlayerSession {
 
 	public var playbackProperties : PlayerPlaybackProperties;
 	public var playlist : Playlist;
+	public var history : PlayerHistory;
 
 	// session name, assigned when session is saved or loaded
 	public var name : Null<String>;
-	/*
-	   the 'sub_playlist' refers to a subset of [playlist], and will only have a value when:
-	    - the player has made a search from within the playlist view
-	    ... seems like there should be more. I'm sure I'll think of more later
-	*/
-	public var sub_playlist : Null<Playlist>;
-
 
 	//public var trackChange : Signal<Delta<Null<Track>>>;
 	// fired after the change in focus has been made
@@ -449,12 +388,28 @@ class PlayerSession {
 	public var trackChanging : Signal<Delta<Null<Track>>>;
 }
 
+@:structInit
+class LoadCallbackOptions {
+/* === Fields === */
+    @:optional public var trigger : LoadTrigger;
+    @:optional public var manipulate : PlaybackDriver->Void;
+    @:optional public var ready : Void->Void;
+    @:optional public var attached : Void->Void;
+    @:optional public var error : Dynamic->Void;
+
+/* === Computed Fields === */
+
+}
+
+/*
 typedef LoadCallbackOptions = {
+    @:optional var trigger : LoadTrigger;
 	@:optional function manipulate(controller : PlaybackDriver):Void;
 	@:optional function ready():Void;
 	@:optional function attached():Void;
 	@:optional function error(error : Dynamic):Void;
 };
+*/
 
 typedef JsonSession = {
 	playlist : Array<String>,
@@ -472,3 +427,9 @@ typedef JsonPlayerState = {
 	track : Int,
 	time : Float
 };
+
+@:enum
+abstract LoadTrigger (String) from String to String {
+    var User = 'user';
+    var History = 'history';
+}
