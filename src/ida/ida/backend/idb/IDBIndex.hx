@@ -34,7 +34,7 @@ class IDBIndex {
 	/**
 	  * Open a CursorWalker
 	  */
-	public function openCursor(?body:IDBCursor->Void, ?keyRange:Dynamic, ?direction:CursorDirection):IDBCursorWalker {
+	public function openCursor(?body:IDBCursor->IDBCursorWalker->Void, ?keyRange:Dynamic, ?direction:CursorDirection):IDBCursorWalker {
 		var request = i.openCursor(keyRange, untyped direction);
 		if (body == null) {
 			return new IDBCursorWalker( request );

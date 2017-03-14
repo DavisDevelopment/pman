@@ -84,7 +84,7 @@ class IDBObjectStore {
 	/**
 	  * Create a Cursor Walker
 	  */
-	public function openCursor(?body:IDBCursor->Void, ?keyRange:Dynamic, ?direction:CursorDirection):IDBCursorWalker {
+	public function openCursor(?body:IDBCursor->IDBCursorWalker->Void, ?keyRange:Dynamic, ?direction:CursorDirection):IDBCursorWalker {
 		var request = store.openCursor(keyRange, untyped direction);
 		if (body != null) {
 			return new IDBFunctionalCursorWalker(request, body);

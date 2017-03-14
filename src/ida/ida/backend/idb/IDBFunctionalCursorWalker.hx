@@ -20,7 +20,7 @@ using ida.Utils;
 
 class IDBFunctionalCursorWalker extends IDBCursorWalker {
 	/* Constructor Function */
-	public function new(r:Request, f:IDBCursor->Void):Void {
+	public function new(r:Request, f:IDBCursor->IDBCursorWalker->Void):Void {
 		super( r );
 
 		body = f;
@@ -38,13 +38,19 @@ class IDBFunctionalCursorWalker extends IDBCursorWalker {
 			next();
 			calledNext = true;
 		};
-		body( cursor );
-		if ( !calledNext ) {
+
+		body(cursor, this);
+
+		if ( aborted ) {
+		    complete.fire();
+		    return ;
+		}
+        else if ( !calledNext ) {
 			cursor.next();
 		}
 	}
 
 /* === Instance Fields === */
 
-	private var body : IDBCursor -> Void;
+	private var body : IDBCursor -> IDBCursorWalker -> Void;
 }
