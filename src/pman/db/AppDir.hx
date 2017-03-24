@@ -173,41 +173,17 @@ class AppDir {
 	}
 
 	/**
-	  * check whether there is a saved session
+	  * get full list of media-source directories
 	  */
-	/*
-	public function hasSavedSession():Bool {
-		return Fs.exists(path().plusString('session.json'));
-	}
-	*/
+	public function getMediaSources(done : Array<Path> -> Void):Void {
+	    defer(function() {
+	        var results = [];
+	        
+	        results.push(App.getPath(Videos));
 
-	/**
-	  * get the saved session 
-	  */
-	/*
-	public function loadSession():Null<JsonSession> {
-		var sessPath:Path = path().plusString( 'session.json' );
-		if (Fs.exists( sessPath )) {
-			var text = Fs.read( sessPath ).toString();
-			var data:JsonSession = Json.parse( text );
-			return data;
-		}
-		else {
-			return null;
-		}
+            done( results );
+	    });
 	}
-	*/
-
-	/**
-	  * save a Session
-	  */
-	/*
-	public function saveSession(session : JsonSession):Void {
-		var sessPath:Path = path().plusString( 'session.json' );
-		var data = ByteArray.ofString(Json.stringify(session, null, '   '));
-		Fs.write(sessPath, data);
-	}
-	*/
 
 /* === Instance Fields === */
 
