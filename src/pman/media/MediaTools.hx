@@ -2,8 +2,7 @@ package pman.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.sys.File;
-import tannus.sys.Path;
+import tannus.sys.*;
 
 import gryffin.media.MediaObject;
 import gryffin.display.Video;
@@ -15,6 +14,7 @@ import foundation.Tools.defer;
 import pman.core.PlayerMediaContext;
 import pman.display.*;
 import pman.display.media.*;
+import pman.ds.*;
 
 import js.html.MediaElement as NativeMediaObject;
 
@@ -28,6 +28,32 @@ using Slambda;
   * mixin class containing utility methods pertaining to the pman.media.* objects
   */
 class MediaTools {
+    /**
+      * probe the given Directory for all openable files
+      */
+    public static function getAllOpenableFiles(dir:Directory, done:Array<File>->Void):Void {
+        var probe = new OpenableFileProbe();
+        probe.setSources([dir]);
+        probe.run( done );
+    }
+
+    /**
+      * convert the given file list into a track list
+      */
+    public static inline function convertToTracks(files : Array<File>):Array<Track> {
+        return (new FileListConverter().convert( files ).toArray());
+    }
+
+    /**
+      * initialize a list of Tracks all at once
+      */
+    public static function initAll(tracks:Array<Track>, done:Void->Void):Void {
+        var initter = new TrackListInitializer();
+        initter.initAll(tracks, function(count : Int) {
+            done();
+        });
+    }
+
 	/**
 	  * given a Track object, loads the [media, driver, renderer] fields onto that Track
 	  */
