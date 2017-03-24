@@ -1,18 +1,33 @@
 {
-	"name": "pman",
-	"version": "0.0.1",
-	"description": "Cross-Platform Media Player/Manager",
-	"main": "scripts/background.js",
-	"keywords": [
-		"media",
-		"video",
-		"audio",
-		"movie", "movies",
-		"music",
-		"player",
-		"manager",
-		"cross-platform"
-	],
-	"author": "Ryan Davis",
-	"license": "ISC"
+  "name": "pman",
+  "version": "0.0.1",
+  "description": "Cross-Platform Media Player/Manager",
+  "main": "scripts/background.js",
+  "repository": "",
+  "dependencies": {
+    "chromecast-api": "0.2.5",
+    "electron-remote": "1.1.2",
+    "jsmediatags": "3.4.0",
+    "mp4box": "0.3.15",
+    "nedb": "1.8.0"
+  },
+  "keywords": [
+    "media",
+    "video",
+    "audio",
+    "movie",
+    "movies",
+    "music",
+    "player",
+    "manager",
+    "cross-platform"
+  ],
+  "author": "Ryan Davis",
+  "license": "ISC",
+  "devDependencies": {
+    "async": "^2.1.5",
+    "electron-devtools-installer": "^2.1.0",
+    "electron-packager": "^8.5.2",
+    "underscore": "^1.8.3"
+  }
 }
