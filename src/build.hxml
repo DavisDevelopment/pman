@@ -26,8 +26,7 @@
 --next
 
 -main BPlayerMain
--debug
-#-D debug
+-D debug
 -D renderer_process
 -js ../dist/scripts/content.js
 
