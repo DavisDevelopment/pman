@@ -11,4 +11,7 @@ dist/styles/theme.css
 dist/node_modules
 dist/node_modules/**
 dist/node_modules/**/
+dist/releases
+dist/releases/**
+dist/releases/**/
 
