@@ -42,10 +42,8 @@ class VideoUnderlay extends CanvasUnderlay {
             'position': 'absolute',
             'left': '0px',
             'top': '0px',
-            'min-width': '100%',
-            'min-height': '100%',
-            'width': 'auto',
-            'height': 'auto'
+            'width': '100%',
+            'height': '100%',
         });
     }
 
