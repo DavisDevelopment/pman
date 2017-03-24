@@ -1,5 +1,6 @@
 package electron.ext;
 
+import tannus.ds.Object;
 import tannus.node.EventEmitter;
 
 #if main_process
@@ -13,6 +14,14 @@ extern class BrowserWindow extends EventEmitter {
 	static function getAllWindows():Array<BrowserWindow>;
 	static function getFocusedWindow():Null<BrowserWindow>;
 	static function fromId(id : Int):Null<BrowserWindow>;
+
+	static function addDevToolsExtension(path:String):Void;
+	static function removeDevToolsExtension(name:String):Void;
+	@:native('getDevToolsExtensions')
+	static function getDevToolsExtensions_raw():Dynamic;
+	inline static function getDevToolsExtensions():Object {
+	    return new Object(getDevToolsExtensions_raw());
+	};
 
 /* === Instance Fields === */
 
