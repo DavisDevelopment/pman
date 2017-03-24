@@ -9,6 +9,7 @@ import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.db.*;
+import pman.media.MediaType;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -127,7 +128,7 @@ class Track {
     }
 
     /**
-      * obtain a reference to the MediaInfo attached to [this] Track in the database
+      * obtain a reference to the media_item row attached to [this] Track in the database
       */
     public function getDbMediaItem(db:PManDatabase, callback:MediaItem->Void):Void {
         var mip = db.mediaStore.cogMediaItem( uri );
@@ -135,10 +136,42 @@ class Track {
             throw error;
         });
     }
+
+    /**
+      * obtain a reference to the MediaInfo object associated with [this] Track in the database
+      */
     public function getDbMediaInfo(db:PManDatabase, callback:MediaInfo->Void):Void {
         getDbMediaItem(db, function(item) {
             item.getInfo( callback );
         });
+    }
+
+    public function readAudioTags():Void {
+        if (type.equals( MTAudio )) {
+            var path = getfspath();
+            if (path != null) {
+                var r = new pman.tools.mediatags.MediaTagReader(path.toString());
+                r.setTagsToRead(['picture']);
+                r.pread().then(function( tagData ) {
+                    var imgtag = tagData.tags.picture;
+                    if (imgtag != null) {
+                        var dat:ByteArray = ByteArray.ofData(tannus.node.Buffer.from(imgtag.data));
+                        var dataUri = dat.toDataUrl( imgtag.format );
+                        var albumImg = gryffin.display.Image.load( dataUri );
+                        trace( albumImg );
+                    }
+                }).unless(function(error) {
+                    trace('MotherFuckingError: $error');
+                });
+            }
+        }
+    }
+
+    private function getfspath():Null<Path> {
+        return switch ( source ) {
+            case MediaSource.MSLocalPath(path): path;
+            default: null;
+        }
     }
 
 /* === Computed Instance Fields === */
@@ -148,6 +181,12 @@ class Track {
 
 	public var uri(get, never):String;
 	private inline function get_uri():String return getURI();
+	
+	public var type(get, never):MediaType;
+	private inline function get_type():MediaType return provider.type;
+
+	public var source(get, never):MediaSource;
+	private inline function get_source():MediaSource return provider.src;
 
 /* === Instance Fields === */
 
