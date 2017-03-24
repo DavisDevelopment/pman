@@ -16,6 +16,8 @@ import pman.core.PlayerMediaContext;
 import pman.display.*;
 import pman.display.media.*;
 
+import js.html.MediaElement as NativeMediaObject;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
@@ -53,6 +55,23 @@ class MediaTools {
 	}
 
 	/**
+	  * get underlying media object from the given MediaObject
+	  */
+	@:access( gryffin.display.Video )
+	@:access( gryffin.audio.Audio )
+	public static function getUnderlyingMediaObject(mo : MediaObject):NativeMediaObject {
+	    if (Std.is(mo, Video)) {
+	        return cast(cast(mo, Video).vid, NativeMediaObject);
+	    }
+        else if (Std.is(mo, Audio)) {
+            return cast(cast(mo, Audio).sound, NativeMediaObject);
+        }
+        else {
+            throw 'Error: Unknown MediaObject type';
+        }
+	}
+
+	/**
 	  * parse the given URI to a MediaProvider
 	  */
 	public static function uriToMediaProvider(uri : String):MediaProvider {
@@ -74,10 +93,16 @@ class MediaTools {
         }
 	}
 
+    /**
+      * parse the given URI into a Track object
+      */
 	public static inline function parseToTrack(uri : String):Track {
 	    return new Track(uriToMediaProvider( uri ));
 	}
 
+    /**
+      * trim leading '//' from String
+      */
 	private static function stripSlashSlash(s : String):String {
 	    if (s.startsWith('//')) {
 	        s = s.slice( 2 );
