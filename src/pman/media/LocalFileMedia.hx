@@ -11,6 +11,9 @@ import gryffin.audio.Audio;
 
 import pman.display.*;
 import pman.display.media.*;
+import pman.media.MediaType;
+
+import electron.ext.FileFilter;
 
 import foundation.Tools.defer;
 
@@ -114,19 +117,15 @@ class LocalFileMedia extends Media {
 	/**
 	  * check whether [this] refers to a video file
 	  */
-	private function isVideoFile():Bool {
-		return [
-			'mp4', 'webm'
-		].has( extensionName );
+	private inline function isVideoFile():Bool {
+	    return (type != null && type.equals(MTVideo));
 	}
 
 	/**
 	  * check whether [this] refers to an audio file
 	  */
-	private function isAudioFile():Bool {
-		return [
-			'mp3', 'wav'
-		].has( extensionName );
+	private inline function isAudioFile():Bool {
+	    return (type != null && type.equals(MTAudio));
 	}
 
 /* === Computed Instance Fields === */

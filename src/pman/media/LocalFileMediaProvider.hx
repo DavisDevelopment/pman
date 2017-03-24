@@ -9,6 +9,8 @@ import gryffin.media.MediaObject;
 import gryffin.display.Video;
 import gryffin.audio.Audio;
 
+import electron.ext.FileFilter;
+
 import haxe.Serializer;
 import haxe.Unserializer;
 import foundation.Tools.defer;
@@ -28,6 +30,11 @@ class LocalFileMediaProvider extends MediaProvider {
 		super();
 
 		src = MediaSource.MSLocalPath( file.path );
+		var _sp = file.path.toString();
+		if (FileFilter.VIDEO.test(_sp))
+		    type = MediaType.MTVideo;
+        else if (FileFilter.AUDIO.test(_sp))
+            type = MediaType.MTAudio;
 		this.file = file;
 	}
 
@@ -41,6 +48,7 @@ class LocalFileMediaProvider extends MediaProvider {
 			defer(function() {
 				var media:Media = cast new LocalFileMedia( file );
 				media.provider = this;
+				@:privateAccess media.type = type;
 				return media;
 			});
 		});

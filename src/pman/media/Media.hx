@@ -97,6 +97,7 @@ class Media {
 /* === Instance Fields === */
 
 	public var src(default, null):MediaSource;
+	public var type(default, null):MediaType;
 	public var provider : MediaProvider;
 
 	private var _ready : ReadyInfo;

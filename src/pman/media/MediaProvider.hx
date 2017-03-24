@@ -79,4 +79,5 @@ class MediaProvider {
 /* === Instance Fields === */
 
 	public var src(default, null):MediaSource;
+	public var type(default, null):MediaType;
 }
