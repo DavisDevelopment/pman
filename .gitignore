@@ -16,5 +16,6 @@ dist/node_modules/**/
 dist/releases
 dist/releases/**
 dist/releases/**/
+dist/installers/*
 
 dist/pack.js
