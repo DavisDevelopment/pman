@@ -12,7 +12,7 @@ import gryffin.media.MediaObject;
 import pman.core.*;
 import pman.media.*;
 
-import foundation.Tools.defer;
+import electron.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
 
@@ -32,6 +32,8 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		super( m );
 
 		this.mediaController = c;
+
+		_av = null;
 	}
 
 /* === Instance Methods === */
@@ -43,6 +45,33 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		super.dispose();
 
 		m.destroy();
+	}
+
+	/**
+	  * attach a visualizer to [this]
+	  */
+	public function attachVisualizer(v:AudioVisualizer, done:Void->Void):Void {
+	    detachVisualizer(function() {
+	        v.attached(function() {
+	            visualizer = v;
+	            done();
+	        });
+	    });
+	}
+
+	/**
+	  * detach the current visualizer
+	  */
+	public function detachVisualizer(done : Void->Void):Void {
+	    if (visualizer != null) {
+	        visualizer.detached(function() {
+	            visualizer = null;
+	            done();
+	        });
+	    }
+        else {
+            defer( done );
+        }
 	}
 
 /* === Computed Instance Fields === */
@@ -61,5 +90,13 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	private var m(get, never):T;
 	private inline function get_m():T return tc.m;
 
+	public var visualizer(get, set):Null<AudioVisualizer>;
+	private inline function get_visualizer():Null<AudioVisualizer> return _av;
+	private inline function set_visualizer(v : Null<AudioVisualizer>):Null<AudioVisualizer> {
+	    return (_av = v);
+	}
+
 /* === Instance Fields === */
+
+    public var _av : Null<AudioVisualizer>;
 }
