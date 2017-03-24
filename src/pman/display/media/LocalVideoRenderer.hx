@@ -12,6 +12,7 @@ import gryffin.display.Video;
 
 import pman.core.*;
 import pman.media.*;
+import pman.ui.VideoUnderlay;
 
 import foundation.Tools.defer;
 import Std.*;
@@ -24,6 +25,10 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
+/*
+   Renderer for video media
+   TODO render the video element directly when possible
+*/
 class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	/* Constructor Function */
 	public function new(m:Media, mc:MediaController):Void {
@@ -39,8 +44,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  * render [this] View
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
-		c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
-		//c.drawComponent(v, 0, 0, v.width, v.height, x, y, w, h);
+	    if (underlay == null) {
+            c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
+        }
 	}
 
 	/**
@@ -61,6 +67,10 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 			// center the video-rect
 			vr.centerX = viewport.centerX;
 			vr.centerY = viewport.centerY;
+
+			if (underlay != null) {
+			    underlay.setRect( vr );
+			}
 		}
 	}
 
@@ -80,6 +90,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		if (this.pv == null) {
 			this.pv = pv;
 		}
+		underlay = new VideoUnderlay( v );
+		underlay.appendTo( 'body' );
 	}
 
 	/**
@@ -87,6 +99,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  */
 	override function onDetached(pv : PlayerView):Void {
 		super.onDetached( pv );
+		if (underlay != null)
+            underlay.destroy();
 	}
 
 /* === Computed Instance Fields === */
@@ -103,4 +117,5 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	private var vr : Rectangle;
 
 	private var pv : Null<PlayerView> = null;
+	private var underlay : Null<VideoUnderlay> = null;
 }
