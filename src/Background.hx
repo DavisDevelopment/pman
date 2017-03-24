@@ -7,6 +7,8 @@ import tannus.sys.Path;
 import electron.ext.*;
 import electron.Tools.defer;
 
+import tannus.TSys as Sys;
+
 class Background {
 	/* Constructor Function */
 	public function new():Void {
@@ -60,13 +62,6 @@ class Background {
 	private function _ready():Void {
 		trace(' -- background process ready -- ');
 		
-        #if debug
-            var dte:Object = BrowserWindow.getDevToolsExtensions();
-            if (!dte.exists( 'kcdehbecimoacajfpcpihajfnbfpk' )) {
-                BrowserWindow.addDevToolsExtension(uip('dev_extensions/kcdehbecimoacajfpcpihajfnbfpk').toString());
-            }
-        #end
-
 		_ipcListen();
 
 		openPlayerWindow(function( bw ) {
