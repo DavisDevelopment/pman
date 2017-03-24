@@ -40,6 +40,12 @@ class Icons {
 	public static function volumeIcon(w:Int, h:Int, ?f:Path->Void):Document {
 		return namedPath(w, h, 'sound3', f);
 	}
+	public static function selectionExpand(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'selection-expand', f);
+	}
+	public static function selectionCollapse(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'selection-collapse', f);
+	}
 
 	/**
 	  * create the Chromecast icon
