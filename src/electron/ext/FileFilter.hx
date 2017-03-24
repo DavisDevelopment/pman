@@ -1,5 +1,9 @@
 package electron.ext;
 
+using StringTools;
+using tannus.ds.StringUtils;
+using Lambda;
+
 @:structInit
 class FileFilter {
 	/* Constructor Function */
@@ -14,6 +18,10 @@ class FileFilter {
         if (sumname == null)
             sumname = (name + other.name);
         return new FileFilter(sumname, extensions.concat(other.extensions));
+    }
+
+    public inline function test(path : String):Bool {
+        return extensions.has(path.afterLast( '.' ));
     }
 
 /* === Instance Fields === */
