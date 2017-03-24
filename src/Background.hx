@@ -1,9 +1,11 @@
 package ;
 
+import tannus.ds.*;
 import tannus.ds.tuples.*;
 import tannus.sys.Path;
 
 import electron.ext.*;
+import electron.Tools.defer;
 
 class Background {
 	/* Constructor Function */
@@ -18,6 +20,7 @@ class Background {
 	 */
 	public function start():Void {
 		App.onReady( _ready );
+		App.onAllClosed( _onAllClosed );
 	}
 
 	/**
@@ -38,9 +41,14 @@ class Background {
 			//win.webContents.openDevTools();
 			win.focus();
 			playerWindows.push( win );
-			if (cb != null) {
-				cb( win );
-			}
+			defer(function() {
+                if (cb != null) {
+                    cb( win );
+                }
+                #if debug
+                win.webContents.openDevTools();
+                #end
+            });
 		});
 	}
 
@@ -51,12 +59,26 @@ class Background {
 	 */
 	private function _ready():Void {
 		trace(' -- background process ready -- ');
+		
+        #if debug
+            var dte:Object = BrowserWindow.getDevToolsExtensions();
+            if (!dte.exists( 'kcdehbecimoacajfpcpihajfnbfpk' )) {
+                BrowserWindow.addDevToolsExtension(uip('dev_extensions/kcdehbecimoacajfpcpihajfnbfpk').toString());
+            }
+        #end
 
 		_ipcListen();
 
 		openPlayerWindow(function( bw ) {
 			null;
 		});
+	}
+
+	/**
+	  * when a window closes
+	  */
+	private function _onAllClosed():Void {
+	    App.quit();
 	}
 
 	/**
@@ -75,6 +97,10 @@ class Background {
 		if (s != null)
 			p = p.plusString( s );
 		return p;
+	}
+
+	private inline function uip(?s:String):Path {
+	    return (s==null?App.getPath(UserData):App.getPath(UserData).plusString(s));
 	}
 
 	/* === Instance Fields === */
