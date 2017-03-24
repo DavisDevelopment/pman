@@ -4,13 +4,19 @@
 
 @primary: rgb(34, 34, 34);
 @secondary: rgb(242, 122, 72);
+@tertiary: rgb(231, 231, 231);
 
 body {
 	overflow: hidden;
+	background-color: black;
+}
+
+body, html {
+    height: 100%;
 }
 
 canvas {
-	background-color: black;
+	z-index: 10;
 }
 
 .block-center {
@@ -19,9 +25,25 @@ canvas {
 	margin-right: auto;
 }
 
+.unselectable {
+    -webkit-user-select: none; /* Chrome/Safari */        
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* IE10+ */
+
+    /* Rules below not implemented in browsers yet */
+    -o-user-select: none;
+    user-select: none;
+}
+
+.canvas-underlay {
+    position: absolute;
+    z-index: 2;
+}
+
 .right-panel {
 	display: block;
 	position: absolute;
+	z-index: 11;
 	right: 0px;
 	top: 0px;
 	width: 30vw;
@@ -110,6 +132,43 @@ canvas {
 			border-bottom: solid @secondary 1.5px;
 		}
 	}
+}
+
+.auto-complete-input {
+    position: absolute;
+    top: 55px;
+    width: 90%;
+    z-index: 11111;
+    font-size: 13.8px;
+
+    /*
+    .text-input-row {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+
+    }
+    */
+    input[type=text] {
+        color: @tertiary;
+        line-height: 24px;
+        width: 100%;
+    }
+
+    .results {
+        display: block;
+        position: absolute;
+        z-index: 20000;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 200px;
+
+        .item {
+            padding: 3px 12px;
+            line-height: 24px;
+        }
+    }
 }
 
 @font-face {
