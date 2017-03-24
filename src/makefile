@@ -8,6 +8,9 @@ test:
 build:
 	haxe build.hxml && cd ../dist/ && sh build.sh
 
+package:
+	cd ../dist/ && bash package.sh
+
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
 	git clone http://github.com/DavisDevelopment/jsgryf gryffin
