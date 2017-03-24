@@ -10,6 +10,8 @@ import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
 import tannus.math.Random;
+import tannus.html.fs.*;
+import tannus.html.fs.WebDirectoryEntry as WebDir;
 
 import pman.core.*;
 import pman.ui.*;
@@ -18,12 +20,14 @@ import pman.events.*;
 import pman.media.*;
 
 import Std.*;
+import electron.Tools.defer;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
+using pman.media.MediaTools;
 
 class DragDropManager {
 	/* Constructor Function */
@@ -59,14 +63,14 @@ class DragDropManager {
 	  * when [this] manager becomes the drop target of the dragged object
 	  */
 	private function onDragEnter(event : DragDropEvent):Void {
-
+	    app.player.dispatch('dragenter', event);
 	}
 
 	/**
 	  * when the dragged object leaves [this] manager's area of influence
 	  */
 	private function onDragLeave(event : DragDropEvent):Void {
-
+	    app.player.dispatch('dragleave', event);
 	}
 
 	/**
@@ -74,13 +78,15 @@ class DragDropManager {
 	  */
 	private function onDragOver(event : DragDropEvent):Void {
 		event.preventDefault();
+
+		app.player.dispatch('dragover', event);
 	}
 
 	/**
 	  * when the current drag operation is being ended
 	  */
 	private function onDragEnd(event : DragDropEvent):Void {
-		null;
+		app.player.dispatch('dragend', event);
 	}
 
 	/**
@@ -91,14 +97,37 @@ class DragDropManager {
 		event.preventDefault();
 		// create the Array of Tracks
 		var tracks:Array<Track> = new Array();
+		var stack = new AsyncStack();
 		// shorthand reference to [event.dataTransfer]
 		var dt = event.dataTransfer;
 		// if the DataTransfer has the [items] field
 		if (dt.items != null) {
 			for (item in dt.items) {
 				if (item.kind == DKFile) {
-					var file:File = new File(item.getFile().path);
-					tracks.push(Track.fromFile( file ));
+				    var entry = item.getEntry();
+				    if ( entry.isDirectory ) {
+				        var webDir:WebDir = new WebDir(cast entry);
+				        stack.push(function(next) {
+                            getDirectoryPath(webDir, function(path : Path) {
+                                var directory:Directory = new Directory(path.absolutize());
+                                trace( directory );
+                                directory.getAllOpenableFiles(function( files ) {
+                                    tracks = tracks.concat(files.convertToTracks());
+                                    next();
+                                });
+                            });
+                        });
+				    }
+                    else {
+                        var webFile = item.getFile();
+                        if (webFile != null) {
+                            stack.push(function(next) {
+                                var file = new File(webFile.path);
+                                tracks.push(Track.fromFile( file ));
+                                next();
+                            });
+                        }
+                    }
 				}
 				else if (item.kind == DKString) {
 					trace({
@@ -113,16 +142,58 @@ class DragDropManager {
 		}
 		// if it has the [files] field
 		else if (dt.files != null) {
-			for (webFile in dt.files) {
-				var file:File = new File( webFile.path );
-				tracks.push(Track.fromFile( file ));
-			}
+		    stack.push(function(next) {
+                for (webFile in dt.files) {
+                    var file:File = new File( webFile.path );
+                    tracks.push(Track.fromFile( file ));
+                }
+                next();
+            });
 		}
 
 		// load the Tracks into the Playlist
-		app.player.addItemList(tracks, function() {
-			trace( tracks );
-		});
+		stack.run(function() {
+            app.player.addItemList(tracks, function() {
+                trace( tracks );
+            });
+        });
+	}
+
+	/**
+	  * get a Directory path from a WebDirectory
+	  */
+	private function getDirectoryPath(d:WebDir, f:Path->Void, level:Int=1):Void {
+	    // read all entries
+	    var ep = d.readEntries();
+	    ep.then(function( entries ) {
+	        var fileEntries:Array<WebFileEntry> = cast entries.filter.fn( _.isFile );
+	        if (fileEntries.length > 0) {
+	            var fileEntry:WebFileEntry = cast fileEntries[0];
+	            var fp = fileEntry.file();
+	            fp.then(function(webFile : WebFile) {
+	                var webFilePath:Path = new Path( webFile.path );
+	                var pieces = webFilePath.pieces;
+	                for (i in 0...level) {
+	                    pieces.pop();
+	                }
+	                webFilePath = Path.fromPieces( pieces );
+	                f( webFilePath );
+	            });
+	            fp.unless(function(error) {
+	                throw error;
+	            });
+	        }
+            else if (entries.length > 0 && entries[0].isDirectory) {
+                var subDir:WebDir = new WebDir(cast entries[0]);
+                getDirectoryPath(subDir, f, (level + 1));
+            }
+            else {
+                throw 'Error: Unable to resolve directory path';
+            }
+	    });
+	    ep.unless(function( error ) {
+	        throw error;
+	    });
 	}
 
 /* === Instance Fields === */
