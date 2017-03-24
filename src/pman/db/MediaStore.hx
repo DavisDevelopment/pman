@@ -30,12 +30,19 @@ class MediaStore extends TableWrapper {
 
 /* === Instance Methods === */
 
+    /**
+      * get an Array of all media item rows
+      */
     public function getAllMediaItemRows():ArrayPromise<MediaItemRow> {
         var store = tos('media_items');
         return store.getAll().transform(function(dynlist:Array<Dynamic>):Array<MediaItemRow> {
             return cast dynlist;
         }).array();
     }
+
+    /**
+      * get an array of all media items
+      */
     public function getAllMediaItems():ArrayPromise<MediaItem> {
         return getAllMediaItemRows().map(function(row) {
             return mediaItem( row );
