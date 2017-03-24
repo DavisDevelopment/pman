@@ -32,7 +32,7 @@ class TableWrapper {
     /**
       * get a usable reference to an objectStore
       */
-    public function tos(table:EitherType<String, Array<String>>, ?mode:String, ?tmp:String):ObjectStore {
+    public function tos(table:TransactionKey, ?mode:String, ?tmp:String):ObjectStore {
         var tableName:String = '';
         if (Std.is(table, String)) {
             tableName = cast table;
@@ -49,6 +49,46 @@ class TableWrapper {
         return db.transaction(table, mode).objectStore( tableName );
     }
 
+    /**
+      * get references to multiple tables with the same mode
+      */
+    public function tables(names:Array<String>, ?mode:String):Array<ObjectStore> {
+        var t = db.transaction(names, mode);
+        return names.map.fn(t.objectStore(_));
+    }
+
+    /**
+      * perform [action] for each row where [test] returns true
+      */
+    public function walk<T>(table:String, action:T->Void, ?transaction:Transaction, ?test:T->Bool, ?end:Null<Dynamic>->Void):Void {
+        var o = (transaction != null ? transaction.objectStore( table ) : tos( table ));
+        var cw = o.openCursor(function(c, w) {
+            if (c.entry != null) {
+                if (test == null || test(untyped c.entry)) {
+                    action(untyped c.entry);
+                }
+            }
+        });
+        if (end != null) {
+            cw.error.once(function(err) end( err ));
+            cw.complete.once(function() end( null ));
+        }
+    }
+
+    /**
+      * perform a filter operation
+      */
+    public function filter<T>(tableName:String, f:T->Bool):ArrayPromise<T> {
+        return Promise.create({
+            var results:Array<T> = new Array();
+            function done(err : Null<Dynamic>)
+                if (err != null)
+                    throw err;
+                else return results;
+            walk(tableName, results.push.bind(_), null, f, done);
+        }).array();
+    }
+
 /* === Computed Instance Fields === */
 
     public var db(get, never):Database;
@@ -61,3 +101,5 @@ class TableWrapper {
 
     public var dbr : PManDatabase;
 }
+
+typedef TransactionKey = EitherType<String, Array<String>>;
