@@ -8,3 +8,7 @@ dist/scripts/background.js
 dist/scripts/worker.js
 dist/styles/theme.css
 
+dist/node_modules
+dist/node_modules/**
+dist/node_modules/**/
+
