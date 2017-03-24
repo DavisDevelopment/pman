@@ -1,5 +1,6 @@
 
 *.swp
+*.map
 
 src/borner
 
@@ -15,3 +16,4 @@ dist/releases
 dist/releases/**
 dist/releases/**/
 
+dist/pack.js
