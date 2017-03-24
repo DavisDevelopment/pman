@@ -99,6 +99,9 @@ class PlayerView extends Ent {
 	  * Render [this]
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
+	    // clear [this]'s rect
+	    c.clearRect(x, y, w, h);
+
 		// if [this] view has media
 		if (cmr != null) {
 			// render that media
