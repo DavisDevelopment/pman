@@ -14,6 +14,8 @@ import pman.media.MediaType;
 import haxe.Serializer;
 import haxe.Unserializer;
 
+import electron.Tools.defer;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
@@ -35,6 +37,25 @@ class Track {
 	}
 
 /* === Instance Methods === */
+
+    /**
+      * initialize [this] Track
+      */
+    public function init(?done : Void->Void):Void {
+        if (done == null) {
+            done = (function() null);
+        }
+
+        if ( ready ) {
+            defer( done );
+        }
+        else {
+            defer(function() {
+                _ready = true;
+                done();
+            });
+        }
+    }
 
 	/**
 	  * get the name of [this] Track
@@ -114,9 +135,6 @@ class Track {
 	  */
 	public function clone(deep:Bool = false):Track {
 	    var copy = new Track( provider );
-	    if (deep && next != null) {
-	        copy.next = next.clone();
-	    }
 	    return copy;
 	}
 
@@ -146,34 +164,6 @@ class Track {
         });
     }
 
-    public function readAudioTags():Void {
-        if (type.equals( MTAudio )) {
-            var path = getfspath();
-            if (path != null) {
-                var r = new pman.tools.mediatags.MediaTagReader(path.toString());
-                r.setTagsToRead(['picture']);
-                r.pread().then(function( tagData ) {
-                    var imgtag = tagData.tags.picture;
-                    if (imgtag != null) {
-                        var dat:ByteArray = ByteArray.ofData(tannus.node.Buffer.from(imgtag.data));
-                        var dataUri = dat.toDataUrl( imgtag.format );
-                        var albumImg = gryffin.display.Image.load( dataUri );
-                        trace( albumImg );
-                    }
-                }).unless(function(error) {
-                    trace('MotherFuckingError: $error');
-                });
-            }
-        }
-    }
-
-    private function getfspath():Null<Path> {
-        return switch ( source ) {
-            case MediaSource.MSLocalPath(path): path;
-            default: null;
-        }
-    }
-
 /* === Computed Instance Fields === */
 
 	public var title(get, never):String;
@@ -188,14 +178,18 @@ class Track {
 	public var source(get, never):MediaSource;
 	private inline function get_source():MediaSource return provider.src;
 
+	public var ready(get, never):Bool;
+	private inline function get_ready():Bool return _ready;
+
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
-	public var next : Null<Track> = null;
 
 	public var media(default, null): Null<Media>;
 	public var driver(default, null): Null<PlaybackDriver>;
 	public var renderer(default, null): Null<MediaRenderer>;
+
+	private var _ready : Bool = false;
 
 /* === Class Methods === */
 
