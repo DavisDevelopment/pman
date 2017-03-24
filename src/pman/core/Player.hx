@@ -30,6 +30,7 @@ import pman.media.*;
 import pman.ui.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
+import pman.ds.*;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
@@ -44,9 +45,11 @@ using tannus.math.RandomTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
 
-class Player {
+class Player extends EventDispatcher {
 	/* Constructor Function */
 	public function new(main:BPlayerMain, page:PlayerPage):Void {
+	    super();
+
 		app = main;
 		this.page = page;
 
@@ -355,12 +358,7 @@ class Player {
 	public function snapshot():Void {
 	    // first off, check whether there's even anything to take a 'snapshot' of
 	    if (session.hasMedia()) {
-	        var vid:Null<Video> = (untyped gmo());
-	        if (vid != null) {
-	            var snapshotCanvas:Canvas = vid.capture(0, 0, vid.width, vid.height);
-	            var ssd = snapshotCanvas.context.getImageData(0, 0, snapshotCanvas.width, snapshotCanvas.height);
-	            
-	        }
+
 	    }
 	}
 
@@ -428,20 +426,9 @@ class Player {
 				callback([]);
 			}
 			else {
-				var dir:Directory = dirs[0];
-				var files:Array<File> = [];
-				dir.walk(function( entry ) {
-					if (entry.isFile()) {
-						var file:File = entry.file();
-						if (file.path.name.isVideoFileName()) {
-							files.push( file );
-						}
-					}
-					else {
-						return ;
-					}
-				});
-				callback(files.map( Track.fromFile ));
+			    dirs[0].getAllOpenableFiles(function( files ) {
+			        callback(files.convertToTracks());
+			    });
 			}
 		});
 	}
@@ -451,9 +438,7 @@ class Player {
 	  */
 	public function selectFilesToPlaylist(callback : Array<Track>->Void):Void {
 		selectFiles(function( files ) {
-			var flc = new FileListConverter();
-			var tracks = flc.convert( files ).toArray();
-			callback( tracks );
+		    callback(files.convertToTracks());
 		});
 	}
 
@@ -536,38 +521,41 @@ class Player {
 	  * add a batch of media items to the queue
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
-		// if these are the first items added to the queue, autoLoad will be invoked once they are all added
-		var autoLoad:Bool = session.playlist.empty();
-		var willPlay:Null<Track> = null;
-		if ( autoLoad ) {
-			willPlay = items[0];
-		}
+	    // initialize these items
+	    items.initAll(function() {
+            // if these are the first items added to the queue, autoLoad will be invoked once they are all added
+            var autoLoad:Bool = session.playlist.empty();
+            var willPlay:Null<Track> = null;
+            if ( autoLoad ) {
+                willPlay = items[0];
+            }
 
-		// shuffle the tracks
-		if ( session.pp.shuffle ) {
-			var rand = new Random();
-			items = rand.shuffle( items );
-		}
+            // shuffle the tracks
+            if ( session.pp.shuffle ) {
+                var rand = new Random();
+                items = rand.shuffle( items );
+            }
 
-		// add all the items
-		for (item in items) {
-			session.addItem(item, null, false);
-		}
+            // add all the items
+            for (item in items) {
+                session.addItem(item, null, false);
+            }
 
-		// autoPlay if appropriate
-		if (autoLoad && willPlay != null) {
-			openTrack(willPlay, {
-				attached: function() {
-					//trace('Media linked to player by auto-load');
-					if (done != null) done();
-				}
-			});
-		}
-		else {
-			if (done != null) {
-				defer( done );
-			}
-		}
+            // autoPlay if appropriate
+            if (autoLoad && willPlay != null) {
+                openTrack(willPlay, {
+                    attached: function() {
+                        //trace('Media linked to player by auto-load');
+                        if (done != null) done();
+                    }
+                });
+            }
+            else {
+                if (done != null) {
+                    defer( done );
+                }
+            }
+        });
 	}
 
 	/**
