@@ -8,14 +8,16 @@ import tannus.graphics.Color;
 
 import gryffin.core.*;
 import gryffin.display.*;
+import gryffin.ui.Padding;
 
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.ctrl.VolumeWidget;
 
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import electron.Tools.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -30,7 +32,6 @@ class PlaybackSpeedWidget extends Ent {
 
 		controls = c;
 		button = b;
-		options = new Array();
 
 		hide();
 	}
@@ -41,16 +42,50 @@ class PlaybackSpeedWidget extends Ent {
 	  * initialize [this]
 	  */
 	override function init(stage : Stage):Void {
-		super.init( stage );
+		var colors = getColors();
+		minus = new VolBtn('selectionCollapse', Std.int(btnSize[0]), colors);
+		plus = new VolBtn('selectionExpand', Std.int(btnSize[0]), colors);
 
-		buildOptions();
+		super.init( stage );
+		on('click', onClick);
 	}
+
+	/**
+	  * do the stuff
+	  */
+    private function cancelClick(event : MouseEvent):Void {
+        if (!containsPoint( event.position )) {
+            event.stopPropogation();
+            hide();
+        }
+    }
+
+    override function show():Void {
+        super.show();
+        player.view.stage.on('click', cancelClick);
+    }
+
+    override function hide():Void {
+        super.hide();
+        player.view.stage.off('click', cancelClick);
+    }
 
 	/**
 	  * update [this]
 	  */
 	override function update(stage : Stage):Void {
 		super.update( stage );
+        plus.state = Normal;
+        minus.state = Normal;
+        var mp = stage.getMousePosition();
+        if (mp != null && containsPoint( mp )) {
+            if (plus.rect.containsPoint( mp ) && plus.state != Disabled) {
+                plus.state = Hovered;
+            }
+            else if (minus.rect.containsPoint( mp ) && minus.state != Disabled) {
+                minus.state = Hovered;
+            }
+        }
 	}
 
 	/**
@@ -58,12 +93,22 @@ class PlaybackSpeedWidget extends Ent {
 	  */
 	@:access( pman.ui.PlayerControlsView )
 	override function render(stage:Stage, c:Ctx):Void {
-		var bg = controls.getBackgroundColor();
-		c.fillStyle = bg.toString();
+		var colors = getColors();
+		inline function col(i:Int) return Std.string(colors[i]);
+
 		c.beginPath();
-		c.drawRoundRect(rect, 4.0);
+		c.fillStyle = col( 0 );
+		c.strokeStyle = col( 2 );
+		c.drawRoundRect(rect, 2);
 		c.closePath();
 		c.fill();
+		c.stroke();
+
+		var bi:Image=minus.image, br:Rectangle=minus.rect;
+		c.drawComponent(bi, 0, 0, bi.width, bi.height, br.x, br.y, br.w, br.h);
+		bi = plus.image;
+		br = plus.rect;
+		c.drawComponent(bi, 0, 0, bi.width, bi.height, br.x, br.y, br.w, br.h);
 
 		super.render(stage, c);
 	}
@@ -72,96 +117,75 @@ class PlaybackSpeedWidget extends Ent {
 	  * calculate [this]'s geometry
 	  */
 	override function calculateGeometry(r : Rectangle):Void {
-		w = 100;
-		centerX = button.centerX;
-		h = calculateHeight();
-		y = (controls.y - h - 7);
+	    inline function double(x:Float) return (x * 2);
+		//w = ((btnSize[1] * 2) + (margin.left * 2) + (margin.right * 2));
+	    w = (double(btnSize[1]) + double( margin.left ) + double( margin.right ));
+	    h = (btnSize[1] + double( margin.top ));
+	    centerX = button.centerX;
+	    y = (button.y - h - margin.bottom);
+	    var br = minus.rect;
+	    br.x = (x + margin.left);
+	    br.y = (y + margin.top);
+	    br.w = br.h = btnSize[1];
+	    br = plus.rect;
+	    br.w = br.h = btnSize[1];
+	    br.x = (x + w - br.w - margin.right);
+	    br.y = (y + margin.top);
+	}
 
-		super.calculateGeometry( r );
-		positionOptions();
+    /**
+      * check whether [this] contains [p]
+      */
+	override function containsPoint(p : Point):Bool {
+	    return (!isHidden() && super.containsPoint( p ));
 	}
 
 	/**
-	  * calculate the height of [this]
+	  * handle click events
 	  */
-	private function calculateHeight():Float {
-		var result:Float = margin;
-		for (o in options) {
-			result += (o.h + margin);
-		}
-		return result;
+	private function onClick(event : MouseEvent):Void {
+	    var jump:Float = 0.05;
+	    if (minus.rect.containsPoint( event.position )) {
+	        player.playbackRate -= jump;
+	    }
+        else if (plus.rect.containsPoint( event.position )) {
+            player.playbackRate += jump;
+        }
 	}
 
-	/**
-	  * position all option buttons
-	  */
-	private function positionOptions():Void {
-		var oy:Float = (y + margin);
-		for (o in options) {
-			o.y = oy;
-			oy += o.h;
-			oy += margin;
-		}
-		oy += margin;
-	}
+    /**
+      * get the Colors used by [this] widget
+      */
+    private function getColors():Array<Color> {
+        if (colids == null) {
+            var bgCol = player.theme.tertiary;
+            var barCol = player.theme.secondary;
+            var outlineCol = player.theme.primary;
+            var disabledCol = outlineCol.lighten( 20 );
+            var list = [bgCol, barCol, outlineCol, disabledCol];
+            colids = list.map(player.theme.save);
+            return list;
+        }
+        else {
+            return colids.map( player.theme.restore );
+        }
+    }
 
-	/**
-	  * build all options
-	  */
-	private function buildOptions():Void {
-		var all:Array<NamedSpeed> = [Slow, Normal, Fast, VeryFast];
-		for (value in all) {
-			var o = option( value );
-			addOption( o );
-		}
-	}
+/* === Computed Instance Fields === */
 
-	/**
-	  * add an Option
-	  */
-	private inline function addOption(o : PlaybackSpeedOption):Void {
-		addChild( o );
-		options.push( o );
-	}
-
-	private inline function option(value : NamedSpeed):PlaybackSpeedOption {
-		return new PlaybackSpeedOption(controls, button, this, value);
-	}
+    public var player(get, never):Player;
+    private inline function get_player():Player return controls.playerView.player;
 
 /* === Instance Fields === */
 
 	public var controls : PlayerControlsView;
 	public var button : PlaybackSpeedButton;
 
-	public var options : Array<PlaybackSpeedOption>;
-
-	private var margin : Float = 4.0;
+	private var margin:Padding = {new Padding(3, 3, 3, 3);};
+	private var plus : VolBtn;
+	private var minus : VolBtn;
+	private var btnSize:Array<Float> = [64, 35];
+	private var colids : Null<Array<Int>> = null;
 	//private var totalWidth : Float;
 	//private var totalHeight : Float;
-}
-
-@:enum
-abstract NamedSpeed (Float) from Float to Float {
-	var Slow = 0.75;
-	var Normal = 1.00;
-	var Fast = 1.25;
-	var VeryFast = 1.75;
-
-	public static inline function isNamedSpeed(n : Float):Bool {
-		return [Slow, Normal, Fast, VeryFast].has( n );
-	}
-
-	public function getName():String {
-		return switch ( this ) {
-			case Slow: 'Slow';
-			case Normal: 'Normal';
-			case Fast: 'Fast';
-			case VeryFast: 'Very Fast';
-			default: Std.string( this );
-		};
-	}
-
-	public inline function getValue():Float {
-		return this;
-	}
 }
