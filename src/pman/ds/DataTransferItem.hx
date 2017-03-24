@@ -6,6 +6,7 @@ import tannus.events.*;
 import tannus.sys.Mime;
 import tannus.html.fs.WebFile;
 import tannus.html.fs.WebFSEntry;
+import tannus.html.fs.WebDirectoryEntry;
 
 //import js.html.DragEvent as NativeDragEvent;
 
@@ -27,8 +28,15 @@ abstract DataTransferItem (NDataTransferItem) from NDataTransferItem to NDataTra
 	public inline function getFile():Null<WebFile> {
 		return new WebFile(this.getAsFile());
 	}
+
+	@:to
+	public inline function getDirectory():Null<WebDirectoryEntry> {
+	    return new WebDirectoryEntry(cast getEntry());
+	}
+
 	@:to
 	public inline function getEntry():Null<WebFSEntry> return this.webkitGetAsEntry();
+
 	@:to
 	public inline function getString():Null<String> return this.getAsString();
 
