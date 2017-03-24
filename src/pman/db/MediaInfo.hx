@@ -51,13 +51,14 @@ class MediaInfo {
     /**
       * write [this]'s data onto the row in the database
       */
-    public function push(done : Void->Void):Void {
+    public function push(?done : Void->Void):Void {
         store.putMediaInfoRow_(row, function(error : Null<Dynamic>) {
             if (error != null) {
                 trace('Error: $error');
             }
             else {
-                done();
+                if (done != null) 
+                    done();
             }
         });
     }
