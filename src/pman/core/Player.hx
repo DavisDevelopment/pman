@@ -14,6 +14,7 @@ import tannus.math.Random;
 import gryffin.core.*;
 import gryffin.display.*;
 import gryffin.media.MediaObject;
+import gryffin.media.MediaReadyState;
 
 import electron.ext.App;
 import electron.ext.Dialog;
@@ -22,6 +23,7 @@ import electron.ext.NativeImage;
 
 import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
+import pman.core.PlayerStatus;
 import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
@@ -238,6 +240,47 @@ class Player {
                 }
             }
 	    });
+	}
+
+	/**
+	  * get the current player status
+	  */
+	@:access( pman.media.LocalMediaObjectPlaybackDriver )
+	public function getStatus():PlayerStatus {
+	    var status : PlayerStatus;
+	    if (session.hasMedia()) {
+	        if (Std.is(session.playbackDriver, LocalMediaObjectPlaybackDriver)) {
+                var mo:MediaObject = cast(cast(session.playbackDriver, LocalMediaObjectPlaybackDriver<Dynamic>).mediaObject, MediaObject);
+                var me = mo.getUnderlyingMediaObject();
+                var readyState:MediaReadyState = me.readyState;
+                switch ( readyState ) {
+                    case HAVE_NOTHING, HAVE_METADATA:
+                        status = Waiting;
+
+                    case HAVE_CURRENT_DATA, HAVE_FUTURE_DATA, HAVE_ENOUGH_DATA:
+                       if ( ended ) {
+                           status = Ended;
+                       }
+                       else if ( paused ) {
+                           status = Paused;
+                       }
+                       else {
+                           status = Playing;
+                       }
+
+                    default:
+                       status = Empty;
+                       throw 'What the fuck';
+                }
+	        }
+            else {
+                status = Empty;
+            }
+	    }
+        else {
+            status = Empty;
+        }
+	    return status;
 	}
 
 /* === Media Methods === */
@@ -581,9 +624,11 @@ class Player {
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
+
 			var mip = ms.cogMediaItem( newTrack.uri );
 			mip.then(function( item ) {
-			    trace( item );
+			    // jump to saved time
+			    /*
 			    item.getInfo(function(info) {
 			        if (info.time.last != null) {
 			            defer(function() {
@@ -596,11 +641,14 @@ class Player {
                         });
                     }
 			    });
+			    */
 			});
 			mip.unless(function(error) {
 			    app.errorMessage( error );
 			});
 		}
+
+		// automatically save the playback settings
 		app.appDir.savePlaybackSettings( this );
 	}
 
@@ -614,14 +662,21 @@ class Player {
 		else {
             var track:Track = delta.previous;
 			var nums:Array<Float> = [currentTime, durationTime];
+			var atend:Bool = ended;
 
+            // get the media_item for the Track
 			var ms = app.db.mediaStore;
 			var mip = ms.cogMediaItem( track.uri );
 			mip.then(function( item ) {
+			    // save the current time
 			    item.getInfo(function( info ) {
-			        info.time.last = nums[0];
-
-			        info.push(function() null);
+			        if ( !atend ) {
+                        info.time.last = nums[0];
+                    }
+                    else {
+                        info.time.last = null;
+                    }
+			        info.push();
 			    });
 			});
 			mip.unless(function( error ) {
