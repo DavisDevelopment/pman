@@ -7,7 +7,9 @@ import electron.ext.ExtApp in A;
 
 import tannus.sys.Path;
 
-class App {
+typedef App = ExtApp;
+
+class OldApp {
 /* === Class Methods === */
 
 	/**
