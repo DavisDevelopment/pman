@@ -2,16 +2,17 @@
 fs = require 'fs'
 path = require 'path'
 
-packager = require 'electron-packager'
 async = require 'async'
 _ = require 'underscore'
+
+packager = require 'electron-packager'
+deb_installer = require 'electron-installer-debian'
 
 scriptdir = (__dirname + '')
 
 defaltOptions =
   dir: scriptdir
   name: 'pman'
-  #platform: 'linux'
   arch: 'x64'
   version: '1.6.2'
   out: path.join(scriptdir, 'releases')
@@ -29,7 +30,12 @@ defaltOptions =
 
 options = (o...) -> _.extend(_.clone(defaltOptions), o...)
 
-do ->
+# task registry
+actions = {}
+
+# Package PMan for Linux and Windows
+build_releases = actions['pack'] = ( complete ) ->
+    complete ?= (-> null)
     builds = []
     #pack_cb = ((error, appPaths) -> if error? then console.error(error) else console.log(appPaths))
     #pack_task = (settings) -> return _.bind(packager, options(settings))
@@ -51,5 +57,42 @@ do ->
             console.error error
         else
             console.log _.flatten paths
+            console.log ' -- PMan Packaged for Linux and Windows -- '
+        do complete
 
-    console.log " -- Done -- "
+# Build the .deb installer
+build_debian_installer = actions['deb'] = actions['debian'] = ( complete ) ->
+    complete ?= (-> null)
+    release_dir = path.join(scriptdir, 'releases', 'pman-linux-x64')
+    installers_dir = path.join(scriptdir, 'installers')
+    
+    options =
+        src  : release_dir
+        dest : installers_dir
+        arch : 'x64'
+
+    #deb_installer callback
+    dicb = (error) ->
+        if error?
+            console.error( error )
+        else
+            console.log " -- Created Debian Installer for PMan -- "
+            do complete
+
+    deb_installer(options, dicb)
+
+# 'main' function
+do ->
+    # get parameters
+    actionNames = process.argv[2..]
+    tasks = do ->
+        for name in actionNames
+            if name of actions
+                actions[name]
+    
+    taskCallback = (error) ->
+        if error?
+            console.error error
+
+    async.series tasks, taskCallback
+
