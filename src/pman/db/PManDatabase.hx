@@ -36,142 +36,6 @@ class PManDatabase {
 /* === Instance Methods === */
 
 	/**
-	  * Get a media entry by its uri/id
-	  */
-	/*
-	public function getMediaRow(key : EitherType<String, Int>):Promise<Null<MediaRow>> {
-		return Promise.create({
-		    if (Std.is(key, Int)) {
-		        var id:Int = cast key;
-                function query():Void {
-                    var p = tl('media_items').get( id );
-                    p.unless(function(error) {
-                        console.error( error );
-                        throw error;
-                    });
-                    p.then(function( row ) {
-                        return row;
-                    });
-                }
-                onready( query );
-		    }
-            else if (Std.is(key, String)) {
-                var uri:String = cast key;
-                var row:Null<Dynamic> = null;
-                function search(cursor:Cursor, walker) {
-                    trace( cursor.entry );
-                    if (cursor.entry != null) {
-                        var ro = cursor.entry;
-                        if (ro.uri == uri) {
-                            walker.abort();
-                            return untyped ro;
-                        }
-                    }
-                }
-                trace('starting cursor iteration');
-                var c = tl('media_items').openCursor( search );
-                c.complete.once(function() {
-                    trace('cursor iteration complete');
-
-                });
-                c.error.once(function(err) {
-                    trace('Error: $err');
-                });
-            }
-            else {
-                throw 'fuck me';
-            }
-		});
-	}
-	*/
-
-	/**
-	  * create/update the given row
-	  */
-	/*
-	public function putMediaRow(row : MediaRow):Promise<MediaRow> {
-		return Promise.create({
-			function query() {
-				var table = tl('media_items', 'readwrite');
-				var p = table.put( row );
-				p.unless(function(error) {
-					console.error( error );
-					throw error;
-				});
-				p.then(function(id : Int) {
-					@forward getMediaRow( id );
-				});
-			}
-			onready( query );
-		});
-	}
-	*/
-
-	/**
-	  * attempt to get the MediaRow for the given Track
-	  -- if successful, yield that
-	  -- if unsuccessful, create new MediaRow for that Track,
-	     PUT it onto the table, and yield the result of that action
-	  */
-	/*
-	public function cogMediaRow(track : Track):Promise<MediaRow> {
-		return Promise.create({
-			var uri:String = track.provider.getURI();
-			var p = getMediaRow( uri );
-			p.unless(function(error) {
-				console.error( error );
-				throw error;
-			});
-			p.then(function(result : Null<MediaRow>):Void {
-				if (result != null) {
-					return result;
-				}
-				else {
-					// create the new MediaRow
-					var row:MediaRow = {
-						uri: uri
-					};
-					@forward putMediaRow( row );
-				}
-			});
-		});
-	}
-	*/
-
-	/**
-	  * push the given MediaRow onto the database (simplified)
-	  -- no Promises to deal with or return values to worry about
-	     just a nice Boolean callback to let you know whether the push
-	     was successful
-	  */
-	/*
-	public function pushMediaRow(row:MediaRow, done:Bool->Void):Void {
-		var p = putMediaRow( row );
-		p.then(function(nrow : MediaRow) {
-			done( true );
-		});
-		p.unless(function(error) {
-			console.error( error );
-			done( false );
-		});
-	}
-	*/
-
-	/**
-	  * a super-simplified pull/modify/push operation method
-	  */
-	/*
-	public function editMediaRow(track:Track, edit:MediaRow->MediaRow, done:MediaRow->Void):Void {
-		var p = cogMediaRow( track );
-		p.unless( rat ).then(function(row : MediaRow) {
-			row = edit( row );
-			p = putMediaRow( row );
-			p.unless( rat ).then( done );
-		});
-	}
-	*/
-
-	/**
 	  * wait for [this] to be ready, and invoke [action]
 	  */
 	public inline function onready(action : Void->Void):Void {
@@ -243,11 +107,9 @@ class PManDatabase {
             unique: true
 	    });
 	    i('views', 'views');
-	    i('rating', 'rating');
-	    i('favorite', 'favorite');
-	    i('time', 'time');
-	    i('tags', 'tags');
-	    i('actors', 'actors');
+	    i('starred', 'starred');
+	    i('duration', 'duration');
+	    i('meta', 'meta');
 	}
 
     /**
