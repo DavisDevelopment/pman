@@ -3,6 +3,7 @@ package pman.db;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.ds.promises.*;
+import tannus.nore.ORegEx;
 
 import ida.*;
 
@@ -25,6 +26,7 @@ class TableWrapper {
     /* Constructor Function */
     public function new(db_root:PManDatabase):Void {
         dbr = db_root;
+        ops = new Ops();
     }
 
 /* === Instance Methods === */
@@ -55,6 +57,24 @@ class TableWrapper {
     public function tables(names:Array<String>, ?mode:String):Array<ObjectStore> {
         var t = db.transaction(names, mode);
         return names.map.fn(t.objectStore(_));
+    }
+
+    /**
+      * PUT
+      */
+    public function put<T>(tableName:String, row:T):Promise<T> {
+        return Promise.create({
+            var store = tos(tableName, 'readwrite');
+            var idp = store.put( row ).transform.fn(cast(_, Int));
+            idp.then(function(row_id : Int) {
+                @forward store.get( row_id ).transform.fn(cast _);
+            });
+            idp.unless(function(error : Null<Dynamic>) {
+                if (error != null) {
+                    throw error;
+                }
+            });
+        });
     }
 
     /**
@@ -89,6 +109,125 @@ class TableWrapper {
         }).array();
     }
 
+    /**
+      * perform filter operation, but return the first match
+      */
+    public function find<T>(tableName:String, test:T->Bool):Promise<T> {
+        return Promise.create({
+            var result:Null<T> = null;
+            var transaction = db.transaction(tableName, 'readonly');
+            transaction.complete.once(function() {
+                return result;
+            });
+            var o = transaction.objectStore( tableName );
+            var cw = o.openCursor(function(c, w) {
+                if (c.entry != null && result == null && test(untyped c.entry)) {
+                    result = untyped c.entry;
+                    w.abort();
+                }
+                c.next();
+            });
+        });
+    }
+
+    /**
+      * SELECT WHERE query
+      */
+    public function selectAll<T>(tableName:String, query:Dynamic):ArrayPromise<T> {
+        var selecter = _selecter( query );
+        return cast filter(tableName, selecter);
+    }
+
+    public function select<T>(tableName:String, query:Dynamic):Promise<Null<T>> {
+        return cast find(tableName, _selecter( query ));
+    }
+
+    private function _selecter(query : Dynamic):Object->Bool {
+        return (Std.is(query, String) ? _selecterFromORegex(cast query) : _selecterFromObject(new Object( query )));
+    }
+
+    /**
+      * build selecter lambda from ORegEx string
+      */
+    private function _selecterFromORegex(oreg : String):Object->Bool {
+        var cf = ORegEx.compile(oreg);
+        return (function(row : Object) {
+            return cf( row );
+        });
+    }
+
+    /**
+      * build filter function for SELECT query
+      */
+    private function _selecterFromObject(query : Object):Object->Bool {
+        var tests:Array<Object->Bool> = new Array();
+        for (key in query.keys) {
+            var test = _selectTest(key, query[key]);
+            tests.push( test );
+        }
+
+        if (tests.length > 0) {
+            // currently only supports AND chaining
+            return (function(row : Object):Bool {
+                var res:Bool = false;
+                for (test in tests) {
+                    if (!test( row )) {
+                        return false;
+                    }
+                }
+                return true;
+            });
+        }
+        else {
+            return (function(row) return false);
+        }
+    }
+
+    /**
+      * build 'tester' function
+      */
+    private function _selectTest(key:String, value:Dynamic):Object->Bool {
+        // manual lambda test
+        if (Reflect.isFunction( value )) {
+            return (function(row : Object):Bool {
+                return value(row.get( key ));
+            });
+        }
+        else if ((value is QueryOperator)) {
+            var op:QueryOperator = cast value;
+            switch ( op ) {
+                case OpEquals( value ):
+                    return (function(row : Object) {
+                        return (row.get(key) == value);
+                    });
+
+                case OpNEquals( value ):
+                    return (function(row : Object) {
+                        return (row.get(key) != value);
+                    });
+
+                case OpContains( value ):
+                    return (function(row : Object) {
+                        var col:Dynamic = row.get( key );
+                        if ((col is Array<Dynamic>)) {
+                            return cast(col, Array<Dynamic>).has( value );
+                        }
+                        else if ((col is String)) {
+                            return cast(col, String).has(Std.string( value ));
+                        }
+                        else {
+                            throw 'TypeError: Invalid "contains" operation';
+                        }
+                    });
+            }
+        }
+        else {
+            return (function(row : Object) {
+                return (row[key] == value);
+            });
+        }
+    }
+
 /* === Computed Instance Fields === */
 
     public var db(get, never):Database;
@@ -100,6 +239,23 @@ class TableWrapper {
 /* === Instance Fields === */
 
     public var dbr : PManDatabase;
+    public var ops : Ops;
 }
 
 typedef TransactionKey = EitherType<String, Array<String>>;
+
+class Ops {
+    public function new():Void {
+
+    }
+
+    public function equals<T>(value : T):QueryOperator return OpEquals( value );
+    public function nequals<T>(value : T):QueryOperator return OpNEquals( value );
+    public function contains<T>(value : T):QueryOperator return OpContains( value );
+}
+
+enum QueryOperator {
+    OpEquals<T>(value : T);
+    OpNEquals<T>(value : T);
+    OpContains<T>(value : T);
+}
