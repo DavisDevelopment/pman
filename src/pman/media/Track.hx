@@ -9,7 +9,10 @@ import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.db.*;
+import pman.db.MediaStore;
 import pman.media.MediaType;
+import pman.async.Mp4InfoLoader;
+import pman.media.MediaInfo;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -158,10 +161,30 @@ class Track {
     /**
       * obtain a reference to the MediaInfo object associated with [this] Track in the database
       */
-    public function getDbMediaInfo(db:PManDatabase, callback:MediaInfo->Void):Void {
+    public function getDbMediaInfo(db:PManDatabase, callback:DbMediaInfo->Void):Void {
         getDbMediaItem(db, function(item) {
             item.getInfo( callback );
         });
+    }
+
+    public function getMediaMetadata():Void {
+        var p = source.getMediaMetadata();
+        p.then(function( meta ) {
+            trace( meta );
+        });
+        p.unless(function( error ) {
+            throw error;
+        });
+    }
+
+    /**
+      * get the Path to [this]
+      */
+    private function getFsPath():Null<Path> {
+        return switch ( source ) {
+            case MediaSource.MSLocalPath(path): path;
+            default: null;
+        };
     }
 
 /* === Computed Instance Fields === */
