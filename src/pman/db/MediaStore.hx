@@ -65,10 +65,16 @@ class MediaStore extends TableWrapper {
         return prom;
     }
 
+    public function getMediaItemRowByUri(uri : String):Promise<Null<MediaItemRow>> {
+        return cast select('media_items', {
+            uri: uri
+        });
+    }
+
     /**
       * obtain a media_item row by its URI when the primary key is not known
       */
-    public function getMediaItemRowByUri(uri : String):Promise<Null<MediaItemRow>> {
+    public function getMediaItemRowByUri_(uri : String):Promise<Null<MediaItemRow>> {
         return Promise.create({
             var row:Null<MediaItemRow> = null;
             var store = tos( 'media_items' );
@@ -113,37 +119,15 @@ class MediaStore extends TableWrapper {
     /**
       * push updated [row] object onto the table
       */
-    public function putMediaItemRow(row : MediaItemRow):Promise<Null<MediaItemRow>> {
-        return Promise.create({
-            var store = tos('media_items', 'readwrite');
-            var idp = store.put( row ).transform.fn(cast(_, Int));
-            idp.then(function(row_id : Int) {
-                @forward store.get( row_id ).transform.fn(cast _);
-            });
-            idp.unless(function(error : Null<Dynamic>) {
-                if (error != null) {
-                    throw error;
-                }
-            });
-        });
+    public inline function putMediaItemRow(row : MediaItemRow):Promise<Null<MediaItemRow>> {
+        return put('media_items', row);
     }
 
     /**
       * put a media_info row onto the table
       */
     public function putMediaInfoRow(row : MediaInfoRow):Promise<MediaInfoRow> {
-        return Promise.create({
-            var store = tos('media_info', 'readwrite');
-            var idp = store.put( row ).transform.fn(cast(_, Int));
-            idp.then(function(row_id : Int) {
-                @forward store.get( row_id ).transform.fn(cast _);
-            });
-            idp.unless(function(error : Null<Dynamic>) {
-                if (error != null) {
-                    throw error;
-                }
-            });
-        });
+        return put('media_info', row);
     }
     public function putMediaInfoRow_(row:MediaInfoRow, done:Null<Dynamic>->Void):Void {
         var prom = putMediaInfoRow( row );
@@ -174,16 +158,11 @@ class MediaStore extends TableWrapper {
             
             var mip = putMediaItemRow( media_item );
             mip.then(function( row ) {
-                trace('this is the row: $row');
-                // build the default info row
                 var media_info:MediaInfoRow = {
                     id: row.id,
                     views: 0,
-                    tags: [],
-                    actors: [],
-                    rating: {status: null, score: null},
-                    favorite: false,
-                    time: {start:null, end:null, last:null}
+                    starred: false,
+                    duration: null
                 };
 
                 // pop that shit into the database
@@ -245,11 +224,13 @@ typedef MediaItemRow = {
 typedef MediaInfoRow = {
     id : Int,
     views : Int,
-    tags : Array<Int>,
-    actors : Array<Int>,
-    rating : MediaInfoRating,
-    favorite : Bool,
-    time : MediaInfoTime
+    starred : Bool,
+    meta : Null<MediaInfoRowMeta>
+};
+
+typedef MediaInfoRowMeta = {
+    duration : Float,
+    video : Null<{width:Int, height:Int}>
 };
 
 typedef MediaInfoRating = {
