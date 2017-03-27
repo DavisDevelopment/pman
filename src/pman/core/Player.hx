@@ -658,12 +658,7 @@ class Player extends EventDispatcher {
 			mip.then(function( item ) {
 			    // save the current time
 			    item.getInfo(function( info ) {
-			        if ( !atend ) {
-                        info.time.last = nums[0];
-                    }
-                    else {
-                        info.time.last = null;
-                    }
+
 			        info.push();
 			    });
 			});
