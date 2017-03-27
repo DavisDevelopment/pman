@@ -15,6 +15,9 @@ import pman.core.PlayerMediaContext;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ds.*;
+import pman.media.MediaType;
+import pman.media.MediaSource;
+import pman.async.*;
 
 import js.html.MediaElement as NativeMediaObject;
 
@@ -97,6 +100,28 @@ class MediaTools {
         }
 	}
 
+    /**
+      * convert the given URI to a MediaSource
+      */
+	public static function uriToMediaSource(uri : String):MediaSource {
+        if (uri.startsWith('/')) {
+	        return MSLocalPath(new Path( uri ));
+	    }
+        else {
+            var protocol:String = uri.before(':');
+            switch ( protocol ) {
+                case 'file':
+                    return MSLocalPath(new Path(stripSlashSlash(uri.after(':'))));
+
+                case 'http', 'https':
+                    return MSUrl( uri );
+
+                default:
+                    return MSLocalPath(new Path( uri ));
+            }
+        }
+	}
+
 	/**
 	  * parse the given URI to a MediaProvider
 	  */
@@ -126,10 +151,46 @@ class MediaTools {
 	    return new Track(uriToMediaProvider( uri ));
 	}
 
+	/**
+	  * load the MediaMetadata attached to the given MediaSource
+	  */
+	public static function getMediaMetadata(src:MediaSource):Promise<MediaMetadata> {
+	    return Promise.create({
+	        switch ( src ) {
+                case MSLocalPath( path ):
+                    var lc = metadataLoaderClass( path );
+                    if (lc == null) {
+                        throw 'Error: No metadata loader for "${path.extension}" files';
+                    }
+                    else {
+                        var loader:MediaMetadataLoader = Type.createInstance(lc, [path]);
+                        @forward loader.getMetadata();
+                    }
+
+                default:
+                    throw 'Error: Media metadata can only be loaded for media items located on the local filesystem';
+	        }
+	    });
+	}
+
+    /**
+      * get the metadata loader class associated with the mime type of the given path
+      */
+	private static function metadataLoaderClass(path : Path):Null<Class<MediaMetadataLoader>> {
+	    switch (path.extension.toLowerCase()) {
+            case 'mp3':
+                return MP3MetadataLoader;
+            case 'mp4':
+                return MP4MetadataLoader;
+            default:
+                return null;
+	    }
+	}
+
     /**
       * trim leading '//' from String
       */
-	private static function stripSlashSlash(s : String):String {
+	public static function stripSlashSlash(s : String):String {
 	    if (s.startsWith('//')) {
 	        s = s.slice( 2 );
 	    }
