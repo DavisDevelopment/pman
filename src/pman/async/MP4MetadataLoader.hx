@@ -43,9 +43,11 @@ class MP4MetadataLoader extends MediaMetadataLoader {
                         height: vt.video.height
                     };
                 }
-                if (vt.audio != null) {
-                    meta.audio = {};
-                }
+            }
+
+            var at = info.audioTracks[0];
+            if (at != null && at.audio != null) {
+                meta.audio = {};
             }
 
             done();
