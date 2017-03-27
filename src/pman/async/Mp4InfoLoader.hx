@@ -17,6 +17,7 @@ import gryffin.Tools.now;
 import pman.core.*;
 import pman.media.*;
 import pman.tools.mp4box.MP4Box;
+import pman.tools.mp4box.MP4Metadata;
 
 import js.Browser.window;
 import electron.Tools.defer;
@@ -41,7 +42,7 @@ class Mp4InfoLoader {
     /**
       * initiate loading of the metadata on [path]
       */
-    public function loadSync(path : Path):MP4Info {
+    public function loadSync(path : Path):MP4Metadata {
         var bytes:ByteArray = Fs.read( path );
         var buffer:Buffer = bytes.getData();
         sfs(buffer, 0);
@@ -54,7 +55,7 @@ class Mp4InfoLoader {
     /**
       * initiate loading of the metadata
       */
-    public function load(path : Path):Promise<MP4Info> {
+    public function load(path : Path):Promise<MP4Metadata> {
         return Promise.create({
             var infoParsed:Bool = false;
 
@@ -72,24 +73,30 @@ class Mp4InfoLoader {
             // chunk size (1MB)
             var chunkSize:Int = (1 * 1024 * 1024);
 
+            // handle chunked-read errors
+            function readReject(error : Dynamic):Void {
+                throw error;
+            }
             // prepare chunked read
             function readStep(data : Buffer):Bool {
                 sfs(data, fileStart);
                 fileStart = box.appendBuffer( data );
                 @ignore return !infoParsed;
             }
+            // when read is complete
             function readComplete():Void {
                 trace('chunked read has stopped');
             }
 
-            chunkedRead(path, chunkSize, readStep, readComplete);
+            // initiate chunked-read
+            chunkedRead(path, chunkSize, readStep, readComplete, readReject);
         });
     }
 
     /**
       * chunked file-read
       */
-    private function chunkedRead(path:Path, chunkSize:Int, step:Buffer->Bool, complete:Void->Void):Void {
+    private function chunkedRead(path:Path, chunkSize:Int, step:Buffer->Bool, complete:Void->Void, reject:Dynamic->Void):Void {
         Nfs.open(path.toString(), 'r', function(err, fid:Int) {
             if (err != null) {
                 throw err;
@@ -99,13 +106,15 @@ class Mp4InfoLoader {
                 var buf:Buffer = new Buffer( chunkSize );
                 Nfs.read(fid, buf, 0, chunkSize, null, function(err, nread, b) {
                     if (err != null) {
-                        throw err;
+                        reject( err );
+                        return ;
                     }
 
                     if (nread == 0) {
                         Nfs.close(fid, function(err) {
                             if (err != null) {
-                                throw err;
+                                reject( err );
+                                return ;
                             }
                             complete();
                         });
@@ -126,7 +135,8 @@ class Mp4InfoLoader {
                     else {
                         Nfs.close(fid, function(err) {
                             if (err != null) {
-                                throw err;
+                                reject( err );
+                                return ;
                             }
                             complete();
                         });
