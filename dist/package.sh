@@ -1,5 +1,5 @@
 
-coffee -c pack.coffee;
+coffee -c -o buildscripts/ buildscripts/src/
 
-node pack.js $@;
+node buildscripts/pack.js $@;
 
