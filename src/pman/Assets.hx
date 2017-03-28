@@ -22,6 +22,9 @@ class Assets {
 	public static inline function getIconPath(id : String):Path {
 		return getAssetsPath().plusString( 'icons/$id' );
 	}
+	public static inline function getIconUri(id : String):String {
+	    return ('file://' + getIconPath( id ).toString());
+	}
 
 	public static function loadIcon(id : String):Image {
 		return Image.load('file://${getIconPath( id )}');
