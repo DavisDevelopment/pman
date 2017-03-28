@@ -27,6 +27,8 @@ import pman.core.PlayerStatus;
 import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
+import pman.media.info.*;
+import pman.media.info.Mark;
 import pman.ui.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
@@ -442,6 +444,32 @@ class Player extends EventDispatcher {
                 return null;
             }
         }
+	}
+
+	/**
+	  * add a bookmark to the current time
+	  */
+	public function addBookmark(?done:Void->Void):Void {
+        var wasPlaying = getStatus().equals( Playing );
+	    pause();
+	    function complete() {
+	        if ( wasPlaying ) {
+	            play();
+	        }
+	        if (done != null) {
+	            done();
+	        }
+	    }
+
+        if (track != null) {
+            prompt('bookmark name', null, function(name : String) {
+                var mark = new Mark(Named( name ), currentTime);
+                track.addMark(mark, function() {
+                    complete();
+                });
+            });
+        }
+        else complete();
 	}
 
 	/**
