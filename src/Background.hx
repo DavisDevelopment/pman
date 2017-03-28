@@ -40,33 +40,35 @@ class Background {
 	public function start():Void {
 		App.onReady( _ready );
 		App.onAllClosed( _onAllClosed );
+
+		_listen();
 	}
 
 	/**
 	  * open a new Player window
 	  */
 	public function openPlayerWindow(?cb : BrowserWindow -> Void):Void {
+	    // create new hidden BrowserWindow
 		var win:BrowserWindow = new BrowserWindow({
 			show: false,
 			icon: ap('assets/icon64.png').toString(),
 			width: 640,
 			height: 480
 		});
+		// load the html file onto that BrowserWindow
 		var dir:Path = ap( 'pages/index.html' );
 		win.loadURL( 'file://$dir' );
+		// wait for the window to be ready
 		win.once('ready-to-show', function() {
 			win.show();
 			win.maximize();
-			//win.webContents.openDevTools();
 			win.focus();
 			playerWindows.push( win );
 			defer(function() {
                 if (cb != null) {
                     cb( win );
                 }
-                #if debug
                 win.webContents.openDevTools();
-                #end
             });
 		});
 	}
