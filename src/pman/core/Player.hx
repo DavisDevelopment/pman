@@ -742,6 +742,16 @@ class Player extends EventDispatcher {
 		}
 		else {
             var track:Track = delta.previous;
+            var isended:Bool = ended;
+            var time:Float = currentTime;
+            track.editData(function( data ) {
+                if ( isended ) {
+                    data.marks = data.marks.filter.fn(!_.type.equals( LastTime ));
+                }
+                else if (time > 0.0) {
+                    data.addMark(new Mark(LastTime, time));
+                }
+            });
 		}
 	}
 
