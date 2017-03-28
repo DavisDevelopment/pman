@@ -612,7 +612,10 @@ class Player extends EventDispatcher {
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
-
+			newTrack.editData(function( data ) {
+			    // increment the 'views'
+			    data.views++;
+			});
 		}
 
 		// automatically save the playback settings
@@ -628,7 +631,6 @@ class Player extends EventDispatcher {
 		}
 		else {
             var track:Track = delta.previous;
-			var ms = app.db.mediaStore;
 		}
 	}
 
