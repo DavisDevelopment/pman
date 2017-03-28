@@ -156,13 +156,14 @@ class MediaStore extends TableWrapper {
         return Promise.create({
             var media_item:MediaItemRow = {uri: uri};
             
+            //TODO load new metadata by default
             var mip = putMediaItemRow( media_item );
             mip.then(function( row ) {
                 var media_info:MediaInfoRow = {
                     id: row.id,
                     views: 0,
                     starred: false,
-                    duration: null
+                    meta: null
                 };
 
                 // pop that shit into the database
@@ -230,7 +231,8 @@ typedef MediaInfoRow = {
 
 typedef MediaInfoRowMeta = {
     duration : Float,
-    video : Null<{width:Int, height:Int}>
+    video : Null<{width:Int, height:Int}>,
+    audio: Null<{}>
 };
 
 typedef MediaInfoRating = {
