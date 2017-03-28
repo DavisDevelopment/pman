@@ -101,6 +101,13 @@ class BPlayerMain extends Application {
 		App.quit();
 	}
 
+    /**
+      * send command to the main process, telling it to update the application menu
+      */
+	public inline function updateMenu():Void {
+	    ic.send('UpdateMenu');
+	}
+
 	/**
 	  * display an error message
 	  */
