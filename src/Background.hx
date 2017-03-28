@@ -3,6 +3,7 @@ package ;
 import tannus.ds.*;
 import tannus.ds.tuples.*;
 import tannus.sys.Path;
+import tannus.node.Fs as NodeFs;
 
 import electron.main.*;
 import electron.main.Menu;
@@ -177,9 +178,23 @@ class Background {
 	/**
 	  * Update the application menu
 	  */
-	public function updateMenu():Void {
 	public inline function updateMenu():Void {
 	    Menu.setApplicationMenu(buildMenu());
+	}
+
+	/**
+	  * bind event handlers
+	  */
+	private function _listen():Void {
+	    _watchFiles();
+	}
+
+	/**
+	  * watch some files for stuff
+	  */
+	private function _watchFiles():Void {
+	    var sessionsPath = appDir.sessionsPath();
+	    var plw = NodeFs.watch(sessionsPath.toString(), _playlistFolderChanged);
 	}
 
 /* === Event Handlers === */
@@ -202,6 +217,13 @@ class Background {
 	  */
 	private function _onAllClosed():Void {
 	    App.quit();
+	}
+
+	/**
+	  * when the playlist folder changes
+	  */
+	private function _playlistFolderChanged(eventName:String, filename:String):Void {
+	    updateMenu();
 	}
 
 /* === Utility Methods === */
