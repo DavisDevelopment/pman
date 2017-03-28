@@ -31,11 +31,12 @@ class PlayerControlButton extends Ent {
 		controls = c;
 		btnFloat = Left;
 		tb = new TextBox();
+		tb.color = (player.theme.secondary.darken( 35 ));
 		tb.fontFamily = 'Ubuntu';
-		tb.fontSize = 10;
+		tb.fontSize = 11;
 		tb.fontSizeUnit = 'px';
+		tb.bold = true;
 		//tb.color = new Color(255, 255, 255);
-		tb.color = player.theme.secondary;
 		//tb.backgroundColor = new Color(255, 0, 0);
 		//tb.padding = 1;
 		label = null;
@@ -58,6 +59,9 @@ class PlayerControlButton extends Ent {
 		else {
 			show();
 		}
+
+	    var mp = stage.getMousePosition();
+	    hovered = (mp != null && containsPoint( mp ));
 	}
 
 	/**
@@ -75,7 +79,7 @@ class PlayerControlButton extends Ent {
 	  * update [this] object's geometry
 	  */
 	override function calculateGeometry(r : Rectangle):Void {
-		h = 30;
+		h = 35;
 		w = h;
 	}
 
@@ -88,7 +92,7 @@ class PlayerControlButton extends Ent {
 		}
 
 		var lx:Float = (x + w - (tb.width * 0.60));
-		var ly:Float = ((y + h) - (tb.height * 0.60));
+		var ly:Float = ((y + h) - tb.height);
 		//var badgeRect:Rectangle = new Rectangle(lx, ly, tb.width, tb.height);
 
 		//c.beginPath();
@@ -135,6 +139,7 @@ class PlayerControlButton extends Ent {
 	public var btnFloat : BtnFloat;
 	public var label : Null<String>;
 	public var enabled : Bool;
+	public var hovered : Bool = false;
 
 	private var tb : TextBox;
 }
