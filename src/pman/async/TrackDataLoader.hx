@@ -141,7 +141,12 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
             });
         });
         itemRowp.unless(function( error ) {
-            throw error;
+            if (error.name == 'ConstraintError') {
+                defer(function() {
+                    attempt_load( next );
+                });
+            }
+            else throw error;
         });
     }
 
@@ -161,7 +166,7 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
     /**
       * load the MediaMetadata for the given Track
       */
-    private function loadMediaMetadata(callback : MediaMetadata->Void):Void {
+    private function loadMediaMetadata(callback : Null<MediaMetadata>->Void):Void {
         var metap = track.uri.uriToMediaSource().getMediaMetadata();
         metap.then(function( meta ) {
             callback( meta );
