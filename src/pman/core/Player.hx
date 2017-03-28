@@ -218,29 +218,31 @@ class Player extends EventDispatcher {
 	  */
 	public function savePlaylist(?done : Void->Void):Void {
 	    Dialog.showSaveDialog({
-            title: 'Export a Muthafuckin\' Playlist',
+            title: 'Export Playlist',
             buttonLabel: 'Save',
-            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.m3u' )),
+            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.xpsf' )),
             filters: [FileFilter.PLAYLIST]
 	    }, function( spath ) {
+	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
 	        var path:Path = new Path( spath );
-	        if (path.extension == '') {
-	            path.extension = 'm3u';
+	        if (!supportedFormats.has(path.extension.toLowerCase())) {
+	            path.extension = 'xpsf';
 	        }
-            else if (path.extension != 'm3u') {
-                throw 'not implemented';
+            var file = new File( path );
+            switch (path.extension.toLowerCase()) {
+                case 'm3u':
+                    var data = pman.format.m3u.Writer.run( session.playlist );
+                    file.write( data );
+
+                case 'xspf':
+                    var data = pman.format.xspf.Writer.run( session.playlist );
+                    file.write( data );
+
+                default:
+                    return ;
             }
-            else {
-                var file = new File( path );
-                var encoder = new pman.format.m3u.Writer();
-                file.write(encoder.encode( session.playlist ));
-                message({
-                    text: 'Playlist exported',
-                    fontSize: '10pt'
-                });
-                if (done != null) {
-                    defer(done);
-                }
+            if (done != null) {
+                done();
             }
 	    });
 	}
