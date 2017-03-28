@@ -73,10 +73,10 @@ class SearchEngine<T> {
 	private function _match(item : T):Null<Match<T>> {
 		var text = getValue( item );
 		if ( !caseSensitive ) text = text.toLowerCase();
-		trace('indexing $text');
 		var score:Int = 0;
 		var minScore = 2;
 		for (term in terms) {
+		    /*
 			var fion = fio(text, term);
 			if (fion > 0) {
 				if (term.length >= minScore && fion < minScore) {
@@ -86,8 +86,11 @@ class SearchEngine<T> {
 					score += fion;
 				}
 			}
+			*/
+		    var fion = fio(text, term);
+		    score += fion;
 		}
-		if (score > 0) {
+		if (score > minScore) {
 			return {
 				item: item,
 				score: score
@@ -202,9 +205,3 @@ class SearchEngine<T> {
 
 	private static inline var ACCEPTIBLE_SYMBOLS:String = '#,./-';
 }
-
-typedef Match<T> = {
-	item : T,
-	score : Int
-	//positions : Array<Int>
-};
