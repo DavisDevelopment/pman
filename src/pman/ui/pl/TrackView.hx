@@ -4,6 +4,8 @@ import tannus.io.*;
 import tannus.html.Element;
 import tannus.geom.*;
 import tannus.events.*;
+import tannus.sys.*;
+import tannus.media.Duration;
 
 import crayon.*;
 import foundation.*;
@@ -24,11 +26,12 @@ using StringTools;
 using Lambda;
 using Slambda;
 using tannus.math.TMath;
+using pman.Tools;
 
-class TrackView extends Pane {
+class TrackView extends FlexRow {
 	/* Constructor Function */
 	public function new(v:PlaylistView, t:Track):Void {
-		super();
+		super([9, 3]);
 
 		addClass( 'track' );
 
@@ -44,10 +47,11 @@ class TrackView extends Pane {
 	  * Build [this] 
 	  */
 	override function populate():Void {
-		title = new Pane();
+		title = pane( 0 );
 		title.addClass( 'title' );
-		title.text = track.title;
-		append( title );
+
+		size = pane( 1 );
+		size.addClass( 'size' );
 
 		if ( !eventInitted ) {
 		    __events();
@@ -61,6 +65,50 @@ class TrackView extends Pane {
 		data['view'] = this;
 
 		needsRebuild = false;
+
+	    update();
+	}
+
+	/**
+	  * update [this]'s content
+	  */
+	public function update():Void {
+        var td = track.data;
+	    // Track Title
+		title.text = track.title;
+		if (td != null) {
+		    if ( td.starred ) {
+		        title.el.prepend('<span class="starred">*</span>');
+		    }
+            else {
+                title.el.remove('span.starred');
+            }
+		}
+
+        // Track Size
+		if (td != null && td.meta != null) {
+		    var tdm = td.meta;
+		    var dur = Duration.fromFloat( tdm.duration );
+		    size.text = dur.toString();
+
+            if (tdm.video != null) {
+                var res = (tdm.video.height + 'p');
+                size.el.prepend('<span class="resolution"><sup>($res)</sup></span>');
+            }
+            else {
+                size.el.remove('span.resolution');
+            }
+		}
+        else {
+            var trackPath = track.getFsPath();
+            if (trackPath == null) {
+                size.text = '';
+            }
+            else {
+                var stats = FileSystem.stat( trackPath );
+                size.text = stats.size.formatSize();
+            }
+        }
 	}
 
 	/**
@@ -95,42 +143,8 @@ class TrackView extends Pane {
 	private function onRightClick(event : MouseEvent):Void {
 		event.cancel();
 
-		var ctxMenu:Menu = Menu.buildFromTemplate([
-			{
-				label: 'Play',
-				click: function(x,y,z) {
-					player.openTrack( track );
-				}
-			},
-			{
-				label: 'Play Next',
-				click: function(x,y,z) {
-                    playlist.move(track, fn(session.indexOfCurrentMedia() + 1));
-					//playlist.moveToAfter(track, session.focusedTrack);
-				}
-			},
-			{
-				label: 'Remove from Playlist',
-				click: function(x, y, z) {
-					playlist.remove( track );
-				}
-			},
-			{type: 'separator'},
-			{
-				label: 'Clear Playlist',
-				click: function(x, y, z) {
-					player.clearPlaylist();
-				}
-			},
-			{
-				label: 'Save Playlist'
-			},
-			{
-				label: 'Export Playlist'
-			}
-		]);
-		menuOpen = true;
-		ctxMenu.popup();
+		var menu:Menu = track.buildMenu();
+		menu.popup();
 	}
 
     /**
@@ -205,6 +219,7 @@ class TrackView extends Pane {
 	public var track : Track;
 
 	public var title : Pane;
+	public var size : Pane;
 
 	private var menuOpen : Bool = false;
 	private var eventInitted : Bool = false;
