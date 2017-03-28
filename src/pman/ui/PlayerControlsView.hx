@@ -31,7 +31,7 @@ class PlayerControlsView extends Ent {
 		playerView = p;
 
 		uiEnabled = true;
-		uiHideDelay = 3000;
+		uiHideDelay = 3500;
 		cidm = new Map();
 		buttons = new Array();
 		seekBar = new SeekBar( this );
@@ -95,14 +95,42 @@ class PlayerControlsView extends Ent {
 
 		var mp = stage.getMousePosition();
 		hovered = (mp != null && containsPoint( mp ));
-		var events = ['mousemove', 'click', 'keydown'];
+		var events = ['mousemove', 'click'];
 		var times = events.map( stage.mostRecentOccurrenceTime  ).filter.fn(_ != null).map.fn(now - _);
-		/*
 		if (!times.empty()) {
 			var last = times.min.fn( _ );
 			uiEnabled = (hovered || last <= uiHideDelay);
 		}
-		*/
+
+        if ( uiEnabled ) {
+            if ( hovered ) {
+                var ihovered:Bool = false;
+                if ( seekBar.hovered ) {
+                    ihovered = true;
+                }
+                else {
+                    for (b in buttons) {
+                        if ( b.hovered ) {
+                            ihovered = true;
+                            break;
+                        }
+                    }
+                }
+
+                if ( ihovered ) {
+                    stage.cursor = 'pointer';
+                }
+                else {
+                    stage.cursor = 'default';
+                }
+            }
+            else {
+                stage.cursor = 'default';
+            }
+        }
+        else {
+            stage.cursor = 'none';
+        }
 	}
 
 	/**
@@ -111,7 +139,7 @@ class PlayerControlsView extends Ent {
 	override function calculateGeometry(r : Rectangle):Void {
 		r = playerView.rect;
 		w = r.w;
-		h = 50;
+		h = 55;
 		y = r.h;
 		x = 0;
 
@@ -147,7 +175,7 @@ class PlayerControlsView extends Ent {
 
 		var padding:Float = 5.0;
 		// base distance from bottom
-		var bdfb:Float = 26;
+		var bdfb:Float = 30;
 
 		// position the left-floating buttons
 		var c:Point = new Point((x + padding), ((y + h) - bdfb - padding));
