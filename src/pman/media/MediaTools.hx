@@ -162,13 +162,14 @@ class MediaTools {
 	/**
 	  * load the MediaMetadata attached to the given MediaSource
 	  */
-	public static function getMediaMetadata(src:MediaSource):Promise<MediaMetadata> {
+	public static function getMediaMetadata(src:MediaSource):Promise<Null<MediaMetadata>> {
 	    return Promise.create({
 	        switch ( src ) {
                 case MSLocalPath( path ):
                     var lc = metadataLoaderClass( path );
                     if (lc == null) {
-                        throw 'Error: No metadata loader for "${path.extension}" files';
+                        //throw 'Error: No metadata loader for "${path.extension}" files';
+                        return null;
                     }
                     else {
                         var loader:MediaMetadataLoader = Type.createInstance(lc, [path]);
