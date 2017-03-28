@@ -129,6 +129,7 @@ class KeyboardCommands {
 			case LetterM:
 				if ( event.ctrlKey ) {
 					//TODO mark current location in the current media
+					p.addBookmark();
 				}
 				else {
 					p.muted = !p.muted;
