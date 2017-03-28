@@ -18,6 +18,7 @@
 -D gryffin
 -D ida
 -D vex
+-D foundation
 
 --each
 
