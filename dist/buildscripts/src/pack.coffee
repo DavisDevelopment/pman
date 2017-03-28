@@ -7,16 +7,23 @@ _ = require 'underscore'
 
 tools = require './tools'
 standalone = require './standalone'
-{Build} = require './standalone'
+{PackBuild} = require './standalone'
 
 module.exports = pack = ( argv ) ->
-    standalone_builds = [new Build('linux', 'x64'), new Build('win32', 'ia32'), new Build('win32', 'x64')]
+    builds = []
+    
+    builds.push new PackBuild('linux', 'x64')
+    builds.push new PackBuild('win32', 'ia32')
+    builds.push new PackBuild('win32', 'x64')
 
-    Build.buildAll standalone_builds, (error) ->
-        if error?
-            console.error( error )
+    task = (b, f) -> b.execute(f)
+    tasks = (_.partial(task, b) for b in builds)
+
+    async.series tasks, (err, result) ->
+        if err?
+            console.error err
         else
-            console.log " -- Done Building Standalones -- "
+            console.log " -- Done -- "
 
 do ->
     argv = process.argv[2..]

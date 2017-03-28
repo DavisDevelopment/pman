@@ -4,6 +4,8 @@ path = require 'path'
 
 async = require 'async'
 _ = require 'underscore'
+tools = require './tools'
+prompt = require 'prompt'
 
 packager = require 'electron-packager'
 
@@ -30,17 +32,17 @@ options = exports['options'] = do ->
     (o...) -> _.extend(_.clone(defaltOptions), o...)
 
 # Build class
-Build = exports['Build'] = class
+PackBuild = exports['PackBuild'] = class extends tools.Build
     constructor: (platform, arch='all', rest...) ->
+        super()
         @options = options({
             platform: platform
             arch: arch
         }, rest...)
 
-    build: (callback) ->
+    execute: (callback) ->
         packager(@options, callback)
 
-    @buildAll: (builds, callback) ->
-        flist = (b.build.bind( b ) for b in builds)
-        async.series(flist, callback)
+    confirm: (callback) ->
+        tools.promptBool("package for #{@options.platform} #{@options.arch}?", no, callback)
 
