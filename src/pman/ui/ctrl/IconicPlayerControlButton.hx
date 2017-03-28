@@ -49,11 +49,27 @@ class IconicPlayerControlButton<Icon> extends PlayerControlButton {
 		null;
 	}
 
+    /**
+      * update [this]
+      */
+	override function update(stage : Stage):Void {
+	    super.update( stage );
+	}
+
 	/**
 	  * draw [this]
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
-		drawIcon(getIcon(), c);
+	    if (glow && hovered) {
+	        c.save();
+	        c.shadowColor = getGlowColor();
+	        c.shadowBlur = 5;
+	        drawIcon(getIcon(), c);
+	        c.restore();
+	    }
+        else {
+            drawIcon(getIcon(), c);
+        }
 		super.render(stage, c);
 	}
 
@@ -71,7 +87,16 @@ class IconicPlayerControlButton<Icon> extends PlayerControlButton {
 		null;
 	}
 
+	/**
+	  * get the glow color
+	  */
+	public function getGlowColor():String {
+	    return 'white';
+	}
+
 /* === Instance Fields === */
+
+    public var glow : Bool = true;
 
 	private var _il : Array<Icon>;
 	private var iconSize : Int;
