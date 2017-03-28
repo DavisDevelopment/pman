@@ -53,7 +53,8 @@ class PlaylistView extends Pane {
 		player.session.playlist.changeEvent.on( on_playlist_change );
 
 		defer(function() {
-            searchWidget.searchInput.focus();
+            //searchWidget.searchInput.focus();
+            scrollToActive();
 		});
 	}
 
@@ -73,26 +74,34 @@ class PlaylistView extends Pane {
 	override function populate():Void {
 		buildRows();
 		var hed = new Heading(4, 'Playlist');
+		hed.css['color'] = 'white';
+		if (player.session.name != null) {
+		    hed.text = player.session.name;
+		}
 		hedRow.append( hed );
 		buildSearchWidget();
 		buildTrackList();
 
 		forwardEvents(['click', 'mousedown', 'mouseup', 'mousemove', 'mouseleave'], null, MouseEvent.fromJqEvent);
-		function ddi(event){
-			var dil = new Element( 'div.drop-indicator' ).toArray();
-			for (di in dil) {
-				di.parent( 'li' ).remove();
-			}
-		}
-		on('mouseleave', ddi);
-		on('mouseup', ddi);
+
+        /*
+        var resizeOptions = {
+            handles: 'w'
+        };
+		el.plugin('resizable', [resizeOptions]);
+		*/
 	}
 
 	/**
 	  * refresh [this] view
 	  */
 	public function refresh():Void {
+	    // save the current scroll pos
+		//var scrollY:Float = el.scrollTop();
+	    // rebuild track list
 		rebuildTracks();
+		// restore scroll pos
+		//el.scrollTop( scrollY );
 	}
 
 	/**
@@ -126,6 +135,9 @@ class PlaylistView extends Pane {
 			}
 			addTrack( trackView );
 		}
+		defer(function() {
+		    scrollToActive();
+		});
 	}
 
 	/**
@@ -202,6 +214,27 @@ class PlaylistView extends Pane {
 	}
 
 	/**
+	  * scroll to the active track
+	  */
+	public function scrollToActive():Void {
+	    if (player.track == null)
+	        return ;
+	    var active:Null<TrackView> = viewFor( player.track );
+	    if (active == null)
+	        return ;
+
+	    var vr = rect();
+	    vr.y += el.scrollTop();
+	    var ar = active.rect();
+	    var visible:Bool = active.el.plugin('isOnScreen');
+	    if ( !visible ) {
+	        // the center of the viewport
+	        var y:Float = (ar.y - (vr.h / 3));
+	        el.scrollTop( y );
+	    }
+	}
+
+	/**
 	  * create or get a TrackView for the given Track
 	  */
 	private function tview(t : Track):TrackView {
@@ -238,36 +271,9 @@ class PlaylistView extends Pane {
 	  */
 	private function on_playlist_change(change : PlaylistChange):Void {
         refresh();
-		/*
-		switch ( change ) {
-            case PCRemove( track ):
-                detachTrack(tview( track ));
-
-            case PCPop( track ):
-                detachTrack(tview( track ));
-
-            case PCPush( track ):
-                addTrack(tview( track ));
-
-            case PCClear:
-                for (view in tracks) {
-                    detachTrack( view );
-                }
-
-            default:
-                refresh();
-		}
-		*/
 	}
 
-	private function viewFor(track : Track):Null<TrackView> {
-		for (t in tracks) {
-			if (t.track == track) {
-				return t;
-			}
-		}
-		return null;
-	}
+	
 
 	/**
 	  * delete [this]
@@ -295,42 +301,48 @@ class PlaylistView extends Pane {
 	}
 
     /**
-      * check whether any trackviews are being dragged
+      * bind events to the list
       */
-	public function areAnyDragging():Bool {
-	    for (t in tracks) {
-	        if ( t.dragging ) {
-	            return true;
-	        }
-	    }
-	    return false;
-	}
-
-	/**
-	  * set the dragging field on all active trackviews
-	  */
-	public function setAllDragging(v : Bool):Void {
-	    for (t in tracks) {
-	        t.dragging = v;
-	    }
-	}
-
-    /**
-      * stop all trackviews from dragging
-      */
-	public function stopDragging():Void {
-	    setAllDragging( false );
-	    clearDropIndicators();
-	}
-
 	private function bindList():Void {
 	    if (list != null) {
 	        list.forwardEvents(['mousemove', 'mouseleave', 'mouseenter'], null, MouseEvent.fromJqEvent);
 	    }
+
+	    var sortOptions = {
+            update: function(event, ui) {
+                var item:Element = ui.item;
+                var t:TrackView = item.children().data( 'view' );
+                playlist.move(t.track, (function() return getIndexOf( t )));
+            }
+	    };
+	    list.el.plugin('sortable', [sortOptions]);
 	}
 
-	private function clearDropIndicators():Void {
-	    Element.fromString('div.drop-indicator').remove();
+    /**
+      * get the TrackView associated with the given Track
+      */
+    public function viewFor(track : Track):Null<TrackView> {
+		for (t in tracks) {
+			if (t.track == track) {
+				return t;
+			}
+		}
+		return null;
+	}
+
+    /**
+      * get the index of the given TrackView
+      */
+	public function getIndexOf(t : TrackView):Int {
+	    var lis:Element = new Element(list.el.children());
+	    for (index in 0...lis.length) {
+	        var li:Element = new Element(lis.at( index ));
+	        var view:Null<TrackView> = li.children().data('view');
+	        if (view != null && Std.is(view, TrackView) && view == t) {
+	            return index;
+	        } 
+	    }
+	    return -1;
 	}
 
 /* === Computed Instance Fields === */

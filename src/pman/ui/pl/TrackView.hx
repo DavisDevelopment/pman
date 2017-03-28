@@ -57,6 +57,9 @@ class TrackView extends Pane {
 		a['title'] = track.title;
 		a['data-uri'] = track.uri;
 
+		var data = this.el.edata;
+		data['view'] = this;
+
 		needsRebuild = false;
 	}
 
@@ -70,7 +73,7 @@ class TrackView extends Pane {
 
 		el.plugin( 'disableSelection' );
 
-		configureDragAndDropRearrangement();
+		//configureDragAndDropRearrangement();
 
 		eventInitted = true;
 	}
@@ -128,92 +131,6 @@ class TrackView extends Pane {
 		]);
 		menuOpen = true;
 		ctxMenu.popup();
-	}
-
-	/**
-	  * configure the drag-n-drop system
-	  */
-	private function configureDragAndDropRearrangement():Void {
-		var di:Element = '<li><div class="drop-indicator"></div></li>';
-
-		on('mousedown', function(event : MouseEvent) {
-			if ( menuOpen ) {
-				menuOpen = false;
-				return ;
-			}
-			if (event.button != 1) {
-				trace( event.button );
-				return ;
-			}
-
-			var start = event.position;
-			list.once('mousemove', function(event : MouseEvent) {
-				//var dis:Float = Math.abs(event.position.distanceFrom( start ));
-				dragging = true;
-			});
-
-			list.once('mouseup', function(event : MouseEvent) {
-				if (event.button != 1) {
-					return ;
-				}
-
-				if ( dragging ) {
-					var tvOver:Null<TrackView> = list.findTrackViewByPoint( event.position );
-					if (list.tracks[0] != null && tvOver == null) {
-					    tvOver = list.tracks[0];
-					}
-
-					if (tvOver != null) {
-						var t:Track = tvOver.track;
-						var r = tvOver.rect();
-						var hwm = (r.y + (r.h / 2));
-
-						di.remove();
-						dragging = false;
-
-						if (event.position.y > hwm) {
-                            //playlist.move(track, fn(min((playlist.indexOf( t ) + 1), (playlist.length - 1))));
-                            playlist.move(track, function() {
-                                return (playlist.indexOf( t ) + 1).clamp(0, playlist.length);
-                            });
-							//playlist.moveToAfter(track, t);
-						}
-						else {
-                            //playlist.move(track, fn(max(playlist.indexOf( t ) - 1, 0)));
-                            playlist.move(track, function() {
-                                return (playlist.indexOf( t ) - 1).clamp(0, playlist.length);
-                            });
-							//playlist.moveToBefore(track, t);
-						}
-					}
-				}
-			});
-
-			//list.list.once('mouseleave', function(event : MouseEvent) {
-				//dragging = false;
-				//di.remove();
-			//});
-		});
-
-		list.on('click', function(event) {
-			//dragging = false;
-			list.stopDragging();
-		});
-
-		list.on('mousemove', function(event : MouseEvent) {
-			if ( dragging ) {
-				var tvOver:Null<TrackView> = list.findTrackViewByPoint( event.position );
-				if (tvOver != null) {
-					var r = tvOver.rect();
-					var hwm = (r.y + (r.h / 2));
-
-					di.remove();
-					//di = '<li><div class="drop-indicator"></div></li>';
-
-					(event.position.y > hwm ? tvOver.li.after : tvOver.li.before)( di );
-				}
-			}
-		});
 	}
 
     /**
