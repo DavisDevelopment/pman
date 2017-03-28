@@ -119,29 +119,9 @@ class KeyboardCommands {
 				p.saveState();
 
             // snapshot
-			case LetterS if ( event.shiftKey ):
+			//case LetterS if ( event.shiftKey ):
 			    //TODO take a snapshot
-			    p.snapshot();
-
-            /*
-               jump to the end of the current media, skipping to the next one,
-               and resetting the info such that the media will start at the beginning
-               the next time that it's played
-            */
-			case LetterG if ( event.shiftKey ):
-			    if (sess.hasMedia()) {
-			        var ct = sess.focusedTrack;
-			        p.currentTime = p.durationTime;
-			        p.gotoNext({
-                        manipulate: function(mc) {
-                            ct.getDbMediaInfo(p.app.db, function( info ) {
-                                info.time.last = null;
-
-                                info.push(function() null);
-                            });
-                        }
-			        });
-			    }
+				//p.snapshot();
 
 			case LetterL:
 				p.togglePlaylist();

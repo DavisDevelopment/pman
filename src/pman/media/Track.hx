@@ -9,7 +9,9 @@ import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.db.*;
+import pman.db.MediaStore;
 import pman.media.MediaType;
+import pman.async.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -34,6 +36,8 @@ class Track {
 		media = null;
 		driver = null;
 		renderer = null;
+
+		data = null;
 	}
 
 /* === Instance Methods === */
@@ -158,10 +162,47 @@ class Track {
     /**
       * obtain a reference to the MediaInfo object associated with [this] Track in the database
       */
-    public function getDbMediaInfo(db:PManDatabase, callback:MediaInfo->Void):Void {
+    public function getDbMediaInfo(db:PManDatabase, callback:DbMediaInfo->Void):Void {
         getDbMediaItem(db, function(item) {
             item.getInfo( callback );
         });
+    }
+
+    /**
+      * load the TrackData for [this] Track
+      */
+    public function getData(callback : TrackData->Void):Void {
+        if (data == null) {
+            var loader = new TrackDataLoader(this, BPlayerMain.instance.db.mediaStore);
+            var dp = loader.load();
+            dp.then(function( dat ) {
+                this.data = dat;
+                callback( data );
+            });
+        }
+        else {
+            defer(callback.bind( data ));
+        }
+    }
+
+    /**
+      * shorthand method to edit the TrackData for [this] Track
+      */
+    public function editData(action:TrackData->Void, ?complete:Void->Void):Void {
+        getData(function(data : TrackData) {
+            action( data );
+            data.save( complete );
+        });
+    }
+
+    /**
+      * get the Path to [this]
+      */
+    private function getFsPath():Null<Path> {
+        return switch ( source ) {
+            case MediaSource.MSLocalPath(path): path;
+            default: null;
+        };
     }
 
 /* === Computed Instance Fields === */
@@ -188,6 +229,8 @@ class Track {
 	public var media(default, null): Null<Media>;
 	public var driver(default, null): Null<PlaybackDriver>;
 	public var renderer(default, null): Null<MediaRenderer>;
+
+	public var data(default, null): Null<TrackData>;
 
 	private var _ready : Bool = false;
 

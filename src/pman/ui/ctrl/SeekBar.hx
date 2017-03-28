@@ -286,37 +286,7 @@ class SeekBar extends Ent {
       * handle right-click events
       */
     private function onRightClick(event : MouseEvent):Void {
-        var ex:Float = event.position.x;
-        ex -= x;
-        var perc:Percent = Percent.percent(ex, w);
-        var timeClicked:Float = perc.of(pd.getDurationTime());
-
-        var contextMenu = Menu.buildFromTemplate([
-            {
-                label: 'Set Track Start',
-                click: function(i,w,e){
-                    var ct:Null<Track> = sess.focusedTrack;
-                    if (ct != null) {
-                        ct.getDbMediaInfo(player.app.db, function( info ) {
-                            info.time.start = timeClicked;
-                        });
-                    }
-                }
-            },
-            {
-                label: 'Set Track End',
-                click: function(i,w,e){
-                    var ct:Null<Track> = sess.focusedTrack;
-                    if (ct != null) {
-                        ct.getDbMediaInfo(player.app.db, function( info ) {
-                            info.time.end = timeClicked;
-                        });
-                    }
-                }
-            }
-        ]);
-
-        contextMenu.popup();
+        null;
     }
 
     /**

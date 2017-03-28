@@ -29,6 +29,7 @@
     "electron-devtools-installer": "^2.1.0",
     "electron-installer-debian": "^0.5.0",
     "electron-packager": "^8.5.2",
+    "mp3-duration": "^1.0.10",
     "underscore": "^1.8.3"
   }
 }

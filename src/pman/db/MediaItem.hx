@@ -42,14 +42,14 @@ class MediaItem {
     /**
       * retrieve [this] media's info row
       */
-    private function _loadInfo():Promise<MediaInfo> {
-        return store.getMediaInfoRow( id ).transform.fn(new MediaInfo(store, this, _));
+    private function _loadInfo():Promise<DbMediaInfo> {
+        return store.getMediaInfoRow( id ).transform.fn(new DbMediaInfo(store, this, _));
     }
 
     /**
       * get [this] Model's info
       */
-    public function getInfo(cb : MediaInfo->Void):Void {
+    public function getInfo(cb : DbMediaInfo->Void):Void {
         if (_i != null) {
             defer(cb.bind( _i ));
         }
@@ -57,7 +57,7 @@ class MediaItem {
             if ( !_wi ) {
                 var ip = _loadInfo();
                 _wi = true;
-                ip.then(function(info : Null<MediaInfo>) {
+                ip.then(function(info : Null<DbMediaInfo>) {
                     _wi = false;
                     _i = info;
                     getInfo( cb );
@@ -82,6 +82,6 @@ class MediaItem {
     public var store : MediaStore;
     public var row   : MediaItemRow;
 
-    private var _i : Null<MediaInfo>;
+    private var _i : Null<DbMediaInfo>;
     private var _wi : Bool = false;
 }

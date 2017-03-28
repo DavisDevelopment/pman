@@ -23,7 +23,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class MediaInfo {
+class DbMediaInfo {
     /* Constructor Function */
     public function new(store:MediaStore, item:MediaItem, row:MediaInfoRow):Void {
         this.store = store;
@@ -81,21 +81,19 @@ class MediaInfo {
     private inline function get_views():Int return row.views;
     private inline function set_views(v : Int):Int return (row.views = v);
 
-    public var tagIds(get, set):Array<Int>;
-    private inline function get_tagIds():Array<Int> return row.tags;
-    private inline function set_tagIds(a : Array<Int>):Array<Int> return (row.tags = a);
+    public var starred(get, set):Bool;
+    private inline function get_starred() return row.starred;
+    private inline function set_starred(v) return (row.starred = v);
 
-    public var actorIds(get, set):Array<Int>;
-    private inline function get_actorIds():Array<Int> return row.actors;
-    private inline function set_actorIds(a : Array<Int>):Array<Int> return (row.actors = a);
+    public var meta(get, set):Null<MediaInfoRowMeta>;
+    private inline function get_meta() return row.meta;
+    private inline function set_meta(v) return (row.meta = v);
 
-    public var rating(get, set):MediaInfoRating;
-    private inline function get_rating() return row.rating;
-    private inline function set_rating(v : MediaInfoRating) return (row.rating = v);
-
-    public var time(get, set):MediaInfoTime;
-    private inline function get_time() return row.time;
-    private inline function set_time(v : MediaInfoTime) return (row.time = v);
+    public var duration(get, set):Null<Float>;
+    private inline function get_duration() return (meta != null ? meta.duration : null);
+    private inline function set_duration(v) {
+        return (meta != null ? (meta.duration = v) : null);
+    }
 
 /* === Instance Fields === */
 

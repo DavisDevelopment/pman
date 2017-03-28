@@ -612,27 +612,9 @@ class Player extends EventDispatcher {
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
-
-			var mip = ms.cogMediaItem( newTrack.uri );
-			mip.then(function( item ) {
-			    // jump to saved time
-			    /*
-			    item.getInfo(function(info) {
-			        if (info.time.last != null) {
-			            defer(function() {
-			                currentTime = info.time.last;
-			            });
-			        }
-                    else if (info.time.start != null) {
-                        defer(function() {
-			                currentTime = info.time.start;
-                        });
-                    }
-			    });
-			    */
-			});
-			mip.unless(function(error) {
-			    app.errorMessage( error );
+			newTrack.editData(function( data ) {
+			    // increment the 'views'
+			    data.views++;
 			});
 		}
 
@@ -649,27 +631,6 @@ class Player extends EventDispatcher {
 		}
 		else {
             var track:Track = delta.previous;
-			var nums:Array<Float> = [currentTime, durationTime];
-			var atend:Bool = ended;
-
-            // get the media_item for the Track
-			var ms = app.db.mediaStore;
-			var mip = ms.cogMediaItem( track.uri );
-			mip.then(function( item ) {
-			    // save the current time
-			    item.getInfo(function( info ) {
-			        if ( !atend ) {
-                        info.time.last = nums[0];
-                    }
-                    else {
-                        info.time.last = null;
-                    }
-			        info.push();
-			    });
-			});
-			mip.unless(function( error ) {
-			    app.errorMessage( error );
-			});
 		}
 	}
 
