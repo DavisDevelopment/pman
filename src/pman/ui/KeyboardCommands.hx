@@ -94,9 +94,8 @@ class KeyboardCommands {
 				//p.saveState();
 
             // snapshot
-			//case LetterS if ( event.shiftKey ):
-			    //TODO take a snapshot
-				//p.snapshot();
+            case LetterS if ( event.shiftKey ):
+                p.snapshot();
 
 			//case LetterL:
 				//p.togglePlaylist();
