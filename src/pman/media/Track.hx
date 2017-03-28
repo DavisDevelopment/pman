@@ -186,23 +186,99 @@ class Track {
     }
 
     /**
+      * get the TrackView associated with [this] Track
+      */
+    public function getView():Null<TrackView> {
+        var p = BPlayerMain.instance.playerPage;
+        if (p.playlistView != null) {
+            return p.playlistView.viewFor( this );
+        }
+        else return null;
+    }
+
+    /**
+      * build the menu for [this] Track
+      */
+    public function buildMenu():MenuTemplate {
+        var mt:MenuTemplate = new MenuTemplate();
+        mt.push({
+            label: 'Play',
+            click: function(i,w,e) player.openTrack( this )
+        });
+        mt.push({
+            label: 'Play Next',
+            click: function(i,w,e) playlist.move(this, fn(session.indexOfCurrentMedia() + 1))
+        });
+        mt.push({
+            label: 'Remove from Playlist',
+            click: function(i,w,e) {
+                playlist.remove( this );
+            }
+        });
+        mt.push({
+            label: (data != null && data.starred ? 'Unfavorite' : 'Favorite'),
+            click: function(i,w,e) {
+                toggleStarred();
+            }
+        });
+        return mt;
+    }
+
+/* === TrackData Methods === */
+
+    /**
       * shorthand method to edit the TrackData for [this] Track
       */
     public function editData(action:TrackData->Void, ?complete:Void->Void):Void {
         getData(function(data : TrackData) {
             action( data );
-            data.save( complete );
+            data.save(function() {
+                var v = getView();
+                if (v != null) {
+                    v.update();
+                }
+                if (complete != null) {
+                    complete();
+                }
+            });
         });
     }
 
     /**
       * get the Path to [this]
       */
-    private function getFsPath():Null<Path> {
+    public function getFsPath():Null<Path> {
         return switch ( source ) {
             case MediaSource.MSLocalPath(path): path;
             default: null;
         };
+    }
+
+    /**
+      * set whether [this] Track is starred
+      */
+    public function setStarred(value:Bool, ?done:Void->Void):Void {
+        editData(function(i) {
+            i.starred = value;
+        }, done);
+    }
+
+    public function toggleStarred(?done : Bool->Void):Void {
+        editData(function(i) {
+            i.starred = !i.starred;
+        }, function() {
+            if (done != null) {
+                done( data.starred );
+            }
+        });
+    }
+
+    public inline function star(?done : Void->Void):Void {
+        setStarred(true, done);
+    }
+
+    public inline function unstar(?done : Void->Void):Void {
+        setStarred(false, done);
     }
 
 /* === Computed Instance Fields === */
