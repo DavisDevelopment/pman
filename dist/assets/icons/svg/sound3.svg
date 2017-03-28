@@ -1,45 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   version="1.1"
-   width="76.0106"
-   height="76.0106"
-   viewBox="0 0 76.01 76.01"
-   enable-background="new 0 0 76.01 76.01"
-   xml:space="preserve"
-   id="svg2"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="appbar.sound.3.svg"><metadata
-     id="metadata10"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
-     id="defs8" /><sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1317"
-     inkscape:window-height="744"
-     id="namedview6"
-     showgrid="false"
-     inkscape:zoom="3.1048302"
-     inkscape:cx="38.005299"
-     inkscape:cy="38.005299"
-     inkscape:window-x="49"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg2" /><path
-     d="m 10.429411,25.726012 10.012171,-2.17e-4 15.018254,-17.6182441 0,59.9025111 -15.018254,-21.142021 -10.012171,0 c -2.7647186,0 -5.0060841,-3.155291 -5.0060841,-7.047346 l 0,-7.047337 c 0,-3.892271 2.2413655,-7.047346 5.0060841,-7.047346 z m 57.570054,10.570901 c 0,10.703523 -3.081798,20.393477 -8.064332,27.407883 l -3.53987,-4.983267 c 4.076661,-5.73894 6.598117,-13.667224 6.598117,-22.424616 0,-8.850394 -2.575356,-16.854119 -6.72868,-22.606854 l 3.025844,-5.6795251 c 5.359993,7.0720361 8.708921,17.1287001 8.708921,28.2863791 z m -10.012169,0 c 0,7.708661 -2.511973,14.59134 -6.446375,19.114451 L 47.9756,50.392492 c 3.039595,-3.214488 5.00561,-8.331712 5.00561,-14.095579 0,-5.763639 -1.966015,-10.88109 -5.00561,-14.095351 l 3.565321,-5.019089 c 3.934402,4.523101 6.446375,11.405781 6.446375,19.11444 z m -10.01217,0 c 0,4.698231 -2.177191,8.680624 -5.188809,10.056665 l -2.320239,-6.532883 c 1.38228,0 2.502963,-1.577641 2.502963,-3.523782 0,-1.94613 -1.120683,-3.523555 -2.502963,-3.523555 l 2.320239,-6.533108 c 3.011618,1.376049 5.188809,5.358442 5.188809,10.056663 z"
-     id="path4"
-     inkscape:connector-curvature="0"
-     style="fill:#000000;fill-opacity:1;stroke-width:0.2;stroke-linejoin:round" /></svg>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="76.0106" height="76.0106" viewBox="0 0 76.01 76.01" enable-background="new 0 0 76.01 76.01" xml:space="preserve">
+	<path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 20.5862,33.2547L 26.9204,33.2546L 36.4217,25.3369L 36.4217,52.2573L 26.9204,42.756L 20.5862,42.756C 18.8371,42.756 17.4191,41.338 17.4191,39.5889L 17.4191,36.4218C 17.4191,34.6726 18.8371,33.2547 20.5862,33.2547 Z M 57.0079,38.0053C 57.0079,42.8155 55.0582,47.1702 51.906,50.3225L 49.6665,48.083C 52.2456,45.5039 53.8408,41.9409 53.8408,38.0053C 53.8408,34.0279 52.2115,30.431 49.5839,27.8457L 51.4982,25.2933C 54.8892,28.4715 57.0079,32.991 57.0079,38.0053 Z M 50.6737,38.0053C 50.6737,41.4696 49.0845,44.5627 46.5954,46.5954L 44.3398,44.3399C 46.2628,42.8953 47.5066,40.5956 47.5066,38.0053C 47.5066,35.4151 46.2628,33.1153 44.3398,31.6708L 46.5954,29.4152C 49.0845,31.4479 50.6737,34.541 50.6737,38.0053 Z M 44.3395,38.0053C 44.3395,40.1167 42.9621,41.9064 41.0568,42.5248L 39.5889,39.5889C 40.4634,39.5889 41.1724,38.8799 41.1724,38.0053C 41.1724,37.1307 40.4634,36.4218 39.5889,36.4218L 41.0568,33.4858C 42.9621,34.1042 44.3395,35.8939 44.3395,38.0053 Z "/>
+</svg>

@@ -1,45 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   version="1.1"
-   width="76.0106"
-   height="76.0106"
-   viewBox="0 0 76.01 76.01"
-   enable-background="new 0 0 76.01 76.01"
-   xml:space="preserve"
-   id="svg4619"
-   inkscape:version="0.91 r13725"
-   sodipodi:docname="appbar.sound.1.svg"><metadata
-     id="metadata4627"><rdf:RDF><cc:Work
-         rdf:about=""><dc:format>image/svg+xml</dc:format><dc:type
-           rdf:resource="http://purl.org/dc/dcmitype/StillImage" /></cc:Work></rdf:RDF></metadata><defs
-     id="defs4625" /><sodipodi:namedview
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1"
-     objecttolerance="10"
-     gridtolerance="10"
-     guidetolerance="10"
-     inkscape:pageopacity="0"
-     inkscape:pageshadow="2"
-     inkscape:window-width="1317"
-     inkscape:window-height="744"
-     id="namedview4623"
-     showgrid="false"
-     inkscape:zoom="7.9857286"
-     inkscape:cx="38.005299"
-     inkscape:cy="38.005299"
-     inkscape:window-x="49"
-     inkscape:window-y="24"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="svg4619" /><path
-     d="m 12.764591,24.422257 15.529261,-2.45e-4 23.293891,-19.4114537 0,65.9994807 -23.293891,-23.293891 -15.529261,0 c -4.2881863,0 -7.7646303,-3.476444 -7.7646303,-7.76463 l 0,-7.764631 c 0,-4.288431 3.476444,-7.76463 7.7646303,-7.76463 z m 58.23485,11.646823 c 0,5.17642 -3.376906,9.564143 -8.048041,11.080246 l -3.598781,-7.197808 c 2.14397,0 3.882192,-1.738222 3.882192,-3.882438 0,-2.144216 -1.738222,-3.882193 -3.882192,-3.882193 L 62.9514,24.988834 c 4.671135,1.516102 8.048041,5.903826 8.048041,11.080246 z"
-     id="path4621"
-     inkscape:connector-curvature="0"
-     style="fill:#000000;fill-opacity:1;stroke-width:0.2;stroke-linejoin:round" /></svg>
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" baseProfile="full" width="76.0106" height="76.0106" viewBox="0 0 76.01 76.01" enable-background="new 0 0 76.01 76.01" xml:space="preserve">
+	<path fill="#000000" fill-opacity="1" stroke-width="0.2" stroke-linejoin="round" d="M 20.5862,33.2547L 26.9204,33.2546L 36.4217,25.3369L 36.4217,52.2573L 26.9204,42.756L 20.5862,42.756C 18.8371,42.756 17.4191,41.338 17.4191,39.5889L 17.4191,36.4218C 17.4191,34.6726 18.8371,33.2547 20.5862,33.2547 Z M 44.3395,38.0053C 44.3395,40.1167 42.9621,41.9064 41.0568,42.5248L 39.5889,39.5889C 40.4634,39.5889 41.1724,38.8799 41.1724,38.0053C 41.1724,37.1307 40.4634,36.4218 39.5889,36.4218L 41.0568,33.4858C 42.9621,34.1042 44.3395,35.8939 44.3395,38.0053 Z "/>
+</svg>
