@@ -12,6 +12,7 @@ import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.async.Mp4InfoLoader;
+import pman.media.info.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -33,6 +34,7 @@ class TrackData {
         media_id = null;
         views = 0;
         starred = false;
+        marks = new Array();
     }
 
 /* === Instance Methods === */
@@ -93,6 +95,7 @@ class TrackData {
     public var media_id : Null<Int>;
     public var views : Int;
     public var starred : Bool;
+    public var marks : Array<Mark>;
 
     public var meta : Null<MediaMetadata>;
 }
