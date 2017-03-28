@@ -34,6 +34,7 @@ class FileFilter {
 	public static var VIDEO : FileFilter;
 	public static var AUDIO : FileFilter;
 	public static var PLAYLIST : FileFilter;
+	public static var IMAGE : FileFilter;
 	public static var ALL : FileFilter;
 
 	public static function __init__():Void {
@@ -45,6 +46,9 @@ class FileFilter {
 		]);
 		PLAYLIST = new FileFilter('Playlist Files', [
 			'm3u', 'xspf', 'pls', 'zip'
+		]);
+		IMAGE = new FileFilter('Image Files', [
+		    'png', 'jpg', 'jpeg'
 		]);
 		ALL = VIDEO.plus(AUDIO).plus(PLAYLIST, 'All Files');
 	}
