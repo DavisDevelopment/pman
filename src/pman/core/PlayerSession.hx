@@ -49,6 +49,8 @@ class PlayerSession {
 		focusedTrack = null;
 		playlist = new Playlist();
 		history = new PlayerHistory( this );
+
+        _listen();
 	}
 
 /* === Instance Methods === */
@@ -335,6 +337,15 @@ class PlayerSession {
 	        cb.trigger = User;
 	    }
 	    return cb;
+	}
+
+	/**
+	  * listen for events
+	  */
+	private function _listen():Void {
+	    playbackProperties.changed.on(function() {
+	        player.app.appDir.savePlaybackSettings( player );
+	    });
 	}
 
 /* === Computed Instance Fields === */
