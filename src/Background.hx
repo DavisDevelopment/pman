@@ -84,12 +84,14 @@ class Background {
             submenu: [
             {
                 label: 'Open File(s)',
+                accelerator: 'CommandOrControl+O',
                 click: function(i:MenuItem, w:BrowserWindow) {
                     ic.send(w, 'OpenFile');
                 }
             },
             {
                 label: 'Open Directory',
+                accelerator: 'CommandOrControl+F',
                 click: function(i:MenuItem, w:BrowserWindow) {
                     ic.send(w, 'OpenDirectory');
                 }
@@ -110,8 +112,16 @@ class Background {
             submenu: [
             {
                 label: 'Playlist',
+                accelerator: 'CommandOrControl+L',
                 click: function(i, w:BrowserWindow) {
                     ic.send(w, 'TogglePlaylist');
+                }
+            },
+            {
+                label: 'Inspect Application',
+                accelerator: 'CommandOrControl+Shift+J',
+                click: function(i, w:BrowserWindow) {
+                    w.webContents.toggleDevTools();
                 }
             }
             ]
@@ -123,6 +133,7 @@ class Background {
             submenu: [
             {
                 label: 'Clear Playlist',
+                accelerator: 'CommandOrControl+W',
                 click: function(i, w) ic.send(w, 'ClearPlaylist')
             },
             {
@@ -142,6 +153,7 @@ class Background {
             submenu: [untyped
             {
                 label: 'Save Current Session',
+                accelerator: 'CommandOrControl+S',
                 click: function(i, w) ic.send(w, 'SaveSession')
             },
             {type: 'separator'}
