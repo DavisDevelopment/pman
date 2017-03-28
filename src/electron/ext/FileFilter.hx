@@ -39,7 +39,7 @@ class FileFilter {
 
 	public static function __init__():Void {
 		VIDEO = new FileFilter('Video Files', [
-			'mp4', 'webm', 'ogg'
+			'mp4', 'webm', 'ogv'
 		]);
 		AUDIO = new FileFilter('Audio Files', [
 			'mp3', 'ogg', 'wav'
