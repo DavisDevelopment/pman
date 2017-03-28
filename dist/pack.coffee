@@ -7,6 +7,7 @@ _ = require 'underscore'
 
 packager = require 'electron-packager'
 deb_installer = require 'electron-installer-debian'
+win_installer = require 'electron-installer-windows'
 
 scriptdir = (__dirname + '')
 
@@ -47,10 +48,15 @@ build_releases = actions['pack'] = ( complete ) ->
     plan
         platform: 'linux'
 
-    # Window Build
+    # Windows Build for ia32
     plan
         platform: 'win32'
         arch: 'ia32'
+
+    # Windows Build for x64
+    plan
+        platform: 'win32'
+        arch: 'x64'
 
     async.series builds, (error, paths) ->
         if error?
@@ -61,11 +67,12 @@ build_releases = actions['pack'] = ( complete ) ->
         do complete
 
 # Build the .deb installer
-build_debian_installer = actions['deb'] = actions['debian'] = ( complete ) ->
+build_debian_installer = actions['debian_installer'] = ( complete ) ->
     complete ?= (-> null)
     release_dir = path.join(scriptdir, 'releases', 'pman-linux-x64')
     installers_dir = path.join(scriptdir, 'installers')
     
+    console.log "creating debian installer for pman"
     options =
         src  : release_dir
         dest : installers_dir
@@ -77,19 +84,56 @@ build_debian_installer = actions['deb'] = actions['debian'] = ( complete ) ->
             console.error( error )
         else
             console.log " -- Created Debian Installer for PMan -- "
-            do complete
+        do complete
 
     deb_installer(options, dicb)
+
+# Build the Windows installer
+build_windows_installer = actions['windows_installer'] = ( complete ) ->
+    complete ?= (-> null)
+    release_dir = (arch) -> path.join(scriptdir, 'releases', "pman-windows-#{arch}")
+    installers_dir = path.join(scriptdir, 'installers')
+    builds = []
+    itask = (o) -> (callback) -> win_installer(o, callback)
+    plan = (o) -> builds.push itask o
+    opts = (arch) ->
+        src  : release_dir arch
+        dest : installers_dir
+        arch : arch
+
+    plan opts 'ia32'
+    plan opts 'x64'
+
+    callback = (error) ->
+        if error?
+            console.error error
+        else
+            console.log " -- Created Windows Installers for PMan -- "
+            do complete
+
+    async.series(builds, callback)
 
 # 'main' function
 do ->
     # get parameters
     actionNames = process.argv[2..]
+    if not actionNames.length
+        actionNames.push 'all'
+    actionNames = actionNames.map (s) -> s.toLowerCase()
+    do ->
+        if actionNames[0] == 'installers'
+            actionNames = ['debian_installer', 'windows_installer']
     tasks = do ->
-        for name in actionNames
-            if name of actions
-                actions[name]
-    
+        if actionNames.length == 1
+            switch actionNames[0]
+                when 'all'
+                    for name of actions then actions[name]
+                else
+                    [actions[actionNames[0]]]
+        else
+            for name in actionNames
+                if name of actions
+                    actions[name]
     taskCallback = (error) ->
         if error?
             console.error error
