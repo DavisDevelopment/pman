@@ -180,6 +180,10 @@ class Track {
             var dp = loader.load();
             dp.then(function( dat ) {
                 this.data = dat;
+                var v = getView();
+                if (v != null) {
+                    v.update();
+                }
                 callback( data );
             });
         }
