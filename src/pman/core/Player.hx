@@ -663,7 +663,7 @@ class Player extends EventDispatcher {
 	  */
 	public function clearPlaylist():Void {
 		session.playlist.clear();
-		stop();
+		session.name = null;
 		if (session.hasMedia()) {
 			session.blur();
 		}
