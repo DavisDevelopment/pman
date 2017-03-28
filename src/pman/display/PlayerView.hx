@@ -86,10 +86,26 @@ class PlayerView extends Ent {
 
 			cmr.update( stage );
 
-			// if the video has ended
-			if (mc.getEnded()) {
-				player.gotoNext();
-			}
+            // handle automatic skipping
+            var currentStatus = player.getStatus();
+            switch ( currentStatus ) {
+                case PlayerStatus.Ended:
+                    var ls = lastStatus;
+                    player.gotoNext({
+                        ready: function() {
+                            switch ( ls ) {
+                                case PlayerStatus.Playing:
+                                    player.play();
+
+                                default:
+                                    trace( ls );
+                            }
+                        }
+                    });
+
+                default:
+                    lastStatus = currentStatus;
+            }
 		}
 
 		super.update( stage );
@@ -145,4 +161,6 @@ class PlayerView extends Ent {
 	public var messageBoard : PlayerMessageBoard;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
+
+	private var lastStatus : Null<PlayerStatus> = null;
 }
