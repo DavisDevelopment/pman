@@ -16,20 +16,19 @@ PMan is just a prototype at this stage, and plays only those codecs which are su
 - reasonable performance
 - save your player sessions, restorable from the window menu under "Sessions"
 - open entire directory (always recursive, need to change that)
-- drag 'n drop files onto window to open them
+- drag 'n drop files **and/or** folders onto window to open them
 - freely rearrange your playlist
 - shuffle
 - supports importing playlists in several popular formats (m3u, pls, and xspf)
-- save your playlist (currently only supports saving as m3u)
+- export playlists in M3U or XSPF formats
+- audio visualizations when playing music files
 
 #### Planned Features
 
 - drag 'n drop folders to open them
-- history
 - bookmarks
 - favorites
 - progress through video is saved, so that user can resume to that position next time the video is opened
-- tabs
 - multiple windows
 - send online media to chromecast
 - stream local media to chromecast
