@@ -615,11 +615,13 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    function complete():Void {
-	        if (done != null) {
-	            defer( done );
-	        }
-	        items.loadDataForAll(function( datas ) {
-	            trace( datas );
+	        defer(function() {
+	            if (done != null) {
+	                done();
+	            }
+	            items.loadDataForAll(function( datas ) {
+
+	            });
 	        });
 	    }
 
