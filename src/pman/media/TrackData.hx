@@ -12,7 +12,6 @@ import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.async.Mp4InfoLoader;
-import pman.media.MediaInfo;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -39,15 +38,52 @@ class TrackData {
 /* === Instance Methods === */
 
     /**
-      * copy data from [row] onto [this]
+      * pull data from a MediaInfoRow
       */
-    public function pullRow(row : MediaInfoRow):Void {
+    public function pullRaw(row : MediaInfoRow):Void {
         media_id = row.id;
         views = row.views;
         starred = row.starred;
         if (row.meta != null) {
-            meta = row.meta;
+            meta = new MediaMetadata();
+            meta.pullRaw( row.meta );
         }
+    }
+
+    /**
+      * convert [this] to a MediaInfoRow
+      */
+    public function toRaw():MediaInfoRow {
+        if (media_id == null) {
+            throw 'What the fuck?';
+        }
+
+        return {
+            id: media_id,
+            views: views,
+            starred: starred,
+            meta: (meta != null ? meta.toRaw() : null)
+        };
+    }
+
+    /**
+      * push [this] TrackData to the database
+      */
+    public function save(?done:Void->Void, ?store:MediaStore):Void {
+        if (store == null) {
+            store = BPlayerMain.instance.db.mediaStore;
+        }
+        var prom = store.putMediaInfoRow(toRaw());
+        prom.then(function( row ) {
+            pullRaw( row );
+
+            if (done != null) {
+                done();
+            }
+        });
+        prom.unless(function( error ) {
+            throw error;
+        });
     }
 
 /* === Instance Fields === */
