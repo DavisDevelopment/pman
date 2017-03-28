@@ -44,7 +44,7 @@ class FileListConverter {
 	  */
 	private function _import(file : File):Void {
 		switch ( file.path.extension ) {
-			case 'mp4', 'webm', 'ogg', 'mp3', 'wav':
+			case 'mp4', 'webm', 'ogg', 'ogv', 'mp3', 'wav':
 				var track = new Track(cast new LocalFileMediaProvider( file ));
 				pl.push( track );
 
