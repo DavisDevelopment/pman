@@ -8,6 +8,8 @@
 
 -lib slambda
 -lib actuate
+-lib format
+-lib electron
 #-lib closure
 
 -D tannus
