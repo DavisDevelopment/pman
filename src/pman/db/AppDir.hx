@@ -7,13 +7,15 @@ import tannus.sys.*;
 import tannus.sys.FileSystem in Fs;
 
 import electron.ext.*;
+import electron.Tools.*;
+
+#if renderer_process
 
 import pman.core.*;
-import pman.core.PlayerSession;
-import pman.media.*;
 
-import foundation.Tools.*;
-import tannus.math.TMath.*;
+#end
+
+import pman.core.JsonData;
 
 import haxe.Json;
 import haxe.Serializer;
@@ -27,8 +29,8 @@ using Slambda;
 
 class AppDir {
 	/* Constructor Function */
-	public function new(app : BPlayerMain):Void {
-		main = app;
+	public function new():Void {
+
 	}
 
 /* === Instance Methods === */
@@ -87,44 +89,6 @@ class AppDir {
 	    var sd = sessionsDirectory();
 	    return sd.subpaths.filter.fn(_.extension == 'session').map.fn(_.name.beforeLast('.'));
 	}
-
-    public inline function hasSavedPlaybackSettings():Bool {
-        return Fs.exists(playbackSettingsPath().toString());
-    }
-
-    public inline function savePlaybackSettings(p : Player):Void {
-        playbackSettingsFile().write(ByteArray.ofString(encodePlaybackSettings( p )));
-    }
-
-    public inline function loadPlaybackSettings(p:Player, ?done:Void->Void):Void {
-        decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
-    }
-
-    private function encodePlaybackSettings(p : Player):String {
-        var s = new Serializer();
-        inline function w(x:Dynamic){
-            s.serialize( x );
-        }
-
-        w( p.playbackRate );
-        w( p.volume );
-        w( p.shuffle );
-
-        return s.toString();
-    }
-
-    private function decodePlaybackSettings(s:String, p:Player, ?done:Void->Void):Void {
-        var u = new Unserializer( s );
-        inline function val<T>():T return u.unserialize();
-
-        p.playbackRate = val();
-        p.volume = val();
-        p.shuffle = val();
-
-        if (done != null) {
-            defer( done );
-        }
-    }
 
 	private function encodeSession(s : JsonSession):String {
 	    var serializer = new Serializer();
@@ -185,7 +149,48 @@ class AppDir {
 	    });
 	}
 
+#if renderer_process
+
+    public inline function hasSavedPlaybackSettings():Bool {
+        return Fs.exists(playbackSettingsPath().toString());
+    }
+
+    public inline function savePlaybackSettings(p : Player):Void {
+        playbackSettingsFile().write(ByteArray.ofString(encodePlaybackSettings( p )));
+    }
+
+    public inline function loadPlaybackSettings(p:Player, ?done:Void->Void):Void {
+        decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
+    }
+
+    private function encodePlaybackSettings(p : Player):String {
+        var s = new Serializer();
+        inline function w(x:Dynamic){
+            s.serialize( x );
+        }
+
+        w( p.playbackRate );
+        w( p.volume );
+        w( p.shuffle );
+
+        return s.toString();
+    }
+
+    private function decodePlaybackSettings(s:String, p:Player, ?done:Void->Void):Void {
+        var u = new Unserializer( s );
+        inline function val<T>():T return u.unserialize();
+
+        p.playbackRate = val();
+        p.volume = val();
+        p.shuffle = val();
+
+        if (done != null) {
+            defer( done );
+        }
+    }
+
+#end
+
 /* === Instance Fields === */
 
-	public var main : BPlayerMain;
 }
