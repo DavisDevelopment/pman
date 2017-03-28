@@ -806,8 +806,17 @@ class Player extends EventDispatcher {
 	public inline function gotoNext(?cb : OpenCbOpts):Void {
 		gotoByOffset(1, cb);
 	}
-	public inline function gotoPrevious(?cb : OpenCbOpts):Void {
-		gotoByOffset(-1, cb);
+	
+	/**
+	  * goto the previous track, or the beginning of the Track
+	  */
+	public function gotoPrevious(?cb : OpenCbOpts):Void {
+	    if (currentTime >= 1.0) {
+	        currentTime = 0.0;
+	    }
+        else {
+            gotoByOffset(-1, cb);
+        }
 	}
 
 /* === Computed Instance Fields === */
