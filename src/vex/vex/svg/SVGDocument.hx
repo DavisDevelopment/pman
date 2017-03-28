@@ -51,6 +51,14 @@ class SVGDocument extends vex.core.BaseDocument {
 	}
 #end
 
+#if foundation
+
+    public function toFoundationImage():foundation.Image {
+        return new foundation.Image(toBlob().toObjectURL());
+    }
+
+#end
+
 /* === Computed Instance Fields === */
 
 	override private function get_x():Float return (hasAttribute('x') ? parseFloat(getAttribute('x')) : 0);
