@@ -11,9 +11,6 @@ import crayon.*;
 import electron.ext.*;
 import electron.ext.Dialog;
 import electron.ext.MenuItem;
-import electron.ipc.*;
-import electron.ipc.IpcAddressType;
-import electron.ipc.IpcTools.*;
 import electron.Tools.defer;
 
 import pman.core.*;
@@ -22,6 +19,7 @@ import pman.db.*;
 import pman.events.*;
 import pman.media.*;
 import pman.ww.Worker;
+import pman.ipc.RendererIpcCommands;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
@@ -62,10 +60,11 @@ class BPlayerMain extends Application {
     private function init(cb : Void->Void):Void {
         onready( cb );
 
+
         // need to find a better way to do this
 		browserWindow = BrowserWindow.getAllWindows()[0];
 
-        appDir = new AppDir( this );
+        appDir = new AppDir();
 
         db = new PManDatabase();
         db.init(function() {
@@ -90,10 +89,9 @@ class BPlayerMain extends Application {
 		dragManager = new DragDropManager( this );
 		dragManager.init();
 
-		__buildMenus();
-
-        var argv = Sys.args();
-        trace( argv );
+		//__buildMenus();
+        ipcCommands = new RendererIpcCommands( this );
+        ipcCommands.bind();
 	}
 
 	/**
@@ -204,13 +202,7 @@ class BPlayerMain extends Application {
                 {
                     label: 'Shuffle Playlist',
                     click: function(i,w,e){
-                        var pl = player.session.playlist.toArray();
-                        player.clearPlaylist();
-                        var r = new Random();
-                        for (i in 0...r.randint(1, 3)) {
-                            r.ishuffle( pl );
-                        }
-                        player.addItemList( pl );
+                        player.shufflePlaylist();
                     }
                 },
                 {
@@ -312,6 +304,9 @@ class BPlayerMain extends Application {
 	    return (playerPage != null ? playerPage.player : null);
     }
 
+    public var ic(get, never):RendererIpcCommands;
+    private inline function get_ic() return ipcCommands;
+
 /* === Instance Fields === */
 
 	public var playerPage : Null<PlayerPage>;
@@ -321,6 +316,7 @@ class BPlayerMain extends Application {
 	public var db : PManDatabase;
 	public var dragManager : DragDropManager;
 	public var tray : Tray;
+	public var ipcCommands : RendererIpcCommands;
 
 	private var _ready : Bool;
 	// ready signal
