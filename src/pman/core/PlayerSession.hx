@@ -145,6 +145,9 @@ class PlayerSession {
 			throw 'Error: Track is not mounted, and thus cannot be blurred';
 		}
 
+		var pre_delta = new Delta(null, track);
+		trackChanging.call( pre_delta );
+
 		// dismount the Track
 		track.dismount();
 
@@ -152,6 +155,9 @@ class PlayerSession {
 		if (track == focusedTrack) {
 			player.view.detachRenderer();
 			focusedTrack = null;
+
+			var post_delta = new Delta(null, track);
+			trackChanged.call( post_delta );
 		}
 	}
 
