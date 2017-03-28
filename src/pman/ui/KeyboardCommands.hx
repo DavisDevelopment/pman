@@ -41,27 +41,6 @@ class KeyboardCommands {
 			case Space:
 				p.togglePlayback();
 
-            // Backspace
-			case Backspace:
-			    // go forward
-			    if ( event.shiftKey ) {
-			        var possible = sess.history.canGoForward();
-			        trace('it is ${possible?'':' not '} possible to go forward');
-			        if ( possible ) {
-			            trace('navigating forward');
-			            sess.history.goForward();
-			        }
-			    }
-			    // go backward
-                else {
-			        var possible = sess.history.canGoBack();
-			        trace('it is ${possible?'':' not '} possible to go backward');
-			        if ( possible ) {
-			            trace('navigating backward');
-			            sess.history.goBack();
-			        }
-                }
-
 			// N
 			case LetterN:
 				//p.gotoNext();
@@ -79,52 +58,48 @@ class KeyboardCommands {
 			        sess.playlist.remove( ct );
 			    }
 
-			// Ctrl+Shift+O
-			case LetterO if ((event.ctrlKey || event.metaKey) && event.shiftKey):
-				p.selectAndOpenAddresses();
-
 			// Ctrl+O
-			case LetterO if (event.ctrlKey || event.metaKey):
-				p.selectAndOpenFiles();
+			//case LetterO if (event.ctrlKey || event.metaKey):
+				//p.selectAndOpenFiles();
 
 			// Ctrl+F
-			case LetterF if (event.ctrlKey || event.metaKey):
-				p.selectAndOpenDirectory();
+			//case LetterF if (event.ctrlKey || event.metaKey):
+				//p.selectAndOpenDirectory();
 
 			// Ctrl+Q
 			case LetterQ if (event.metaKey || event.ctrlKey):
 				app.quit();
 
 			// Ctrl+W
-			case LetterW if (event.metaKey || event.ctrlKey):
-				p.clearPlaylist();
+			//case LetterW if (event.metaKey || event.ctrlKey):
+				//p.clearPlaylist();
 
 			// Ctrl+R
 			case LetterR if (event.metaKey || event.ctrlKey):
 				app.browserWindow.webContents.reload();
 
 			// Ctrl+Shift+J
-			case LetterJ if (event.shiftKey && (event.metaKey || event.ctrlKey)):
-				var wc = app.browserWindow.webContents;
-				if (wc.isDevToolsOpened()) {
-					wc.closeDevTools();
-				}
-				else {
-					wc.openDevTools();
-				}
+			//case LetterJ if (event.shiftKey && (event.metaKey || event.ctrlKey)):
+				//var wc = app.browserWindow.webContents;
+				//if (wc.isDevToolsOpened()) {
+					//wc.closeDevTools();
+				//}
+				//else {
+					//wc.openDevTools();
+				//}
 
 			// Ctrl+S
-			case LetterS if (event.metaKey || event.ctrlKey):
+			//case LetterS if (event.metaKey || event.ctrlKey):
 				//app.appDir.saveSession(p.session.toJson());
-				p.saveState();
+				//p.saveState();
 
             // snapshot
 			//case LetterS if ( event.shiftKey ):
 			    //TODO take a snapshot
 				//p.snapshot();
 
-			case LetterL:
-				p.togglePlaylist();
+			//case LetterL:
+				//p.togglePlaylist();
 
 			case LetterH:
 				p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
