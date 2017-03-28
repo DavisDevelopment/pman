@@ -45,7 +45,6 @@ using tannus.math.RandomTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
 
-#if !renderer_process #error #end
 class Player extends EventDispatcher {
 	/* Constructor Function */
 	public function new(main:BPlayerMain, page:PlayerPage):Void {
