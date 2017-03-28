@@ -19,6 +19,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.core.history.PlayerHistoryItem;
 import pman.core.history.PlayerHistoryItem as PHItem;
+import pman.core.JsonData;
 
 import foundation.Tools.*;
 
@@ -410,26 +411,3 @@ typedef LoadCallbackOptions = {
 	@:optional function error(error : Dynamic):Void;
 };
 */
-
-typedef JsonSession = {
-	playlist : Array<String>,
-	playbackProperties : JsonPlaybackProperties,
-	?nowPlaying : JsonPlayerState
-};
-
-typedef JsonPlaybackProperties = {
-	speed : Float,
-	volume : Float,
-	shuffle : Bool
-};
-
-typedef JsonPlayerState = {
-	track : Int,
-	time : Float
-};
-
-@:enum
-abstract LoadTrigger (String) from String to String {
-    var User = 'user';
-    var History = 'history';
-}
