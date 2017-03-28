@@ -85,9 +85,15 @@ class DbMediaInfo {
     private inline function get_starred() return row.starred;
     private inline function set_starred(v) return (row.starred = v);
 
+    public var meta(get, set):Null<MediaInfoRowMeta>;
+    private inline function get_meta() return row.meta;
+    private inline function set_meta(v) return (row.meta = v);
+
     public var duration(get, set):Null<Float>;
-    private inline function get_duration() return row.duration;
-    private inline function set_duration(v) return (row.duration = v);
+    private inline function get_duration() return (meta != null ? meta.duration : null);
+    private inline function set_duration(v) {
+        return (meta != null ? (meta.duration = v) : null);
+    }
 
 /* === Instance Fields === */
 
