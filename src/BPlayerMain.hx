@@ -25,6 +25,7 @@ import pman.ww.Worker;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
+import tannus.TSys as Sys;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -42,6 +43,15 @@ class BPlayerMain extends Application {
 		_rs.once(function() {
 		    _ready = true;
 		});
+
+		win.expose('main', this);
+
+		if (instance == null) {
+		    instance = this;
+		}
+        else {
+            throw 'Error: Only one instance of BPlayerMain can be constructed';
+        }
 	}
 
 /* === Instance Methods === */
@@ -81,6 +91,9 @@ class BPlayerMain extends Application {
 		dragManager.init();
 
 		__buildMenus();
+
+        var argv = Sys.args();
+        trace( argv );
 	}
 
 	/**
@@ -320,6 +333,10 @@ class BPlayerMain extends Application {
 	    var app = new BPlayerMain();
 	    app.init( app.start );
 	}
+
+/* === Static Fields === */
+
+    public static var instance : Null<BPlayerMain> = null;
 }
 
 typedef FSPromptOptions = {
