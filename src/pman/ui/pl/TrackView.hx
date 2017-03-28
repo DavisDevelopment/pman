@@ -57,6 +57,9 @@ class TrackView extends Pane {
 		a['title'] = track.title;
 		a['data-uri'] = track.uri;
 
+		var data = this.el.edata;
+		data['view'] = this;
+
 		needsRebuild = false;
 	}
 
@@ -70,7 +73,7 @@ class TrackView extends Pane {
 
 		el.plugin( 'disableSelection' );
 
-		configureDragAndDropRearrangement();
+		//configureDragAndDropRearrangement();
 
 		eventInitted = true;
 	}

@@ -73,6 +73,10 @@ class PlaylistView extends Pane {
 	override function populate():Void {
 		buildRows();
 		var hed = new Heading(4, 'Playlist');
+		hed.css['color'] = 'white';
+		if (player.session.name != null) {
+		    hed.text = player.session.name;
+		}
 		hedRow.append( hed );
 		buildSearchWidget();
 		buildTrackList();
@@ -323,10 +327,34 @@ class PlaylistView extends Pane {
 	    clearDropIndicators();
 	}
 
+    /**
+      * bind events to the list
+      */
 	private function bindList():Void {
 	    if (list != null) {
 	        list.forwardEvents(['mousemove', 'mouseleave', 'mouseenter'], null, MouseEvent.fromJqEvent);
 	    }
+
+	    var sortOptions = {
+            update: function(event, ui) {
+                var item:Element = ui.item;
+                var t:TrackView = item.children().data( 'view' );
+                playlist.move(t.track, (function() return getIndexOf( t )));
+            }
+	    };
+	    list.el.plugin('sortable', [sortOptions]);
+	}
+
+	private function getIndexOf(t : TrackView):Int {
+	    var lis:Element = new Element(list.el.children());
+	    for (index in 0...lis.length) {
+	        var li:Element = new Element(lis.at( index ));
+	        var view:Null<TrackView> = li.children().data('view');
+	        if (view != null && Std.is(view, TrackView) && view == t) {
+	            return index;
+	        } 
+	    }
+	    return -1;
 	}
 
 	private function clearDropIndicators():Void {
