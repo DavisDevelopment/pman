@@ -255,8 +255,13 @@ class PlayerSession {
 		stack.push(function(next) {
 			defer(function() {
 				//__pullJsonPlaylist( state.playlist );
-				playlist = Playlist.fromJSON( state.playlist );
-				next();
+				var tmp = Playlist.fromJSON( state.playlist );
+				var tmpShuffle = player.shuffle;
+				player.shuffle = false;
+				player.addItemList(tmp.toArray(), function() {
+                    player.shuffle = tmpShuffle;
+                    next();
+				});
 			});
 		});
 		stack.push(function(next) {
