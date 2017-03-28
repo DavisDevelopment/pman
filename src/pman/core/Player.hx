@@ -130,6 +130,18 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * prompt the user to confirm a something
+	  */
+	public function confirm(msg:String, callback:Bool->Void):Void {
+	    var box = new ConfirmBox();
+	    box.prompt(msg, function(v) {
+	        box.close();
+	        callback( v );
+	    });
+	    box.open();
+	}
+
+	/**
 	  * show playlist view
 	  */
 	public inline function showPlaylist():Void {
