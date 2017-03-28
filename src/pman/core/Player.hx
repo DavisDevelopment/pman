@@ -45,6 +45,7 @@ using tannus.math.RandomTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
 
+#if !renderer_process #error #end
 class Player extends EventDispatcher {
 	/* Constructor Function */
 	public function new(main:BPlayerMain, page:PlayerPage):Void {
@@ -567,6 +568,17 @@ class Player extends EventDispatcher {
 		if (session.hasMedia()) {
 			session.blur();
 		}
+	}
+
+	/**
+	  * shuffle the playlist
+	  */
+	public function shufflePlaylist():Void {
+        var pl = session.playlist.toArray();
+        clearPlaylist();
+        var r = new Random();
+        r.ishuffle( pl );
+        addItemList( pl );
 	}
 
 	/**
