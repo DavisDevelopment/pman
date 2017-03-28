@@ -13,6 +13,7 @@ import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
 import pman.ui.pl.TrackView;
+import pman.media.info.Mark;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -286,6 +287,12 @@ class Track {
 
     public inline function unstar(?done : Void->Void):Void {
         setStarred(false, done);
+    }
+
+    public function addMark(mark:Mark, ?done:Void->Void):Void {
+        editData(function(i) {
+            i.addMark( mark );
+        }, done);
     }
 
 /* === Computed Instance Fields === */
