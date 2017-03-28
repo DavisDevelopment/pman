@@ -574,6 +574,15 @@ class Player extends EventDispatcher {
 	  * add a batch of media items to the queue
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
+	    function complete():Void {
+	        if (done != null) {
+	            defer( done );
+	        }
+	        items.loadDataForAll(function( datas ) {
+	            trace( datas );
+	        });
+	    }
+
 	    // initialize these items
 	    items.initAll(function() {
             // if these are the first items added to the queue, autoLoad will be invoked once they are all added
@@ -599,14 +608,12 @@ class Player extends EventDispatcher {
                 openTrack(willPlay, {
                     attached: function() {
                         //trace('Media linked to player by auto-load');
-                        if (done != null) done();
+                        complete();
                     }
                 });
             }
             else {
-                if (done != null) {
-                    defer( done );
-                }
+                complete();
             }
         });
 	}
