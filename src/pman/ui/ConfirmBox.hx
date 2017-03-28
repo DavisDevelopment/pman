@@ -80,6 +80,9 @@ class ConfirmBox extends Pane {
         if (!childOf('body')) {
             appendTo( 'body' );
             defer( __center );
+            defer(function() {
+                confirmBtn.el.plugin('focus');
+            });
         }
     }
 
