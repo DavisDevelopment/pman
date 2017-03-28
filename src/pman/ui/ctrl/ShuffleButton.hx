@@ -14,9 +14,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
 import pman.ui.ctrl.PlayerControlButton;
-
-import tannus.math.TMath.*;
-import foundation.Tools.*;
+import tannus.math.TMath.*; import foundation.Tools.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -48,6 +46,11 @@ class ShuffleButton extends ImagePlayerControlButton {
 	// get the currently active icon at any given time
 	override function getIcon():Image {
 		return _il[player.shuffle ? 1 : 0];
+	}
+
+    // get the 'glow color'
+	override function getGlowColor():String {
+	    return (player.shuffle ? player.theme.secondary.toString() : 'white');
 	}
 
 	// handle click events
