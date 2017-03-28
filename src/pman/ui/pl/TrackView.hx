@@ -8,16 +8,18 @@ import tannus.sys.*;
 import tannus.media.Duration;
 
 import crayon.*;
-import foundation.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
+import foundation.*;
+import vex.core.*;
 
 import electron.ext.*;
 import electron.ext.Dialog;
 
 import pman.core.*;
 import pman.media.*;
+import pman.display.*;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -50,8 +52,44 @@ class TrackView extends FlexRow {
 		title = pane( 0 );
 		title.addClass( 'title' );
 
-		size = pane( 1 );
+        info = pane( 1 );
+        info.addClass('info');
+		size = new Pane();
 		size.addClass( 'size' );
+		info.append( size );
+		buttons = new Pane();
+		buttons.addClass('actions');
+		info.append( buttons );
+
+		function addAction(icon:Int->Int->?(Path->Void)->Document, action:Void->Void) {
+            function setcolor(path : vex.core.Path) {
+                //path.style.fill = player.theme.secondary.toString();
+                path.style.fill = 'white';
+            }
+		    var ab = icon(25, 25, setcolor).toFoundationImage();
+		    ab.addClass( 'action' );
+		    ab.width = 25;
+		    ab.height = 25;
+		    buttons.append( ab );
+		    ab.forwardEvent('click', null, MouseEvent.fromJqEvent);
+		    ab.on('click', function(event) {
+		        action();
+		    });
+		    return ab;
+		}
+
+        /*
+		var play = addAction(Icons.playIcon, function() {
+		    if (track != player.track) {
+		        player.openTrack( track );
+		    }
+		});
+
+		var options = addAction(Icons.cogIcon, function() {
+		    var menu:Menu = track.buildMenu();
+		    menu.popup();
+		});
+		*/
 
 		if ( !eventInitted ) {
 		    __events();
@@ -116,7 +154,7 @@ class TrackView extends FlexRow {
 	  */
 	private function __events():Void {
         forwardEvents(['click', 'contextmenu', 'mousedown', 'mouseup', 'mousemove'], null, MouseEvent.fromJqEvent);
-		on('click', onLeftClick);
+        on('click', onLeftClick);
 		on('contextmenu', onRightClick);
 
 		el.plugin( 'disableSelection' );
@@ -219,6 +257,8 @@ class TrackView extends FlexRow {
 	public var track : Track;
 
 	public var title : Pane;
+	public var info : Pane;
+	public var buttons : Pane;
 	public var size : Pane;
 
 	private var menuOpen : Bool = false;
