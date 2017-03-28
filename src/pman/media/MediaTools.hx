@@ -57,6 +57,14 @@ class MediaTools {
         });
     }
 
+    /**
+      * load data for a list of Tracks
+      */
+    public static function loadDataForAll(tracks:Array<Track>, ?done:Array<TrackData>->Void):Void {
+        var loader = new TrackListDataLoader();
+        loader.load(tracks, done);
+    }
+
 	/**
 	  * given a Track object, loads the [media, driver, renderer] fields onto that Track
 	  */
