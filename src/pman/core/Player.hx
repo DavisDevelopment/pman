@@ -36,6 +36,7 @@ import tannus.math.TMath.*;
 import foundation.Tools.*;
 import haxe.extern.EitherType;
 
+using DateTools;
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
@@ -217,14 +218,8 @@ class Player extends EventDispatcher {
 	  * save the current playlist to a file
 	  */
 	public function savePlaylist(?done : Void->Void):Void {
-	    Dialog.showSaveDialog({
-            title: 'Export Playlist',
-            buttonLabel: 'Save',
-            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.xpsf' )),
-            filters: [FileFilter.PLAYLIST]
-	    }, function( spath ) {
+	    function cb(path : Path) {
 	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
-	        var path:Path = new Path( spath );
 	        if (!supportedFormats.has(path.extension.toLowerCase())) {
 	            path.extension = 'xpsf';
 	        }
@@ -244,6 +239,13 @@ class Player extends EventDispatcher {
             if (done != null) {
                 done();
             }
+	    }
+	    app.fileSystemSavePrompt({
+            title: 'Export Playlist',
+            buttonLabel: 'Save',
+            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.xpsf' )),
+            filters: [FileFilter.PLAYLIST],
+            complete: cb
 	    });
 	}
 
@@ -357,11 +359,60 @@ class Player extends EventDispatcher {
 	/**
 	  * capture snapshot of media
 	  */
-	public function snapshot():Void {
+	public function snapshot(?done : Void->Void):Void {
+	    var ip:Bool = !paused;
+	    pause();
+
+	    // when complete
+	    function complete():Void {
+	        if ( ip ) {
+	            play();
+	        }
+	        if (done != null) {
+	            done();
+	        }
+	    }
+
 	    // first off, check whether there's even anything to take a 'snapshot' of
 	    if (session.hasMedia()) {
-
+	        if (track.type.equals(MediaType.MTVideo)) {
+	            var mediaObject = gmo();
+	            if (mediaObject != null) {
+	                var video:Video = cast mediaObject;
+	                var canvas = Canvas.create(video.width, video.height);
+	                canvas.context.drawComponent(video, 0, 0, video.width, video.height, 0, 0, video.width, video.height);
+	                var dataUri = canvas.dataURI();
+	                var img = NativeImage.createFromDataURL( dataUri );
+	                var defaultPath:String = (Date.now().format('snapshot from %Y-%m-%d %H-%M-%S.png'));
+	                app.fileSystemSavePrompt({
+                        title: 'Save Snapshot',
+                        buttonLabel: 'Save',
+                        defaultPath: defaultPath,
+                        filters: [FileFilter.IMAGE],
+                        complete: function(path : Null<Path>) {
+                            if (path == null) {
+                                complete();
+                                return ;
+                            }
+                            path.extension = path.extension.toLowerCase();
+                            var data = (switch ( path.extension ) {
+                                case 'png': img.toPNG;
+                                case 'jpg', 'jpeg': img.toJPEG.bind(100);
+                                default:
+                                    throw 'Error: Unsupported image format';
+                            })();
+                            FileSystem.write(path.toString(), data);
+                            complete();
+                        }
+	                });
+	            }
+                else {
+                    defer( complete );
+                }
+	        }
+            else defer( complete );
 	    }
+        else defer( complete );
 	}
 
     // get media object
