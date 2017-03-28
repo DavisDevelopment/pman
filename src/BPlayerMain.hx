@@ -5,6 +5,7 @@ import tannus.ds.*;
 import tannus.math.Random;
 import tannus.graphics.Color;
 import tannus.node.ChildProcess;
+import tannus.sys.*;
 
 import crayon.*;
 
@@ -136,6 +137,22 @@ class BPlayerMain extends Application {
 
 			callback( paths );
 		});
+	}
+
+	/**
+	  * create and display a FileSystem 'save' dialog
+	  */
+	public function fileSystemSavePrompt(?options:FSSPromptOptions, ?callback:Null<Path>->Void):Void {
+	    if (options == null) options = {};
+	    Dialog.showSaveDialog(_convertFSSPromptOptions(options), function(name : Null<String>) {
+	        var path:Null<Path> = (name != null ? new Path( name ) : null);
+	        if (options.complete != null) {
+	            options.complete( path );
+	        }
+	        if (callback != null) {
+	            callback( path );
+	        }
+	    });
 	}
 
 	/**
@@ -291,6 +308,19 @@ class BPlayerMain extends Application {
 		return res;
 	}
 
+	private function _convertFSSPromptOptions(o : FSSPromptOptions):FileDialogOptions {
+	    var res:FileDialogOptions = {
+            title: o.title,
+            buttonLabel: o.buttonLabel,
+            defaultPath: o.defaultPath,
+            filters: o.filters
+	    };
+	    if (res.defaultPath == null) {
+	        res.defaultPath = db.configInfo.lastDirectory;
+	    }
+	    return res;
+	}
+
 	/**
 	  * ensure that the app has been initialized before running [task]
 	  */
@@ -341,6 +371,14 @@ class BPlayerMain extends Application {
 
     public static var instance : Null<BPlayerMain> = null;
 }
+
+typedef FSSPromptOptions = {
+    ?title:String,
+    ?defaultPath:String,
+    ?buttonLabel:String,
+    ?filters:Array<FileFilter>,
+    ?complete:Null<Path>->Void
+};
 
 typedef FSPromptOptions = {
 	?title:String,
