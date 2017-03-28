@@ -12,11 +12,14 @@ import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
+import pman.ui.pl.TrackView;
 
 import haxe.Serializer;
 import haxe.Unserializer;
 
+import electron.*;
 import electron.Tools.defer;
+import Slambda.fn;
 
 using StringTools;
 using tannus.ds.StringUtils;
