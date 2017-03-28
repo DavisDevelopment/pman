@@ -163,6 +163,7 @@ class MediaStore extends TableWrapper {
                     id: row.id,
                     views: 0,
                     starred: false,
+                    marks: [],
                     meta: null
                 };
 
@@ -226,6 +227,7 @@ typedef MediaInfoRow = {
     id : Int,
     views : Int,
     starred : Bool,
+    marks : Array<String>,
     meta : Null<MediaInfoRowMeta>
 };
 
@@ -233,15 +235,4 @@ typedef MediaInfoRowMeta = {
     duration : Float,
     video : Null<{width:Int, height:Int}>,
     audio: Null<{}>
-};
-
-typedef MediaInfoRating = {
-    ?status : Bool,
-    ?score : Float
-};
-
-typedef MediaInfoTime = {
-    ?start : Float,
-    ?end : Float,
-    ?last : Float
 };

@@ -54,7 +54,7 @@ class PManDatabase {
 		p.then(function( db ) {
 			this.db = db;
 
-			or.fire();
+			defer( or.fire );
 		});
 		p.unless(function( error ) {
 			throw error;
@@ -109,6 +109,7 @@ class PManDatabase {
 	    i('views', 'views');
 	    i('starred', 'starred');
 	    i('duration', 'duration');
+	    i('marks', 'marks');
 	    i('meta', 'meta');
 	}
 

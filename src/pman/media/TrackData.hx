@@ -18,6 +18,7 @@ import haxe.Serializer;
 import haxe.Unserializer;
 
 import electron.Tools.defer;
+import tannus.node.Buffer;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -50,6 +51,7 @@ class TrackData {
             meta = new MediaMetadata();
             meta.pullRaw( row.meta );
         }
+        marks = row.marks.map( Unserializer.run );
     }
 
     /**
@@ -64,6 +66,7 @@ class TrackData {
             id: media_id,
             views: views,
             starred: starred,
+            marks: marks.map( Serializer.run ),
             meta: (meta != null ? meta.toRaw() : null)
         };
     }
@@ -86,6 +89,20 @@ class TrackData {
         prom.unless(function( error ) {
             throw error;
         });
+    }
+
+    /**
+      * add a new Mark to [this]
+      */
+    public function addMark(mark : Mark):Void {
+        switch ( mark.type ) {
+            case Begin, End, LastTime:
+                marks = marks.filter.fn(!_.type.equals( mark.type ));
+                marks.push( mark );
+
+            case Named( name ):
+                marks.push( mark );
+        }
     }
 
 /* === Instance Fields === */
