@@ -69,7 +69,6 @@ class Background {
                 if (cb != null) {
                     cb( win );
                 }
-                win.webContents.openDevTools();
             });
 		});
 	}
