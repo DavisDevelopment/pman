@@ -24,7 +24,6 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 
-@:expose('Mark')
 class Mark {
     /* Constructor Function */
     public function new(type:MarkType, time:Float):Void {
@@ -76,8 +75,26 @@ class Mark {
         return new Mark(type, time);
     }
 
-    public static function create(name:String, time:Float):Mark {
-        return new Mark(Named(name), time);
+    /**
+      * serialize [this] Mark
+      */
+    @:keep
+    public function hxSerialize(s : Serializer):Void {
+        inline function w(x:Dynamic) s.serialize( x );
+
+        w( type );
+        w( time );
+    }
+
+    /**
+      * deserialize [this] Mark
+      */
+    @:keep
+    public function hxUnserialize(u : Unserializer):Void {
+        inline function v<T>():T return u.unserialize();
+
+        type = v();
+        time = v();
     }
 
 /* === Instance Fields === */
