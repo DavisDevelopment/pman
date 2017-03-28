@@ -104,13 +104,35 @@ canvas {
                     //max-height: 18px;
                     overflow: hidden;
                     font-size: 10pt;
+
+                    .starred {
+                        font-weight: bold;
+                        color: lighten(@secondary, 12%);
+                        margin-right: 3px;
+                    }
                 }
 
+                .size {
+                    padding: 5px;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    font-size: 9pt;
+                    text-align: right;
 
+                    .resolution {
+                        margin-right: 3px;
+                    }
+                }
 
                 /* highlighted */
                 &.focused, &.hovered, &:hover {
                     background-color: @secondary;
+
+                    .title {
+                        .starred {
+                            color: white;
+                        }
+                    }
                 }
 
                 &.being-dragged {
