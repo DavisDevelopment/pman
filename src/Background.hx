@@ -166,6 +166,7 @@ class Background {
 	  * Update the application menu
 	  */
 	public function updateMenu():Void {
+	public inline function updateMenu():Void {
 	    Menu.setApplicationMenu(buildMenu());
 	}
 
