@@ -1,10 +1,11 @@
-package pman.utils;
+package pman.format.xspf;
 
 import tannus.ds.*;
 import tannus.io.*;
 import tannus.sys.*;
 
 import pman.core.*;
+import pman.media.*;
 
 import Xml;
 
@@ -15,9 +16,8 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.ds.StringUtils;
 using Slambda;
-using pman.commands.Tools;
 
-class XSPFEncoder {
+class Writer {
 	/* Constructor Function */
 	public function new():Void {
 		
@@ -28,8 +28,8 @@ class XSPFEncoder {
 	/**
 	  * Encode the given Files
 	  */
-	public function encode(files : Array<File>):ByteArray {
-		toXml( files );
+	public function encode(list : Playlist):ByteArray {
+		toXml( list );
 		var el = tannus.xml.Elem.fromXml( root );
 		var data:String = el.print( true );
 		data = ('<?xml version="1.0" encoding="UTF-8"?>\n' + data);
@@ -39,7 +39,7 @@ class XSPFEncoder {
 	/**
 	  * Encode the given FileList
 	  */
-	private function toXml(files : Array<File>):Xml {
+	private function toXml(list : Playlist):Xml {
 		doc = Xml.createDocument();
 		root = Xml.createElement( 'playlist' );
 		doc.addChild( root );
@@ -47,8 +47,8 @@ class XSPFEncoder {
 		root.set('xmlns', 'http://xspf.org/ns/0/');
 		tracks = Xml.createElement( 'trackList' );
 		root.addChild( tracks );
-		for (file in files) {
-			addFile( file );
+		for (track in list) {
+		    addTrack( track );
 		}
 		return doc;
 	}
@@ -56,8 +56,8 @@ class XSPFEncoder {
 	/**
 	  * add a File to the Playlist
 	  */
-	private function addFile(file : File):Void {
-		var track = Xml.parse('<track><location>file://${file.path}</location></track>').firstElement();
+	private inline function addTrack(track : Track):Void {
+		var track = Xml.parse('<track><location>${track.uri}</location></track>').firstElement();
 		tracks.addChild( track );
 	}
 
@@ -67,7 +67,12 @@ class XSPFEncoder {
 	private var root : Xml;
 	private var tracks : Xml;
 
-	public static inline function run(files : Array<File>):ByteArray {
-		return new XSPFEncoder().encode( files );
+/* === Static Methods === */
+
+    /**
+      * shorthand method for encoding an Array of tracks
+      */
+	public static inline function run(tracks : Playlist):ByteArray {
+		return (new Writer().encode(tracks));
 	}
 }
