@@ -21,7 +21,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.media.PlaylistChange;
 import pman.ui.pl.*;
-import pman.search.SearchEngine.Match as SearchMatch;
+import pman.search.Match as SearchMatch;
 
 using StringTools;
 using Lambda;
