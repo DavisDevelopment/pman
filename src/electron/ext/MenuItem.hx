@@ -5,7 +5,11 @@ import haxe.extern.EitherType;
 import js.html.Event;
 import js.html.Window;
 
+#if renderer_process
 @:jsRequire('electron', 'remote.MenuItem')
+#elseif main_process
+@:jsRequire('electron', 'MenuItem')
+#end
 extern class MenuItem {
 	public function new(options : MenuItemOptions):Void;
 

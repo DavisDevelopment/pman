@@ -1,6 +1,10 @@
 package electron.ext;
 
+#if renderer_process
 @:jsRequire('electron', 'remote.dialog')
+#elseif main_process
+@:jsRequire('electron', 'dialog')
+#end
 extern class Dialog {
 	@:overload(function(options:FileOpenOptions, callback:Array<String>->Void):Void {})
 	@:overload(function(win:BrowserWindow, options:FileOpenOptions, callback:Array<String>->Void):Void {})
