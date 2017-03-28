@@ -726,6 +726,23 @@ class Player extends EventDispatcher {
 			newTrack.editData(function( data ) {
 			    // increment the 'views'
 			    data.views++;
+
+			    for (m in data.marks) {
+			        if (m.type.equals( LastTime )) {
+			            var jt:Float = m.time;
+			            confirm('Do you want to restart playback where you left off?', function(answer) {
+			                if ( answer ) {
+			                    currentTime = jt;
+			                }
+                            else {
+                                newTrack.editData(function(data) {
+                                    data.marks = data.marks.filter.fn(!_.type.equals(LastTime));
+                                });
+                            }
+			            });
+			            break;
+			        }
+			    }
 			});
 		}
 
