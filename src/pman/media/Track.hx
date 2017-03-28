@@ -305,6 +305,18 @@ class Track {
 	public var ready(get, never):Bool;
 	private inline function get_ready():Bool return _ready;
 
+	public var main(get, never):BPlayerMain;
+	private inline function get_main() return BPlayerMain.instance;
+
+	public var player(get, never):Player;
+	private inline function get_player() return main.player;
+
+	public var session(get, never):PlayerSession;
+	private inline function get_session() return player.session;
+
+	public var playlist(get, never):Playlist;
+	private inline function get_playlist() return session.playlist;
+
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
