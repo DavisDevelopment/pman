@@ -17,5 +17,6 @@ dist/releases
 dist/releases/**
 dist/releases/**/
 dist/installers/*
+dist/buildscripts/*.js
 
 dist/pack.js
