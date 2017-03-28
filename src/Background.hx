@@ -228,6 +228,9 @@ class Background {
 
 /* === Utility Methods === */
 
+    /**
+      * get paths descended from the application path
+      */
 	private function ap(?s : String):Path {
 		var p:Path = (_p != null ? _p : (_p = App.getAppPath()));
 		if (s != null)
@@ -235,6 +238,9 @@ class Background {
 		return p;
 	}
 
+    /**
+      * get apps descended from the userdata path
+      */
 	private inline function uip(?s:String):Path {
 	    return (s==null?App.getPath(UserData):App.getPath(UserData).plusString(s));
 	}
