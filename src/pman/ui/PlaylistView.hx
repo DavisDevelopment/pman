@@ -321,14 +321,9 @@ class PlaylistView extends Pane {
     /**
       * get the TrackView associated with the given Track
       */
-    public function viewFor(track : Track):Null<TrackView> {
-		for (t in tracks) {
-			if (t.track == track) {
-				return t;
-			}
-		}
-		return null;
-	}
+    public inline function viewFor(track : Track):Null<TrackView> {
+        return _tc[track.uri];
+    }
 
     /**
       * get the index of the given TrackView
