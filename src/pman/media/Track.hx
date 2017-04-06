@@ -28,11 +28,12 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
+using tannus.ds.SortingTools;
 
 /**
   * pman.media.Track -- object that centralizes media playback state
   */
-class Track {
+class Track implements IComparable<Track> {
 	/* Constructor Function */
 	public function new(p:MediaProvider):Void {
 		provider = p;
@@ -141,6 +142,7 @@ class Track {
 	  */
 	public function clone(deep:Bool = false):Track {
 	    var copy = new Track( provider );
+	    copy.data = data;
 	    return copy;
 	}
 
@@ -148,7 +150,14 @@ class Track {
       * check for equality
       */
     public inline function equals(other : Track):Bool {
-        return (provider == other.provider);
+        return (compareTo( other ) == 0);
+    }
+
+    /**
+      * perform 'icompare' operation between [this] and [other]
+      */
+    public function compareTo(other : Track):Int {
+        return (source.compareEnumValues( other.source ));
     }
 
     /**
