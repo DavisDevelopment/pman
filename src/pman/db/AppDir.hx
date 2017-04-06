@@ -166,6 +166,44 @@ class AppDir {
 	    });
 	}
 
+    /**
+      * get path to a template file
+      */
+	public inline function templatePath(name : String):Path {
+	    return appPath('assets/templates/$name');
+	}
+
+	/**
+	  * read contents of a template file
+	  */
+	public function readTemplate(name : String):Null<String> {
+	    var tp = templatePath( name );
+	    if (Fs.exists( tp )) {
+	        return (Fs.read( tp ).toString());
+	    }
+        else return null;
+	}
+
+	/**
+	  * get a Template
+	  */
+	public function getTemplate(name : String):Null<haxe.Template> {
+	    var tt = readTemplate( name );
+	    if (tt == null)
+	        return null;
+	    return new haxe.Template( tt );
+	}
+
+    /**
+      * get the path of the application
+      */
+	public function appPath(?s : String):Path {
+	    var p:Path = App.getAppPath();
+	    if (s != null)
+	        p = p.plusString( s );
+	    return p;
+	}
+
 #if renderer_process
 
     public inline function hasSavedPlaybackSettings():Bool {
