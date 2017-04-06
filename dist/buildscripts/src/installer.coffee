@@ -5,16 +5,36 @@ async = require 'async'
 _ = require 'underscore'
 
 tools = require './tools'
-standalone = require './standalone'
-{PackBuild} = require './standalone'
 
-class InstallerBuild extends tools.Build
+deb_installer = require 'electron-installer-debian'
+win_installer = require 'electron-installer-windows'
+installer_funcs = {
+    win32: win_installer
+    linux: deb_installer
+}
+
+exports['InstallerBuild'] = class InstallerBuild extends tools.Build
     constructor: (platform, arch) ->
         super()
 
+        @platform = platform
+        @arch = arch
         @options = {
-            src: null
+            src: tools.scriptdir('releases', "pman-#{@platform}-#{@arch}")
+            dest: tools.scriptdir('installers')
+            arch: @arch
         }
 
+    execute: (callback) ->
+        self = this
+        @confirm (err, doit) =>
+            if doit
+                self.getf()?(self.options, callback)
+            else
+                _.defer(_.partial(callback, null, null))
+
+    getf: ->
+        return installer_funcs[@platform]
+
     confirm: (callback) ->
-        tools.promptBool("package for #{@options.platform} #{@options.arch}?", no, callback)
+        tools.promptBool("create #{@platform}-#{@arch} installer?", no, callback)

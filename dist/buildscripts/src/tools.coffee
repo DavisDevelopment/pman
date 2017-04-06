@@ -37,3 +37,7 @@ Build = exports['Build'] = class
 
     confirm: (callback) ->
         _.defer(_.partial(callback, null, true))
+
+# Path related stuff
+scriptdir = exports['scriptdir'] = (stuff...) ->
+    return path.resolve(__dirname, '..', stuff...)

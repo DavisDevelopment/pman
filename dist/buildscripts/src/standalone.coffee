@@ -20,9 +20,9 @@ options = exports['options'] = do ->
       out: path.join(scriptdir, 'releases')
       'app-bundle-id': ''
       'app-version': ''
-      overwrite: true
-      asar: true
-      prune: true
+      overwrite: yes
+      asar: no
+      prune: yes
       icon: path.join(scriptdir, 'assets/icon32.png')
       app_version: '0.1.2'
       bundle_id: ''
