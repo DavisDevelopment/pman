@@ -47,6 +47,7 @@ class Icons {
 	    return namedPath(w, h, 'selection-collapse', f);
 	}
 	public static function cogIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'cog', f);
+	public static function clearIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'clear', f);
 
 	/**
 	  * create the Chromecast icon
