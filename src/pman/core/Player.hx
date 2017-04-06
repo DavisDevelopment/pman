@@ -617,6 +617,11 @@ class Player extends EventDispatcher {
 	  * add a batch of media items to the queue
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
+	    // ensure that there are no duplicate entries
+	    var trackSet:Set<Track> = new Set();
+	    trackSet.pushMany( items );
+	    items = trackSet.toArray();
+
 	    function complete():Void {
 	        defer(function() {
 	            if (done != null) {
