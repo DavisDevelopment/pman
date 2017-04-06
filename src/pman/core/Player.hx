@@ -180,6 +180,67 @@ class Player extends EventDispatcher {
 	public inline function getPlaylistView():Null<PlaylistView> return page.playlistView;
 
 	/**
+	  * save current playlist to the filesystem
+	  */
+	public function savePlaylist(saveAs:Bool=false, ?done:Void->Void):Void {
+	    trace(untyped [saveAs, done]);
+        var l:Playlist = session.playlist;
+
+	    function finish():Void {
+	        var plf = app.appDir.playlistFile( l.title );
+	        var data = pman.format.xspf.Writer.run( l );
+	        plf.write( data );
+	        if (done != null) {
+	            defer( done );
+	        }
+	    }
+
+	    if (session.name == null || saveAs) {
+	        prompt('playlist name', null, function( title ) {
+	            if (title == null) {
+	                savePlaylist(saveAs, done);
+	            }
+                else {
+                    //l.title = title;
+                    session.name = title;
+                    finish();
+                }
+	        });
+	    }
+        else {
+            finish();
+        }
+	}
+
+	/**
+	  * load the saved playlist by the given name
+	  */
+	public function loadPlaylist(name:String, ?done:Void->Void):Void {
+	    if (app.appDir.playlistExists( name )) {
+	        var plf = app.appDir.playlistFile( name );
+	        var reader = new pman.format.xspf.Reader();
+	        var l:Playlist = reader.read(plf.read());
+	        clearPlaylist();
+	        var tmpShuffle = shuffle;
+	        shuffle = false;
+			session.name = name;
+
+	        addItemList(l.toArray(), function() {
+                shuffle = tmpShuffle;
+                session.name = name;
+                if (done != null) {
+                    defer( done );
+                }
+	        });
+	    }
+        else {
+            if (done != null) {
+                defer( done );
+            }
+        }
+	}
+
+	/**
 	  * save current player-state to the filesystem
 	  */
 	public function saveState(saveAs:Bool=false, ?done:Void->Void):Void {
