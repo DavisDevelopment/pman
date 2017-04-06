@@ -8,9 +8,12 @@ import pman.core.*;
 import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
+import pman.search.SearchTerm;
 
 import haxe.Serializer;
 import haxe.Unserializer;
+
+import tannus.math.TMath.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -18,6 +21,8 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
+using tannus.math.TMath;
+using pman.search.SearchTools;
 
 class SearchEngine<T> {
 	/* Constructor Function */
@@ -52,10 +57,6 @@ class SearchEngine<T> {
 	  * perform the search
 	  */
 	public function getMatches():Array<Match<T>> {
-		if ( !caseSensitive ) {
-			terms = terms.map.fn(_.toLowerCase());
-		}
-
 		var matches:Array<Match<T>> = new Array();
 		for (item in context) {
 			var m = _match( item );
@@ -71,23 +72,14 @@ class SearchEngine<T> {
 	  * attempt a Match
 	  */
 	private function _match(item : T):Null<Match<T>> {
-		var text = getValue( item );
-		if ( !caseSensitive ) text = text.toLowerCase();
+		var values = getValues( item );
+		if ( !caseSensitive ) {
+		    values = values.map.fn(_.toLowerCase());
+        }
 		var score:Int = 0;
 		var minScore = 2;
 		for (term in terms) {
-		    /*
-			var fion = fio(text, term);
-			if (fion > 0) {
-				if (term.length >= minScore && fion < minScore) {
-					continue;
-				}
-				else {
-					score += fion;
-				}
-			}
-			*/
-		    var fion = fio(text, term);
+		    var fion = term.getScore( values );
 		    score += fion;
 		}
 		if (score > minScore) {
@@ -109,10 +101,23 @@ class SearchEngine<T> {
 	}
 
 	/**
+	  * get multiple values for the given context item
+	  */
+	private function getValues(item : T):Array<String> {
+	    return [''];
+	}
+
+	/**
 	  * split an input String into terms,
 	  * performing some rudimentary parsing along the way
 	  */
 	private function parseStringToTerms(input : String):Void {
+	    input = __checkFirstChar(input.trim());
+	    terms = SearchTermParser.runString( input );
+	    trace(terms + '');
+	}
+	/*
+	private function parseStringToTerms_(input : String):Void {
 		input = __checkFirstChar(input.trim());
 		
 		var currentWord:String = '';
@@ -140,6 +145,7 @@ class SearchEngine<T> {
 		}
 		flush();
 	}
+	*/
 
 	/**
 	  * interprets the search-term leader, if there is any
@@ -157,45 +163,10 @@ class SearchEngine<T> {
 		}
 	}
 
-	/**
-	  * searches for [t] in [src], finding the index in [src] at which [t] begins,
-	  * but instead of looking for an exact match, it just counts how many characters of [t]
-	  * appear in [src] in order, and returns that value as well
-	  */
-	private static function fio(src:String, t:String, minmatched:Int=0):Int {
-		//var start:Int = 0;
-		var mostmatched:Int = 0;
-		var nmatched:Int = 0;
-		// reset; keep largest
-		inline function rkl(){
-			mostmatched = Std.int(Math.max(nmatched, mostmatched));
-			nmatched = 0;
-		}
-		for (i in 0...src.length) {
-			var c = src.charAt( i );
-			if (c == t.charAt( nmatched  )) {
-				nmatched++;
-			}
-			else if (nmatched > 0) {
-				rkl();
-			}
-			else {
-				continue;
-			}
-		}
-		rkl();
-		if (mostmatched > 0) {
-			return mostmatched;
-		}
-		else {
-			return 0;
-		}
-	}
-
 /* === Instance Fields === */
 
 	public var context : Array<T>;
-	public var terms : Array<String>;
+	public var terms : Array<SearchTerm>;
 
 	public var caseSensitive : Bool;
 	public var useEReg : Bool;
@@ -203,5 +174,4 @@ class SearchEngine<T> {
 
 /* === Static Fields === */
 
-	private static inline var ACCEPTIBLE_SYMBOLS:String = '#,./-';
 }
