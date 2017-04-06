@@ -10,15 +10,18 @@ before = exports['before'] = (s, what) -> s[...s.indexOf(what)]
 after = exports['after'] = (s, what) -> s[(s.indexOf(what) + what.length)...]
 divide = exports['divide'] = (s, what) -> [before(s, what), after(s, what)]
 
+prompt.start()
 promptBool = exports['promptBool'] = ([msg, def]..., callback) ->
+    console.log 'anus'
     _cb = (error, result) ->
-        if error?
-            callback(error, false)
-        else
-            val = result.val.toLowerCase() == 'y'
-            callback(null, val)
+        #prompt.stop()
+        _.defer ->
+            if error?
+                callback(error, false)
+            else
+                val = result.val.toLowerCase() == 'y'
+                callback(null, val)
 
-    prompt.start()
     prompt.get({
         properties: {
             val: {
@@ -28,15 +31,61 @@ promptBool = exports['promptBool'] = ([msg, def]..., callback) ->
         }
     }, _cb)
 
-Build = exports['Build'] = class
+exports['Build'] = class Build
     constructor: ->
         null
 
     execute: (callback) ->
-        null
+        _.defer(_.partial(callback, null, null))
 
-    confirm: (callback) ->
-        _.defer(_.partial(callback, null, true))
+    confirm: ([msg, def=no]..., callback) ->
+        promptBool msg, def, callback
+
+exports['Task'] = class Task extends Build
+    constructor: ->
+        @promptMessage = 'perform this task?'
+        @promptDefault = no
+        @promptResult = null
+
+    perform: (callback) ->
+        super( callback )
+
+    confirm: ( cb ) ->
+        if not @promptResult?
+            callback = (error, value) =>
+                if error?
+                    cb(error, null)
+                else
+                    @promptResult = value
+                    cb(error, value)
+            super(@promptMessage, @promptDefault, callback)
+        else
+            _.defer(_.partial(cb, null, @promptResult))
+
+    execute: ( cb ) ->
+        @confirm (error, perform) =>
+            if error?
+                cb error, null
+            else if perform
+                @perform cb
+            else
+                cb(null, null)
+
+exports['Batch'] = class Batch extends Task
+    constructor: (tasks=[]) ->
+        super()
+        @tasks = tasks
+
+    perform: ( cb ) ->
+        self = this
+        conf = (t)->(f)->t.confirm(f)
+        perf = (t)->(f)->t.execute(f)
+
+        confs = (conf( t ) for t in @tasks)
+        perfs = (perf( t ) for t in @tasks)
+
+        async.series confs, (err, vals) ->
+            async.series perfs, cb
 
 # Path related stuff
 scriptdir = exports['scriptdir'] = (stuff...) ->
