@@ -49,6 +49,19 @@ class PlayerControlsView extends Ent {
 
 			addChild( seekBar );
 		});
+
+        // wait two seconds
+        @:privateAccess
+        wait(1000, function() {
+            // update the text boxes for all of the buttons
+            for (btn in buttons) {
+                if (btn.label != null) {
+                    var tmp = btn.tb.text;
+                    btn.tb.text = 'tmp';
+                    btn.tb.text = tmp;
+                }
+            }
+        });
 	}
 
 /* === Instance Methods === */
