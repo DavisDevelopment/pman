@@ -55,6 +55,7 @@ class PlaylistView extends Pane {
 		defer(function() {
             //searchWidget.searchInput.focus();
             scrollToActive();
+            searchWidget.update();
 		});
 	}
 
