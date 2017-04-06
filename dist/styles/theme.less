@@ -123,6 +123,7 @@ canvas {
                 }
 
                 .info {
+                    overflow: hidden;
                     .size {
                         padding: 5px;
                         display: -webkit-box;
@@ -150,25 +151,6 @@ canvas {
                             color: white;
                         }
                     }
-                }
-
-                /*
-                &:hover {
-                    .info {
-                        .size {
-                            display: none;
-                        }
-
-                        .actions {
-                            display: -webkit-box;
-                        }
-                    }
-                }
-                */
-
-                &.being-dragged {
-                    position: absolute;
-                    z-index: 100;
                 }
             }
         }
