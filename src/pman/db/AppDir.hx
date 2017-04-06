@@ -53,8 +53,25 @@ class AppDir {
 	public inline function sessionsDirectory():Directory {
 	    return new Directory(sessionsPath(), true);
 	}
+	public inline function playlistsPath():Path return path().plusString( 'saved_playlists' );
+	public inline function playlistsDirectory():Directory {
+	    return new Directory(playlistsPath(), true);
+	}
 	public inline function playbackSettingsPath():Path return path().plusString('playbackProperties.dat');
 	public inline function playbackSettingsFile():File return new File(playbackSettingsPath());
+
+	public inline function playlistFile(name : String):File {
+	    return playlistsDirectory().file(name + '.xspf');
+	}
+	public function allSavedPlaylistNames():Array<String> {
+	    var pld = playlistsDirectory();
+	    return pld.entries.map.fn( _.path ).filter.fn(_.extension == 'xspf').map(function(path) {
+	        return (new Path( path.name ).basename);
+	    });
+	}
+	public inline function playlistExists(name : String):Bool {
+	    return Fs.exists(playlistsPath().plusString(name + '.xspf').toString());
+	}
 
 	/**
 	  * save the given session info with the given name
