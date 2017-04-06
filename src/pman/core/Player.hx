@@ -890,6 +890,7 @@ class Player extends EventDispatcher {
 	        stack.push(function(next) {
 	            if (track != null) {
 	                track.buildMenu(function( trackItem ) {
+	                    trackItem = trackItem.slice( 2 );
 	                    menu.push({
                             label: 'Track',
                             submenu: trackItem
