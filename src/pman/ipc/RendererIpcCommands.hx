@@ -48,7 +48,7 @@ class RendererIpcCommands {
 
         b('OpenFile', function() player.selectAndOpenFiles());
         b('OpenDirectory', function() player.selectAndOpenDirectory());
-        b('SavePlaylist', function() player.savePlaylist());
+        b('ExportPlaylist', function() player.exportPlaylist());
         b('TogglePlaylist', function() player.togglePlaylist());
         b('ClearPlaylist', function() player.clearPlaylist());
         b('ShufflePlaylist', function() player.shufflePlaylist());
