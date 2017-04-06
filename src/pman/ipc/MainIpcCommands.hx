@@ -33,8 +33,11 @@ class MainIpcCommands {
     /**
       * send command
       */
-    public inline function send(w:BrowserWindow, cmd:String, ?args:Array<Dynamic>):Void {
-        w.webContents.send('command:$cmd', (args != null ? args : []));
+    public function send(w:BrowserWindow, cmd:String, ?args:Array<Dynamic>):Void {
+        var params:Array<Dynamic> = ['command:$cmd'];
+        if (args != null)
+            params = params.concat( args );
+        Reflect.callMethod(w.webContents, w.webContents.send, params);
     }
 
 /* === Instance Fields === */
