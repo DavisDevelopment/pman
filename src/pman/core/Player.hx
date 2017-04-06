@@ -732,6 +732,10 @@ class Player extends EventDispatcher {
 		else {
 			var newTrack:Track = delta.current;
 			app.title = 'PMan | ${newTrack.title}';
+			message({
+                text: newTrack.title,
+                fontSize: '10pt'
+			});
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
