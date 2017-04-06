@@ -111,32 +111,32 @@ class TrackView extends FlexRow {
 	  * update [this]'s content
 	  */
 	public function update():Void {
-        var td = track.data;
-	    // Track Title
-		title.text = track.title;
-		if (td != null) {
-		    if ( td.starred ) {
-		        title.el.prepend('<span class="starred">*</span>');
-		    }
+	    var td = track.data;
+
+        title.text = track.title;
+        if (td != null) {
+            if ( td.starred ) {
+                title.el.prepend('<span class="starred">*</span>');
+            }
             else {
                 title.el.remove('span.starred');
             }
-		}
+        }
 
         // Track Size
-		if (td != null && td.meta != null) {
-		    var tdm = td.meta;
-		    var dur = Duration.fromFloat( tdm.duration );
-		    size.text = dur.toString();
+        if (td != null && td.meta != null) {
+            var tdm = td.meta;
+            var dur = Duration.fromFloat( tdm.duration );
+            size.text = dur.toString();
 
             if (tdm.video != null) {
                 var res = (tdm.video.height + 'p');
-                size.el.prepend('<span class="resolution"><sup>($res)</sup></span>');
+                size.el.prepend('<span class="resolution">($res)</span>');
             }
             else {
                 size.el.remove('span.resolution');
             }
-		}
+        }
         else {
             var trackPath = track.getFsPath();
             if (trackPath == null) {
