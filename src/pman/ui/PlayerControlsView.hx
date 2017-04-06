@@ -17,6 +17,9 @@ import pman.ui.ctrl.*;
 import tannus.math.TMath.*;
 import gryffin.Tools.*;
 
+import motion.Actuate;
+import motion.easing.*;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
@@ -106,13 +109,27 @@ class PlayerControlsView extends Ent {
 	override function update(stage : Stage):Void {
 		super.update( stage );
 
+        // cache 'previous' value of [uiEnabled]
+		var uie:Bool = uiEnabled;
+
 		var mp = stage.getMousePosition();
 		hovered = (mp != null && containsPoint( mp ));
 		var events = ['mousemove', 'click'];
 		var times = events.map( stage.mostRecentOccurrenceTime  ).filter.fn(_ != null).map.fn(now - _);
 		if (!times.empty()) {
 			var last = times.min.fn( _ );
-			uiEnabled = (hovered || last <= uiHideDelay);
+			var nuie = (hovered || last <= uiHideDelay);
+
+            // if [uiEnabled] has just changed values
+			if (nuie != uie && !playingAnimation) {
+			    // invoke animation methods
+			    if ( nuie ) {
+			        showUi();
+			    }
+                else {
+                    hideUi();
+                }
+			}
 		}
 
         if ( uiEnabled ) {
@@ -147,13 +164,43 @@ class PlayerControlsView extends Ent {
 	}
 
 	/**
+	  * start 'hide' animation
+	  */
+	public function hideUi():Void {
+	    playingAnimation = true;
+	    Actuate.tween(this, 0.5, {
+            yOffset: h
+	    }).onUpdate(function() {
+	        calculateGeometry( rect );
+        }).onComplete(function() {
+            playingAnimation = false;
+            uiEnabled = false;
+        }).ease( Sine.easeInOut );
+	}
+
+    /**
+      * show the ui
+      */
+	public function showUi():Void {
+	    playingAnimation = true;
+	    uiEnabled = true;
+	    Actuate.tween(this, 0.2, {
+            yOffset: 0
+	    }).onUpdate(function() {
+	        calculateGeometry( rect );
+        }).onComplete(function() {
+            playingAnimation = false;
+        }).ease( Sine.easeInOut );
+	}
+
+	/**
 	  * calculate [this]'s geometry
 	  */
 	override function calculateGeometry(r : Rectangle):Void {
 		r = playerView.rect;
 		w = r.w;
 		h = 55;
-		y = r.h;
+		y = (r.h + yOffset);
 		x = 0;
 
 		__positionButtons();
@@ -240,6 +287,8 @@ class PlayerControlsView extends Ent {
 	public var hovered : Bool = false;
 	public var uiEnabled : Bool;
 	public var uiHideDelay : Float;
+	public var yOffset : Float = 0;
+	public var playingAnimation:Bool = false;
 
 	private var cidm : Map<String, Int>;
 }
