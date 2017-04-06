@@ -62,48 +62,11 @@ class KeyboardCommands {
 			        sess.playlist.remove( ct );
 			    }
 
-			// Ctrl+O
-			//case LetterO if (event.ctrlKey || event.metaKey):
-				//p.selectAndOpenFiles();
-
-			// Ctrl+F
-			//case LetterF if (event.ctrlKey || event.metaKey):
-				//p.selectAndOpenDirectory();
-
-			// Ctrl+Q
-			case LetterQ if (event.metaKey || event.ctrlKey):
-				app.quit();
-
-			// Ctrl+W
-			//case LetterW if (event.metaKey || event.ctrlKey):
-				//p.clearPlaylist();
-
-			// Ctrl+R
-			case LetterR if (event.metaKey || event.ctrlKey):
-				app.browserWindow.webContents.reload();
-
-			// Ctrl+Shift+J
-			//case LetterJ if (event.shiftKey && (event.metaKey || event.ctrlKey)):
-				//var wc = app.browserWindow.webContents;
-				//if (wc.isDevToolsOpened()) {
-					//wc.closeDevTools();
-				//}
-				//else {
-					//wc.openDevTools();
-				//}
-
-			// Ctrl+S
-			//case LetterS if (event.metaKey || event.ctrlKey):
-				//app.appDir.saveSession(p.session.toJson());
-				//p.saveState();
-
             // snapshot
             case LetterS if ( event.shiftKey ):
                 p.snapshot();
 
-			//case LetterL:
-				//p.togglePlaylist();
-
+            // toggle controls visibility
 			case LetterH:
 				p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
 
