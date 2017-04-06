@@ -48,7 +48,11 @@ class KeyboardCommands {
 
 			// P
 			case LetterP:
-				p.gotoPrevious();
+			    var n = fncc();
+			    if (n == 1)
+                    p.gotoPrevious();
+                else
+                    p.gotoByOffset( n );
 
 			// X
 			case LetterX:
