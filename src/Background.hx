@@ -136,6 +136,16 @@ class Background {
                 click: function(i, w:BrowserWindow) {
                     w.webContents.toggleDevTools();
                 }
+            },
+            {
+                label: 'Reload App',
+                accelerator: 'CommandOrControl+R',
+                click: function() App.relaunch()
+            },
+            {
+                label: 'Exit App',
+                accelerator: 'CommandOrControl+Q',
+                click: function() close()
             }
             ]
 	    });
