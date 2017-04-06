@@ -804,25 +804,23 @@ class Player extends EventDispatcher {
 			    // increment the 'views'
 			    data.views++;
 
-			    for (m in data.marks) {
-			        if (m.type.equals( LastTime )) {
-			            var jt:Float = m.time;
-			            var box = confirm('Do you want to restart playback where you left off?', function(answer) {
-			                if ( answer ) {
-			                    currentTime = jt;
-			                }
-                            else {
-                                newTrack.editData(function(data) {
-                                    data.marks = data.marks.filter.fn(!_.type.equals(LastTime));
-                                });
-                            }
-			            });
-			            session.trackChanged.once(function(x) {
-			                box.close();
-			            });
-			            break;
-			        }
-			    }
+                // get previous playback progress (if available)
+                var lastTime:Null<Float> = data.getLastTime();
+
+                // if playback progress was retrieved
+                if (lastTime != null) {
+                    defer(function() {
+                        // seek to it
+                        currentTime = lastTime;
+
+                        // tell the user that such an action was taken
+                        message({
+                            text: '${newTrack.title}\n\nPlayback progress restored\nHit Backspace to start over',
+                            fontSize: '10pt',
+                            duration: 3000.0
+                        });
+                    });
+                }
 			});
 		}
 
