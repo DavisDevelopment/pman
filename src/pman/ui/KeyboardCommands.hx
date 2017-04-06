@@ -80,6 +80,16 @@ class KeyboardCommands {
 				var n:Float = -seekTimeDelta( event );
 				p.currentTime += n;
 
+            // Up Arrow Key
+			case Up:
+			    var n:Float = volumeDelta( event );
+			    p.volume += n;
+
+			// Down Arrow Key
+			case Down:
+			    var n:Float = -volumeDelta( event );
+			    p.volume += n;
+
 			// [ key
 			case OpenBracket:
 				p.playbackRate -= (fncc() * 0.02);
@@ -95,7 +105,6 @@ class KeyboardCommands {
 			// M
 			case LetterM:
 				if ( event.ctrlKey ) {
-					//TODO mark current location in the current media
 					p.addBookmark();
 				}
 				else {
