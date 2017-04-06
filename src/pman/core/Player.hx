@@ -134,13 +134,14 @@ class Player extends EventDispatcher {
 	/**
 	  * prompt the user to confirm a something
 	  */
-	public function confirm(msg:String, callback:Bool->Void):Void {
+	public function confirm(msg:String, callback:Bool->Void):ConfirmBox {
 	    var box = new ConfirmBox();
 	    box.prompt(msg, function(v) {
 	        box.close();
 	        callback( v );
 	    });
 	    box.open();
+	    return box;
 	}
 
 	/**
