@@ -33,7 +33,7 @@ using pman.Tools;
 class TrackView extends FlexRow {
 	/* Constructor Function */
 	public function new(v:PlaylistView, t:Track):Void {
-		super([9, 3]);
+		super([12, 0]);
 
 		addClass( 'track' );
 
@@ -49,46 +49,28 @@ class TrackView extends FlexRow {
 	  * Build [this] 
 	  */
 	override function populate():Void {
+
 		title = pane( 0 );
 		title.addClass( 'title' );
+		title.columns.on('small').is( 12 );
+		title.columns.on('small').expand = true;
+		title.columns.on('large').is( 9 );
 
         info = pane( 1 );
         info.addClass('info');
+        info.columns.on('small').remove();
+        info.columns.on('large').is( 3 );
+        info.addClass( 'hide-for-small-only' );
+        info.addClass( 'hide-for-medium-only' );
+
 		size = new Pane();
 		size.addClass( 'size' );
 		info.append( size );
+
+		/*
 		buttons = new Pane();
 		buttons.addClass('actions');
 		info.append( buttons );
-
-		function addAction(icon:Int->Int->?(Path->Void)->Document, action:Void->Void) {
-            function setcolor(path : vex.core.Path) {
-                //path.style.fill = player.theme.secondary.toString();
-                path.style.fill = 'white';
-            }
-		    var ab = icon(25, 25, setcolor).toFoundationImage();
-		    ab.addClass( 'action' );
-		    ab.width = 25;
-		    ab.height = 25;
-		    buttons.append( ab );
-		    ab.forwardEvent('click', null, MouseEvent.fromJqEvent);
-		    ab.on('click', function(event) {
-		        action();
-		    });
-		    return ab;
-		}
-
-        /*
-		var play = addAction(Icons.playIcon, function() {
-		    if (track != player.track) {
-		        player.openTrack( track );
-		    }
-		});
-
-		var options = addAction(Icons.cogIcon, function() {
-		    var menu:Menu = track.buildMenu();
-		    menu.popup();
-		});
 		*/
 
 		if ( !eventInitted ) {
@@ -258,8 +240,8 @@ class TrackView extends FlexRow {
 	public var list : PlaylistView;
 	public var track : Track;
 
-	public var title : Pane;
-	public var info : Pane;
+	public var title : FlexPane;
+	public var info : FlexPane;
 	public var buttons : Pane;
 	public var size : Pane;
 

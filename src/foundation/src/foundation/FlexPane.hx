@@ -9,6 +9,7 @@ import Math.*;
 import tannus.math.TMath.*;
 
 using Lambda;
+using Slambda;
 using tannus.ds.ArrayTools;
 using StringTools;
 using tannus.ds.StringUtils;
@@ -84,6 +85,21 @@ class FlexColumnSize {
 
 	/* set the value for [size] */
 	public inline function is(value : Int):Int return (size = value);
+
+	public function className():Null<String> {
+		return pane.classes().firstMatch.fn(_.startsWith('$name-'));
+	}
+
+	public function remove():Bool {
+	    var cn = className();
+	    if (cn != null) {
+	        pane.removeClass( cn );
+	        return true;
+	    }
+        else {
+            return false;
+        }
+	}
 
 /* === Computed Instance Fields === */
 
