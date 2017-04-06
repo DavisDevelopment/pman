@@ -234,7 +234,7 @@ class Player extends EventDispatcher {
 	/**
 	  * save the current playlist to a file
 	  */
-	public function savePlaylist(?done : Void->Void):Void {
+	public function exportPlaylist(?done : Void->Void):Void {
 	    function cb(path : Path) {
 	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
 	        if (!supportedFormats.has(path.extension.toLowerCase())) {
