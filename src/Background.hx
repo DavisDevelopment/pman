@@ -17,6 +17,7 @@ import tannus.TSys as Sys;
 
 import pman.db.AppDir;
 import pman.ipc.MainIpcCommands;
+import pman.ww.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -43,6 +44,17 @@ class Background {
 		App.onAllClosed( _onAllClosed );
 
 		_listen();
+	}
+
+    /**
+      * stop the background script
+      */
+	public function close():Void {
+	    App.quit();
+	    /*
+	    serverBoss.send('close', null);
+	    serverBoss.kill();
+	    */
 	}
 
 	/**
@@ -202,20 +214,31 @@ class Background {
 	 * when the Application is ready to start doing stuff
 	 */
 	private function _ready():Void {
-		trace(' -- background process ready -- ');
+	    #if release
+	        null;
+	    #else
+            trace(' -- background process ready -- ');
+        #end
 
 		updateMenu();
 		
 		openPlayerWindow(function( bw ) {
 			null;
 		});
+
+        /*
+		serverBoss = Boss.hire_cp( 'server' );
+		serverBoss.send('init', {
+            appPath: App.getAppPath().toString()
+		});
+		*/
 	}
 
 	/**
 	  * when a window closes
 	  */
 	private function _onAllClosed():Void {
-	    App.quit();
+	    close();
 	}
 
 	/**
@@ -254,6 +277,7 @@ class Background {
 	public var playerWindows : Array<BrowserWindow>;
 	public var ipcCommands : MainIpcCommands;
 	public var appDir : AppDir;
+	//public var serverBoss : Boss;
 	private var _p:Null<Path> = null;
 
 	/* === Class Methods === */
