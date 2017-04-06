@@ -1019,6 +1019,29 @@ class Player extends EventDispatcher {
             gotoByOffset(-1, cb);
         }
 	}
+	
+	/**
+	  * start current track over, erasing previous playback progress if present
+	  */
+	public function startOver(?cb : Void->Void):Void {
+	    inline function done() {
+	        if (cb != null)
+	            defer( cb );
+	    }
+
+	    if (track == null) {
+	        done();
+	    }
+        else {
+            function erase(i : TrackData) {
+                i.removeLastTimeMark();
+            }
+            track.editData(erase, function() {
+                currentTime = 0.0;
+                done();
+            });
+        }
+	}
 
 /* === Computed Instance Fields === */
 
