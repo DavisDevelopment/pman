@@ -239,6 +239,39 @@ class Track implements IComparable<Track> {
                 }
             });
 
+            mt.push({type: 'separator'});
+
+            var marks:MenuTemplate = new MenuTemplate();
+
+            // bookmarks
+            for (mark in data.marks) {
+                switch ( mark.type ) {
+                    case MarkType.Named( name ):
+                        var time = mark.time;
+                        marks.push({
+                            label: name,
+                            click: function(i,w,e) {
+                                if (player.track != this) {
+                                    player.openTrack(this, {
+                                        startTime: time
+                                    });
+                                }
+                                else {
+                                    player.currentTime = time;
+                                }
+                            }
+                        });
+
+                    default:
+                        continue;
+                }
+            }
+
+            mt.push({
+                label: 'Bookmarks',
+                submenu: marks
+            });
+
             callback( mt );
         });
     }
