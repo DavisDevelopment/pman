@@ -2,6 +2,7 @@ package pman.ui.pl;
 
 import tannus.ds.*;
 import tannus.io.*;
+import tannus.geom.*;
 import tannus.html.Element;
 import tannus.events.*;
 import tannus.events.Key;
@@ -21,6 +22,7 @@ import pman.search.TrackSearchEngine;
 
 import Slambda.fn;
 import tannus.ds.SortingTools.*;
+import electron.Tools.*;
 
 using StringTools;
 using Lambda;
@@ -61,6 +63,10 @@ class SearchWidget extends Pane {
 		inputRow.pane( 1 ).append( submitButton );
 		*/
 
+		clear = pman.display.Icons.clearIcon(64, 64).toFoundationImage();
+		clear.addClass('clear');
+		append( clear );
+
 		__events();
 
 		css.write({
@@ -68,6 +74,30 @@ class SearchWidget extends Pane {
 			'margin-left': 'auto',
 			'margin-right': 'auto'
 		});
+
+		update(); } 
+	/**
+	  * update [this]
+	  */
+	public function update():Void {
+	    if (searchInput.getValue() != null && searchInput.getValue() != '') { 
+	        clear.css.write({
+	            'display': 'block'
+	        });
+	        /*
+            var sr = searchInput.rect();
+            var cr = clear.rect();
+            cr.centerY = sr.centerY;
+            clear.css.write({
+                'top': '${cr.y}px'
+            });
+            */
+        }
+        else {
+            clear.css.write({
+                'display': 'none'
+            });
+        }
 	}
 
 	/**
@@ -110,6 +140,8 @@ class SearchWidget extends Pane {
 		    var pl = player.session.playlist;
 		    player.session.setPlaylist(pl.getRootPlaylist());
 		}
+
+		defer( update );
 	}
 
 	/**
@@ -138,9 +170,17 @@ class SearchWidget extends Pane {
 			event.stopPropogation();
 		});
 		searchInput.on('keyup', onkeyup);
+		clear.el.on('click', function(e) {
+		    clearSearch();
+		});
 		//submitButton.on('click', function(event : MouseEvent) {
 			//submit();
 		//});
+	}
+
+	public function clearSearch():Void {
+	    searchInput.setValue( null );
+	    submit();
 	}
 
 /* === Instance Fields === */
@@ -150,6 +190,7 @@ class SearchWidget extends Pane {
 
 	public var inputRow : FlexRow;
 	public var searchInput : TextInput;
+	public var clear : foundation.Image;
 	//public var submitButton : Button;
 }
 
