@@ -207,29 +207,33 @@ class Track {
     /**
       * build the menu for [this] Track
       */
-    public function buildMenu():MenuTemplate {
-        var mt:MenuTemplate = new MenuTemplate();
-        mt.push({
-            label: 'Play',
-            click: function(i,w,e) player.openTrack( this )
+    public function buildMenu(callback : MenuTemplate -> Void):Void {
+        getData(function( data ) {
+            var mt:MenuTemplate = new MenuTemplate();
+
+            mt.push({
+                label: 'Play',
+                click: function(i,w,e) player.openTrack( this )
+            });
+            mt.push({
+                label: 'Play Next',
+                click: function(i,w,e) playlist.move(this, fn(session.indexOfCurrentMedia() + 1))
+            });
+            mt.push({
+                label: 'Remove from Playlist',
+                click: function(i,w,e) {
+                    playlist.remove( this );
+                }
+            });
+            mt.push({
+                label: (data != null && data.starred ? 'Unfavorite' : 'Favorite'),
+                click: function(i,w,e) {
+                    toggleStarred();
+                }
+            });
+
+            callback( mt );
         });
-        mt.push({
-            label: 'Play Next',
-            click: function(i,w,e) playlist.move(this, fn(session.indexOfCurrentMedia() + 1))
-        });
-        mt.push({
-            label: 'Remove from Playlist',
-            click: function(i,w,e) {
-                playlist.remove( this );
-            }
-        });
-        mt.push({
-            label: (data != null && data.starred ? 'Unfavorite' : 'Favorite'),
-            click: function(i,w,e) {
-                toggleStarred();
-            }
-        });
-        return mt;
     }
 
 /* === TrackData Methods === */
