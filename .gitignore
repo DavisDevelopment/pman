@@ -20,3 +20,5 @@ dist/installers/*
 dist/buildscripts/*.js
 
 dist/pack.js
+
+dist/scripts/server\.js
