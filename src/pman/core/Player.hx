@@ -187,7 +187,7 @@ class Player extends EventDispatcher {
         var l:Playlist = session.playlist;
 
 	    function finish():Void {
-	        var plf = app.appDir.playlistFile( l.title );
+	        var plf = app.appDir.playlistFile( session.name );
 	        var data = pman.format.xspf.Writer.run( l );
 	        plf.write( data );
 	        if (done != null) {
