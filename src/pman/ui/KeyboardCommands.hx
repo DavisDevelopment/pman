@@ -113,34 +113,34 @@ class KeyboardCommands {
 
 		/* --- 'next-command-count' modifiers --- */
 
-			case Number0:
+			case Number0, Numpad0:
 				mncc( 0 );
 
-			case Number1:
+			case Number1, Numpad1:
 				mncc( 1 );
 
-			case Number2:
+			case Number2, Numpad2:
 				mncc( 2 );
 
-			case Number3:
+			case Number3, Numpad3:
 				mncc( 3 );
 
-			case Number4:
+			case Number4, Numpad4:
 				mncc( 4 );
 
-			case Number5:
+			case Number5, Numpad5:
 				mncc( 5 );
 
-			case Number6:
+			case Number6, Numpad6:
 				mncc( 6 );
 
-			case Number7:
+			case Number7, Numpad7:
 				mncc( 7 );
 
-			case Number8:
+			case Number8, Numpad8:
 				mncc( 8 );
 
-			case Number9:
+			case Number9, Numpad9:
 				mncc( 9 );
 
 			default:
@@ -178,6 +178,17 @@ class KeyboardCommands {
 		}
 		n = (n * fncc());
 		return n;
+	}
+
+    /**
+      * get the amount by which the volume will be changed
+      */
+	private function volumeDelta(event : KeyboardEvent):Float {
+	    var n:Float = 5.0;
+	    if ( event.shiftKey ) {
+	        n = 1.0;
+	    }
+	    return n;
 	}
 
 	/**
