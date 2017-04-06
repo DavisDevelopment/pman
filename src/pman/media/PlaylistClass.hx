@@ -1,7 +1,7 @@
 package pman.media;
 
 import tannus.io.*;
-import tannus.ds.Promise;
+import tannus.ds.*;
 import tannus.sys.Path;
 import tannus.http.Url;
 import tannus.math.Random;
@@ -291,6 +291,22 @@ class PlaylistClass {
 	  */
 	public function toJSON():Array<String> {
 	    return map.fn(_.provider.getURI());
+	}
+
+    /**
+      * convert [this] Playlist to a Set of Tracks
+      */
+	public function toSet():Set<Track> {
+	    var set:Set<Track> = new Set();
+	    set.pushMany( l );
+	    return set;
+	}
+
+    /**
+      * create and return new Playlist containing no duplicate Tracks
+      */
+	public function uniqueify():Playlist {
+	    return new Playlist(toSet().toArray());
 	}
 
 /* === Computed Instance Fields === */
