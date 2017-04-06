@@ -68,6 +68,15 @@ canvas {
 			width: 100%;
 			height: auto;
 		}
+
+		img.clear {
+		    position: absolute;
+		    z-index: 2;
+		    right: -2px;
+		    top: 37px;
+		    height: 45px;
+		    cursor: pointer;
+		}
 	}
 
 	// the Track list widget
@@ -118,8 +127,9 @@ canvas {
                         padding: 5px;
                         display: -webkit-box;
                         -webkit-box-orient: vertical;
-                        font-size: 9pt;
+                        font-size: 7pt;
                         text-align: right;
+                        margin-top: 3px;
 
                         .resolution {
                             margin-right: 3px;
