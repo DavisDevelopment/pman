@@ -1,4 +1,4 @@
-package ;
+package pman.ww;
 
 import tannus.ds.Maybe;
 import tannus.ds.Obj;
@@ -21,7 +21,7 @@ using tannus.ds.ArrayTools;
 /**
   * class used to handle various long-running tasks from within a node subprocess
   */
-class WorkerMain {
+class Worker {
 	/* Constructor Function */
 	public function new():Void {
 
@@ -141,10 +141,4 @@ class WorkerMain {
     }
 
 /* === Instance Fields === */
-
-/* === Static Methods === */
-
-	public static function main():Void {
-		new WorkerMain().start();
-	}
 }
