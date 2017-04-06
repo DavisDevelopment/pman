@@ -24,9 +24,7 @@ import js.html.MediaElement as NativeMediaObject;
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
-using tannus.ds.ArrayTools;
-using Slambda;
-
+using tannus.ds.ArrayTools; using Slambda; 
 /**
   * mixin class containing utility methods pertaining to the pman.media.* objects
   */
@@ -106,6 +104,16 @@ class MediaTools {
         else {
             throw 'Error: Unknown MediaObject type';
         }
+	}
+
+	public static function mediaSourceToUri(src : MediaSource):String {
+	    switch ( src ) {
+            case MSLocalPath(_.toString() => path):
+                return path;
+
+            case MSUrl( url ):
+                return url;
+	    }
 	}
 
     /**
