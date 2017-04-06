@@ -618,9 +618,11 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    // ensure that there are no duplicate entries
+	    /*
 	    var trackSet:Set<Track> = new Set();
 	    trackSet.pushMany( items );
 	    items = trackSet.toArray();
+	    */
 
 	    function complete():Void {
 	        defer(function() {
