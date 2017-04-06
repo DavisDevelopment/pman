@@ -40,8 +40,6 @@ class Track {
 		media = null;
 		driver = null;
 		renderer = null;
-
-		data = null;
 	}
 
 /* === Instance Methods === */
@@ -179,8 +177,8 @@ class Track {
         if (data == null) {
             var loader = new TrackDataLoader(this, BPlayerMain.instance.db.mediaStore);
             var dp = loader.load();
-            dp.then(function( dat ) {
-                this.data = dat;
+            dp.then(function( data ) {
+                this.data = data;
                 var v = getView();
                 if (v != null) {
                     v.update();
@@ -276,11 +274,12 @@ class Track {
     }
 
     public function toggleStarred(?done : Bool->Void):Void {
+        var val:Bool = false;
         editData(function(i) {
-            i.starred = !i.starred;
+            val = (i.starred = !i.starred);
         }, function() {
             if (done != null) {
-                done( data.starred );
+                done( val );
             }
         });
     }
@@ -331,12 +330,11 @@ class Track {
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
+	public var data(default, null):Null<TrackData> = null;
 
 	public var media(default, null): Null<Media>;
 	public var driver(default, null): Null<PlaybackDriver>;
 	public var renderer(default, null): Null<MediaRenderer>;
-
-	public var data(default, null): Null<TrackData>;
 
 	private var _ready : Bool = false;
 
