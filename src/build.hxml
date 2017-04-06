@@ -5,6 +5,8 @@
 -cp crayon/
 -cp ida/
 -cp vex/
+-cp hxpress/src/
+-cp hscript/
 
 -lib slambda
 -lib actuate
@@ -26,14 +28,10 @@
 -D main_process
 -js ../dist/scripts/background.js
 
---next
+--next 
 
 -main BPlayerMain
 -D debug
 -D renderer_process
 -js ../dist/scripts/content.js
 
---next
-
--main WorkerMain
--js ../dist/scripts/worker.js
