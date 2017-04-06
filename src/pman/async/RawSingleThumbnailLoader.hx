@@ -19,6 +19,7 @@ import foundation.Tools.*;
 import Math.*;
 import tannus.math.TMath.*;
 import tannus.math.Random;
+import tannus.TSys.systemName;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -45,12 +46,26 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
 		this.getTime = getTime;
 		this.mutateRect = mutateRect;
 
-		return Promise.create({
-			perform(function() {
-				video.clear();
-				return result;
-			});
-		});
+        // can use ffmpeg to load thumbnails
+        if (systemName() == 'Linux') {
+            return Promise.create({
+                var mo:Video = cast track.driver.getMediaObject();
+                var vr:Rect<Int> = new Rect(0, 0, mo.naturalWidth, mo.naturalHeight);
+                var tr = mutateRect( vr );
+
+                track.probe(getTime( mo.duration.totalSeconds ), '${tr.width}x${tr.height}', function(can : Canvas) {
+                    return can;
+                });
+            });
+        }
+        else {
+            return Promise.create({
+                perform(function() {
+                    video.clear();
+                    return result;
+                });
+            });
+        }
 	}
 
 	/**
