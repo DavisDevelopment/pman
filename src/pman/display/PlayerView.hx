@@ -8,6 +8,10 @@ import tannus.events.*;
 import gryffin.core.*;
 import gryffin.display.*;
 
+import electron.Tools.*;
+import electron.MenuTemplate;
+import electron.ext.Menu;
+
 import pman.core.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -33,6 +37,13 @@ class PlayerView extends Ent {
 	}
 
 /* === PMan Methods === */
+
+    /**
+      * initialize [this]
+      */
+    override function init(stage : Stage):Void {
+        on('contextmenu', onRightClick);
+    }
 
 	/**
 	  * detach the current renderer from [this] view, and deallocate its memory
@@ -147,6 +158,17 @@ class PlayerView extends Ent {
 			cmr.calculateGeometry( rect );
 		}
 	}
+
+    /**
+      * handle right click events
+      */
+    public function onRightClick(event : MouseEvent):Void {
+        var p = event.position;
+        player.buildMenu(function( template ) {
+            var menu:Menu = template;
+            menu.popup(p.x, p.y);
+        });
+    }
 
 /* === Computed Instance Fields === */
 
