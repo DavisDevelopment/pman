@@ -20,6 +20,8 @@ import electron.ext.App;
 import electron.ext.Dialog;
 import electron.ext.FileFilter;
 import electron.ext.NativeImage;
+import electron.MenuTemplate;
+import electron.ext.Menu;
 
 import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
@@ -776,6 +778,62 @@ class Player extends EventDispatcher {
                 }
             });
 		}
+	}
+
+	/**
+	  * build [this] context Menu
+	  */
+	public function buildMenu(callback : MenuTemplate->Void):Void {
+	    defer(function() {
+	        var stack = new AsyncStack();
+	        var menu:MenuTemplate = new MenuTemplate();
+
+	        stack.push(function(next) {
+	            menu.push({
+                    label: 'Next',
+                    click: function(i,w,e) gotoNext()
+	            });
+	            menu.push({
+                    label: 'Previous',
+                    click: function(i,w,e) gotoPrevious()
+	            });
+	            next();
+	        });
+
+	        stack.push(function(next) {
+	            menu.push({
+                    label: 'Playlist',
+                    submenu: [
+                    {
+                        label: 'Clear',
+                        click: function(i,w,e) clearPlaylist()
+                    },
+                    {
+                        label: 'Shuffle',
+                        click: function(i,w,e) shufflePlaylist()
+                    }
+                    ]
+	            });
+	            next();
+	        });
+
+	        stack.push(function(next) {
+	            if (track != null) {
+	                track.buildMenu(function( trackItem ) {
+	                    menu.push({
+                            label: 'Track',
+                            submenu: trackItem
+	                    });
+	                    next();
+	                });
+	            }
+                else next();
+	        });
+
+	        stack.run(function() {
+	            callback( menu );
+	        });
+	    });
 	}
 
 /* === Playback Methods === */
