@@ -3,7 +3,7 @@ package pman.ww;
 import tannus.node.ChildProcess;
 import pman.ww.WorkerPacket;
 
-class NodeWorker extends Worker {
+class NodeBoss extends Boss {
     private var p : ChildProcess;
     public function new(cp : ChildProcess):Void {
         super();

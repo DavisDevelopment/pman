@@ -4,7 +4,7 @@ package pman.ww;
 import pman.ww.WorkerPacket;
 import js.html.Worker as NWorker;
 
-class WebWorker extends Worker {
+class WebBoss extends Boss {
     private var w : NWorker;
     public function new(ww : NWorker):Void {
         super();
