@@ -31,18 +31,29 @@ options = exports['options'] = do ->
       ignore: path.join(scriptdir, 'releases')
     (o...) -> _.extend(_.clone(defaltOptions), o...)
 
-# Build class
-PackBuild = exports['PackBuild'] = class extends tools.Build
-    constructor: (platform, arch='all', rest...) ->
+exports['Pack'] = class Pack extends tools.Task
+    constructor: (@platform, @arch='all', rest...) ->
         super()
+
+        @promptMessage = "package as standalone application for #{@platform}/#{@arch}?"
+        @promptDefault = yes
+        
         @options = options({
-            platform: platform
-            arch: arch
+            platform: @platform
+            arch: @arch
         }, rest...)
 
-    execute: (callback) ->
-        packager(@options, callback)
+    perform: ( cb ) ->
+        packager(@options, cb)
 
-    confirm: (callback) ->
-        tools.promptBool("package for #{@options.platform} #{@options.arch}?", no, callback)
+exports['PackAll'] = class PackAll extends tools.Batch
+    constructor: ->
+        super()
+        
+        @tasks = [
+            new Pack('linux', 'x64')
+            new Pack('win32', 'x64')
+        ]
 
+        @promptMessage = "package app?"
+        @promptDefault = yes
