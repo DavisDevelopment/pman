@@ -733,7 +733,7 @@ class Player extends EventDispatcher {
 			    for (m in data.marks) {
 			        if (m.type.equals( LastTime )) {
 			            var jt:Float = m.time;
-			            confirm('Do you want to restart playback where you left off?', function(answer) {
+			            var box = confirm('Do you want to restart playback where you left off?', function(answer) {
 			                if ( answer ) {
 			                    currentTime = jt;
 			                }
@@ -742,6 +742,9 @@ class Player extends EventDispatcher {
                                     data.marks = data.marks.filter.fn(!_.type.equals(LastTime));
                                 });
                             }
+			            });
+			            session.trackChanged.once(function(x) {
+			                box.close();
 			            });
 			            break;
 			        }
