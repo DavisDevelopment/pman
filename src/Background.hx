@@ -4,6 +4,7 @@ import tannus.ds.*;
 import tannus.ds.tuples.*;
 import tannus.sys.Path;
 import tannus.node.Fs as NodeFs;
+import tannus.sys.FileSystem as Fs;
 
 import electron.main.*;
 import electron.main.Menu;
@@ -140,24 +141,51 @@ class Background {
 	    });
 	    menu.append( viewItem );
 
-	    var playlist = new MenuItem({
+	    var playlistOptions:Dynamic = {
             label: 'Playlist',
-            submenu: [
+            submenu: untyped [
             {
-                label: 'Clear Playlist',
+                label: 'Clear',
                 accelerator: 'CommandOrControl+W',
                 click: function(i, w) ic.send(w, 'ClearPlaylist')
             },
             {
-                label: 'Shuffle Playlist',
+                label: 'Shuffle',
                 click: function(i, w) ic.send(w, 'ShufflePlaylist')
             },
             {
-                label: 'Save Playlist',
-                click: function(i, w) ic.send(w, 'SavePlaylist')
+                label: 'Save',
+                accelerator: 'CommandOrControl+S',
+                click: function(i, w) ic.send(w, 'SavePlaylist', [false])
+            },
+            {
+                label: 'Save As',
+                accelerator: 'CommandOrControl+Shift+S',
+                click: function(i, w) ic.send(w, 'SavePlaylist', [true])
+            },
+            {
+                label: 'Export',
+                click: function(i, w) ic.send(w, 'ExportPlaylist')
             }
             ]
-	    });
+	    };
+	    var openPlaylistOptions:Dynamic = {
+            label: 'Load',
+            submenu: []
+	    };
+	    playlistOptions.submenu.push( openPlaylistOptions );
+
+	    var splNames = appDir.allSavedPlaylistNames();
+	    for (name in splNames) {
+	        openPlaylistOptions.submenu.push({
+                label: name,
+                click: function(i, w) {
+                    ic.send(w, 'LoadPlaylist', [name]);
+                }
+	        });
+	    }
+
+	    var playlist = new MenuItem( playlistOptions );
 	    menu.append( playlist );
 
 	    var sessionOptions:Dynamic = {
@@ -165,7 +193,6 @@ class Background {
             submenu: [untyped
             {
                 label: 'Save Current Session',
-                accelerator: 'CommandOrControl+S',
                 click: function(i, w) ic.send(w, 'SaveSession')
             },
             {type: 'separator'}
@@ -205,7 +232,18 @@ class Background {
 	  */
 	private function _watchFiles():Void {
 	    var sessionsPath = appDir.sessionsPath();
-	    var plw = NodeFs.watch(sessionsPath.toString(), _playlistFolderChanged);
+	    if (!Fs.exists(sessionsPath.toString())) {
+	        Fs.createDirectory(sessionsPath.toString());
+	    }
+
+	    var ssw = NodeFs.watch(sessionsPath.toString(), _sessionsFolderChanged);
+
+	    var plPath = appDir.playlistsPath();
+	    if (!Fs.exists(plPath.toString())) {
+	        Fs.createDirectory(plPath.toString());
+	    }
+
+	    var plw = NodeFs.watch(plPath.toString(), _playlistFolderChanged);
 	}
 
 /* === Event Handlers === */
@@ -245,6 +283,13 @@ class Background {
 	  * when the playlist folder changes
 	  */
 	private function _playlistFolderChanged(eventName:String, filename:String):Void {
+	    updateMenu();
+	}
+
+	/**
+	  * when the sessions folder changes
+	  */
+	private function _sessionsFolderChanged(eventName:String, filename:String):Void {
 	    updateMenu();
 	}
 
