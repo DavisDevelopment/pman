@@ -181,8 +181,10 @@ class TrackView extends FlexRow {
 	private function onRightClick(event : MouseEvent):Void {
 		event.cancel();
 
-		var menu:Menu = track.buildMenu();
-		menu.popup();
+        track.buildMenu(function( template ) {
+            var menu:Menu = template;
+            menu.popup();
+        });
 	}
 
     /**
