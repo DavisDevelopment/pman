@@ -56,6 +56,13 @@ class RendererIpcCommands {
         b('LoadSession', function(e, name:String) {
             player.loadState( name );
         });
+        b('SavePlaylist', function(e, ?saveAs:Bool) {
+            trace( saveAs );
+            player.savePlaylist( saveAs );
+        });
+        b('LoadPlaylist', function(e, name:String) {
+            player.loadPlaylist( name );
+        });
     }
 
     /**
