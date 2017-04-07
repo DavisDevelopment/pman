@@ -46,13 +46,13 @@ class KeyboardCommands {
 				//p.gotoNext();
 				p.gotoByOffset(fncc());
 
-			// P
-			case LetterP:
 			    var n = fncc();
 			    if (n == 1)
                     p.gotoPrevious();
                 else
                     p.gotoByOffset( n );
+			// P or -
+			case LetterP, Key.NumpadMinus:
 
 			// X
 			case LetterX:
