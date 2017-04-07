@@ -105,6 +105,13 @@ class TrackData {
         }
     }
 
+    /**
+    /**
+      * filter [marks]
+      */
+    public inline function filterMarks(f : Mark->Bool):Void {
+        marks = marks.filter( f );
+    }
 /* === Instance Fields === */
 
     public var track : Track;
