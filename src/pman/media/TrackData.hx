@@ -136,6 +136,10 @@ class TrackData {
         var m = getMarkByType( LastTime );
         return if (m != null) m.time else null;
     }
+    public function getBeginTime():Null<Float> {
+        var m = getMarkByType( Begin );
+        return if (m != null) m.time else null;
+    }
 /* === Instance Fields === */
 
     public var track : Track;
