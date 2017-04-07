@@ -147,6 +147,18 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * open and initiate a QuickOpen prompt
+	  */
+	public function qoprompt():Void {
+	    var box = new QuickOpenPrompt();
+	    box.init(function() {
+	        box.prompt(function() {
+
+	        });
+	    });
+	}
+
+	/**
 	  * show playlist view
 	  */
 	public inline function showPlaylist():Void {
