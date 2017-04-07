@@ -114,7 +114,6 @@ class SearchEngine<T> {
 	private function parseStringToTerms(input : String):Void {
 	    input = __checkFirstChar(input.trim());
 	    terms = SearchTermParser.runString( input );
-	    trace(terms + '');
 	}
 	/*
 	private function parseStringToTerms_(input : String):Void {
