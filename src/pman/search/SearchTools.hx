@@ -27,10 +27,10 @@ class SearchTools {
     /**
       * get the 'score' of the given term
       */
-    public static function getScore(term:SearchTerm, sources:Array<String>):Int {
+    public static function getScore(term:SearchTerm, sources:Array<String>, strictness:Int=0):Int {
         switch ( term ) {
             case Word( word ):
-                return fiom(sources, word);
+                return fiom(sources, word, strictness);
         }
     }
 
