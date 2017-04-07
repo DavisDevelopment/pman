@@ -140,6 +140,11 @@ class TrackData {
         var m = getMarkByType( Begin );
         return if (m != null) m.time else null;
     }
+    public function getEndTime():Null<Float> {
+        var m = getMarkByType( End );
+        return if (m != null) m.time else null;
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
