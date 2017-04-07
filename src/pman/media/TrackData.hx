@@ -106,6 +106,11 @@ class TrackData {
     }
 
     /**
+      * remove all marks of the given type
+      */
+    public inline function removeMarksOfType(mt : MarkType):Void {
+        filterMarks.fn(!_.type.equals( mt ));
+    }
     /**
       * filter [marks]
       */
