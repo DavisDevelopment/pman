@@ -28,8 +28,7 @@ class SearchEngine<T> {
 	/* Constructor Function */
 	public function new():Void {
 		caseSensitive = false;
-		useEReg = false;
-		useGlobStar = false;
+		strictness = 3;
 
 		context = new Array();
 		terms = new Array();
@@ -77,9 +76,9 @@ class SearchEngine<T> {
 		    values = values.map.fn(_.toLowerCase());
         }
 		var score:Int = 0;
-		var minScore = 2;
+		var minScore = strictness;
 		for (term in terms) {
-		    var fion = term.getScore( values );
+		    var fion = term.getScore(values, strictness);
 		    score += fion;
 		}
 		if (score > minScore) {
@@ -151,6 +150,8 @@ class SearchEngine<T> {
 	  * returns the input String stripped the leader
 	  */
 	private function __checkFirstChar(i : String):String {
+	    return i;
+	    /*
 		switch (i.charAt( 0 )) {
 			// regular expression search
 			case '~':
@@ -160,6 +161,7 @@ class SearchEngine<T> {
 			default:
 				return i;
 		}
+		*/
 	}
 
 /* === Instance Fields === */
@@ -168,8 +170,7 @@ class SearchEngine<T> {
 	public var terms : Array<SearchTerm>;
 
 	public var caseSensitive : Bool;
-	public var useEReg : Bool;
-	public var useGlobStar : Bool;
+	public var strictness : Int;
 
 /* === Static Fields === */
 
