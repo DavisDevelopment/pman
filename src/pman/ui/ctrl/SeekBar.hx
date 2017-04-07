@@ -86,7 +86,7 @@ class SeekBar extends Ent {
             else {
                 var sinceLast:Float = (now - lhct);
                 // if the last hover-status change was more than 2.5sec ago, and no thumbnail is currently being loaded
-                if (sinceLast > 2500 && !loadingThumbnail) {
+                if (sinceLast > 800 && !loadingThumbnail) {
                     // if there is already a thumbnail loaded, and it was loaded more recently than the last hover-status change
                     if (thumbnail != null && thumbnail.loadedAt > lhct) {
                         null;
