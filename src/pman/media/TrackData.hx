@@ -97,7 +97,8 @@ class TrackData {
     public function addMark(mark : Mark):Void {
         switch ( mark.type ) {
             case Begin, End, LastTime:
-                marks = marks.filter.fn(!_.type.equals( mark.type ));
+                //marks = marks.filter.fn(!_.type.equals( mark.type ));
+                filterMarks.fn(!_.type.equals( mark.type ));
                 marks.push( mark );
 
             case Named( name ):
