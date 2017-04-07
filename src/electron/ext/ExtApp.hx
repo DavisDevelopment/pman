@@ -23,6 +23,11 @@ extern class ExtApp {
 	public static function _getPath(name : ExtAppNamedPath):String;
 	public static function getVersion():String;
 	public static function getName():String;
+	public static function makeSingleInstance(f : Array<String>->String->Void):Void;
+	public static function releaseSingleInstance():Void;
+
+	@:overload(function(path:String,o:{size:String},cb:Null<Dynamic>->NativeImage->Void):Void {})
+	public static function getFileIcon(path:String, callback:Null<Dynamic>->NativeImage->Void):Void;
 
 	inline public static function getAppPath():Path return new Path(_getAppPath());
 	inline public static function getPath(name : ExtAppNamedPath):Path return new Path(_getPath(name));
