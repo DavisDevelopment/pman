@@ -121,6 +121,10 @@ class TrackData {
     public inline function filterMarks(f : Mark->Bool):Void {
         marks = marks.filter( f );
     }
+
+    public inline function getMarkq(f : Mark->Bool):Null<Mark> {
+        return marks.firstMatch( f );
+    }
 /* === Instance Fields === */
 
     public var track : Track;
