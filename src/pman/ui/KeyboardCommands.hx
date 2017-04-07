@@ -42,7 +42,7 @@ class KeyboardCommands {
 				p.togglePlayback();
 
 			// N
-			case LetterN:
+			case LetterN, Key.NumpadPlus:
 				//p.gotoNext();
 				p.gotoByOffset(fncc());
 
