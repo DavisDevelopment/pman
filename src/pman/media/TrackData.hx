@@ -12,7 +12,7 @@ import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.async.Mp4InfoLoader;
-import pman.media.info.*;
+import pman.media.info.Mark;
 
 import haxe.Serializer;
 import haxe.Unserializer;
