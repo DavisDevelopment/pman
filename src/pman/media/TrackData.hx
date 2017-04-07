@@ -113,6 +113,8 @@ class TrackData {
     }
     public inline function removeBeginMark():Void removeMarksOfType( Begin );
     public inline function removeEndMark():Void removeMarksOfType( End );
+    public inline function removeLastTimeMark():Void removeMarksOfType( LastTime );
+
     /**
       * filter [marks]
       */
