@@ -207,7 +207,7 @@ class KeyboardCommands {
 	    if ( event.shiftKey ) {
 	        n = 1.0;
 	    }
-	    return n;
+	    return (n / 100);
 	}
 
 	/**
