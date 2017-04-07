@@ -179,24 +179,29 @@ class Background {
             }
             ]
 	    };
-	    var openPlaylistOptions:Dynamic = {
-            label: 'Load',
-            submenu: []
-	    };
-	    playlistOptions.submenu.push( openPlaylistOptions );
-
-	    var splNames = appDir.allSavedPlaylistNames();
-	    for (name in splNames) {
-	        openPlaylistOptions.submenu.push({
-                label: name,
-                click: function(i, w) {
-                    ic.send(w, 'LoadPlaylist', [name]);
-                }
-	        });
-	    }
 
 	    var playlist = new MenuItem( playlistOptions );
 	    menu.append( playlist );
+
+	    var splNames = appDir.allSavedPlaylistNames();
+	    if (splNames.length > 0) {
+            var playlistsOptions:Dynamic = {
+                label: 'Playlists',
+                submenu: []
+            };
+
+            for (name in splNames) {
+                playlistsOptions.submenu.push({
+                    label: name,
+                    click: function(i, w) {
+                        ic.send(w, 'LoadPlaylist', [name]);
+                    }
+                });
+            }
+
+            var playlists = new MenuItem( playlistsOptions );
+            menu.append( playlists );
+        }
 
 	    var sessionOptions:Dynamic = {
             label: 'Session',
