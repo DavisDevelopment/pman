@@ -125,6 +125,9 @@ class TrackData {
     public inline function getMarkq(f : Mark->Bool):Null<Mark> {
         return marks.firstMatch( f );
     }
+    public inline function getMarkByType(type : MarkType):Null<Mark> {
+        return getMarkq.fn(_.type.equals( type ));
+    }
 /* === Instance Fields === */
 
     public var track : Track;
