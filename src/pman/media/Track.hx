@@ -5,6 +5,8 @@ import tannus.ds.*;
 import tannus.sys.*;
 import tannus.http.Url;
 
+import gryffin.display.*;
+
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
@@ -239,38 +241,40 @@ class Track implements IComparable<Track> {
                 }
             });
 
-            mt.push({type: 'separator'});
+            if (!data.marks.empty()) {
+                mt.push({type: 'separator'});
 
-            var marks:MenuTemplate = new MenuTemplate();
+                var marks:MenuTemplate = new MenuTemplate();
 
-            // bookmarks
-            for (mark in data.marks) {
-                switch ( mark.type ) {
-                    case MarkType.Named( name ):
-                        var time = mark.time;
-                        marks.push({
-                            label: name,
-                            click: function(i,w,e) {
-                                if (player.track != this) {
-                                    player.openTrack(this, {
-                                        startTime: time
-                                    });
+                // bookmarks
+                for (mark in data.marks) {
+                    switch ( mark.type ) {
+                        case MarkType.Named( name ):
+                            var time = mark.time;
+                            marks.push({
+                                label: name,
+                                click: function(i,w,e) {
+                                    if (player.track != this) {
+                                        player.openTrack(this, {
+                                            startTime: time
+                                        });
+                                    }
+                                    else {
+                                        player.currentTime = time;
+                                    }
                                 }
-                                else {
-                                    player.currentTime = time;
-                                }
-                            }
-                        });
+                            });
 
-                    default:
-                        continue;
+                        default:
+                            continue;
+                    }
                 }
-            }
 
-            mt.push({
-                label: 'Bookmarks',
-                submenu: marks
-            });
+                mt.push({
+                    label: 'Bookmarks',
+                    submenu: marks
+                });
+            }
 
             callback( mt );
         });
@@ -338,6 +342,38 @@ class Track implements IComparable<Track> {
         editData(function(i) {
             i.addMark( mark );
         }, done);
+    }
+
+    /**
+      * capture screenshot of given size, at given time
+      */
+    public function probe(time:Float, size:String, callback:Canvas->Void):Void {
+        if (!type.equals( MTVideo ))
+            return ;
+        var thumbPath = player.app.appDir.appPath('_thumbs');
+        var m = new ffmpeg.FFfmpeg(getFsPath().toString());
+        var paths:Array<Path> = [];
+        m.onFileNames(function(filenames) {
+            paths = filenames.map.fn(thumbPath.plusString(_));
+        }).onEnd(function() {
+            var uri:String = ('file://${paths[0]}');
+            Image.load(uri, function( img ) {
+                img.ready.once(function() {
+                    trace('IMAGE READY MOTHERFUCKER');
+                    defer(function() {
+                        var canvas = img.toCanvas();
+                        @:privateAccess img.img.remove();
+                        FileSystem.deleteFile( paths[0] );
+                        callback( canvas );
+                    });
+                });
+            });
+        }).screenshots({
+            folder: thumbPath.toString(),
+            filename: '%s|%r|%f.png',
+            size: size,
+            timemarks: [time]
+        });
     }
 
 /* === Computed Instance Fields === */
