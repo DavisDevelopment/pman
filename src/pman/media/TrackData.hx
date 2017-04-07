@@ -128,6 +128,14 @@ class TrackData {
     public inline function getMarkByType(type : MarkType):Null<Mark> {
         return getMarkq.fn(_.type.equals( type ));
     }
+
+    /**
+      * get [this] Track's last time
+      */
+    public function getLastTime():Null<Float> {
+        var m = getMarkByType( LastTime );
+        return if (m != null) m.time else null;
+    }
 /* === Instance Fields === */
 
     public var track : Track;
