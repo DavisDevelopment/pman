@@ -120,6 +120,16 @@ class KeyboardCommands {
 					p.muted = !p.muted;
 				}
 
+            // *
+            case NumpadAsterisk:
+                if (p.track != null) {
+                    p.track.toggleStarred();
+                }
+            case Number8 if ( event.shiftKey ):
+                if (p.track != null) {
+                    p.track.toggleStarred();
+                }
+
 		/* --- 'next-command-count' modifiers --- */
 
 			case Number0, Numpad0:
