@@ -136,6 +136,16 @@ class MediaTools {
 	    }
 	}
 
+	public static function mediaSourceName(src : MediaSource):String {
+	    switch ( src ) {
+            case MSLocalPath( path ):
+                return path.name;
+
+            case MSUrl( url ):
+                return url;
+	    }
+	}
+
     /**
       * convert the given URI to a MediaSource
       */
