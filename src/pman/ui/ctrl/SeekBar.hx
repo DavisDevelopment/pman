@@ -100,6 +100,10 @@ class SeekBar extends Ent {
                 }
             }
         }
+        else {
+            thumbnail = null;
+            loadingThumbnail = false;
+        }
 
         __updateTextBoxes( stage );
         __updateViewed( stage );
