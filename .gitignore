@@ -22,3 +22,5 @@ dist/buildscripts/*.js
 dist/pack.js
 
 dist/scripts/server\.js
+
+dist/_thumbs/
