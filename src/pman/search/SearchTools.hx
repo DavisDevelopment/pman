@@ -77,7 +77,11 @@ class SearchTools {
 	private static function fiom(srca:Array<String>, t:String, minmatched:Int=0):Int {
 	    var result:Int = 0;
 	    for (src in srca) {
-	        result = max(result, fio(src, t, minmatched));
+			//result = max(result, fio(src, t, minmatched));
+			result += fio(src, t, minmatched);
+	    }
+	    if (result < minmatched) {
+	        result = 0;
 	    }
 	    return result;
 	}
