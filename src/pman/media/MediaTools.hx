@@ -5,11 +5,13 @@ import tannus.ds.*;
 import tannus.sys.*;
 
 import gryffin.media.MediaObject;
-import gryffin.display.Video;
+import gryffin.display.*;
 import gryffin.audio.Audio;
 
 import Slambda.fn;
 import foundation.Tools.defer;
+
+import electron.ext.NativeImage;
 
 import pman.core.PlayerMediaContext;
 import pman.display.*;
@@ -24,7 +26,9 @@ import js.html.MediaElement as NativeMediaObject;
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
-using tannus.ds.ArrayTools; using Slambda; 
+using tannus.ds.ArrayTools;
+using Slambda; 
+
 /**
   * mixin class containing utility methods pertaining to the pman.media.* objects
   */
@@ -36,6 +40,22 @@ class MediaTools {
         var probe = new OpenableFileProbe();
         probe.setSources([dir]);
         probe.run( done );
+    }
+    public static function igetAllOpenableFiles(idir:Iterable<Directory>, done:Array<File>->Void):Void {
+        var coll = new Array();
+        function collect(d:Directory, next:Void->Void) {
+            getAllOpenableFiles(d, function(files) {
+                coll = coll.concat( files );
+                next();
+            });
+        }
+        var stack = new AsyncStack();
+        for (dir in idir) {
+            stack.push(collect.bind(dir, _));
+        }
+        stack.run(function() {
+            done( coll );
+        });
     }
 
     /**
