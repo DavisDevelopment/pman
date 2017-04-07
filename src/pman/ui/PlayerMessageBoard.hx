@@ -28,6 +28,7 @@ class PlayerMessageBoard extends Ent {
 
 		player = p;
 		box = new TextBox();
+		box.multiline = true;
 		box.padding = 7;
 		box.fontSize = 14;
 		box.fontFamily = 'Ubuntu';
