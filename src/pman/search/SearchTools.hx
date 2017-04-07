@@ -8,6 +8,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
+import pman.search.QuickOpenItem;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -35,6 +36,13 @@ class SearchTools {
     }
 
 /* === Utility Methods === */
+
+    public static function name(q:QuickOpenItem):String {
+        return switch ( q ) {
+            case QOMedia( src ): src.mediaSourceName();
+            case QOPlaylist( name ): name;
+        }
+    }
 
     /**
 	  * searches for [t] in [src], finding the index in [src] at which [t] begins,
