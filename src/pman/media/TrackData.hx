@@ -111,6 +111,7 @@ class TrackData {
     public inline function removeMarksOfType(mt : MarkType):Void {
         filterMarks.fn(!_.type.equals( mt ));
     }
+    public inline function removeBeginMark():Void removeMarksOfType( Begin );
     /**
       * filter [marks]
       */
