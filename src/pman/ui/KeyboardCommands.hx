@@ -59,6 +59,10 @@ class KeyboardCommands {
                         p.gotoByOffset( n );
                 }
 
+            // Backspace
+            case Backspace:
+                p.startOver();
+
 			// X
 			case LetterX:
 			    var ct = sess.focusedTrack;
