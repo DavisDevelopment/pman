@@ -5,6 +5,6 @@ import tannus.ds.*;
 import tannus.sys.*;
 
 enum QuickOpenItem {
-    QOFile(file : File);
+    QOMedia(src : MediaSource);
     QOPlaylist(name : String);
 }
