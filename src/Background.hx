@@ -277,17 +277,19 @@ class Background {
         #end
 
 		updateMenu();
+
+        // get cli args and environment variables
+        var argv = Sys.args();
+        var env = tannus.ds.MapTools.toObject(Sys.environment());
+
+        //TODO actually parse [argv]
 		
 		openPlayerWindow(function( bw ) {
-			null;
+			var launchInfo = {argv: argv, env: env};
+			defer(function() {
+                ic.send(playerWindow, 'LaunchInfo', [launchInfo]);
+            });
 		});
-
-        /*
-		serverBoss = Boss.hire_cp( 'server' );
-		serverBoss.send('init', {
-            appPath: App.getAppPath().toString()
-		});
-		*/
 	}
 
 	/**
