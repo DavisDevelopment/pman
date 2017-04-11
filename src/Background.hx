@@ -140,7 +140,10 @@ class Background {
             {
                 label: 'Reload App',
                 accelerator: 'CommandOrControl+R',
-                click: function() App.relaunch()
+                click: function() {
+                    App.relaunch();
+                    App.quit();
+                }
             },
             {
                 label: 'Exit App',
