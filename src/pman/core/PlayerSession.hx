@@ -324,6 +324,14 @@ class PlayerSession {
 	    return file().exists;
 	}
 
+	/**
+	  * delete the session.dat file
+	  */
+	public inline function deleteSavedState():Void {
+	    file().delete();
+	}
+
+	/**
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
