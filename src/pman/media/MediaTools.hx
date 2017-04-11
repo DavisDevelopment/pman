@@ -169,6 +169,26 @@ class MediaTools {
 	}
 
 	/**
+	  * convert MediaSource to a MediaProvider
+	  */
+	public static function mediaSourceToMediaProvider(src : MediaSource):MediaProvider {
+	    switch ( src ) {
+            case MSLocalPath( path ):
+                return cast new LocalFileMediaProvider(new File( path ));
+
+            case MSUrl( url ):
+                var protocol:String = url.before(':').toLowerCase();
+                switch ( protocol ) {
+                    case 'http', 'https':
+                        return cast new HttpAddressMediaProvider( url );
+
+                    default:
+                        throw 'Error: Unsupported URL "$url"';
+                }
+	    }
+	}
+
+	/**
 	  * parse the given URI to a MediaProvider
 	  */
 	public static function uriToMediaProvider(uri : String):MediaProvider {
