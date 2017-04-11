@@ -52,10 +52,6 @@ class Background {
       */
 	public function close():Void {
 	    App.quit();
-	    /*
-	    serverBoss.send('close', null);
-	    serverBoss.kill();
-	    */
 	}
 
 	/**
@@ -72,6 +68,7 @@ class Background {
 		// load the html file onto that BrowserWindow
 		var dir:Path = ap( 'pages/index.html' );
 		win.loadURL( 'file://$dir' );
+		
 		// wait for the window to be ready
 		win.once('ready-to-show', function() {
 			win.show();
