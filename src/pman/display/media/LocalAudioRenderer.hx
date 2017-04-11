@@ -56,7 +56,8 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
       */
     override function update(stage : Stage):Void {
         super.update( stage );
-        if (underlay != null) {
+
+        if (prefs.directRender && underlay != null) {
             var imgSize:Rectangle = new Rectangle(0, 0, albumArt.width, albumArt.height);
             var viewport:Rectangle = pv.rect.clone();
             var scale:Float = marScale(imgSize, viewport);
@@ -74,6 +75,9 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
         }
     }
 
+    /**
+      * 
+      */
 	private inline function marScale(src:Rectangle, dest:Rectangle):Float {
 		return min((dest.width / src.width), (dest.height / src.height));
 	}
@@ -105,6 +109,10 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
 
     // set up event listeners that may lead to getting album art
     private function _maybe_load_albumart(t : Track):Void {
+        if ( !prefs.showAlbumArt ) {
+            return ;
+        }
+
         function _load_albumart():Void {
             if (visualizer == null) {
                 return ;
@@ -114,13 +122,18 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
                 var artPromise = artLoader.loadAlbumArt( t );
                 artPromise.then(function(art : Null<Image>) {
                     albumArt = art;
-                    underlay = new AlbumArtUnderlay( albumArt );
-                    underlay.appendTo('body');
+                    if ( prefs.directRender ) {
+                        underlay = new AlbumArtUnderlay( albumArt );
+                        underlay.appendTo('body');
+                    }
                 });
             }
         }
         window.setTimeout(_load_albumart, 2000);
     }
+
+    public var prefs(get, never):pman.db.Preferences;
+    private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */
 
