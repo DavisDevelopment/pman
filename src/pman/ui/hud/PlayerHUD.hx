@@ -43,6 +43,10 @@ class PlayerHUD extends Ent {
       */
     override function init(stage : Stage):Void {
         super.init( stage );
+
+        defer(function() {
+            addItem(new ProgressItem( this ));
+        });
     }
 
     /**
