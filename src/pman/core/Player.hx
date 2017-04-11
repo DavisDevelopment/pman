@@ -1063,6 +1063,15 @@ class Player extends EventDispatcher {
         }
 	}
 
+	/**
+	  * override [this] Player's dispatch method
+	  */
+	override function dispatch<T>(name:String, data:T):Void {
+	    super.dispatch(name, data);
+
+	    var now:Date = Date.now();
+	    eventTimes[name] = now;
+	}
 /* === Computed Instance Fields === */
 
 	public var duration(get, never):Duration;
