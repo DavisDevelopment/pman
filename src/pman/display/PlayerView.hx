@@ -15,6 +15,7 @@ import electron.ext.Menu;
 import pman.core.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.hud.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -28,10 +29,15 @@ class PlayerView extends Ent {
 		super();
 		
 		player = p;
+
 		controls = new PlayerControlsView( this );
 		addSibling( controls );
+
 		messageBoard = new PlayerMessageBoard( player );
 		addSibling( messageBoard );
+
+        hud = new PlayerHUD( this );
+        addSibling( hud );
 
 		currentMediaRenderer = null;
 	}
@@ -184,6 +190,7 @@ class PlayerView extends Ent {
 	public var player : Player;
 	public var controls : PlayerControlsView;
 	public var messageBoard : PlayerMessageBoard;
+	public var hud : PlayerHUD;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
 
