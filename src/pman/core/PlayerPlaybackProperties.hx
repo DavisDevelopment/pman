@@ -10,7 +10,7 @@ using tannus.math.TMath;
 class PlayerPlaybackProperties {
 	/* Constructor Function */
 	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false):Void {
-	    changed = new VoidSignal();
+	    changed = new Signal();
 
 		this.speed = speed;
 		this.volume = volume;
@@ -71,7 +71,8 @@ class PlayerPlaybackProperties {
 
 /* === Instance Fields === */
 
-	public var changed : VoidSignal;
+	public var changed : Signal<PPChange>;
+}
 
 /**
   * enum of kinds of changes to PlayerPlaybackProperties
