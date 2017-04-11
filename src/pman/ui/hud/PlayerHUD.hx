@@ -57,6 +57,8 @@ class PlayerHUD extends Ent {
       */
     override function calculateGeometry(r : Rectangle):Void {
         rect = playerView.rect.clone();
+
+        super.calculateGeometry( r );
     }
 
 /* === Instance Fields === */
