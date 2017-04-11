@@ -1072,6 +1072,14 @@ class Player extends EventDispatcher {
 	    var now:Date = Date.now();
 	    eventTimes[name] = now;
 	}
+
+	/**
+	  * get most recent recent occurrence time (if any) for the given event
+	  */
+	public inline function getMostRecentOccurrenceTime(event : String):Maybe<Date> {
+	    return eventTimes[event];
+	}
+
 /* === Computed Instance Fields === */
 
 	public var duration(get, never):Duration;
