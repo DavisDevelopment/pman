@@ -377,10 +377,6 @@ class PlayerSession {
 
 /* === Computed Instance Fields === */
 
-	// shorthand name for [mediaContext]
-	//public var mc(get, never):PlayerMediaContext;
-	//private inline function get_mc():PlayerMediaContext return mediaContext;
-
 	public var pp(get, never):PlayerPlaybackProperties;
 	private inline function get_pp():PlayerPlaybackProperties return playbackProperties;
 
