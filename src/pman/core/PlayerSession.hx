@@ -372,6 +372,10 @@ class PlayerSession {
 	private inline function get_shuffle():Bool return pp.shuffle;
 	private inline function set_shuffle(v : Bool):Bool return (pp.shuffle = v);
 
+	public var muted(get, set):Bool;
+	private inline function get_muted():Bool return pp.muted;
+	private inline function set_muted(v : Bool):Bool return (pp.muted = v);
+
 	public var mediaProvider(get, never):Null<MediaProvider>;
 	private inline function get_mediaProvider():Null<MediaProvider> return mft.ternary(_.provider, null);
 
