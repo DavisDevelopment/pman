@@ -52,6 +52,11 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
         return this.map.fn(new Track(_.mediaSourceToMediaProvider()));
     }
 
+    @:from
+    public static inline function fromTracks(tracks : Array<Track>):MediaSourceList {
+        return tracks.map.fn( _.source );
+    }
+
 /* === Instance Fields === */
 
 }
