@@ -94,6 +94,7 @@ class PlayerView extends Ent {
 			// copy the data over
 			mc.setVolume( pp.volume );
 			mc.setPlaybackRate( pp.speed );
+			mc.setMuted( pp.muted );
 
 			cmr.update( stage );
 
