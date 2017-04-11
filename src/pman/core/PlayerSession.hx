@@ -297,6 +297,26 @@ class PlayerSession {
 	    f.write(state.encode());
 	}
 
+	/**
+	  * load state
+	  */
+	public function restore(?done : Void->Void):Void {
+	    // get the File
+	    var f = file();
+	    // if the File exists
+	    if ( f.exists ) {
+	        // decode the state
+	        var state = PlayerSessionState.decode(f.read());
+	        // pull the state onto [this] Session
+	        pullState(state, done);
+	    }
+        else {
+            if (done != null) {
+                defer( done );
+            }
+        }
+	}
+
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
