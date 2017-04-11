@@ -241,40 +241,45 @@ class Track implements IComparable<Track> {
                 }
             });
 
-            if (!data.marks.empty()) {
-                mt.push({type: 'separator'});
+            mt.push({type: 'separator'});
 
-                var marks:MenuTemplate = new MenuTemplate();
-
-                // bookmarks
-                for (mark in data.marks) {
-                    switch ( mark.type ) {
-                        case MarkType.Named( name ):
-                            var time = mark.time;
-                            marks.push({
-                                label: name,
-                                click: function(i,w,e) {
-                                    if (player.track != this) {
-                                        player.openTrack(this, {
-                                            startTime: time
-                                        });
-                                    }
-                                    else {
-                                        player.currentTime = time;
-                                    }
-                                }
-                            });
-
-                        default:
-                            continue;
-                    }
+            var marks:MenuTemplate = new MenuTemplate();
+            marks.push({
+                label: 'Add Bookmark',
+                click: function(i,w,e) {
+                    player.addBookmark();
                 }
+            });
+            marks.push({type: 'separator'});
 
-                mt.push({
-                    label: 'Bookmarks',
-                    submenu: marks
-                });
+            // bookmarks
+            for (mark in data.marks) {
+                switch ( mark.type ) {
+                    case MarkType.Named( name ):
+                        var time = mark.time;
+                        marks.push({
+                            label: name,
+                            click: function(i,w,e) {
+                                if (player.track != this) {
+                                    player.openTrack(this, {
+                                        startTime: time
+                                    });
+                                }
+                                else {
+                                    player.currentTime = time;
+                                }
+                            }
+                        });
+
+                    default:
+                        continue;
+                }
             }
+
+            mt.push({
+                label: 'Bookmarks',
+                submenu: marks
+            });
 
             callback( mt );
         });
