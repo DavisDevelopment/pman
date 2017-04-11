@@ -36,6 +36,7 @@ class ConfirmBox extends Pane {
       * build the shit
       */
     override function populate():Void {
+        modal = new Modal();
         title = new Heading( 4 );
         append( title );
         btnRow = new FlexRow([6, 6]);
@@ -79,6 +80,7 @@ class ConfirmBox extends Pane {
     public function open():Void {
         if (!childOf('body')) {
             appendTo( 'body' );
+            modal.open();
             defer( __center );
             defer(function() {
                 confirmBtn.el.plugin('focus');
@@ -90,6 +92,7 @@ class ConfirmBox extends Pane {
       * close [this]
       */
     public function close():Void {
+        modal.close();
         destroy();
     }
     
@@ -125,6 +128,7 @@ class ConfirmBox extends Pane {
     public var btnRow : FlexRow;
     public var cancelBtn : Button;
     public var confirmBtn : Button;
+    public var modal : Modal;
 
     public var resultEvent : Signal<Bool>;
 }
