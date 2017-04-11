@@ -227,6 +227,7 @@ class AppDir {
         w( p.playbackRate );
         w( p.volume );
         w( p.shuffle );
+        w( p.muted );
 
         return s.toString();
     }
@@ -238,6 +239,7 @@ class AppDir {
         p.playbackRate = val();
         p.volume = val();
         p.shuffle = val();
+        p.muted = val();
 
         if (done != null) {
             defer( done );
