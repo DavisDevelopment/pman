@@ -31,6 +31,7 @@ class PManDatabase {
 
 		configInfo = new ConfigInfo( this );
 		mediaStore = new MediaStore( this );
+		preferences = Preferences.pull();
 	}
 
 /* === Instance Methods === */
@@ -171,6 +172,7 @@ class PManDatabase {
 	public var db : Database;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
+	public var preferences : Preferences;
 
 	private var or : VoidSignal;
 	private var reddy : Bool = false;
