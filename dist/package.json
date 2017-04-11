@@ -28,6 +28,7 @@
   "license": "ISC",
   "devDependencies": {
     "async": "^2.1.5",
+    "coffee-script": "1.12.4",
     "electron-devtools-installer": "^2.1.0",
     "electron-installer-debian": "^0.5.0",
     "electron-installer-windows": "^0.2.0",
