@@ -335,6 +335,9 @@ class Background {
     public var ic(get, never):MainIpcCommands;
     private inline function get_ic() return ipcCommands;
 
+    public var playerWindow(get, never):Null<BrowserWindow>;
+    private inline function get_playerWindow() return playerWindows[0];
+
 /* === Instance Fields === */
 
 	public var playerWindows : Array<BrowserWindow>;
