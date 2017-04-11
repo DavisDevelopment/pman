@@ -64,7 +64,7 @@ class PlayerPlaybackProperties {
 	    var hc = (shuffle != v);
 	    shuffle = v;
 	    if ( hc ) {
-	        changed.fire();
+	        sce(Shuffle( shuffle ));
 	    }
 	    return shuffle;
 	}
