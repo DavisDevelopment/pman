@@ -260,58 +260,6 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * save current player-state to the filesystem
-	  */
-	public function saveState(saveAs:Bool=false, ?done:Void->Void):Void {
-	    inline function finish()
-	        if (done != null)
-	            defer( done );
-	    if (session.name == null || saveAs) {
-            prompt('session title', null, function(title) {
-                if (title == null) {
-                    finish();
-                }
-                else {
-                    _saveState( title );
-                    session.name = title;
-                    finish();
-                }
-            });
-        }
-        else {
-            _saveState( session.name );
-        }
-	}
-
-	/**
-	  * load the saved player-state from the filesystem
-	  */
-	public inline function loadState(name:String, ?done:Void->Void):Void {
-	    _loadState(name, done);
-	}
-
-	/**
-	  * save the current session to the filesystem
-	  */
-	public inline function _saveState(name : String):Void {
-	    app.appDir.saveSession(name, session.toJson());
-	}
-
-	/**
-	  * load a saved session by name
-	  */
-	public inline function _loadState(name:String, ?done:Void->Void):Void {
-	    session.pullJson(app.appDir.loadSession(name), function() {
-	        session.name = name;
-	        if (page.playlistView != null) {
-	            page.playlistView.refresh();
-	        }
-	        if (done != null)
-	            done();
-	    });
-	}
-
-	/**
 	  * save the current playlist to a file
 	  */
 	public function exportPlaylist(?done : Void->Void):Void {
