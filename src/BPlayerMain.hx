@@ -262,3 +262,8 @@ typedef FSPromptOptions = {
 	?filters:Array<FileFilter>,
 	?directory:Bool
 };
+
+typedef LaunchInfo = {
+    argv: Array<String>,
+    env: Object
+};
