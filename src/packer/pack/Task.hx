@@ -23,12 +23,15 @@ class Task {
       */
     public function run(?cb : ?Dynamic->Void):Void {
         if (cb == null) {
-            cb = (function(error : ?Dynamic) null);
+            cb = (function(?error : Dynamic) null);
         }
         execute( cb );
     }
 
-    private function execute(cb : Null<Dynamic>->Void):Void {
+    /**
+      * execute [this] Task
+      */
+    private function execute(cb : ?Dynamic->Void):Void {
         cb();
     }
 
