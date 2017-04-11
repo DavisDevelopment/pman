@@ -43,6 +43,8 @@ class BPlayerMain extends Application {
 		    _ready = true;
 		});
 
+		closingEvent = new Signal2();
+
 		win.expose('main', this);
 
 		if (instance == null) {
@@ -236,6 +238,7 @@ class BPlayerMain extends Application {
 	public var dragManager : DragDropManager;
 	public var tray : Tray;
 	public var ipcCommands : RendererIpcCommands;
+	public var closingEvent : Signal2<Dynamic, AsyncStack>;
 
 	private var _ready : Bool;
 	// ready signal
