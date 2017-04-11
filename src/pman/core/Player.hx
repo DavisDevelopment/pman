@@ -104,6 +104,13 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * a frame has passed
+	  */
+	public function tick():Void {
+	    dispatch('tick', null);
+	}
+
+	/**
 	  * post a Message to the message board
 	  */
 	public inline function message(msg : EitherType<String, MessageOptions>):Void {
