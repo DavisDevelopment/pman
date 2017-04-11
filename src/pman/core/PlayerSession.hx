@@ -329,6 +329,20 @@ class PlayerSession {
 	    });
 	}
 
+	/**
+	  * get the Path to the session.dat file
+	  */
+	private static inline function filePath():Path {
+	    return BPlayerMain.instance.appDir.lastSessionPath();
+	}
+
+	/**
+	  * get the session.dat File
+	  */
+	public static inline function file():File {
+	    return new File(filePath());
+	}
+
 /* === Computed Instance Fields === */
 
 	public var pp(get, never):PlayerPlaybackProperties;
