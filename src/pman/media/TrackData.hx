@@ -159,6 +159,14 @@ class TrackData {
         addMark(new Mark(type, time));
     }
 
+    /**
+      * get the time for a Mark of the given type
+      */
+    private function _getTime(type:MarkType):Null<Float> {
+        var m:Null<Mark> = getMarkByType( type );
+        return (m != null ? m.time : null);
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
