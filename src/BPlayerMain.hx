@@ -208,6 +208,13 @@ class BPlayerMain extends Application {
         }
 	}
 
+	/**
+	  * process the given LaunchInfo
+	  */
+	public function launchInfo(info : LaunchInfo):Void {
+	    trace( info );
+	}
+
 /* === Compute Instance Fields === */
 
     // reference to the Player object
