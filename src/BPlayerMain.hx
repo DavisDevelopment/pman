@@ -73,6 +73,20 @@ class BPlayerMain extends Application {
         db.init(function() {
             _rs.fire();
         });
+
+        var preCloseComplete:Bool = false;
+        win.onbeforeunload = (untyped function(event : Dynamic) {
+            if ( preCloseComplete ) {
+                return null;
+            }
+            else {
+                beforeUnload(event, function() {
+                    preCloseComplete = true;
+                    win.close();
+                });
+                return false;
+            }
+        });
     }
 
 	/**
