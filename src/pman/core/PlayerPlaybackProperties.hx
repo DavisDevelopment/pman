@@ -39,10 +39,12 @@ class PlayerPlaybackProperties {
 
 	public var volume(default, set): Float;
 	private function set_volume(v : Float):Float {
-	    var hc = (volume != v.clamp(0.0, 1.0));
+	    var ov = volume;
 	    volume = v.clamp(0.0, 1.0);
-	    if ( hc )
-            changed.fire();
+	    var hc = (ov != volume);
+	    if ( hc ) {
+	        sce(Volume(new Delta(volume, ov)));
+        }
 	    return volume;
 	}
 
