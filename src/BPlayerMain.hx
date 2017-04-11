@@ -123,6 +123,16 @@ class BPlayerMain extends Application {
 	}
 
 	/**
+	  * before the DOM gets unloaded
+	  */
+	public function beforeUnload(event:Dynamic, done:Void->Void):String {
+	    var stack = new AsyncStack();
+	    closingEvent.call(event, stack);
+	    stack.run( done );
+	    return '';
+	}
+
+	/**
 	  * create and display FileSystem prompt
 	  */
 	public inline function fileSystemPrompt(options:FSPromptOptions, callback:Array<String>->Void):Void {
