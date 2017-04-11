@@ -39,6 +39,14 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
         return this.map( MediaTools.mediaSourceToUri );
     }
 
+    /**
+      * Build MediaSourceList from an Array of Strings
+      */
+    @:from
+    public static inline function fromStrings(sl : Array<String>):MediaSourceList {
+        return sl.map( pman.media.MediaTools.uriToMediaSource );
+    }
+
 /* === Instance Fields === */
 
 }
