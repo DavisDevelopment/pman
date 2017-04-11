@@ -151,6 +151,14 @@ class TrackData {
         return _getTime( End );
     }
 
+    /**
+      * set the time for the Mark of the given type
+      */
+    private function _setTime(type:MarkType, time:Float):Void {
+        removeMarksOfType( type );
+        addMark(new Mark(type, time));
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
