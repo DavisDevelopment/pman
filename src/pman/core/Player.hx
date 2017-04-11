@@ -93,9 +93,34 @@ class Player extends EventDispatcher {
 	  */
 	private function initialize(stage : Stage):Void {
 	    var ad = app.appDir;
+	    var prefs = app.db.preferences;
 	    if (ad.hasSavedPlaybackSettings()) {
 	        ad.loadPlaybackSettings(this, function() {
-	            readyEvent.fire();
+	            if ( prefs.autoRestore ) {
+                    session.restore(function() {
+                        readyEvent.fire();
+                    });
+                }
+                else {
+                    defer(function() {
+                        if (session.hasSavedState()) {
+                            confirm('Restore Previous Session?', function(restore : Bool) {
+                                if ( restore ) {
+                                    session.restore(function() {
+                                        readyEvent.fire();
+                                    });
+                                }
+                                else {
+                                    session.deleteSavedState();
+                                    readyEvent.fire();
+                                }
+                            });
+                        }
+                        else {
+                            readyEvent.fire();
+                        }
+                    });
+                }
 	        });
 	    }
         else {
