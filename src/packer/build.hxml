@@ -1,0 +1,21 @@
+
+-cp ../tannus/
+#-cp ../gryffin/
+#-cp ../foundation/src/
+#-cp ../crayon/
+#-cp ../ida/
+#-cp ../vex/
+#-cp ../hxpress/src/
+#-cp ../hscript/
+
+-lib slambda
+-lib format
+
+-D tannus
+-D node
+
+--each
+
+-main Packer
+-js ../../dist/pack
+
