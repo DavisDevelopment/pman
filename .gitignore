@@ -24,3 +24,5 @@ dist/pack.js
 dist/scripts/server\.js
 
 dist/_thumbs/
+
+dist/pack
