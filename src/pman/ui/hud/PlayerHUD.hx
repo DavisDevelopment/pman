@@ -16,7 +16,7 @@ import pman.ui.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+import electron.Tools.*;
 
 import motion.Actuate;
 import motion.easing.*;
@@ -59,6 +59,14 @@ class PlayerHUD extends Ent {
         rect = playerView.rect.clone();
 
         super.calculateGeometry( r );
+    }
+
+    /**
+      * add an item to [this]
+      */
+    public inline function addItem(item : PlayerHUDItem):Void {
+        items.push( item );
+        addChild( item );
     }
 
 /* === Instance Fields === */
