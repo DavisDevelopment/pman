@@ -1120,6 +1120,7 @@ class Player extends EventDispatcher {
 	public var isReady(default, null): Bool;
 
 	private var readyEvent : VoidSignal;
+	private var eventTimes : Dict<String, Date> = {new Dict();};
 }
 
 typedef OpenCbOpts = {
