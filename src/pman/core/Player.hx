@@ -1093,8 +1093,9 @@ class Player extends EventDispatcher {
 
 	public var currentTime(get, set):Float;
 	private inline function get_currentTime():Float return sim(_.getCurrentTime(), 0.0);
-	private inline function set_currentTime(v : Float):Float {
+	private function set_currentTime(v : Float):Float {
 		sim(_.setCurrentTime( v ));
+		defer(dispatch.bind('seek', currentTime));
 		return currentTime;
 	}
 
