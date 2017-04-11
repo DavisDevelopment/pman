@@ -1,5 +1,5 @@
 
-lessc styles/theme.less >styles/theme.css
+lessc styles/pman.less >styles/pman.css
 
 coffee -c -o scripts/lib scripts/lib/
 
