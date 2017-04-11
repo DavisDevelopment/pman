@@ -139,7 +139,7 @@ class Background {
                 accelerator: 'CommandOrControl+R',
                 click: function() {
                     App.relaunch();
-                    App.quit();
+                    close();
                 }
             },
             {
