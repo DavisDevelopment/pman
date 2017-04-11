@@ -253,6 +253,41 @@ class PlayerSession {
 	    return state;
 	}
 
+	/**
+	  * put a state onto [this]
+	  */
+	public function pullState(state:PlayerSessionState, ?done:Void->Void):Void {
+	    var stack = new AsyncStack();
+
+	    // pull the playlist
+	    stack.push(function(next) {
+	        var tmp = player.shuffle;
+	        player.shuffle = false;
+	        player.addItemList(state.playlist.toTracks(), function() {
+	            player.shuffle = tmp;
+	            next();
+	        });
+	    });
+
+	    // pull the current track
+	    stack.push(function(next) {
+	        if (state.focused != -1) {
+	            player.gotoTrack(state.focused, {
+                    attached: function() {
+                        next();
+                    }
+	            });
+	        }
+	    });
+
+	    // run the tasks
+	    stack.run(function() {
+	        if (done != null) {
+	            done();
+	        }
+	    });
+	}
+
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
