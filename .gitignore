@@ -26,3 +26,5 @@ dist/scripts/server\.js
 dist/_thumbs/
 
 dist/pack
+
+dist/styles/pman\.css
