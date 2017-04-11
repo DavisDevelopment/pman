@@ -108,6 +108,20 @@ class AppDir {
 	}
 
 	/**
+	  * get the Path to the preferences file
+	  */
+	public inline function preferencesPath():Path {
+	    return path().plusString( 'preferences.dat' );
+	}
+
+	/**
+	  * get the preferences File
+	  */
+	public inline function preferencesFile():File {
+	    return new File(preferencesPath());
+	}
+
+	/**
 	  * save the given session info with the given name
 	  */
 	public function saveSession(name:String, session:JsonSession):Void {
