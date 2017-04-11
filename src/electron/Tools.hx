@@ -11,4 +11,11 @@ class Tools {
 	public static inline function defer(action : Void -> Void):Void {
 		(untyped __js__( 'process.nextTick' )( action ));
 	}
+
+/* === Class Fields === */
+
+    public static var now(get, never):Float;
+    private static inline function get_now():Float {
+        return Date.now().getTime();
+    }
 }
