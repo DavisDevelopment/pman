@@ -1,0 +1,25 @@
+
+@import "theme";
+@import "utils";
+
+.canvas-underlay {
+    position: absolute;
+    z-index: 2;
+}
+
+.right-panel {
+	display: block;
+	position: absolute;
+	z-index: 11;
+	right: 0px;
+	top: 0px;
+	width: 30vw;
+	height: 100vh;
+	color: #222;
+	background-color: @primary;
+	font-family: Ubuntu;
+	border-right: solid @secondary 0.75px;
+}
+
+@import "widgets/dialogs";
+@import "widgets/playlist";

@@ -1,0 +1,118 @@
+
+@import "theme";
+@import "utils";
+
+.playlist {
+	overflow-y: scroll;
+
+	// The search widget
+	.search-box {
+		margin-left: auto;
+		margin-right: auto;
+		width: 100%;
+
+		input[type=text] {
+			font-size: 10pt;
+			width: 100%;
+			height: auto;
+		}
+
+		img.clear {
+		    position: absolute;
+		    z-index: 2;
+		    right: -2px;
+		    top: 37px;
+		    height: 45px;
+		    cursor: pointer;
+		}
+	}
+
+	// the Track list widget
+	ul {
+		background-color: lighten(@primary, 12%);
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+		width: 100%;
+
+		li {
+
+            &:nth-child(even) .track {
+                background-color: lighten(@primary, 18%);
+            }
+            &:nth-child(odd) .track {
+                box-shadow: inset 0px 0px 8px 2px #444;
+            }
+
+            .track {
+                .block-center;
+
+
+                width: 96%;
+                border: solid grey 0.5px;
+                /*margin-top: 5px;*/
+                color: white;
+                cursor: pointer;
+
+                .title {
+                    padding: 5px;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 1;
+                    -webkit-box-orient: vertical;
+                    //max-height: 18px;
+                    overflow: hidden;
+                    font-size: 10pt;
+
+                    .starred {
+                        font-weight: bold;
+                        color: lighten(@secondary, 12%);
+                        margin-right: 3px;
+                    }
+                }
+
+                .info {
+                    overflow: hidden;
+                    .size {
+                        padding: 5px;
+                        display: -webkit-box;
+                        -webkit-box-orient: vertical;
+                        font-size: 7pt;
+                        text-align: right;
+                        margin-top: 3px;
+
+                        .resolution {
+                            margin-right: 3px;
+                        }
+                    }
+
+                    .actions {
+                        display: none;
+                    }
+                }
+
+                /* highlighted */
+                &.focused, &.hovered, &:hover {
+                    background-color: @secondary;
+
+                    .title {
+                        .starred {
+                            color: white;
+                        }
+                    }
+                }
+            }
+        }
+
+
+		
+
+		li .drop-indicator {
+			.block-center;
+			
+			margin-top: 5px;
+			width: 96%;
+			border-top: solid @secondary 1.5px;
+			border-bottom: solid @secondary 1.5px;
+		}
+	}
+}

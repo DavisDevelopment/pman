@@ -1,0 +1,65 @@
+
+@import "theme";
+@import "utils";
+
+.auto-complete-input {
+    position: absolute;
+    top: 55px;
+    width: 90%;
+    z-index: 11111;
+    font-size: 13.8px;
+
+    /*
+    .text-input-row {
+        padding: 0;
+        margin: 0;
+        width: 100%;
+
+    }
+    */
+    input[type=text] {
+        color: @tertiary;
+        line-height: 24px;
+        width: 100%;
+    }
+
+    .results {
+        display: block;
+        position: absolute;
+        z-index: 20000;
+        width: 100%;
+        overflow-y: auto;
+        overflow-x: hidden;
+        max-height: 200px;
+
+        .item {
+            padding: 3px 12px;
+            line-height: 24px;
+        }
+    }
+}
+
+.confirm {
+    background-color: white;
+    border: solid @primary 1px;
+    font-family: Ubuntu;
+    position: fixed;
+    z-index: 11111;
+    top: 55px;
+    width: 45%;
+
+    h4 {
+        text-align: center;
+    }
+}
+
+.modal {
+    width: 100vw;
+    height: 100vh;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    z-index: 12;
+    background-color: @primary;
+    opacity: 70%;
+}
