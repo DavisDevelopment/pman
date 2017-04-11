@@ -31,6 +31,7 @@ promptBool = exports['promptBool'] = ([msg, def]..., callback) ->
         }
     }, _cb)
 
+# Build base class
 exports['Build'] = class Build
     constructor: ->
         null
@@ -41,6 +42,7 @@ exports['Build'] = class Build
     confirm: ([msg, def=no]..., callback) ->
         promptBool msg, def, callback
 
+# Builds class
 exports['Builds'] = class Builds extends Build
     constructor: (@builds=[]) ->
         super()
@@ -55,6 +57,7 @@ exports['Builds'] = class Builds extends Build
         (callback) ->
             build.execute(callback)
 
+# Task class
 exports['Task'] = class Task extends Build
     constructor: ->
         @promptMessage = 'perform this task?'
@@ -85,6 +88,7 @@ exports['Task'] = class Task extends Build
             else
                 cb(null, null)
 
+# Batch class
 exports['Batch'] = class Batch extends Task
     constructor: (tasks=[]) ->
         super()
