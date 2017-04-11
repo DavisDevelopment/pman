@@ -44,7 +44,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  * render [this] View
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
-	    if (underlay == null) {
+	    if ( !prefs.directRender ) {
             c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
         }
 	}
@@ -90,8 +90,11 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		if (this.pv == null) {
 			this.pv = pv;
 		}
-		underlay = new VideoUnderlay( v );
-		underlay.appendTo( 'body' );
+
+		if ( prefs.directRender ) {
+            underlay = new VideoUnderlay( v );
+            underlay.appendTo( 'body' );
+        }
 	}
 
 	/**
@@ -110,6 +113,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 
 	private var ovr(get, never):Rectangle;
 	private inline function get_ovr():Rectangle return new Rectangle(0, 0, v.width, v.height);
+
+    public var prefs(get, never):pman.db.Preferences;
+    private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */
 
