@@ -374,6 +374,12 @@ class PlayerSession {
 	        save();
 	    });
 
+	    // when the Playlist changes
+	    playlist.changeEvent.on(function( change ) {
+	        // save [this] Session
+	        save();
+	    });
+
 	}
 
 	/**
