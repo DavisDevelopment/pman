@@ -13,28 +13,31 @@ installer_funcs = {
     linux: deb_installer
 }
 
-exports['InstallerBuild'] = class InstallerBuild extends tools.Build
-    constructor: (platform, arch) ->
+class Installer extends tools.Task
+    constructor: (@platform, @arch='x64') ->
         super()
-
-        @platform = platform
-        @arch = arch
+        @method = switch (@platform.toLowerCase())
+            when 'win32' then win_installer
+            when 'linux' then deb_installer
+            else null
         @options = {
             src: tools.scriptdir('releases', "pman-#{@platform}-#{@arch}")
             dest: tools.scriptdir('installers')
             arch: @arch
         }
+        @promptMessage = "create installer for #{@platform}-#{@arch}"
+        @promptDefault = no
 
-    execute: (callback) ->
-        self = this
-        @confirm (err, doit) =>
-            if doit
-                self.getf()?(self.options, callback)
-            else
-                _.defer(_.partial(callback, null, null))
+    perform: (callback) ->
+        @method(@options, callback)
 
-    getf: ->
-        return installer_funcs[@platform]
+exports['InstAller'] = class InstAller extends tools.Batch
+    constructor: ->
+        super()
+        @tasks = [
+            new Installer( 'linux' )
+            new Installer( 'win32' )
+        ]
 
-    confirm: (callback) ->
-        tools.promptBool("create #{@platform}-#{@arch} installer?", no, callback)
+    confirm: (f) ->
+        _.defer(_.partial(f, null, yes))

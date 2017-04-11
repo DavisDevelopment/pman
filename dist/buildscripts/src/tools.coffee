@@ -41,6 +41,20 @@ exports['Build'] = class Build
     confirm: ([msg, def=no]..., callback) ->
         promptBool msg, def, callback
 
+exports['Builds'] = class Builds extends Build
+    constructor: (@builds=[]) ->
+        super()
+
+    execute: ([flow=null]..., callback) ->
+        if not flow?
+            flow = async.series
+        flow(Builds.execs( @builds ), callback)
+
+    @execs: (list) -> (Builds.exec( build ) for build in list)
+    @exec: (build) ->
+        (callback) ->
+            build.execute(callback)
+
 exports['Task'] = class Task extends Build
     constructor: ->
         @promptMessage = 'perform this task?'

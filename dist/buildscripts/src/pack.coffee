@@ -8,12 +8,14 @@ _ = require 'underscore'
 tools = require './tools'
 standalone = require './standalone'
 {Pack, PackAll} = require './standalone'
-{InstallerBuild} = require './installer'
+{Installer,InstAller} = require './installer'
 
 module.exports = pack = ( argv ) ->
     packall = new PackAll()
+    install = new InstAller()
     packall.execute ->
-        console.log " Nigger Anus "
+        install.execute ->
+            console.log " -- DONE -- "
 
 do ->
     argv = process.argv[2..]
