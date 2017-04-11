@@ -373,6 +373,12 @@ class PlayerSession {
                     player.dispatch('change:muted', nv);
 	        }
 	    });
+
+	    // on focusedTrack changing
+	    trackChanged.on(function( d ) {
+	        // forward the event to the Player
+	        player.dispatch('change:nowPlaying', d);
+	    });
 	}
 
 /* === Computed Instance Fields === */
