@@ -50,10 +50,12 @@ class PlayerPlaybackProperties {
 
 	public var speed(default, set): Float;
 	private function set_speed(v : Float):Float {
-	    var hc = (speed != v);
+	    var ov = speed;
 	    speed = v;
-	    if ( hc )
-            changed.fire();
+	    var hc = (ov != speed);
+	    if ( hc ) {
+	        sce(Speed(new Delta(speed, ov)));
+        }
 	    return speed;
 	}
 
