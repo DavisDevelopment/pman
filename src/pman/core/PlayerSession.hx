@@ -288,6 +288,15 @@ class PlayerSession {
 	    });
 	}
 
+	/**
+	  * save state
+	  */
+	public function save():Void {
+	    var f = file();
+	    var state = getState();
+	    f.write(state.encode());
+	}
+
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
