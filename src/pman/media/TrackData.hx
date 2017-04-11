@@ -143,9 +143,12 @@ class TrackData {
     public inline function getBeginTime():Null<Float> {
         return _getTime( Begin );
     }
-    public function getEndTime():Null<Float> {
-        var m = getMarkByType( End );
-        return if (m != null) m.time else null;
+
+    /**
+      * get [this] Track's end time
+      */
+    public inline function getEndTime():Null<Float> {
+        return _getTime( End );
     }
 
 /* === Instance Fields === */
