@@ -6,18 +6,25 @@ using tannus.math.TMath;
 
 class PlayerPlaybackProperties {
 	/* Constructor Function */
-	public function new(speed:Float, volume:Float, shuffle:Bool):Void {
+	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false):Void {
 	    changed = new VoidSignal();
+
 		this.speed = speed;
 		this.volume = volume;
 		this.shuffle = shuffle;
+		this.muted = muted;
 	}
 
 /* === Instance Methods === */
 
+    /**
+      * create and return a copy of [this]
+      */
 	public function clone():PlayerPlaybackProperties {
-		return new PlayerPlaybackProperties(speed, volume, shuffle);
+		return new PlayerPlaybackProperties(speed, volume, shuffle, muted);
 	}
+
+	/**
 
 /* === Computed Instance Fields === */
 
@@ -47,6 +54,16 @@ class PlayerPlaybackProperties {
 	        changed.fire();
 	    }
 	    return shuffle;
+	}
+
+	public var muted(default, set): Bool;
+	private function set_muted(v : Bool):Bool {
+	    var hc = (muted != v);
+	    muted = v;
+	    if ( hc ) {
+	        changed.fire();
+	    }
+	    return muted;
 	}
 
 /* === Instance Fields === */
