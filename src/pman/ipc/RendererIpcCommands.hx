@@ -52,10 +52,12 @@ class RendererIpcCommands {
         b('TogglePlaylist', function() player.togglePlaylist());
         b('ClearPlaylist', function() player.clearPlaylist());
         b('ShufflePlaylist', function() player.shufflePlaylist());
+        /*
         b('SaveSession', function() player.saveState());
         b('LoadSession', function(e, name:String) {
             player.loadState( name );
         });
+        */
         b('SavePlaylist', function(e, ?saveAs:Bool) {
             trace( saveAs );
             player.savePlaylist( saveAs );
