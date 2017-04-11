@@ -39,6 +39,7 @@ class Preferences {
       */
     public function defaults():Void {
         autoPlay = true;
+        autoRestore = false;
         directRender = true;
         showAlbumArt = true;
         showSnapshot = true;
@@ -54,6 +55,7 @@ class Preferences {
             s.serialize( x );
 
         w( autoPlay );
+        w( autoRestore );
         w( directRender );
         w( showAlbumArt );
         w( showSnapshot );
@@ -69,6 +71,7 @@ class Preferences {
             return u.unserialize();
 
         autoPlay = v();
+        autoRestore = v();
         directRender = v();
         showAlbumArt = v();
         showSnapshot = v();
@@ -128,6 +131,7 @@ class Preferences {
 /* === Instance Fields === */
 
     public var autoPlay : Bool;
+    public var autoRestore : Bool;
     public var directRender : Bool;
     public var showAlbumArt : Bool;
 
