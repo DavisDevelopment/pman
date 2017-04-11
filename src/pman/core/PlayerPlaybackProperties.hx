@@ -28,6 +28,12 @@ class PlayerPlaybackProperties {
 	}
 
 	/**
+	  * sce -- schedule change event
+	  * schedule that 'changed' be fired with the given PPChange item during the next call stack
+	  */
+	private inline function sce(change : PPChange):Void {
+	    defer(changed.call.bind( change ));
+	}
 
 /* === Computed Instance Fields === */
 
