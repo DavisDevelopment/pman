@@ -72,4 +72,13 @@ class PlayerPlaybackProperties {
 /* === Instance Fields === */
 
 	public var changed : VoidSignal;
+
+/**
+  * enum of kinds of changes to PlayerPlaybackProperties
+  */
+enum PPChange {
+    Volume(d : Delta<Float>);
+    Speed(d : Delta<Float>);
+    Shuffle(newval : Bool);
+    Muted(newval : Bool);
 }
