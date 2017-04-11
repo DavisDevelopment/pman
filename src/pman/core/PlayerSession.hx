@@ -19,6 +19,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.core.history.PlayerHistoryItem;
 import pman.core.history.PlayerHistoryItem as PHItem;
+import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
 
 import foundation.Tools.*;
@@ -41,7 +42,6 @@ class PlayerSession {
 	public function new(p : Player):Void {
 		player = p;
 
-		//mediaContext = new PlayerMediaContext( this );
 		playbackProperties = new PlayerPlaybackProperties(1.0, 1.0, false);
 
 		trackChanging = new Signal();
@@ -354,8 +354,24 @@ class PlayerSession {
 	  * listen for events
 	  */
 	private function _listen():Void {
-	    playbackProperties.changed.on(function() {
+	    // on any change to the playback properties
+	    playbackProperties.changed.on(function( change ) {
+	        // save the playback settings
 	        player.app.appDir.savePlaybackSettings( player );
+
+	        switch ( change ) {
+                case Volume( d ):
+                    player.dispatch('change:volume', d);
+
+                case Speed( d ):
+                    player.dispatch('change:speed', d);
+
+                case Shuffle( nv ):
+                    player.dispatch('change:shuffle', nv);
+
+                case Muted( nv ):
+                    player.dispatch('change:muted', nv);
+	        }
 	    });
 	}
 
