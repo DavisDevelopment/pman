@@ -181,6 +181,13 @@ class TrackData {
         _setTime(Begin, time);
     }
 
+    /**
+      * set [this] Track's end time
+      */
+    public inline function setEndTime(time : Float):Void {
+        _setTime(End, time);
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
