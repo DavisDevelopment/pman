@@ -133,9 +133,8 @@ class TrackData {
     /**
       * get [this] Track's last time
       */
-    public function getLastTime():Null<Float> {
-        var m = getMarkByType( LastTime );
-        return if (m != null) m.time else null;
+    public inline function getLastTime():Null<Float> {
+        return _getTime( LastTime );
     }
     public function getBeginTime():Null<Float> {
         var m = getMarkByType( Begin );
