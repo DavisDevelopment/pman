@@ -47,6 +47,11 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
         return sl.map( pman.media.MediaTools.uriToMediaSource );
     }
 
+    @:to
+    public inline function toTracks():Array<Track> {
+        return this.map.fn(new Track(_.mediaSourceToMediaProvider()));
+    }
+
 /* === Instance Fields === */
 
 }
