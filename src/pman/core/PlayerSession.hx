@@ -370,7 +370,10 @@ class PlayerSession {
 	    trackChanged.on(function( d ) {
 	        // forward the event to the Player
 	        player.dispatch('change:nowPlaying', d);
+	        // save [this] Session
+	        save();
 	    });
+
 	}
 
 	/**
