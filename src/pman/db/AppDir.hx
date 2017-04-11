@@ -49,26 +49,60 @@ class AppDir {
 		return new Directory(path());
 	}
 
+    /**
+      * get the Path to the player_sessions directory
+      */
 	public inline function sessionsPath():Path return path().plusString( 'player_sessions' );
+
+	/**
+	  * get the player_session directory, creating it if necessary
+	  */
 	public inline function sessionsDirectory():Directory {
 	    return new Directory(sessionsPath(), true);
 	}
+
+	/**
+	  * get the Path to the saved_playlists directory
+	  */
 	public inline function playlistsPath():Path return path().plusString( 'saved_playlists' );
+
+	/**
+	  * get the saved_playlists directory, creating it if necessary
+	  */
 	public inline function playlistsDirectory():Directory {
 	    return new Directory(playlistsPath(), true);
 	}
+
+	/**
+	  * get the Path to the playback settings file
+	  */
 	public inline function playbackSettingsPath():Path return path().plusString('playbackProperties.dat');
+
+	/**
+	  * get the playback settings file
+	  */
 	public inline function playbackSettingsFile():File return new File(playbackSettingsPath());
 
+    /**
+      * get a file from the saved_playlists by name
+      */
 	public inline function playlistFile(name : String):File {
 	    return playlistsDirectory().file(name + '.xspf');
 	}
+
+	/**
+	  * get the names of all saved playlists
+	  */
 	public function allSavedPlaylistNames():Array<String> {
 	    var pld = playlistsDirectory();
 	    return pld.entries.map.fn( _.path ).filter.fn(_.extension == 'xspf').map(function(path) {
 	        return (new Path( path.name ).basename);
 	    });
 	}
+
+	/**
+	  * check if there is a saved playlist by the given name
+	  */
 	public inline function playlistExists(name : String):Bool {
 	    return Fs.exists(playlistsPath().plusString(name + '.xspf').toString());
 	}
@@ -107,6 +141,9 @@ class AppDir {
 	    return sd.subpaths.filter.fn(_.extension == 'session').map.fn(_.name.beforeLast('.'));
 	}
 
+    /**
+      * serialize the given Session info into a String
+      */
 	private function encodeSession(s : JsonSession):String {
 	    var serializer = new Serializer();
 	    serializer.useCache = true;
@@ -126,6 +163,9 @@ class AppDir {
 	    return serializer.toString();
 	}
 
+    /**
+      * unserialize the given String as Session info
+      */
 	private function decodeSession(s : String):JsonSession {
 	    var us = new Unserializer( s );
 	    inline function val<T>():T {
