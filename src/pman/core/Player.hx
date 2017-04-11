@@ -1036,7 +1036,7 @@ class Player extends EventDispatcher {
 	  * goto the previous track, or the beginning of the Track
 	  */
 	public function gotoPrevious(?cb : OpenCbOpts):Void {
-	    if (currentTime >= 1.0) {
+	    if (currentTime >= 5.0) {
 	        currentTime = 0.0;
 	    }
         else {
