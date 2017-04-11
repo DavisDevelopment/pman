@@ -74,7 +74,7 @@ class PlayerPlaybackProperties {
 	    var hc = (muted != v);
 	    muted = v;
 	    if ( hc ) {
-	        changed.fire();
+	        sce(Muted( muted ));
 	    }
 	    return muted;
 	}
