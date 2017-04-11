@@ -24,6 +24,7 @@ class PromptBox extends Pane {
 	public function new():Void {
 		super();
 
+        modal = new Modal();
 		input = new TextInput();
 		/*
 		var auto = input.el.method( 'autocomplete' );
@@ -50,6 +51,7 @@ class PromptBox extends Pane {
 	public function open():Void {
 		__init();
 		appendTo( 'body' );
+		modal.open();
 		__center();
 	}
 
@@ -58,6 +60,7 @@ class PromptBox extends Pane {
 	  */
 	public function close():Void {
 		destroy();
+		modal.close();
 	}
 
 	/**
@@ -198,4 +201,6 @@ class PromptBox extends Pane {
 
 	public var input : TextInput;
 	public var titl : LabelSpan;
+
+	public var modal : Modal;
 }
