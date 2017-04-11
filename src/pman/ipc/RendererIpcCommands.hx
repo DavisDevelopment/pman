@@ -63,6 +63,10 @@ class RendererIpcCommands {
         b('LoadPlaylist', function(e, name:String) {
             player.loadPlaylist( name );
         });
+
+        b('LaunchInfo', function(e, info) {
+            main.launchInfo( info );
+        });
     }
 
     /**
