@@ -167,6 +167,13 @@ class TrackData {
         return (m != null ? m.time : null);
     }
 
+    /**
+      * set [this] Track's last time
+      */
+    public inline function setLastTime(time : Float):Void {
+        _setTime(LastTime, time);
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
