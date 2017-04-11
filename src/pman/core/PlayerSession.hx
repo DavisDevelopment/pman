@@ -24,6 +24,9 @@ import pman.core.JsonData;
 
 import foundation.Tools.*;
 
+import haxe.Serializer;
+import haxe.Unserializer;
+
 using Std;
 using StringTools;
 using tannus.ds.StringUtils;
@@ -242,6 +245,14 @@ class PlayerSession {
 	}
 
 	/**
+	  * get state
+	  */
+	public function getState():PlayerSessionState {
+	    var state = new PlayerSessionState();
+	    state.pull( this );
+	    return state;
+	}
+
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
