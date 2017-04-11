@@ -380,6 +380,25 @@ class PlayerSession {
 	        save();
 	    });
 
+        // when the window is about to close
+	    player.app.closingEvent.on(function(event, stack) {
+	        stack.push(function(next) {
+	            if (player.track == null) {
+	                defer( next );
+	            }
+                else {
+                    player.track.editData(function( i ) {
+                        i.setLastTime( player.currentTime );
+                    }, next);
+                }
+	        });
+	        stack.push(function(next) {
+	            defer(function() {
+	                save();
+	                next();
+	            });
+	        });
+	    });
 	}
 
 	/**
