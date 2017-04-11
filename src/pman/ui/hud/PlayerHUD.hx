@@ -46,6 +46,7 @@ class PlayerHUD extends Ent {
 
         defer(function() {
             addItem(new ProgressItem( this ));
+            addItem(new VolumeItem( this ));
         });
     }
 
