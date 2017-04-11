@@ -120,6 +120,8 @@ class PlayerView extends Ent {
             }
 		}
 
+		player.tick();
+
 		super.update( stage );
 	}
 
