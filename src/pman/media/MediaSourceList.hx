@@ -29,8 +29,14 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
 
 /* === Methods === */
 
-    public function toStrings():Array<String> {
-        return this.map.fn(_.mediaSourceToUri());
+/* === Casting Methods === */
+
+    /**
+      * convert [this] to an Array of Strings
+      */
+    @:to
+    public inline function toStrings():Array<String> {
+        return this.map( MediaTools.mediaSourceToUri );
     }
 
 /* === Instance Fields === */
