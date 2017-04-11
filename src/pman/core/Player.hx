@@ -835,11 +835,13 @@ class Player extends EventDispatcher {
                         currentTime = lastTime;
 
                         // tell the user that such an action was taken
+                        /*
                         message({
                             text: '${newTrack.title}\n\nPlayback progress restored\nHit Backspace to start over',
                             fontSize: '10pt',
                             duration: 3000.0
                         });
+                        */
                     });
                 }
 			});
