@@ -33,6 +33,7 @@ class PlayerHUD extends Ent {
         super();
 
         playerView = p;
+        items = new Array();
     }
 
 /* === Instance Methods === */
@@ -61,4 +62,5 @@ class PlayerHUD extends Ent {
 /* === Instance Fields === */
 
     public var playerView : PlayerView;
+    public var items : Array<PlayerHUDItem>;
 }
