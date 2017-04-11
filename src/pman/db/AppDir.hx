@@ -207,6 +207,13 @@ class AppDir {
         };
 	}
 
+    /**
+      * get path to the 'session.dat' file
+      */
+	public inline function lastSessionPath():Path {
+	    return path().plusString( 'session.dat' );
+	}
+
 	/**
 	  * get full list of media-source directories
 	  */
