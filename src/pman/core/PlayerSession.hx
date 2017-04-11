@@ -317,6 +317,13 @@ class PlayerSession {
         }
 	}
 
+	/**
+	  * check whether there is a session.dat file
+	  */
+	public inline function hasSavedState():Bool {
+	    return file().exists;
+	}
+
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
