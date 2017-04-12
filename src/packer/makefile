@@ -8,4 +8,4 @@ compile:
 	#cd ../../dist/ && chmod +x ./pack
 
 run:
-	cd ../../dist/ && ./pack
+	cd ../../dist/ && ./pack -compress rc pp
