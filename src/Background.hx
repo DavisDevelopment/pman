@@ -209,6 +209,7 @@ class Background {
             menu.append( playlists );
         }
 
+        /*
 	    var sessionOptions:Dynamic = {
             label: 'Session',
             submenu: [untyped
@@ -319,17 +320,8 @@ class Background {
 
 		updateMenu();
 
-        // get cli args and environment variables
-        var argv = Sys.args();
-        var env = tannus.ds.MapTools.toObject(Sys.environment());
-
-        //TODO actually parse [argv]
-		
 		openPlayerWindow(function( bw ) {
-			var launchInfo = {argv: argv, env: env};
-			defer(function() {
-                ic.send(playerWindow, 'LaunchInfo', [launchInfo]);
-            });
+
 		});
 	}
 
