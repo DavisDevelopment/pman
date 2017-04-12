@@ -48,6 +48,7 @@ class PlayerHUD extends Ent {
             addItem(new ProgressItem( this ));
             addItem(new VolumeItem( this ));
             addItem(new TitleItem( this ));
+            addItem(new ToggleableItem( this ));
         });
     }
 
