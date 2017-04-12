@@ -16,6 +16,7 @@ import js.html.Window;
 
 import tannus.TSys as Sys;
 
+import pman.LaunchInfo;
 import pman.db.AppDir;
 import pman.ipc.MainIpcCommands;
 import pman.ww.*;
@@ -41,8 +42,10 @@ class Background {
 	 * start [this] Background script
 	 */
 	public function start():Void {
+
 		App.onReady( _ready );
 		App.onAllClosed( _onAllClosed );
+		App.makeSingleInstance( _onSecondaryLaunch );
 
 		_listen();
 	}
@@ -257,6 +260,26 @@ class Background {
 	}
 
 	/**
+	  * Get launch info
+	  */
+	public function launchInfo(?cwd:String, ?argv:Array<String>, ?env:Dynamic):RawLaunchInfo {
+	    if (cwd == null) {
+	        cwd = Sys.getCwd();
+	    }
+	    if (argv == null) {
+	        argv = Sys.args();
+	    }
+	    if (env == null) {
+	        env = MapTools.toObject(Sys.environment());
+	    }
+	    return {
+            cwd: cwd,
+            env: env,
+            argv: argv
+	    };
+	}
+
+	/**
 	  * bind event handlers
 	  */
 	private function _listen():Void {
@@ -315,6 +338,14 @@ class Background {
 	  */
 	private function _onAllClosed():Void {
 	    close();
+	}
+
+	/**
+	  * when an attempt is made to launch a second instance of [this] application
+	  */
+	private function _onSecondaryLaunch(args:Array<String>, scwd:String):Void {
+	    var info = launchInfo(scwd, args);
+	    ic.send(playerWindow, 'LaunchInfo', [info]);
 	}
 
 	/**
