@@ -32,3 +32,7 @@ dist/styles/pman\.css
 dist/scripts/background\.min\.js
 
 dist/scripts/content\.min\.js
+
+dist/scripts/all-libs\.js
+
+dist/scripts/all-libs\.min\.js
