@@ -35,6 +35,7 @@ class Installer extends Task {
       * execute [this] Task
       */
     override function execute(callback : ?Dynamic->Void):Void {
+        trace('building installer for $platform $arch..');
         build(options, function(?error : Dynamic) {
             callback( error );
         });
@@ -48,12 +49,20 @@ class Installer extends Task {
             src: (path('releases/pman-$platform-$arch').toString()),
             dest: (path('installers').toString()),
             arch: translateArch( arch ),
+            icon: getIcon(),
             rename: function(sdest:String, ssrc:String) {
                 var result = rename(Path.fromString( sdest ), Path.fromString( ssrc ));
                 trace( result );
                 return result.toString();
             }
         };
+    }
+
+    /**
+      * get the value for the 'icon' field of [options]
+      */
+    private function getIcon():Dynamic {
+        return path('assets/icon32.png').toString();
     }
 
     /**
