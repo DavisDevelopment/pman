@@ -445,36 +445,23 @@ class Player extends EventDispatcher {
 
 	    // first off, check whether there's even anything to take a 'snapshot' of
 	    if (session.hasMedia()) {
-	        if (track.type.equals(MediaType.MTVideo)) {
+	        if (track.type.equals( MediaType.MTVideo )) {
 	            var mediaObject = gmo();
 	            if (mediaObject != null) {
 	                var video:Video = cast mediaObject;
-	                var canvas = Canvas.create(video.width, video.height);
-	                canvas.context.drawComponent(video, 0, 0, video.width, video.height, 0, 0, video.width, video.height);
-	                var dataUri = canvas.dataURI();
-	                var img = NativeImage.createFromDataURL( dataUri );
-	                var defaultPath:String = (Date.now().format('snapshot from %Y-%m-%d %H-%M-%S.png'));
-	                app.fileSystemSavePrompt({
-                        title: 'Save Snapshot',
-                        buttonLabel: 'Save',
-                        defaultPath: defaultPath,
-                        filters: [FileFilter.IMAGE],
-                        complete: function(path : Null<Path>) {
-                            if (path == null) {
-                                complete();
-                                return ;
-                            }
-                            path.extension = path.extension.toLowerCase();
-                            var data = (switch ( path.extension ) {
-                                case 'png': img.toPNG;
-                                case 'jpg', 'jpeg': img.toJPEG.bind(100);
-                                default:
-                                    throw 'Error: Unsupported image format';
-                            })();
-                            FileSystem.write(path.toString(), data);
-                            complete();
-                        }
-	                });
+	                var canvas = video.capture();
+	                var image = NativeImage.createFromDataURL(canvas.dataURI('image/png'));
+	                var snapPath:Path = app.db.preferences.snapshotPath;
+	                var snapDir:Directory = new Directory(snapPath, true);
+	                var snapFile = snapDir.file(Date.now().format('snapshot from %Y-%m-%d %H-%M-%S.png'));
+	                snapFile.write(image.toPNG());
+	                if ( app.db.preferences.showSnapshot ) {
+	                    //TODO show snapshot
+	                    defer( complete );
+	                }
+                    else {
+                        defer( complete );
+                    }
 	            }
                 else {
                     defer( complete );
