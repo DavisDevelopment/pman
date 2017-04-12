@@ -24,6 +24,8 @@ class Packer extends Application {
         taskOptions = {
             release: false,
             compress: false,
+            platforms: [],
+            arches: [],
             styles: {
                 compile: true,
                 compress: false,
@@ -77,6 +79,15 @@ class Packer extends Application {
                         o.styles.concat = true;
                         o.scripts.concat = true;
 
+                    case '-D':
+                        o.app.haxeDefs.push(args.pop());
+
+                    case '-platform', '-p':
+                        o.platforms.push(args.pop());
+
+                    case '-arch', '-a':
+                        o.arches.push(args.pop());
+
                     default:
                         null;
                 }
@@ -84,6 +95,14 @@ class Packer extends Application {
             else {
                 taskNames.push( s );
             }
+        }
+
+        // if no platforms provided, all are used
+        if (o.platforms.length == 0) {
+            o.platforms = ['linux', 'win32'];
+        }
+        if (o.arches.length == 0) {
+            o.arches = ['x64'];
         }
 
         parseTaskNames();
@@ -145,6 +164,8 @@ class Packer extends Application {
 typedef TaskOptions = {
     release:Bool,
     compress:Bool,
+    platforms:Array<String>,
+    arches:Array<String>,
     styles: {
         compile: Bool,
         compress: Bool,
