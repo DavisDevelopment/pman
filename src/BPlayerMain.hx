@@ -14,6 +14,7 @@ import electron.ext.Dialog;
 import electron.ext.MenuItem;
 import electron.Tools.defer;
 
+import pman.LaunchInfo;
 import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
@@ -31,6 +32,7 @@ using tannus.ds.StringUtils;
 using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
+using pman.media.MediaTools;
 
 class BPlayerMain extends Application {
 	/* Constructor Function */
@@ -109,6 +111,11 @@ class BPlayerMain extends Application {
 		//__buildMenus();
         ipcCommands = new RendererIpcCommands( this );
         ipcCommands.bind();
+
+        // request launch info from background
+        defer(function() {
+            ic.send( 'GetLaunchInfo' );
+        });
 	}
 
 	/**
