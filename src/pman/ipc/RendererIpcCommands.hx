@@ -13,6 +13,7 @@ import electron.renderer.IpcRenderer as Ipc;
 import electron.ext.Dialog;
 import electron.Tools.defer;
 
+import pman.LaunchInfo;
 import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
@@ -71,6 +72,9 @@ class RendererIpcCommands {
         });
         b('EditPreferences', function() {
             //TODO player.editPreferences
+        });
+        b('LaunchInfo', function(e, info:RawLaunchInfo) {
+            main.launchInfo( info );
         });
     }
 
