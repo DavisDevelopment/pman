@@ -28,6 +28,9 @@ class MainIpcCommands {
         inline function b(name, f) Ipc.on('command:$name', f);
 
         b('UpdateMenu', function() bg.updateMenu());
+        b('GetLaunchInfo', function() {
+            send(bg.playerWindow, 'LaunchInfo', [bg.launchInfo()]);
+        });
     }
 
     /**
