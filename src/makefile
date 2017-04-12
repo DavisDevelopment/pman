@@ -1,21 +1,23 @@
 
-all: compile test
-	#cd ../dist/ && electron .
+all: compile run
 
-test:
+run:
 	cd ../dist/ && electron .
 
 compile:
-	haxe build.hxml && cd ../dist/ && sh build.sh
+	haxe build.hxml && cd ../dist/ && ./pack preprocess
 
-build-all:
-	cd ../dist/ && bash package.sh all
+compile-compress:
+	cd ../dist/ && ./pack -compress rc pp
 
-build-pack:
-	cd ../dist/ && bash package.sh pack
+compile-release:
+	cd ../dist/ && ./pack -compress -release rc pp
+
+pack:
+	cd ../dist/ && ./pack -compress -release pack
 
 build-installers:
-	cd ../dist/ && bash package.sh installers
+	cd ../dist/ && ./pack -compress -release installers
 
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
