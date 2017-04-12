@@ -244,8 +244,97 @@ class BPlayerMain extends Application {
 	/**
 	  * process the given LaunchInfo
 	  */
-	public function launchInfo(info : LaunchInfo):Void {
-	    trace( info );
+	public function launchInfo(info : RawLaunchInfo):Void {
+	    // get LaunchInfo
+	    var i:LaunchInfo = LaunchInfo.fromRaw( info );
+	    // get action being performed
+	    var action:String = getAction( i );
+
+        // perform that action
+        switch ( action ) {
+            case 'add':
+                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
+                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
+                player.addItemList( tracks );
+
+            case 'open':
+                player.clearPlaylist();
+                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
+                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
+                player.addItemList( tracks );
+
+            default:
+                trace('unhandled action: $action');
+        }
+	}
+
+	/**
+	  * compute the 'action' specified by the given LaunchInfo
+	  */
+	private function getAction(i : LaunchInfo):String {
+	    if (i.argv.length == 0) {
+	        return 'add';
+	    }
+        else {
+            var aa:String = i.argv[0];
+            try {
+                var aap = Path.fromString( aa );
+                // single-segment, not a valid path to a media file
+                if (aap.pieces.length == 1 && !FileFilter.ALL.test( aap )) {
+                    i.argv.shift();
+                    return aa;
+                }
+                else {
+                    return 'add';
+                }
+            }
+            catch (error : Dynamic) {
+                return 'add';
+            }
+        }
+	}
+
+    /**
+      * get the Array of Paths provided via command-line arguments
+      */
+	private function getPaths(info : LaunchInfo):Array<Path> {
+	    var paths:Array<Path> = new Array();
+	    var p:Null<Path> = null;
+	    for (arg in info.argv) {
+	        p = rta(arg, info.cwd, info.env);
+	        if (p != null) {
+	            paths.push( p );
+	        }
+	    }
+	    return paths;
+	}
+
+	/**
+	  * map the given Array to an Array of URIs
+	  */
+	private function toUris(a : Array<String>):Array<String> {
+	    return a.map.fn(_.uriToMediaSource()).map.fn(_.mediaSourceToUri());
+	}
+
+    /**
+      * resolve [p] to an absolute path
+      */
+	private function rta(p:Path, cwd:Path, env:Map<String, String>):Path {
+	    if ( p.absolute ) {
+	        return p;
+	    }
+
+	    var paths:Array<Path> = [cwd];
+	    if (env.exists('PATH')) {
+	        paths = paths.concat(env['PATH'].split(';').map.fn(Path.fromString(_)));
+	    }
+	    for (path in paths) {
+	        var rr = path.resolve( p );
+	        if (FileSystem.exists( rr )) {
+	            return rr;
+	        }
+	    }
+	    return null;
 	}
 
 /* === Compute Instance Fields === */
@@ -302,9 +391,4 @@ typedef FSPromptOptions = {
 	?buttonLabel:String,
 	?filters:Array<FileFilter>,
 	?directory:Bool
-};
-
-typedef LaunchInfo = {
-    argv: Array<String>,
-    env: Object
 };
