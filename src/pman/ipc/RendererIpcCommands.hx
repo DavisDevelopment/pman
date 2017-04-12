@@ -66,8 +66,11 @@ class RendererIpcCommands {
             player.loadPlaylist( name );
         });
 
-        b('LaunchInfo', function(e, info) {
-            main.launchInfo( info );
+        b('Snapshot', function() {
+            player.snapshot();
+        });
+        b('EditPreferences', function() {
+            //TODO player.editPreferences
         });
     }
 
