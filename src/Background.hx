@@ -227,6 +227,24 @@ class Background {
 	    }
 	    var session = new MenuItem( sessionOptions );
 	    menu.append( session );
+	    */
+
+	    var tools = new MenuItem({
+            label: 'Tools',
+            submenu: [
+            {
+                label: 'Take Snapshot',
+                accelerator: 'Shift+S',
+                click: function(i,w) ic.send(w, 'Snapshot')
+            },
+            {type: 'separator'},
+            {
+                label: 'Preferences',
+                click: function(i,w) ic.send(w, 'EditPreferences')
+            }
+            ]
+	    });
+	    menu.append( tools );
 
 	    return menu;
 	}
