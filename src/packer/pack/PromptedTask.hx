@@ -4,16 +4,19 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 
+import pack.Tools.*;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pack.Tools;
 
-class PromptedTask extends Task {
+class PromptedTask extends pack.Task {
     /* Constructor Function */
     public function new():Void {
-
+        super();
     }
 
 /* === Instance Methods === */
@@ -30,7 +33,10 @@ class PromptedTask extends Task {
       */
     override function run(?cb : ?Dynamic->Void):Void {
         prompt(function() {
-            super.run( cb );
+            if (cb == null) {
+                cb = (function(?error : Dynamic) null);
+            }
+            execute( cb );
         });
     }
 
