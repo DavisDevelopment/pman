@@ -23,7 +23,22 @@ class BuildStandalones extends BatchTask {
     public function new(o : TaskOptions):Void {
         super();
 
-        children.push(new Ps('linux', 'x64'));
-        children.push(new Ps('win32', 'x64'));
+        inline function q(t:Task)
+            children.push( t );
+
+        for (platform in o.platforms) {
+            for (arch in o.arches) {
+                switch ( platform ) {
+                    case 'linux':
+                        q(new LinuxApp( arch ));
+
+                    case 'win32', 'windows':
+                        q(new WindowsApp( arch ));
+
+                    default:
+                        throw 'Error: $platform platform not yet supported';
+                }
+            }
+        }
     }
 }
