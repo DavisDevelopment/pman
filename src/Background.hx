@@ -67,6 +67,9 @@ class Background {
 		});
 		// load the html file onto that BrowserWindow
 		var dir:Path = ap( 'pages/index.html' );
+	    #if (release || compress)
+	        dir = ap('pages/index.min.html');
+	    #end
 		win.loadURL( 'file://$dir' );
 		
 		// wait for the window to be ready
