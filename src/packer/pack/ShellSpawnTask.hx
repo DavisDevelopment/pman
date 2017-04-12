@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.node.ReadableStream;
 import tannus.node.ChildProcess;
 import tannus.TSys as Sys;
 
@@ -44,7 +45,26 @@ class ShellSpawnTask extends Task {
     private function exec(done : ?Dynamic->Void):Void {
         process = ChildProcess.spawn(command, args, options);
         process.on('close', function(code : Int) {
-            done();
+            if (code == 0) {
+                done();
+            }
+            else {
+                done('Compiler failed');
+            }
+        });
+    }
+
+    /**
+      * read all data from [x]
+      */
+    private function flush(x:ReadableStream, cb:ByteArray->Void):Void {
+        var chunks = [];
+        x.on('data', function(chunk) {
+            chunks.push(Std.string( chunk ));
+        });
+        x.on('end', function() {
+            var data = chunks.join('');
+            cb(ByteArray.ofString( data ));
         });
     }
 

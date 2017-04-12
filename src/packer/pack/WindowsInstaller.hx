@@ -24,11 +24,40 @@ class WindowsInstaller extends Installer {
         super('win32', arch);
     }
 
-    override function getBuildFunction():Dynamic {
-        return require('electron-installer-windows');
+/* === Instance Methods === */
+
+    // run the 'build' function
+    override function runBuild(callback : ?Dynamic->Void):Void {
+        var resultPromise = build.createWindowsInstaller( options );
+        function success():Void {
+            trace('it fucking worked! :D');
+            callback();
+        }
+        function failure(error:Dynamic):Void {
+            trace( error );
+            callback( error );
+        }
+        trace( resultPromise );
+        resultPromise.then(success, failure);
     }
 
+    // get the 'build' function
+    override function getBuildFunction():Dynamic {
+        //return require('electron-installer-windows');
+        return require('electron-winstaller');
+    }
+
+    // get the 'icon' field value
     override function getIcon():Dynamic {
         return (path('assets/icon32.ico').toString());
+    }
+
+    // build the 'options' field
+    override function buildOptions():Void {
+        options = {
+            appDirectory: (path('releases/pman-win32-$arch').toString()),
+            outputDirectory: (path('installers').toString()),
+            setupIcon: getIcon()
+        };
     }
 }

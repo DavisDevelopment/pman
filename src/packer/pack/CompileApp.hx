@@ -39,8 +39,7 @@ class CompileApp extends Task {
             stdio: 'inherit'
         });
         shell.execute(function(?error : Dynamic) {
-            trace('haxe compiler has finished');
-            callback();
+            callback( error );
         });
     }
 

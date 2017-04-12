@@ -24,6 +24,7 @@ class Packer extends Application {
         taskOptions = {
             release: false,
             compress: false,
+            concat: true,
             platforms: [],
             arches: [],
             styles: {
@@ -68,6 +69,7 @@ class Packer extends Application {
             if (s.startsWith('-')) {
                 switch ( s ) {
                     case '-compress':
+                        o.concat = true;
                         o.compress = true;
                         o.app.haxeDefs.push( 'compress' );
 
@@ -76,6 +78,7 @@ class Packer extends Application {
                         o.app.haxeDefs.push( 'release' );
                     
                     case '-concat':
+                        o.concat = true;
                         o.styles.concat = true;
                         o.scripts.concat = true;
 
@@ -83,10 +86,25 @@ class Packer extends Application {
                         o.app.haxeDefs.push(args.pop());
 
                     case '-platform', '-p':
-                        o.platforms.push(args.pop());
+                        var plat = args.pop();
+                        switch ( plat ) {
+                            case 'all':
+                                o.platforms.push('linux');
+                                o.platforms.push('win32');
+
+                            default:
+                                o.platforms.push( plat );
+                        }
 
                     case '-arch', '-a':
-                        o.arches.push(args.pop());
+                        var arch = args.pop();
+                        switch ( arch ) {
+                            case 'all':
+                                o.arches = o.arches.concat(['ia32', 'x64', 'armv71']).unique();
+
+                            default:
+                                o.arches.push( arch );
+                        }
 
                     default:
                         null;
@@ -164,6 +182,7 @@ class Packer extends Application {
 typedef TaskOptions = {
     release:Bool,
     compress:Bool,
+    concat:Bool,
     platforms:Array<String>,
     arches:Array<String>,
     styles: {

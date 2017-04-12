@@ -30,5 +30,8 @@ class Preprocess extends BatchTask {
         if (o.compress || o.scripts.compress) {
             children.push(CompressJs.compress([path('scripts/content.js'), path('scripts/background.js')]));
         }
+        if ( o.concat ) {
+            children.push(new CatJsLibs( o ));
+        }
     }
 }

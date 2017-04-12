@@ -36,9 +36,16 @@ class Installer extends Task {
       */
     override function execute(callback : ?Dynamic->Void):Void {
         trace('building installer for $platform $arch..');
-        build(options, function(?error : Dynamic) {
+        runBuild(function(?error : Dynamic) {
             callback( error );
         });
+    }
+
+    /**
+      * run the 'build' method with a callback
+      */
+    private function runBuild(callback : ?Dynamic->Void):Void {
+        build(options, callback);
     }
 
     /**
