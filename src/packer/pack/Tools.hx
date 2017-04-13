@@ -3,6 +3,8 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.node.*;
+import tannus.node.Process;
 
 import pack.*;
 
@@ -13,6 +15,13 @@ using tannus.ds.ArrayTools;
 using Slambda;
 
 class Tools {
+    /**
+      *
+      */
+    public static inline function defer(action : Void->Void):Void {
+        ((untyped __js__('process')).nextTick( action ));
+    }
+
     /**
       * get the absolute Path to the pack script
       */
