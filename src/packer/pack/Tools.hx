@@ -36,7 +36,7 @@ class Tools {
     /**
       * perform a batch of Tasks
       */
-    public static function batch(tasks:Array<Task>, callback:?Dynamic->Void):Void {
+    public static function batch<T:Task>(tasks:Array<T>, callback:?Dynamic->Void):Void {
         var stack = new AsyncStack();
         for (t in tasks) {
             stack.push(function(next) {
