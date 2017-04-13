@@ -1,5 +1,5 @@
 {
-  "name": "pman",
+  "name": "pman-dev",
   "version": "0.5.0",
   "description": "Cross-Platform Media Player/Manager",
   "main": "scripts/background.js",
