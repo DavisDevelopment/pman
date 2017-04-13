@@ -30,10 +30,10 @@ class BuildStandalones extends BatchTask {
             for (arch in o.arches) {
                 switch ( platform ) {
                     case 'linux':
-                        q(new LinuxApp( arch ));
+                        q(new LinuxApp(o, arch));
 
                     case 'win32', 'windows':
-                        q(new WindowsApp( arch ));
+                        q(new WindowsApp(o, arch));
 
                     default:
                         throw 'Error: $platform platform not yet supported';
