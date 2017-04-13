@@ -8,16 +8,16 @@ compile:
 	haxe build.hxml && cd ../dist/ && ./pack preprocess
 
 compile-compress:
-	cd ../dist/ && ./pack -compress rc pp
+	cd ../dist/ && ./pack -p linux -compress recompile preprocess
 
 compile-release:
-	cd ../dist/ && ./pack -compress -release rc pp
+	cd ../dist/ && ./pack -p linux -compress -release recompile preprocess
 
 pack:
-	cd ../dist/ && ./pack -compress -release pack
+	cd ../dist/ && ./pack -release package
 
 build-installers:
-	cd ../dist/ && ./pack -compress -release installers
+	cd ../dist/ && ./pack -release installer
 
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
