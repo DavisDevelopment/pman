@@ -371,13 +371,13 @@ class PlayerSession {
 	        // forward the event to the Player
 	        player.dispatch('change:nowPlaying', d);
 	        // save [this] Session
-	        save();
+	        player.saveState();
 	    });
 
 	    // when the Playlist changes
 	    playlist.changeEvent.on(function( change ) {
 	        // save [this] Session
-	        save();
+	        player.saveState();
 	    });
 
         // when the window is about to close
@@ -394,7 +394,7 @@ class PlayerSession {
 	        });
 	        stack.push(function(next) {
 	            defer(function() {
-	                save();
+	                player.saveState();
 	                next();
 	            });
 	        });
