@@ -2,18 +2,15 @@
   "name": "pman-dev",
   "version": "0.5.0",
   "description": "Cross-Platform Media Player/Manager",
-  "main": "scripts/background.js",
   "repository": "http://github.com/DavisDevelopment/pman",
   "homepage": "http://github.com/DavisDevelopment/pman",
-  "dependencies": {
-    "chromecast-api": "0.2.5",
-    "electron-remote": "1.1.2",
-    "fluent-ffmpeg": "^2.1.0",
-    "jsmediatags": "3.4.0",
-    "mp3-duration": "^1.0.10",
-    "mp4box": "0.3.15",
-    "nedb": "1.8.0"
+  "author": {
+      "name": "Ryan Davis",
+      "email": "epikit@gmail.com"
   },
+  "license": "ISC",
+  "main": "scripts/background.js",
+  "build": {},
   "keywords": [
     "media",
     "video",
@@ -25,12 +22,19 @@
     "manager",
     "cross-platform"
   ],
-  "author": "Ryan Davis",
-  "license": "ISC",
+  "dependencies": {
+    "chromecast-api": "0.2.5",
+    "fluent-ffmpeg": "^2.1.0",
+    "jsmediatags": "3.4.0",
+    "mp3-duration": "^1.0.10",
+    "mp4box": "0.3.15"
+  },
   "devDependencies": {
     "async": "^2.1.5",
     "coffee-script": "1.12.4",
     "coffeescript": "^1.12.5",
+    "electron": "1.6.2",
+    "electron-builder": "^16.8.3",
     "electron-devtools-installer": "^2.1.0",
     "electron-installer-debian": "^0.5.0",
     "electron-installer-windows": "^0.2.0",
