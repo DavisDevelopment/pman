@@ -67,6 +67,22 @@ class SeekBar extends Ent {
 
         on('click', onClick);
         on('contextmenu', onRightClick);
+    /**
+      * construct the list of views for the track's marks
+      */
+    private function buildMarkViews():Void {
+        // previous markviews
+        //var _pmv = markViews;
+        markViews = new Array();
+        _lfml = null;
+        if (player.track != null && player.track.data != null) {
+            var marks = player.track.data.marks;
+            for (m in marks) {
+                if (m.type.match(Named(_))) {
+                    markViews.push(new MarkView(this, m));
+                }
+            }
+        }
     }
 
     /**
