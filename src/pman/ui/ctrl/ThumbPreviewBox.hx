@@ -58,7 +58,7 @@ class ThumbPreviewBox extends Ent {
 
 
 			var progress = bar.progress;
-			var ct:Duration = Duration.fromFloat(progress.of( bar.player.duration.totalSeconds ));
+			var ct:Duration = Duration.fromFloat(progress.of( bar.player.durationTime ));
 			tbox.text = ct.toString();
 		}
 	}
