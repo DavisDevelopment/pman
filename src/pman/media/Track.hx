@@ -21,6 +21,7 @@ import haxe.Serializer;
 import haxe.Unserializer;
 
 import electron.*;
+import electron.Shell;
 import electron.Tools.defer;
 import Slambda.fn;
 
@@ -240,6 +241,18 @@ class Track implements IComparable<Track> {
                     toggleStarred();
                 }
             });
+
+            mt.push({type: 'separator'});
+
+            if (source.match(MSLocalPath(_))) {
+                var path = getFsPath();
+                mt.push({
+                    label: 'Show in Folder',
+                    click: function(i,w,e) {
+                        Shell.showItemInFolder( path );
+                    }
+                });
+            }
 
             mt.push({type: 'separator'});
 
