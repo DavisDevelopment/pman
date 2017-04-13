@@ -21,7 +21,7 @@ using pack.Tools;
 
 class WindowsApp extends PackStandalone {
     /* Constructor Function */
-    public function new(arch:String, ?opts:Array<PackagerOptions>):Void {
-        super('win32', arch, opts);
+    public function new(o:TaskOptions, arch:String, ?opts:Array<PackagerOptions>):Void {
+        super(o, 'win32', arch, opts);
     }
 }
