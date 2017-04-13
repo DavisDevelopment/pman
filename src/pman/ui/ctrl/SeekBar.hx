@@ -18,6 +18,7 @@ import electron.ext.MenuItem;
 
 import pman.core.*;
 import pman.media.*;
+import pman.media.info.Mark;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -50,6 +51,8 @@ class SeekBar extends Ent {
         __itb( ctb );
         __itb( dtb );
         tb_margin = 0;
+
+        markViews = new Array();
     }
 
     /* === Instance Methods === */
@@ -342,6 +345,7 @@ class SeekBar extends Ent {
     private var lhct:Float;
     private var loadingThumbnail:Bool = false;
     private var thumbnail : Null<Thumbnail> = null;
+    private var markViews : Array<MarkView>;
 }
 
 typedef Thumbnail = {
