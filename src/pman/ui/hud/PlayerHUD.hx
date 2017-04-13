@@ -69,6 +69,13 @@ class PlayerHUD extends Ent {
     }
 
     /**
+      * check if [p] is inside of [this]
+      */
+    override function containsPoint(p : Point):Bool {
+        return false;
+    }
+
+    /**
       * add an item to [this]
       */
     public inline function addItem(item : PlayerHUDItem):Void {
