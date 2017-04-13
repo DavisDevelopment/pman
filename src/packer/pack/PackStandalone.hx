@@ -23,6 +23,7 @@ class PackStandalone extends Task {
     public function new(o:TaskOptions, platform:String, arch:String='x64', ?opts:Array<PackagerOptions>):Void {
         super();
 
+        this.go = o;
         this.platform = platform;
         this.arch = arch;
         this.options = buildOptions(opts != null ? opts : []);
@@ -160,6 +161,7 @@ class PackStandalone extends Task {
 
 /* === Instance Fields === */
 
+    public var go : TaskOptions;
     public var platform : String;
     public var arch : String;
     public var options : PackagerOptions;
