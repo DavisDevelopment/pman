@@ -77,6 +77,7 @@ class PackStandalone extends Task {
             'styles/widgets',
             'styles/*.less',
             '*.xcf',
+            '*.swp',
             "build.sh",
             "package.sh",
             "prefixer.py"
