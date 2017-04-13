@@ -20,7 +20,7 @@ using pack.Tools;
 
 class PackStandalone extends Task {
     /* Constructor Function */
-    public function new(platform:String, arch:String='x64', ?opts:Array<PackagerOptions>):Void {
+    public function new(o:TaskOptions, platform:String, arch:String='x64', ?opts:Array<PackagerOptions>):Void {
         super();
 
         this.platform = platform;
