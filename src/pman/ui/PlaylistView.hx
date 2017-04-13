@@ -265,6 +265,7 @@ class PlaylistView extends Pane {
 				cv.focused( true );
 			}
 		}
+		defer( scrollToActive );
 	}
 
 	/**
