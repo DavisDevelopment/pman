@@ -64,7 +64,7 @@ class Background {
 	    // create new hidden BrowserWindow
 		var win:BrowserWindow = new BrowserWindow({
 			show: false,
-			icon: ap('assets/icon64.png').toString(),
+			icon: (ap('assets/icon32.png').toString()),
 			width: 640,
 			height: 480
 		});
