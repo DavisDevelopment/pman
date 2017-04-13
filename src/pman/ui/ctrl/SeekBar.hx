@@ -67,6 +67,12 @@ class SeekBar extends Ent {
 
         on('click', onClick);
         on('contextmenu', onRightClick);
+
+        sess.trackChanged.on(function(delta) {
+            buildMarkViews();
+        });
+    }
+
     /**
       * construct the list of views for the track's marks
       */
@@ -126,6 +132,29 @@ class SeekBar extends Ent {
 
         __updateTextBoxes( stage );
         __updateViewed( stage );
+
+        // rebuild the mark views when the track's marks array changes
+        if (player.track != null && player.track.data != null) {
+            // track's current marks
+            var marks = player.track.data.marks;
+            if (_lfml != null) {
+                // check for actual equality, i.e. the two arrays are in fact just two references to the same array
+                var same = (marks == _lfml);
+                // if this is the case
+                if ( same ) {
+                    // nothing to do in this case
+                }
+                else {
+                    // rebuild the mark views to reflect this change
+                    buildMarkViews();
+                    // update [_lfml]
+                    _lfml = marks;
+                }
+            }
+            else {
+                _lfml = marks;
+            }
+        }
 
         calculateGeometry( rect );
     }
