@@ -21,7 +21,7 @@ using pack.Tools;
 
 class LinuxApp extends PackStandalone {
     /* Constructor Function */
-    public function new(arch:String, ?opts:Array<PackagerOptions>):Void {
-        super('linux', arch, opts);
+    public function new(o:TaskOptions, arch:String, ?opts:Array<PackagerOptions>):Void {
+        super(o, 'linux', arch, opts);
     }
 }
