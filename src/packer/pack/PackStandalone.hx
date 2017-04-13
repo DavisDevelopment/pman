@@ -72,7 +72,9 @@ class PackStandalone extends Task {
             'buildscripts[/*]',
             'releases[/*]',
             'installers[/*]',
+            'styles/widgets',
             'styles/*.less',
+            '*.xcf',
             "build.sh",
             "package.sh",
             "prefixer.py"
