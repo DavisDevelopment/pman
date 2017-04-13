@@ -19,8 +19,17 @@ class Packer extends Application {
     public function new():Void {
         super();
 
+        availableDirectives = [
+            ['recompile', 'rc'],
+            ['preprocess', 'pp'],
+            ['package', 'pack', 'pk'],
+            ['installers', 'installer', 'i']
+        ];
+        availableFlags = [
+            ['--platform', '-p']
+        ];
+
         tasks = new Array();
-        taskNames = new Array();
         taskOptions = {
             release: false,
             compress: false,
@@ -40,7 +49,8 @@ class Packer extends Application {
             app: {
                 compile: false,
                 haxeDefs: []
-            }
+            },
+            directives: []
         };
     }
 
@@ -63,6 +73,7 @@ class Packer extends Application {
       */
     private function parseArgs():Void {
         var args = new Stack(argv.copy());
+        var dirs = new Array();
         
         while ( !args.empty ) {
             var s = args.pop();
@@ -111,7 +122,7 @@ class Packer extends Application {
                 }
             }
             else {
-                taskNames.push( s );
+                dirs.push( s );
             }
         }
 
@@ -123,29 +134,61 @@ class Packer extends Application {
             o.arches = ['x64'];
         }
 
-        parseTaskNames();
+        // sanitize and simplify the list of 'task names'
+        o.directives = [];
+        for (d in dirs) {
+            var valid:Bool = false;
+            for (dspec in availableDirectives) {
+                if (dspec.has( d )) {
+                    o.directives.push(dspec[0]);
+                    valid = true;
+                    break;
+                }
+            }
+            if ( !valid ) {
+                println('Warning: "$d" is not a directive');
+            }
+        }
+
+        parseDirectives();
     }
 
     /**
       * parse task-names
       */
-    private function parseTaskNames():Void {
-        if (taskNames.length == 0) {
-            queue(new Preprocess( o ));
+    private function parseDirectives():Void {
+        if (o.directives.length == 0) {
+            //queue(new Preprocess( o ));
+            help();
         }
         else {
-            for (n in taskNames) {
-                switch ( n ) {
-                    case 'preprocess', 'pp':
+
+            for (dName in o.directives) {
+                switch ( dName ) {
+                    case 'preprocess':
                         queue(new Preprocess( o ));
 
-                    case 'recompile', 'compile', 'rc':
+                    case 'recompile':
                         queue(new CompileApp( o ));
 
-                    case 'pack', 'package':
-                        queue(new BuildStandalones( o ));
+                    case 'package':
+                        o.compress = true;
+                        o.concat = true;
+                        o.app.haxeDefs.push( 'compress' );
+                        var beforePack = o.directives.before( dName );
+                        if (!(beforePack.has('recompile') && beforePack.has('preprocess'))) {
+                            var batch = new BatchTask(cast untyped [
+                                new CompileApp(o),
+                                new Preprocess(o),
+                                new BuildStandalones(o)
+                            ]);
+                            queue( batch );
+                        }
+                        else {
+                            queue(new BuildStandalones( o ));
+                        }
 
-                    case 'installers', 'bi':
+                    case 'installers':
                         queue(new BuildInstallers( o ));
 
                     default:
@@ -153,6 +196,13 @@ class Packer extends Application {
                 }
             }
         }
+    }
+
+    /**
+      * display help text
+      */
+    private function help():Void {
+        println('pman.pack\n - insert helpful info <here>\n');
     }
 
     /**
@@ -168,7 +218,10 @@ class Packer extends Application {
 
 /* === Instance Fields === */
 
-    public var taskNames : Array<String>;
+    //public var taskNames : Array<String>;
+    public var availableDirectives : Array<Array<String>>;
+    public var availableFlags : Array<Array<String>>;
+
     public var taskOptions : TaskOptions;
     public var tasks : Array<Task>;
 
@@ -198,5 +251,6 @@ typedef TaskOptions = {
     app: {
         compile: Bool,
         haxeDefs: Array<String>
-    }
+    },
+    directives: Array<String>
 };
