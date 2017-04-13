@@ -326,6 +326,14 @@ class Player extends EventDispatcher {
 	    session.save();
 	}
 
+	/**
+	  * restore previously saved Session
+	  */
+	public function restoreState(?done : Void->Void):Void {
+	    session.restore( done );
+	}
+
+	/**
 	  * get the current player status
 	  */
 	@:access( pman.media.LocalMediaObjectPlaybackDriver )
