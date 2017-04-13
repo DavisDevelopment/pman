@@ -346,6 +346,8 @@ class SeekBar extends Ent {
     private var loadingThumbnail:Bool = false;
     private var thumbnail : Null<Thumbnail> = null;
     private var markViews : Array<MarkView>;
+    // last frame's mark list
+    private var _lfml : Null<Array<Mark>> = null;
 }
 
 typedef Thumbnail = {
