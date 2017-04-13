@@ -27,6 +27,8 @@ class PackStandalone extends Task {
         this.platform = platform;
         this.arch = arch;
         this.options = buildOptions(opts != null ? opts : []);
+        this.adts = new Array();
+        adts.push(new pack.adt.Common());
     }
 
 /* === Instance Methods === */
@@ -166,6 +168,7 @@ class PackStandalone extends Task {
     public var go : TaskOptions;
     public var platform : String;
     public var arch : String;
+    public var adts : Array<AppDirTransformer>;
     public var options : PackagerOptions;
 
 /* === Static Fields === */
