@@ -23,7 +23,7 @@ class Preprocess extends BatchTask {
     public function new(o : TaskOptions):Void {
         super();
 
-        children.push(new RevisePackageJson( o ));
+        // children.push(new RevisePackageJson( o ));
         if ( o.styles.compile ) {
             children.push(CompileLess.compile([Path.fromString('styles/pman.less')]));
         }
