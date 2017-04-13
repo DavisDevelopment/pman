@@ -175,6 +175,13 @@ class SeekBar extends Ent {
         c.closePath();
         c.fill();
 
+        // draw the bookmark tabs
+        /*
+        for (mv in markViews) {
+            drawMarkView(mv, stage, c);
+        }
+        */
+
         // draw the viewed rectangle
         c.fillStyle = fg.toString();
         c.beginPath();
@@ -186,8 +193,29 @@ class SeekBar extends Ent {
         var ctbx:Float = controls.x + (((x - controls.x) - ctb.width) / 2);
         c.drawComponent(ctb, 0, 0, ctb.width, ctb.height, ctbx, y, ctb.width, ctb.height);
 
+        // draw the duration
         var dtbx:Float = x + w + ((((controls.x + controls.w) - (x + w)) - dtb.width) / 2);
         c.drawComponent(dtb, 0, 0, dtb.width, dtb.height, dtbx, y, dtb.width, dtb.height);
+
+    }
+
+    /**
+      * draw the given mark view
+      */
+    private function drawMarkView(mv:MarkView, stage:Stage, c:Ctx):Void {
+        var pp = mv.prog();
+        var mr = mv.rect();
+        var mp = stage.getMousePosition();
+        if (mp != null && mr.containsPoint( mp )) {
+            mr.y -= 5;
+            mr.h += 5;
+        }
+
+        c.beginPath();
+        c.fillStyle = '#1EF71E';
+        c.drawRect( mr );
+        c.closePath();
+        c.fill();
     }
 
     /**
