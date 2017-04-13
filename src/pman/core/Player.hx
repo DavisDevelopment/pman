@@ -320,6 +320,12 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * save the Session into a File
+	  */
+	public function saveState():Void {
+	    session.save();
+	}
+
 	  * get the current player status
 	  */
 	@:access( pman.media.LocalMediaObjectPlaybackDriver )
