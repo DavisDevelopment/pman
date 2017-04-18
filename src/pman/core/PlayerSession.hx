@@ -23,6 +23,7 @@ import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
 
 import foundation.Tools.*;
+import electron.Tools.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -258,14 +259,17 @@ class PlayerSession {
 	  */
 	public function pullState(state:PlayerSessionState, ?done:Void->Void):Void {
 	    var stack = new AsyncStack();
+        //var tmp = player.shuffle;
 
 	    // pull the playlist
 	    stack.push(function(next) {
-	        var tmp = player.shuffle;
+            var tmp = player.shuffle;
 	        player.shuffle = false;
 	        player.addItemList(state.playlist.toTracks(), function() {
-	            player.shuffle = tmp;
-	            next();
+				//defer(function() {
+                    player.shuffle = tmp;
+                    next();
+                //});
 	        });
 	    });
 
@@ -320,15 +324,22 @@ class PlayerSession {
 	/**
 	  * check whether there is a session.dat file
 	  */
-	public inline function hasSavedState():Bool {
-	    return file().exists;
+	public function hasSavedState():Bool {
+		//return file().exists;
+		return FileSystem.exists(filePath());
 	}
 
 	/**
 	  * delete the session.dat file
 	  */
-	public inline function deleteSavedState():Void {
-	    file().delete();
+	public function deleteSavedState():Void {
+	    try {
+            //file().delete();
+            FileSystem.deleteFile(filePath());
+        }
+        catch (error : Dynamic) {
+            return ;
+        }
 	}
 
 	/**
