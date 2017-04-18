@@ -9,6 +9,7 @@ import tannus.sys.FileSystem as Fs;
 import electron.main.*;
 import electron.main.Menu;
 import electron.main.MenuItem;
+import electron.NativeImage;
 import electron.ext.App;
 import electron.Tools.defer;
 
@@ -62,9 +63,9 @@ class Background {
 	  */
 	public function openPlayerWindow(?cb : BrowserWindow -> Void):Void {
 	    // create new hidden BrowserWindow
+	    var icon = NativeImage.createFromPath(ap('assets/icon64.png').toString());
 		var win:BrowserWindow = new BrowserWindow({
 			show: false,
-			icon: (ap('assets/icon32.png').toString()),
 			width: 640,
 			height: 480
 		});
@@ -74,6 +75,7 @@ class Background {
 	        dir = ap('pages/index.min.html');
 	    #end
 		win.loadURL( 'file://$dir' );
+		win.setIcon( icon );
 		
 		// wait for the window to be ready
 		win.once('ready-to-show', function() {
