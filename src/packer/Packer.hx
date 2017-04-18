@@ -231,26 +231,3 @@ class Packer extends Application {
         new Packer().start();
     }
 }
-
-typedef TaskOptions = {
-    release:Bool,
-    compress:Bool,
-    concat:Bool,
-    platforms:Array<String>,
-    arches:Array<String>,
-    styles: {
-        compile: Bool,
-        compress: Bool,
-        concat: Bool
-    },
-    scripts: {
-        compile: Bool,
-        compress: Bool,
-        concat: Bool
-    },
-    app: {
-        compile: Bool,
-        haxeDefs: Array<String>
-    },
-    directives: Array<String>
-};
