@@ -461,6 +461,13 @@ class SeekBar extends Ent {
     private var markViews : Array<MarkView>;
     // last frame's mark list
     private var _lfml : Null<Array<Mark>> = null;
+
+    private static var KEYCODES:Array<Key> = {[
+        Number1,Number2,Number3,Number4,Number5,Number6,Number7,Number8,Number9,
+        LetterA,LetterB,LetterC,LetterD,LetterE,LetterF,LetterG,LetterH,LetterI,
+        LetterJ,LetterK,LetterL,LetterM,LetterN,LetterO,LetterP,LetterQ,LetterR,
+        LetterS,LetterT,LetterU,LetterV,LetterW,LetterY,LetterZ
+    ];};
 }
 
 typedef Thumbnail = {
