@@ -89,6 +89,7 @@ class SeekBar extends Ent {
                 }
             }
         }
+        markViews.sort.fn([a,b]=>Reflect.compare(a.time, b.time));
     }
 
     /**
