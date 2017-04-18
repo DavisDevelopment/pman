@@ -179,6 +179,10 @@ class SeekBar extends Ent {
                 }
             }
             else {
+                if (marks.length != markViews.length) {
+                    buildMarkViews();
+                }
+
                 _lfml = marks;
             }
         }
