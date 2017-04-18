@@ -318,7 +318,7 @@ class SeekBar extends Ent {
 
         // if there is media loaded currently
         if (pd != null) {
-            if ( hovered ) {
+            if ( false ) {
                 var mx = hoverLocation.x;
                 mx -= x;
                 v.w = mx;
