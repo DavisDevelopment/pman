@@ -9,7 +9,6 @@ import js.Lib.require;
 
 import pack.*;
 import pack.Tools.*;
-import Packer.TaskOptions;
 import pack.PackStandalone as Ps;
 
 using StringTools;
