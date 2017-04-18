@@ -218,6 +218,15 @@ class SeekBar extends Ent {
             drawMarkView(mv, stage, c);
         }
 
+        // draw the seek-caret
+        if ( hovered ) {
+            c.fillStyle = (viewed.containsPoint(hoverLocation)?fg.invert():fg).toString();
+            c.beginPath();
+            c.rect((hoverLocation.x - 2), y, 4.0, viewed.h);
+            c.closePath();
+            c.fill();
+        }
+
         // draw the current time
         var ctbx:Float = controls.x + (((x - controls.x) - ctb.width) / 2);
         c.drawComponent(ctb, 0, 0, ctb.width, ctb.height, ctbx, y, ctb.width, ctb.height);
