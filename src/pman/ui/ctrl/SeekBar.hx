@@ -241,19 +241,21 @@ class SeekBar extends Ent {
       * draw the given mark view
       */
     private function drawMarkView(mv:MarkView, stage:Stage, c:Ctx):Void {
-        var pp = mv.prog();
         var mr = mv.rect();
-        var mp = stage.getMousePosition();
-        if (mp != null && mr.containsPoint( mp )) {
-            mr.y -= 5;
-            mr.h += 5;
-        }
 
+        c.save();
+        c.shadowBlur=3.5;
+        c.shadowColor = getBackgroundColor().toString();
         c.beginPath();
-        c.fillStyle = '#1EF71E';
+        c.fillStyle = getForegroundColor().darken( 35 ).toString();
         c.drawRect( mr );
         c.closePath();
         c.fill();
+        c.restore();
+
+        if ( bmnav ) {
+            mv.tooltip.paint(c, mr.centerX, mr.centerY);
+        }
     }
 
     /**
