@@ -323,7 +323,12 @@ class Player extends EventDispatcher {
 	  * save the Session into a File
 	  */
 	public function saveState():Void {
-	    session.save();
+	    if (session.playlist.length == 0) {
+	        session.deleteSavedState();
+	    }
+        else {
+            session.save();
+        }
 	}
 
 	/**
