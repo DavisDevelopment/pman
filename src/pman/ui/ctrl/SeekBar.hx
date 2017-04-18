@@ -77,6 +77,29 @@ class SeekBar extends Ent {
     }
 
     /**
+      * initiate bookmark navigation
+      */
+    public function bookmarkNavigation():Void {
+        if ( !bmnav ) {
+            bmnav = true;
+            player.app.keyboardCommands.nextKeyDown( bmnavHandler );
+        }
+    }
+
+    /**
+      * the bookmark-navigation handler
+      */
+    private function bmnavHandler(event : KeyboardEvent):Void {
+        for (mv in markViews) {
+            if (event.key == mv.key()) {
+                player.currentTime = mv.time;
+                break;
+            }
+        }
+        bmnav = false;
+    }
+
+    /**
       * construct the list of views for the track's marks
       */
     private function buildMarkViews():Void {
