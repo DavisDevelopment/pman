@@ -5,8 +5,8 @@
   "repository": "http://github.com/DavisDevelopment/pman",
   "homepage": "http://github.com/DavisDevelopment/pman",
   "author": {
-      "name": "Ryan Davis",
-      "email": "epikit@gmail.com"
+    "name": "Ryan Davis",
+    "email": "epikit@gmail.com"
   },
   "license": "ISC",
   "main": "scripts/background.js",
@@ -38,7 +38,7 @@
     "electron-devtools-installer": "^2.1.0",
     "electron-installer-debian": "^0.5.0",
     "electron-installer-windows": "^0.2.0",
-    "electron-packager": "^8.5.2",
+    "electron-packager": "^8.6.0",
     "electron-winstaller": "^2.5.2",
     "less": "^2.7.2",
     "prompt": "^1.0.0",
