@@ -40,6 +40,7 @@ class Common extends AppDirTransformer {
 
         trace('deleting unnecessary files..');
         for (p in del) {
+            trace('deleting $p..');
             if (Fs.isDirectory( p )) {
                 Fs.deleteDirectory( p );
             }
