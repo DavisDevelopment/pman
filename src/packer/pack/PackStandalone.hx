@@ -109,7 +109,7 @@ class PackStandalone extends Task {
             arch: arch,
             platform: platform,
             icon: path('assets/icon32.png'),
-            version: '1.6.2',
+            version: '1.6.5',
             dir: path(),
             sourcedir: path(),
             out: path( 'releases' ),
@@ -124,7 +124,10 @@ class PackStandalone extends Task {
             case 'win32': 'ico';
             default: 'png';
         });
-        result.icon = path('assets/icon32.$imgExt');
+        result.icon = path('assets/icon64.$imgExt');
+        if (platform == 'linux') {
+            result.icon = null;
+        }
         var o:Object = result;
         for (x in ol) {
             o.write( x );
