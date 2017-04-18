@@ -421,10 +421,10 @@ class SeekBar extends Ent {
      * get the time referred to by either currentTime or the time being hovered
      */
     private inline function getCurrentTime():Float {
-        return (getCurrentPercent().of(pd.getDurationTime()));
+        return (hovered ? hoveredProgress : progress).of(pd.getDurationTime());
     }
 
-    /* === Computed Instance Fields === */
+/* === Computed Instance Fields === */
 
     public var playerView(get, never):PlayerView;
     private inline function get_playerView():PlayerView return controls.playerView;
