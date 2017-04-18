@@ -441,11 +441,20 @@ class SeekBar extends Ent {
     public var progress(get, never):Percent;
     private inline function get_progress():Percent return getCurrentPercent();
 
+    public var hoveredProgress(get, never):Null<Percent>;
+    private function get_hoveredProgress():Null<Percent> {
+        if (hoverLocation != null) {
+            return Percent.percent((hoverLocation.x - x), w);
+        }
+        else return null;
+    }
+
     /* === Instance Fields === */
 
     public var controls : PlayerControlsView;
     public var hoverLocation : Null<Point>;
     public var hovered(default, null):Bool;
+    public var bmnav : Bool = false;
 
     private var viewed : Rectangle;
 
