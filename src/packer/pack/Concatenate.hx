@@ -11,7 +11,6 @@ import js.Lib.require;
 
 import pack.*;
 import pack.Tools.*;
-import Packer.TaskOptions;
 
 using StringTools;
 using tannus.ds.StringUtils;
