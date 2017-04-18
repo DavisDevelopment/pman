@@ -7,6 +7,8 @@ import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
 import tannus.math.Percent;
+import tannus.events.*;
+import tannus.events.Key;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -22,6 +24,7 @@ import pman.media.info.Mark;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.ctrl.SeekBarMarkView as MarkView;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
 import tannus.math.TMath.*;
@@ -176,19 +179,17 @@ class SeekBar extends Ent {
         c.closePath();
         c.fill();
 
-        // draw the bookmark tabs
-        /*
-        for (mv in markViews) {
-            drawMarkView(mv, stage, c);
-        }
-        */
-
         // draw the viewed rectangle
         c.fillStyle = fg.toString();
         c.beginPath();
         c.drawRect( viewed );
         c.closePath();
         c.fill();
+
+        // draw the bookmark tabs
+        for (mv in markViews) {
+            drawMarkView(mv, stage, c);
+        }
 
         // draw the current time
         var ctbx:Float = controls.x + (((x - controls.x) - ctb.width) / 2);
