@@ -70,6 +70,7 @@ class SeekBar extends Ent {
 
         on('click', onClick);
         on('contextmenu', onRightClick);
+        on('mousemove', onMouseMove);
 
         sess.trackChanged.on(function(delta) {
             buildMarkViews();
@@ -149,6 +150,7 @@ class SeekBar extends Ent {
                 }
                 else if (thumbnail != null) {
                     thumbnail = null;
+                    loadingThumbnail = false;
                 }
             }
         }
@@ -407,6 +409,13 @@ class SeekBar extends Ent {
       */
     private function onRightClick(event : MouseEvent):Void {
         null;
+    }
+
+    /**
+      * handle mouse-move events
+      */
+    private function onMouseMove(event : MouseEvent):Void {
+        thumbnail = null;
     }
 
     /**
