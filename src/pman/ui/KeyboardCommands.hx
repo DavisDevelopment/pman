@@ -12,10 +12,19 @@ import pman.core.*;
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
 
+using StringTools;
+using tannus.ds.StringUtils;
+using Lambda;
+using tannus.ds.ArrayTools;
+using Slambda;
+
 class KeyboardCommands {
 	/* Constructor Function */
 	public function new(app : BPlayerMain):Void {
 		this.app = app;
+
+		_nextKeyDown = new Array();
+        _nextKeyUp = new Array();
 		//commands = new Map();
 	}
 
@@ -25,17 +34,40 @@ class KeyboardCommands {
 	  * bind all commands
 	  */
 	public function bind():Void {
-		app.playerPage.stage.on('keydown', handleKeyDown);
+	    var target = app.playerPage.stage;
+		target.on('keydown', handleKeyDown);
+		target.on('keyup', handleKeyUp);
 	}
 
 	/**
 	  * unbind all commands
 	  */
 	public function unbind():Void {
-		
+	    var target = app.playerPage.stage;
+	    target.off('keydown', handleKeyDown);
+	    target.off('keyup', handleKeyUp);
 	}
 
+	/**
+	  * intercept the next 'keydown' event
+	  */
+	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
+	    _nextKeyDown.push( f );
+	}
+	public inline function nextKeyUp(f : KeyboardEvent->Void):Void {
+	    _nextKeyUp.push( f );
+	}
+
+    /**
+      * handle 'keydown' events
+      */
 	private function handleKeyDown(event : KeyboardEvent):Void {
+	    if (_nextKeyDown.length > 0) {
+            _nextKeyDown.iter.fn(_( event ));
+            _nextKeyDown = [];
+            return ;
+	    }
+
 		switch ( event.key ) {
 			// Space
 			case Space:
@@ -168,6 +200,22 @@ class KeyboardCommands {
 	}
 
 	/**
+	  * handle key-up events
+	  */
+	private function handleKeyUp(event : KeyboardEvent):Void {
+	    if (_nextKeyUp.length > 0) {
+	        _nextKeyUp.iter.fn(_( event ));
+	        _nextKeyUp = [];
+	        return ;
+	    }
+
+	    switch ( event.key ) {
+            default:
+                null;
+	    }
+	}
+
+	/**
 	  * get the seek time delta from the given Event
 	  */
 	private function seekTimeDelta(event : KeyboardEvent):Float {
@@ -248,6 +296,8 @@ class KeyboardCommands {
 
 	public var app : BPlayerMain;
 
+    private var _nextKeyDown:Array<KeyboardEvent->Void>;
+    private var _nextKeyUp:Array<KeyboardEvent->Void>;
 	private var nextCmdCount : Int;
 
 	//private var commands : Map<String, Void->Void>;
