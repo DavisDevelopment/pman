@@ -162,6 +162,11 @@ class KeyboardCommands {
                     p.track.toggleStarred();
                 }
 
+            // bookmark navigation
+            case BackTick, LetterB:
+                // initiate that shit
+                p.view.controls.seekBar.bookmarkNavigation();
+
 		/* --- 'next-command-count' modifiers --- */
 
 			case Number0, Numpad0:
