@@ -68,6 +68,9 @@ class Player extends EventDispatcher {
 		// create the Player's Session
 		session = new PlayerSession( this );
 
+		// [this] Player's list of components
+		components = new Array();
+
 		// create the ready-state fields
 		isReady = false;
 		readyEvent = new VoidSignal();
@@ -1150,6 +1153,7 @@ class Player extends EventDispatcher {
 	public var view : PlayerView;
 	public var session : PlayerSession;
 	public var isReady(default, null): Bool;
+	public var components : Array<PlayerComponent>;
 
 	private var readyEvent : VoidSignal;
 	private var eventTimes : Dict<String, Date> = {new Dict();};
