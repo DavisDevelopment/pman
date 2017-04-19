@@ -79,6 +79,7 @@ class Player extends EventDispatcher {
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
 		session.trackChanging.on( _onTrackChanging );
+		session.trackReady.on( _onTrackReady );
 	}
 
 /* === Instance Methods === */
@@ -911,6 +912,12 @@ class Player extends EventDispatcher {
                 }
             });
 		}
+	/**
+	  * current Track has been 'prepared' and is fully ready for playback
+	  */
+	private function _onTrackReady(t : Track):Void {
+	    dispatch('track-ready', t);
+	    components.iter.fn(_.onTrackReady( t ));
 	}
 
 	/**
