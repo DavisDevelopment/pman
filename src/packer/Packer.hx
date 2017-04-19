@@ -6,6 +6,7 @@ import tannus.sys.*;
 
 import pack.*;
 import pack.Tools.*;
+import pack.ArgParser.Result as ArgDef;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -37,11 +38,13 @@ class Packer extends Application {
     }
 
     /**
-      * parse some arguments
+      * execute the task def given by the given arg list
       */
-    private function parseArgs():Void {
-        taskOptions = ArgParser.parse( argv );
-        parseDirectives();
+    private function exec(args:Array<String>, done:?Dynamic->Void):Void {
+        var def = parseArgs( args );
+        def.tasks.batch(function(?error : Dynamic) {
+            done( error );
+        });
     }
 
     /**
