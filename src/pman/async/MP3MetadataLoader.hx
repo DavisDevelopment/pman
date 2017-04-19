@@ -29,10 +29,14 @@ using Slambda;
 
 class MP3MetadataLoader extends MediaMetadataLoader {
     override function action(done : Void->Void):Void {
+        status = 'Loading metadata..';
+        progress( 0 );
         MP3Duration.duration(path.toString(), function(error, duration) {
             meta.duration = duration;
 
             meta.audio = {};
+            status = 'metadata loaded';
+            progress( 100 );
 
             defer( done );
         });
