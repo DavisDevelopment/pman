@@ -54,4 +54,28 @@ class Tools {
             callback();
         });
     }
+
+    /**
+      * read entire data from Readable
+      */
+    public static function readAll(s:ReadableStream, cb:ByteArray->Void):Void {
+        var buf = new ByteArrayBuffer();
+        s.onData(function(dat : Dynamic) {
+            if (Std.is(dat, Buffer)) {
+                buf.add(ByteArray.ofData(cast dat));
+            }
+            else if (Std.is(dat, Binary)) {
+                buf.add(cast dat);
+            }
+            else if (Std.is(dat, String)) {
+                buf.addString(cast dat);
+            }
+            else {
+                throw 'Error: invalid data $dat';
+            }
+        });
+        s.onEnd(function() {
+            cb(buf.getByteArray());
+        });
+    }
 }
