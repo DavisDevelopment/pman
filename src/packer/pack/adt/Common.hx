@@ -36,6 +36,11 @@ class Common extends AppDirTransformer {
         for (n in names)
             del.push(sub('scripts/$n'));
         del.push(sub('pages/index.html'));
+        
+        if (ps.platform != 'win32') {
+            names.push('assets/ffmpeg-static/ffmpeg.exe');
+            names.push('assets/ffmpeg-static/ffprobe.exe');
+        }
 
         trace('deleting unnecessary files..');
         for (p in del) {
