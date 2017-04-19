@@ -50,6 +50,8 @@ class ArgParser {
                 haxeDefs: []
             }
         };
+
+        tasks = new Array();
     }
 
 /* === Instance Methods === */
@@ -57,7 +59,7 @@ class ArgParser {
     /**
       * parse the given Array
       */
-    public function parseArray(argv : Array<String>):TaskOptions {
+    public function parseArray(argv : Array<String>):Result {
         args = new Stack( argv );
         var dirs = new Array();
         while ( !args.empty ) {
@@ -103,7 +105,7 @@ class ArgParser {
                         }
 
                     default:
-                        o.setFlag(s, true);
+                        assignFlag( s );
                 }
             }
             else {
@@ -135,7 +137,81 @@ class ArgParser {
             }
         }
 
-        return o;
+        parseDirectives();
+
+        return {
+            options: o,
+            tasks: tasks
+        };
+    }
+
+    /**
+      * parse task-names
+      */
+    private function parseDirectives():Void {
+        if (o.directives.length == 0) {
+            return ;
+        }
+        else {
+            for (dName in o.directives) {
+                switch ( dName ) {
+                    case 'preprocess':
+                        queue(new Preprocess( o ));
+
+                    case 'recompile':
+                        queue(new CompileApp( o ));
+
+                    case 'package':
+                        o.compress = true;
+                        o.concat = true;
+                        o.app.haxeDefs.push( 'compress' );
+                        var beforePack = o.directives.before( dName );
+                        if (!(beforePack.has('recompile') && beforePack.has('preprocess'))) {
+                            var batch = new BatchTask(cast untyped [
+                                new CompileApp(o),
+                                new Preprocess(o),
+                                new BuildStandalones(o)
+                            ]);
+                            queue( batch );
+                        }
+                        else {
+                            queue(new BuildStandalones( o ));
+                        }
+
+                    case 'installers':
+                        queue(new BuildInstallers( o ));
+
+                    default:
+                        null;
+                }
+            }
+        }
+    }
+
+    /**
+      * parse and assign a flag
+      */
+    private function assignFlag(name : String):Void {
+        if (name.has('=')) {
+            var sval = name.after('=');
+            name = name.before('=');
+            if (sval.has(',')) {
+                o.flags.set(name, sval.split(','));
+            }
+            else {
+                o.flags.set(name, sval);
+            }
+        }
+        else {
+            o.flags.set(name, true);
+        }
+    }
+
+    /**
+      * queue a Task
+      */
+    private inline function queue(t : Task):Void {
+        tasks.push( t );
     }
 
 /* === Computed Instance Fields === */
@@ -150,10 +226,16 @@ class ArgParser {
     public var availableFlags : Array<Array<String>>;
 
     public var taskOptions : TaskOptions;
+    public var tasks : Array<Task>;
 
 /* === Static Methods === */
 
-    public static function parse(args : Array<String>):TaskOptions {
+    public static inline function parse(args : Array<String>):Result {
         return new ArgParser().parseArray( args );
     }
 }
+
+typedef Result = {
+    options : TaskOptions,
+    tasks : Array<Task>
+};
