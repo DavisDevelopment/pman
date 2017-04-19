@@ -95,20 +95,49 @@ class SeekBarMarkViewTooltip {
         t.text = markView.key().name;
         t.fontSize = 12;
 
+        var mvl = @:privateAccess markView.bar.markViews;
+        var prev = mvl[mvl.indexOf(markView)-1];
+        if (prev != null && rect != null && rect.containsRect( prev.tooltip.rect )) {
+            yOffset = (prev.tooltip.rect.h + prev.tooltip.yOffset + margin);
+            var tempy = yOffset;
+            yOffset = 0.0;
+            rect.y = (bar.controls.y - rect.height - margin - yOffset);
+            if (!rect.containsRect( prev.tooltip.rect )) {
+                yOffset = 0.0;
+            }
+            else {
+                yOffset = tempy;
+            }
+        }
+
         inline function dbl(x:Float):Float return (x * 2);
 
         rect = new Rectangle(0, 0, (ttr.width + dbl( margin )), (ttr.height + margin));
         rect.centerX = x;
-        rect.y = (bar.controls.y - rect.height - margin);
+        if ( true ) {
+            rect.y = (bar.controls.y - rect.height - margin - yOffset);
 
-        tbr = new Array();
-        var y:Float = (rect.y + margin);
-        for (t in tb) {
-            var r = new Rectangle(0, 0, t.width, t.height);
-            r.centerX = rect.centerX;
-            r.y = y;
-            y += (r.h - 2);
-            tbr.push( r );
+            tbr = new Array();
+            var y:Float = (rect.y + margin);
+            for (t in tb) {
+                var r = new Rectangle(0, 0, t.width, t.height);
+                r.centerX = rect.centerX;
+                r.y = y;
+                y += (r.h - 2);
+                tbr.push( r );
+            }
+        }
+        else {
+            rect.y = (bar.y + bar.h + margin);
+            tbr = new Array();
+            var y:Float = (rect.y + margin);
+            for (t in tb) {
+                var r = new Rectangle(0, 0, t.width, t.height);
+                r.centerX = rect.centerX;
+                r.y = y;
+                y += (r.h - 2);
+                tbr.push( r );
+            }
         }
     }
 
@@ -141,6 +170,7 @@ class SeekBarMarkViewTooltip {
     public var markView : SeekBarMarkView;
     public var rect : Rectangle;
     public var margin:Float = 5.0;
+    public var yOffset:Float = 0.0;
 
     private var tb : Array<TextBox>;
     private var ttr : Rectangle;
