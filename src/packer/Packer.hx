@@ -48,48 +48,10 @@ class Packer extends Application {
     }
 
     /**
-      * parse task-names
+      * parse some arguments
       */
-    private function parseDirectives():Void {
-        if (o.directives.length == 0) {
-            //queue(new Preprocess( o ));
-            help();
-        }
-        else {
-
-            for (dName in o.directives) {
-                switch ( dName ) {
-                    case 'preprocess':
-                        queue(new Preprocess( o ));
-
-                    case 'recompile':
-                        queue(new CompileApp( o ));
-
-                    case 'package':
-                        o.compress = true;
-                        o.concat = true;
-                        o.app.haxeDefs.push( 'compress' );
-                        var beforePack = o.directives.before( dName );
-                        if (!(beforePack.has('recompile') && beforePack.has('preprocess'))) {
-                            var batch = new BatchTask(cast untyped [
-                                new CompileApp(o),
-                                new Preprocess(o),
-                                new BuildStandalones(o)
-                            ]);
-                            queue( batch );
-                        }
-                        else {
-                            queue(new BuildStandalones( o ));
-                        }
-
-                    case 'installers':
-                        queue(new BuildInstallers( o ));
-
-                    default:
-                        null;
-                }
-            }
-        }
+    private function parseArgs(args : Array<String>):ArgDef {
+        return ArgParser.parse( args );
     }
 
     /**
