@@ -62,7 +62,11 @@ class PackStandalone extends Task {
       * called on copy of application
       */
     private function afterCopy(path:Path, electronVersion:String, platform:String, arch:String, done:Void->Void):Void {
-        adts.iter.fn(_.path = path);
+        adts.iter(function(x) {
+            x.path = path;
+            x.ps = this;
+            x.go = go;
+        });
         adts.batch(function(?error : Dynamic) {
             if (error != null) throw error;
             done();
