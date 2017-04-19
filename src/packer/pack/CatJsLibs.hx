@@ -32,6 +32,18 @@ class CatJsLibs extends Concatenate {
     }
 
     /**
+      * execute [this] Task
+      */
+    override function execute(done : ?Dynamic->Void):Void {
+        if (shouldRun()) {
+            super.execute( done );
+        }
+        else {
+            defer(function() done());
+        }
+    }
+
+    /**
       * place results in file
       */
     override function putResult(data:ByteArray, callback:?Dynamic->Void):Void {
@@ -49,6 +61,13 @@ class CatJsLibs extends Concatenate {
                 callback( error );
             }
         });
+    }
+
+    /**
+      * check that [this] task is even necessary
+      */
+    private function shouldRun():Bool {
+        return sources.anyNewerThan( dest );
     }
 
     private var compress:Bool;
