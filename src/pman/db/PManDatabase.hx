@@ -139,7 +139,6 @@ class PManDatabase {
 	    });
 	    inline function i(n, k, ?o) actors.createIndex(n,k,o);
 
-        i('id', 'id', {unique: true});
         i('name', 'name', {unique: true});
 	}
 
@@ -172,6 +171,7 @@ class PManDatabase {
 	public var db : Database;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
+	public var tagsStore : TagsStore;
 	public var preferences : Preferences;
 
 	private var or : VoidSignal;
