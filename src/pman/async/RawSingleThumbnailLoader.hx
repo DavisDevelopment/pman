@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.math.*;
 import tannus.geom2.*;
+import tannus.sys.*;
 
 import pman.core.*;
 import pman.media.*;
@@ -47,25 +48,13 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
 		this.mutateRect = mutateRect;
 
         // can use ffmpeg to load thumbnails
-        if (systemName() == 'Linux') {
-            return Promise.create({
-                var mo:Video = cast track.driver.getMediaObject();
-                var vr:Rect<Int> = new Rect(0, 0, mo.naturalWidth, mo.naturalHeight);
-                var tr = mutateRect( vr );
-
-                track.probe(getTime( mo.duration.totalSeconds ), '${tr.width}x${tr.height}', function(can : Canvas) {
-                    return can;
-                });
-            });
-        }
-        else {
-            return Promise.create({
-                perform(function() {
+        return Promise.create({
+            perform(function() {
+                if (video != null)
                     video.clear();
-                    return result;
-                });
+                return result;
             });
-        }
+        });
 	}
 
 	/**
@@ -77,7 +66,38 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
 			throw 'Error: Cannot load thumbnail from $track';
 		}
 
-		var stack = new AsyncStack();
+		var sysname = systemName();
+		(switch ( sysname ) {
+            case 'Linux', 'Win32': loadWithFfmpeg;
+            default: loadWithVideo;
+		})( done );
+	}
+
+	/**
+	  * load using ffmpeg
+	  */
+	private function loadWithFfmpeg(done : Void->Void):Void {
+        if (systemName() == 'Win32') {
+            var toolPath = track.player.app.appDir.appPath('assets/ffmpeg-static');
+            ffmpeg.FFfmpeg.setFfmpegPath(toolPath.plusString('ffmpeg.exe'));
+            ffmpeg.FFfmpeg.setFfprobePath(toolPath.plusString('ffprobe.exe'));
+        }
+
+        var mo:Video = cast track.driver.getMediaObject();
+        var vr:Rect<Int> = new Rect(0, 0, mo.naturalWidth, mo.naturalHeight);
+        var tr = mutateRect( vr );
+
+        thumbProbe(getTime( mo.duration.totalSeconds ), '${tr.width}x${tr.height}', function(can : Canvas) {
+            result = canvas = can;
+            done();
+        });
+	}
+
+	/**
+	  * load using video
+	  */
+	private function loadWithVideo(done : Void->Void):Void {
+        var stack = new AsyncStack();
 
 		stack.push( load_video );
 		stack.push( seek_video );
@@ -87,6 +107,40 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
 			done();
 		});
 	}
+
+	/**
+	  * obtain a thumbnail from the Track via ffmpeg
+	  */
+    private function thumbProbe(time:Float, size:String, callback:Canvas->Void):Void {
+        if (!track.type.equals( MTVideo ))
+            return ;
+        var thumbPath:Path = track.player.app.appDir.appPath('_thumbs');
+        var m = new ffmpeg.FFfmpeg(track.getFsPath().toString());
+        var paths:Array<Path> = [];
+        m.onFileNames(function(filenames) {
+            paths = filenames.map.fn(thumbPath.plusString(_));
+        });
+        m.onEnd(function() {
+            var uri:String = ('file://${paths[0]}');
+            Img.load(uri, function( img ) {
+                img.ready.once(function() {
+                    trace('IMAGE READY MOTHERFUCKER');
+                    defer(function() {
+                        var canvas = img.toCanvas();
+                        @:privateAccess img.img.remove();
+                        FileSystem.deleteFile( paths[0] );
+                        callback( canvas );
+                    });
+                });
+            });
+        });
+        m.screenshots({
+            folder: thumbPath.toString(),
+            filename: '%s|%r|%f.png',
+            size: size,
+            timemarks: [time]
+        });
+    }
 
 	/**
 	  * Load the Video into memory
