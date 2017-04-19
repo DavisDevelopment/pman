@@ -73,6 +73,9 @@ class RendererIpcCommands {
         b('EditPreferences', function() {
             //TODO player.editPreferences
         });
+        b('EditMarks', function() {
+            player.editBookmarks();
+        });
         b('LaunchInfo', function(e, info:RawLaunchInfo) {
             main.launchInfo( info );
         });
