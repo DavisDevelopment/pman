@@ -137,6 +137,24 @@ class Player extends EventDispatcher {
 	  */
 	public function tick():Void {
 	    dispatch('tick', null);
+	/**
+	  * attach a component to [this] Player
+	  */
+	public function attachComponent(c : PlayerComponent):Void {
+	    if (!components.has( c )) {
+	        components.push( c );
+	        c.onAttached();
+	        defer(function() {
+	            if (track != null) {
+	                c.onTrackChanged(new Delta(track, null));
+	                defer(function() {
+	                    c.onTrackReady( track );
+	                });
+	            }
+	        });
+	    }
+	}
+	/**
 	}
 
 	/**
