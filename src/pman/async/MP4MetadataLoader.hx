@@ -28,6 +28,8 @@ using Slambda;
 
 class MP4MetadataLoader extends MediaMetadataLoader {
     override function action(done : Void->Void):Void {
+        status = 'loading metadata..';
+        progress( 0 );
         var il = new Mp4InfoLoader();
         var ip = il.load( path );
         ip.then(function(info) {
@@ -49,6 +51,8 @@ class MP4MetadataLoader extends MediaMetadataLoader {
             if (at != null && at.audio != null) {
                 meta.audio = {};
             }
+            status = 'metadata loaded';
+            progress( 100 );
 
             done();
         });
