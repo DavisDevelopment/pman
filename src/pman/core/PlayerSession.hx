@@ -51,6 +51,7 @@ class PlayerSession {
 
 		trackChanging = new Signal();
 		trackChanged = new Signal();
+		trackReady = new Signal();
 		//focusedTrack = null;
 		//playlist = new Playlist();
 		history = new PlayerHistory( this );
@@ -495,6 +496,8 @@ class PlayerSession {
 	public var trackChanged : Signal<Delta<Null<Track>>>;
 	// fired just before focus shifts to a different Track
 	public var trackChanging : Signal<Delta<Null<Track>>>;
+	// fired once the Player has prepared a Track
+	public var trackReady : Signal<Track>;
 }
 
 @:structInit
