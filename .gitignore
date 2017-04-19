@@ -4,9 +4,11 @@
 
 src/borner
 
-dist/scripts/content.js
-dist/scripts/background.js
-dist/scripts/worker.js
+dist/scripts/content*.js
+dist/scripts/background*.js
+dist/scripts/worker*.js
+dist/scripts/all-libs*.js
+dist/scripts/server*.js
 dist/scripts/lib/*.js
 dist/styles/theme.css
 
@@ -21,18 +23,8 @@ dist/buildscripts/*.js
 
 dist/pack.js
 
-dist/scripts/server\.js
-
 dist/_thumbs/
 
 dist/pack
 
 dist/styles/pman\.css
-
-dist/scripts/background\.min\.js
-
-dist/scripts/content\.min\.js
-
-dist/scripts/all-libs\.js
-
-dist/scripts/all-libs\.min\.js
