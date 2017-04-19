@@ -224,6 +224,20 @@ class Player extends EventDispatcher {
 	public inline function getPlaylistView():Null<PlaylistView> return page.playlistView;
 
 	/**
+	  * open the Bookmark editor
+	  */
+	public function editBookmarks():Void {
+	    if (track == null)
+	        return ;
+
+	    var editor = new BookmarkEditor(this, track);
+	    editor.open();
+	    editor.once('close', function(e) {
+	        editor.destroy();
+	    });
+	}
+
+	/**
 	  * save current playlist to the filesystem
 	  */
 	public function savePlaylist(saveAs:Bool=false, ?done:Void->Void):Void {
