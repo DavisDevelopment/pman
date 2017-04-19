@@ -297,13 +297,6 @@ class Background {
 	  * watch some files for stuff
 	  */
 	private function _watchFiles():Void {
-	    var sessionsPath = appDir.sessionsPath();
-	    if (!Fs.exists(sessionsPath.toString())) {
-	        Fs.createDirectory(sessionsPath.toString());
-	    }
-
-	    var ssw = NodeFs.watch(sessionsPath.toString(), _sessionsFolderChanged);
-
 	    var plPath = appDir.playlistsPath();
 	    if (!Fs.exists(plPath.toString())) {
 	        Fs.createDirectory(plPath.toString());
@@ -350,13 +343,6 @@ class Background {
 	  * when the playlist folder changes
 	  */
 	private function _playlistFolderChanged(eventName:String, filename:String):Void {
-	    updateMenu();
-	}
-
-	/**
-	  * when the sessions folder changes
-	  */
-	private function _sessionsFolderChanged(eventName:String, filename:String):Void {
 	    updateMenu();
 	}
 
