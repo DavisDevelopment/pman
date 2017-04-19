@@ -875,14 +875,8 @@ class Player extends EventDispatcher {
                         // seek to it
                         currentTime = lastTime;
 
-                        // tell the user that such an action was taken
-                        /*
-                        message({
-                            text: '${newTrack.title}\n\nPlayback progress restored\nHit Backspace to start over',
-                            fontSize: '10pt',
-                            duration: 3000.0
-                        });
-                        */
+                        // fire the TrackReady event
+                        session.trackReady.call( newTrack );
                     });
                 }
 			});
