@@ -138,6 +138,12 @@ class Player extends EventDispatcher {
 	  */
 	public function tick():Void {
 	    dispatch('tick', null);
+	    var time:Float = gryffin.Tools.now;
+	    for (c in components) {
+	        c.onTick( time );
+	    }
+	}
+
 	/**
 	  * attach a component to [this] Player
 	  */
@@ -884,6 +890,9 @@ class Player extends EventDispatcher {
 
 		// automatically save the playback settings
 		app.appDir.savePlaybackSettings( this );
+
+		// notify all components
+		components.iter.fn(_.onTrackChanged(delta));
 	}
 
     /**
@@ -906,6 +915,11 @@ class Player extends EventDispatcher {
                 }
             });
 		}
+
+		// notify all components
+		components.iter.fn(_.onTrackChanging(delta));
+	}
+
 	/**
 	  * current Track has been 'prepared' and is fully ready for playback
 	  */
