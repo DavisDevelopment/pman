@@ -41,6 +41,7 @@ using tannus.math.RandomTools;
   * Object used to represent the current media Playback context
   */
 @:allow( pman.core.Player )
+@:access( pman.core.PlayerTab )
 class PlayerSession {
 	/* Constructor Function */
 	public function new(p : Player):Void {
@@ -50,9 +51,12 @@ class PlayerSession {
 
 		trackChanging = new Signal();
 		trackChanged = new Signal();
-		focusedTrack = null;
-		playlist = new Playlist();
+		//focusedTrack = null;
+		//playlist = new Playlist();
 		history = new PlayerHistory( this );
+
+		tabs = [new PlayerTab( this )];
+		activeTabIndex = 0;
 
         _listen();
 	}
@@ -430,6 +434,14 @@ class PlayerSession {
 
 /* === Computed Instance Fields === */
 
+    // the currently active Tab
+	public var activeTab(get, never):Null<PlayerTab>;
+	private inline function get_activeTab() return tabs[activeTabIndex];
+
+	// alias to [activeTab]
+	public var tab(get, never):Null<PlayerTab>;
+	private inline function get_tab() return activeTab;
+
 	public var pp(get, never):PlayerPlaybackProperties;
 	private inline function get_pp():PlayerPlaybackProperties return playbackProperties;
 
@@ -457,21 +469,26 @@ class PlayerSession {
 	private inline function get_mft():Maybe<Track> return focusedTrack;
 
 	// the currently 'active' Track
-	public var focusedTrack(default, set): Null<Track>;
-	private inline function set_focusedTrack(v : Null<Track>):Null<Track> {
-		return (focusedTrack = v);
-	}
+	public var focusedTrack(get, set): Null<Track>;
+	private inline function get_focusedTrack() return tab.focusedTrack;
+	private inline function set_focusedTrack(v) return (tab.focusedTrack = v);
+
+	public var playlist(get, set):Playlist;
+	private inline function get_playlist() return tab.playlist;
+	private inline function set_playlist(v) return (tab.playlist = v);
 
 /* === Instance Fields === */
 
 	public var player : Player;
-
 	public var playbackProperties : PlayerPlaybackProperties;
-	public var playlist : Playlist;
+	//public var playlist : Playlist;
+
 	public var history : PlayerHistory;
 
 	// session name, assigned when session is saved or loaded
 	public var name : Null<String>;
+	public var activeTabIndex : Int;
+	public var tabs : Array<PlayerTab>;
 
 	//public var trackChange : Signal<Delta<Null<Track>>>;
 	// fired after the change in focus has been made
