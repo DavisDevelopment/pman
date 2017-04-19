@@ -298,6 +298,31 @@ class Track implements IComparable<Track> {
         });
     }
 
+    /**
+      * rename [this] Track
+      */
+    private function _rename(?done:Void->Void):Void {
+        if (done == null)
+            done = (function() null);
+
+        var path = getFsPath();
+        player.prompt('rename track', null, path, function(line : Null<String>) {
+            if (line == null) {
+                return done();
+            }
+            else {
+                var newPath:Path = new Path( line );
+                if (FileSystem.exists( newPath )) {
+                    return done();
+                }
+                else {
+                    var ren = new TrackRename(this, main.db.mediaStore, newPath);
+                    ren.perform( done );
+                }
+            }
+        });
+    }
+
 /* === TrackData Methods === */
 
     /**
