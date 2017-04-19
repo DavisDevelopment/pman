@@ -247,6 +247,10 @@ class Background {
             {
                 label: 'Preferences',
                 click: function(i,w) ic.send(w, 'EditPreferences')
+            },
+            {
+                label: 'Bookmarks',
+                click: function(i,w) ic.send(w, 'EditMarks')
             }
             ]
 	    });
