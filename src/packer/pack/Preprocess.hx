@@ -25,15 +25,22 @@ class Preprocess extends BatchTask {
 
         // children.push(new RevisePackageJson( o ));
         if ( o.styles.compile ) {
-            children.push(CompileLess.compile([Path.fromString('styles/pman.less')]));
+            children.push(new CompileStyles( o ));
         }
         if (o.compress || o.scripts.compress) {
+            var compressors:Array<JsCompressor> = [Uglify];
+            if (o.hasFlag('-uglify') && !compressors.has(Uglify)) {
+                compressors.push(Uglify);
+            }
+            if (o.hasFlag('-ccjs') && !compressors.has(Closure)) {
+                compressors.push(Closure);
+            }
             children.push(CompressJs.compress(
                 [
                     path('scripts/content.js'),
                     path('scripts/background.js')
                 ],
-                [Uglify, Closure]
+                compressors
             ));
         }
         if ( o.concat ) {
