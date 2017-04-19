@@ -109,7 +109,7 @@ class TrackData {
     /**
       * remove all marks of the given type
       */
-    public inline function removeMarksOfType(mt : MarkType):Void {
+    public function removeMarksOfType(mt : MarkType):Void {
         filterMarks.fn(!_.type.equals( mt ));
     }
     public inline function removeBeginMark():Void removeMarksOfType( Begin );
@@ -119,14 +119,14 @@ class TrackData {
     /**
       * filter [marks]
       */
-    public inline function filterMarks(f : Mark->Bool):Void {
+    public function filterMarks(f : Mark->Bool):Void {
         marks = marks.filter( f );
     }
 
-    public inline function getMarkq(f : Mark->Bool):Null<Mark> {
+    public function getMarkq(f : Mark->Bool):Null<Mark> {
         return marks.firstMatch( f );
     }
-    public inline function getMarkByType(type : MarkType):Null<Mark> {
+    public function getMarkByType(type : MarkType):Null<Mark> {
         return getMarkq.fn(_.type.equals( type ));
     }
 
