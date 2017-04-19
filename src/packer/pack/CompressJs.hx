@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.TSys as Sys;
 
 import haxe.Json;
 import js.Lib.require;
@@ -19,72 +20,76 @@ using pack.Tools;
 
 class CompressJs extends Task {
     /* Constructor Function */
-    public function new(input:Path):Void {
+    public function new(input:Path, ?compressors:Array<JsCompressor>):Void {
         super();
 
         this.input = input;
+        this.output = input.toString();
+        output.extension = 'min.js';
+        this.tempOutput = (Sys.tempDir().plusString('temp.js'));
+        if (compressors == null) {
+            this.compressors = [Uglify];
+        }
+        else
+            this.compressors = compressors;
     }
 
 /* === Instance Methods === */
 
     /**
-      * execute [this] Task
+      * compress that shit
       */
     override function execute(callback : ?Dynamic->Void):Void {
-        // get uncompressed source
-        var code:String = FileSystem.read( input );
-        // transform source code
-        code = beforeParse( code );
-        // parse source
-        var ast = uglify.parse( code );
-        // initialize ast
-        ast.figure_out_scope();
-        ast.compute_char_frequency();
-        // mangle ast
-        ast.mangle_names();
-        // create compressor
-        var compressor = uglify.Compressor({
-            global_defs: {}
-        });
-        // apply compressor to ast
-        ast.transform( compressor );
-        // generate compressed output code from ast
-        var minCode:String = ast.print_to_string();
-        // transform compressed code
-        minCode = afterCompress( minCode );
-        // figure out where to put compressed code
-        var output:Path = Path.fromString(input.toString());
-        output.extension = 'min.js';
-        // write compressed code to [output]
-        FileSystem.write(output, minCode);
-        // declare [this] Task complete
-        callback();
+        if (compressors.has(Closure)) {
+            tempOutput = input.toString();
+            tempOutput.extension = 'temp.js';
+            var closure = new ClosureCompile(input, tempOutput);
+            closure.run(function(?error : Dynamic) {
+                if (error != null) {
+                    return callback( error );
+                }
+                var ugly = new UglifyJs(tempOutput, output);
+                ugly.run(function(?error : Dynamic) {
+                    FileSystem.deleteFile( tempOutput );
+                    callback( error );
+                });
+            });
+        }
+        else {
+            var ugly = new UglifyJs( input );
+            ugly.run( callback );
+        }
     }
 
     /**
-      * transform uncompressed source code
+      * get a compressor Task
       */
-    private function beforeParse(code : String):String {
-        return code;
-    }
+    private function getTask(c : JsCompressor):Task {
+        switch ( c ) {
+            case Uglify:
+                return new UglifyJs( input );
 
-    /**
-      * transform compressed code
-      */
-    private function afterCompress(code : String):String {
-        return code;
+            case Closure:
+                return new ClosureCompile(input, tempOutput);
+        }
     }
 
 /* === Instance Fields === */
 
-    public var input:Path;
-    
-    private static var uglify:Dynamic = {require('uglify-js');};
+    public var input : Path;
+    public var output : Path;
+    public var tempOutput : Path;
+    public var compressors : Array<JsCompressor>;
 
-    /**
-      * create and return a batch task to compress all given js files
-      */
-    public static function compress(paths : Array<Path>):Task {
-        return cast new BatchTask(cast paths.map.fn(new CompressJs(_)));
+/* === Static Methods === */
+
+    public static function compress(paths:Array<Path>, ?compressors:Array<JsCompressor>):Task {
+        return cast new BatchTask(cast paths.map.fn(new CompressJs(_, compressors)));
     }
+}
+
+@:enum
+abstract JsCompressor (String) from String to String {
+    inline var Uglify = 'uglify';
+    inline var Closure = 'closure';
 }
