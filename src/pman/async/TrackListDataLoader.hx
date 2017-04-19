@@ -3,6 +3,7 @@ package pman.async;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.math.Percent;
 
 import pman.core.*;
 import pman.display.*;
@@ -35,6 +36,7 @@ class TrackListDataLoader extends StandardTask<String, Array<TrackData>> {
       */
     public function load(tracks:Array<Track>, ?done:Array<TrackData>->Void):Void {
         this.tracks = tracks;
+        this.tp = Percent.percent(1.0, tracks.length);
         this.datas = new Map();
         perform(function() {
             result = new Array();
@@ -47,6 +49,9 @@ class TrackListDataLoader extends StandardTask<String, Array<TrackData>> {
         });
     }
 
+    /**
+      * perform [this] Task
+      */
     override function action(done : Void->Void):Void {
         var stack = new AsyncStack();
         for (t in tracks) {
@@ -55,15 +60,35 @@ class TrackListDataLoader extends StandardTask<String, Array<TrackData>> {
         stack.run( done );
     }
 
+    /**
+      * method used to get the data for a single Track
+      */
     private function gdt(t:Track, next:Void->Void):Void {
+        /*
         t.getData(function( data ) {
             datas[t.uri] = data;
+            progress( tp );
+            next();
+        });
+        */
+        status = 'loading ${t.title}..';
+        var loadr = new TrackDataLoader(t, BPlayerMain.instance.db.mediaStore);
+        link(loadr, tp);
+        var dp = loadr.load();
+        dp.then(function( data ) {
+            @:privateAccess t.data = data;
+            var v = t.getView();
+            if (v != null) {
+                v.update();
+            }
+            status = 'loaded ${t.title}';
             next();
         });
     }
 
 /* === Instance Fields === */
 
+    private var tp : Percent;
     public var tracks : Array<Track>;
     public var datas : Map<String, TrackData>;
 }
