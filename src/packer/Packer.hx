@@ -29,10 +29,9 @@ class Packer extends Application {
       * start pack
       */
     override function start():Void {
-        parseArgs();
-        tasks.batch(function(?error : Dynamic) {
+        exec(argv, function(?error:Dynamic) {
             if (error != null) {
-                (untyped __js__('console')).error( error );
+                (untyped __js__('console.error'))(error);
             }
         });
     }
