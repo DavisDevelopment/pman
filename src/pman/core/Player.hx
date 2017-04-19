@@ -193,11 +193,14 @@ class Player extends EventDispatcher {
 	/**
 	  * Create a PromptBox, to prompt the user for information
 	  */
-	public function prompt(msg:String, ?placeholder:String, callback:Null<String>->Void):Void {
+	public function prompt(msg:String, ?placeholder:String, ?value:String, callback:Null<String>->Void):Void {
 		var box = new PromptBox();
 		box.title = msg;
 		if (placeholder != null) {
 			box.placeholder = placeholder;
+		}
+		if (value != null) {
+		    box.value = value;
 		}
 		box.open();
 		box.readLine(function(text : String) {
