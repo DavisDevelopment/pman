@@ -19,40 +19,7 @@ class Packer extends Application {
     public function new():Void {
         super();
 
-        availableDirectives = [
-            ['recompile', 'rc'],
-            ['preprocess', 'pp'],
-            ['package', 'pack', 'pk'],
-            ['installers', 'installer', 'i']
-        ];
-        availableFlags = [
-            ['--platform', '-p']
-        ];
-
         tasks = new Array();
-        taskOptions = {
-            release: false,
-            compress: false,
-            concat: true,
-            platforms: [],
-            arches: [],
-            directives: [],
-            flags: new Dict(),
-            styles: {
-                compile: true,
-                compress: false,
-                concat: false
-            },
-            scripts: {
-                compile: false,
-                compress: false,
-                concat: false
-            },
-            app: {
-                compile: false,
-                haxeDefs: []
-            }
-        };
     }
 
 /* === Instance Methods === */
@@ -70,87 +37,10 @@ class Packer extends Application {
     }
 
     /**
-      * parse command-line arguments
+      * parse some arguments
       */
     private function parseArgs():Void {
-        var args = new Stack(argv.copy());
-        var dirs = new Array();
-        
-        while ( !args.empty ) {
-            var s = args.pop();
-            if (s.startsWith('-')) {
-                switch ( s ) {
-                    case '-compress':
-                        o.concat = true;
-                        o.compress = true;
-                        o.app.haxeDefs.push( 'compress' );
-
-                    case '-release':
-                        o.release = true;
-                        o.app.haxeDefs.push( 'release' );
-                    
-                    case '-concat':
-                        o.concat = true;
-                        o.styles.concat = true;
-                        o.scripts.concat = true;
-
-                    case '-D':
-                        o.app.haxeDefs.push(args.pop());
-
-                    case '-platform', '-p':
-                        var plat = args.pop();
-                        switch ( plat ) {
-                            case 'all':
-                                o.platforms.push('linux');
-                                o.platforms.push('win32');
-
-                            default:
-                                o.platforms.push( plat );
-                        }
-
-                    case '-arch', '-a':
-                        var arch = args.pop();
-                        switch ( arch ) {
-                            case 'all':
-                                o.arches = o.arches.concat(['ia32', 'x64', 'armv71']).unique();
-
-                            default:
-                                o.arches.push( arch );
-                        }
-
-                    default:
-                        o.setFlag(s, true);
-                }
-            }
-            else {
-                dirs.push( s );
-            }
-        }
-
-        // if no platforms provided, all are used
-        if (o.platforms.length == 0) {
-            o.platforms = ['linux', 'win32'];
-        }
-        if (o.arches.length == 0) {
-            o.arches = ['x64'];
-        }
-
-        // sanitize and simplify the list of 'task names'
-        o.directives = [];
-        for (d in dirs) {
-            var valid:Bool = false;
-            for (dspec in availableDirectives) {
-                if (dspec.has( d )) {
-                    o.directives.push(dspec[0]);
-                    valid = true;
-                    break;
-                }
-            }
-            if ( !valid ) {
-                println('Warning: "$d" is not a directive');
-            }
-        }
-
+        taskOptions = ArgParser.parse( argv );
         parseDirectives();
     }
 
@@ -220,8 +110,8 @@ class Packer extends Application {
 /* === Instance Fields === */
 
     //public var taskNames : Array<String>;
-    public var availableDirectives : Array<Array<String>>;
-    public var availableFlags : Array<Array<String>>;
+    //public var availableDirectives : Array<Array<String>>;
+    //public var availableFlags : Array<Array<String>>;
 
     public var taskOptions : TaskOptions;
     public var tasks : Array<Task>;
