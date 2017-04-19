@@ -31,7 +31,15 @@ class CatJsLibs extends Concatenate {
         }
     }
 
+    /**
+      * place results in file
+      */
     override function putResult(data:ByteArray, callback:?Dynamic->Void):Void {
+        var code:String = data.toString();
+        var header:String = "if (typeof module === 'object') {\nwindow.module = module;\nmodule=undefined;\n}\n(function(){\n";
+        var footer:String = "\n}());\nif(window.module){\nmodule=window.module;\n}";
+        code = (header + code + footer);
+        data = ByteArray.ofString( code );
         super.putResult(data, function(?error:Dynamic) {
             if ( compress ) {
                 var compress = new CompressJs( dest );
