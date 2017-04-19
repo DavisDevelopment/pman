@@ -154,7 +154,16 @@ class Player extends EventDispatcher {
 	        });
 	    }
 	}
+
 	/**
+	  * detach a component from [this] Player
+	  */
+	public function detachComponent(c : PlayerComponent):Bool {
+	    var res = components.remove( c );
+	    if ( res ) {
+	        c.onDetached();
+	    }
+	    return res;
 	}
 
 	/**
