@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.sys.FileSystem as Fs;
 import tannus.node.*;
 import tannus.node.Process;
 
@@ -77,5 +78,26 @@ class Tools {
         s.onEnd(function() {
             cb(buf.getByteArray());
         });
+    }
+
+    /**
+      * compare the last modified time
+      */
+    public static function compareLastModified(a:Path, b:Path):Int {
+        return Reflect.compare(Fs.stat(a).mtime.getTime(), Fs.stat(b).mtime.getTime());
+    }
+
+    /**
+      * check whether [a] is newer than [b]
+      */
+    public static function newerThan(a:Path, b:Path):Bool {
+        return (compareLastModified(a, b) > 1);
+    }
+
+    /**
+      * check whether any of the files referenced in [a] are newer than [b]
+      */
+    public static function anyNewerThan(a:Array<Path>, b:Path):Bool {
+        return a.any.fn(newerThan(_, b));
     }
 }
