@@ -1,7 +1,5 @@
 package pack;
-
-import tannus.io.*;
-import tannus.ds.*;
+import tannus.io.*; import tannus.ds.*;
 import tannus.sys.*;
 
 import haxe.Json;
@@ -109,4 +107,6 @@ class AppDirTransformer extends Task {
 /* === Instance Fields === */
 
     public var path : Path;
+    public var ps : PackStandalone;
+    public var go : TaskOptions;
 }
