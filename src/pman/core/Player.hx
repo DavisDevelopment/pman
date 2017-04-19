@@ -174,6 +174,16 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * 'skim' the current media
+	  */
+	public function skim():Void {
+	    if (!components.any.fn(Std.is(_, pman.core.comp.Skimmer))) {
+	        var skimr = new pman.core.comp.Skimmer();
+	        attachComponent( skimr );
+	    }
+	}
+
+	/**
 	  * post a Message to the message board
 	  */
 	public inline function message(msg : EitherType<String, MessageOptions>):Void {
