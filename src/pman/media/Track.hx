@@ -252,6 +252,14 @@ class Track implements IComparable<Track> {
                         Shell.showItemInFolder( path );
                     }
                 });
+                mt.push({
+                    label: 'Rename',
+                    click: function(i,w,e) {
+                        _rename(function() {
+                            trace('Track renamed');
+                        });
+                    }
+                });
             }
 
             mt.push({type: 'separator'});
