@@ -34,39 +34,82 @@ class TagsStore extends TableWrapper {
       * write [row] onto the database
       */
     public function putTagRow(row : TagRow):Promise<TagRow> {
-        return Promise.create({
-            var store = tos('tags', 'readwrite');
-            var idp = store.put( row ).transform.fn(cast(_, String));
-            idp.then(function(name : String) {
-                @forward store.get( name ).transform.fn(cast _);
-            });
-            idp.unless(function(error : Null<Dynamic>) {
-                if (error != null) {
-                    throw error;
-                }
-            });
+        return cast put('tags', row);
+    }
+    public function putTagRow_(row:TagRow, f:Null<Dynamic>->Null<TagRow>->Void):Void {
+        var p = putTagRow( row );
+        p.then(function( row ) {
+            f(null, row);
+        });
+        p.unless(function( error ) {
+            f(error, null);
         });
     }
 
     /**
       * retrieve a row from [this] table
       */
-    public function getTagRow(name : String):Promise<TagRow> {
-        return Promise.create({
-            var store = tos('tags');
-            return store.get( name ).transform.fn(cast _);
+    public function getTagRow(name : String):Promise<Null<TagRow>> {
+        return untyped tos('tags').get( name );
+    }
+    public function getTagRow_(name:String, f:Null<Dynamic>->Null<TagRow>->Void):Void {
+        var p = getTagRow( name );
+        p.then(function(row : Null<TagRow>) {
+            f(null, row);
+        });
+        p.unless(function(error : Dynamic) {
+            f(error, null);
         });
     }
 
     /**
-      * 
+      * create or retrieve a row from [this] table
       */
+    public function cogTagRow(name : String):Promise<TagRow> {
+        return Promise.create({
+            getTagRow_(name, function(error:Null<Dynamic>, row:Null<TagRow>) {
+                if (error != null) {
+                    throw error;
+                }
+                else {
+                    if (row == null) {
+                        @forward putTagRow({
+                            name: name,
+                            type: ''
+                        });
+                    }
+                    else {
+                        return row;
+                    }
+                }
+            });
+        });
+    }
+
+    /**
+      * remove a tag from the database
+      */
+    /*
+    public function deleteTagRow(name:String):BoolPromise {
+        return Promise.create({
+            var store = tos('tags', 'readwrite');
+            store.delete(name, function(error:Null<Dynamic>) {
+                if (error != null) {
+                    throw error;
+                }
+                else {
+
+                }
+            });
+        }).bool();
+    }
+    */
 
 /* === Instance Fields === */
 }
 
 typedef TagRow = {
     name: String,
-    ?type: String,
+    type: String,
     ?data: String
 };
