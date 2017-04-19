@@ -117,6 +117,13 @@ class TrackData {
     public inline function removeLastTimeMark():Void removeMarksOfType( LastTime );
 
     /**
+      * remove a specific Mark
+      */
+    public function removeMark(mark : Mark):Void {
+        filterMarks.fn(_ != mark);
+    }
+
+    /**
       * filter [marks]
       */
     public function filterMarks(f : Mark->Bool):Void {
