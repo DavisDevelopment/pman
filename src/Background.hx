@@ -251,6 +251,16 @@ class Background {
             {
                 label: 'Bookmarks',
                 click: function(i,w) ic.send(w, 'EditMarks')
+            },
+            {type: 'separator'},
+            {
+                label: 'Scripts',
+                submenu: [
+                {
+                    label: 'Skim Media',
+                    click: function(i,w) ic.send(w, 'AddComponent', untyped ['skim'])
+                }
+                ]
             }
             ]
 	    });
