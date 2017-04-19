@@ -8,6 +8,7 @@ import haxe.Json;
 import js.Lib.require;
 
 import pack.*;
+import pack.CompressJs;
 import pack.Tools.*;
 
 using StringTools;
@@ -27,7 +28,13 @@ class Preprocess extends BatchTask {
             children.push(CompileLess.compile([Path.fromString('styles/pman.less')]));
         }
         if (o.compress || o.scripts.compress) {
-            children.push(CompressJs.compress([path('scripts/content.js'), path('scripts/background.js')]));
+            children.push(CompressJs.compress(
+                [
+                    path('scripts/content.js'),
+                    path('scripts/background.js')
+                ],
+                [Uglify, Closure]
+            ));
         }
         if ( o.concat ) {
             children.push(new CatJsLibs( o ));
