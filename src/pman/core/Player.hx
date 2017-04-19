@@ -35,6 +35,7 @@ import pman.ui.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 import pman.ds.*;
+import pman.async.*;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
@@ -391,6 +392,15 @@ class Player extends EventDispatcher {
             status = Empty;
         }
 	    return status;
+	}
+
+	/**
+	  * create a new ProgressBar for the given Task and attach it to the view
+	  */
+	public function showProgressBar(task:StandardTask<String, Dynamic>, ?bar:CanvasProgressBar):Void {
+	    if (bar == null)
+	        bar = new CanvasProgressBar(task, this);
+	    view.addSibling( bar );
 	}
 
 /* === Media Methods === */
