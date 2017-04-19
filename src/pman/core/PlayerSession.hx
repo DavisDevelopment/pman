@@ -400,11 +400,13 @@ class PlayerSession {
                 else {
                     player.track.editData(function( i ) {
                         i.setLastTime( player.currentTime );
+                        trace('editing TrackData');
                     }, next);
                 }
 	        });
 	        stack.push(function(next) {
 	            defer(function() {
+	                trace('saving session');
 	                player.saveState();
 	                next();
 	            });
