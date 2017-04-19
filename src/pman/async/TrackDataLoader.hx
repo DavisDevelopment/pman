@@ -92,6 +92,7 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
                 var p = store.getMediaInfoRow( row.id );
                 p.then(function( irow ) {
                     data.pullRaw( irow );
+                    progress( 75 );
                     next();
                 });
                 p.unless(function( error ) {
@@ -108,11 +109,14 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
       * fill in missing info
       */
     private function fill_missing_info(next : Void->Void):Void {
+        status = 'completing metadata';
         // if any data is missing from the TrackData's 'meta' field
         if (data.meta == null || data.meta.isIncomplete()) {
             // reload the entirety of the media metadata and reassign said field
             loadMediaMetadata(function( md ) {
                 data.meta = md;
+                status = 'metadata complete';
+                progress( 25 );
                 next();
             });
         }
@@ -125,16 +129,22 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
       * build new data from scratch
       */
     private function create_new(next : Void->Void):Void {
+        status = 'creating new media_info row';
         // create new row for the media item in question
         var itemRowp = store.newMediaItemRowFor( track.uri );
         // once new row has been created
         itemRowp.then(function( itemRow ) {
+            status = 'row created';
+            progress( 25 );
             // copy the 'media id' onto the TrackData
             data.media_id = itemRow.id;
             // get the media's metadata
+            status = 'loading row as media metadata';
             loadMediaMetadata(function( md ) {
                 // put that metadata on the track data
                 data.meta = md;
+                status = 'row loaded as media metadata';
+                progress( 25 );
                 
                 // push the newly created data onto the database
                 push_data_to_db( next );
@@ -154,11 +164,14 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
       * push the data onto the database
       */
     private function push_data_to_db(next : Void->Void):Void {
+        status = 'pushing row onto database..';
         var raw:MediaInfoRow = data.toRaw();
         store.putMediaInfoRow_(raw, function(error : Null<Dynamic>) {
             if (error != null) {
                 throw error;
             }
+            status = 'row written to database';
+            progress( 25 );
             next();
         });
     }
