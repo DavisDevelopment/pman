@@ -79,6 +79,16 @@ class RendererIpcCommands {
         b('LaunchInfo', function(e, info:RawLaunchInfo) {
             main.launchInfo( info );
         });
+
+        b('AddComponent', function(e, name:String) {
+            switch ( name ) {
+                case 'skim':
+                    player.skim();
+
+                default:
+                    null;
+            }
+        });
     }
 
     /**
