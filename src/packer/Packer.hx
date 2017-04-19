@@ -36,6 +36,8 @@ class Packer extends Application {
             concat: true,
             platforms: [],
             arches: [],
+            directives: [],
+            flags: new Dict(),
             styles: {
                 compile: true,
                 compress: false,
@@ -49,8 +51,7 @@ class Packer extends Application {
             app: {
                 compile: false,
                 haxeDefs: []
-            },
-            directives: []
+            }
         };
     }
 
@@ -118,7 +119,7 @@ class Packer extends Application {
                         }
 
                     default:
-                        null;
+                        o.setFlag(s, true);
                 }
             }
             else {
