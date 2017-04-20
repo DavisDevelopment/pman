@@ -43,4 +43,17 @@ class DebianInstaller extends Installer {
         });
     }
 
+    /**
+      * build icon spec
+      */
+    override function getIcon():Dynamic {
+        var icons:Object = {};
+        inline function i(size : Int) {
+            icons['${size}x${size}'] = path('assets/icon$size.png').toString();
+        }
+        for (size in [16, 32, 48, 64, 128, 256]) {
+            i( size );
+        }
+        return icons;
+    }
 }
