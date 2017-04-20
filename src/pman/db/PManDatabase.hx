@@ -31,6 +31,7 @@ class PManDatabase {
 
 		configInfo = new ConfigInfo( this );
 		mediaStore = new MediaStore( this );
+		tagsStore = new TagsStore( this );
 		preferences = Preferences.pull();
 	}
 
@@ -111,6 +112,8 @@ class PManDatabase {
 	    i('starred', 'starred');
 	    i('duration', 'duration');
 	    i('marks', 'marks');
+	    i('tags', 'tags');
+	    i('actors', 'actors');
 	    i('meta', 'meta');
 	}
 
