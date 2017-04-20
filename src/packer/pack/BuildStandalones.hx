@@ -22,6 +22,9 @@ class BuildStandalones extends BatchTask {
     public function new(o : TaskOptions):Void {
         super();
 
+        o.platforms = o.platforms.unique();
+        o.arches = o.arches.unique();
+
         inline function q(t:Task)
             children.push( t );
 
