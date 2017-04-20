@@ -25,7 +25,22 @@ class DebianInstaller extends Installer {
 
 /* === Instance Methods === */
 
+    /**
+      * get the function that'll be used to build installer
+      */
     override function getBuildFunction():Dynamic {
         return require( 'electron-installer-debian' );
     }
+
+    /**
+      * amend [options]
+      */
+    override function buildOptions():Void {
+        super.buildOptions();
+        options.write({
+            categories: ['Player', 'Media', 'Video', 'Audio', 'Movie', 'Music'],
+            mimeType: ['video/mp4', 'audio/mp3']
+        });
+    }
+
 }
