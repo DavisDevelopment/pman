@@ -263,6 +263,14 @@ class Track implements IComparable<Track> {
                         });
                     }
                 });
+                mt.push({
+                    label: 'Move to Trash',
+                    click: function(i,w,e) {
+                        _delete(function() {
+                            trace('Track deleted');
+                        });
+                    }
+                });
             }
 
             mt.push({type: 'separator'});
