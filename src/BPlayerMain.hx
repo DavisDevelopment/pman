@@ -22,6 +22,7 @@ import pman.events.*;
 import pman.media.*;
 import pman.ww.Worker;
 import pman.ipc.RendererIpcCommands;
+import pman.async.*;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
@@ -130,6 +131,14 @@ class BPlayerMain extends Application {
       */
 	public inline function updateMenu():Void {
 	    ic.send('UpdateMenu');
+	}
+
+	/**
+	  * invoke task that tidies up the database
+	  */
+	public function cleanDatabase(?done : VoidCb):Void {
+	    var cleanDb = new pman.async.tasks.CleanDatabase( db );
+	    cleanDb.run( done );
 	}
 
 	/**
