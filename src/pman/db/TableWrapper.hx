@@ -151,6 +151,16 @@ class TableWrapper {
     }
 
     /**
+      * delete a particular row of a particular table
+      */
+    public function deleteFrom(table:String, id:Dynamic, done:VoidCb):Void {
+        trace('deleting row identified by $id from `${db.db.name}.${table}`');
+        tos(table, 'readwrite').delete(id, function(error:Null<Dynamic>) {
+            done( error );
+        });
+    }
+
+    /**
       * SELECT WHERE query
       */
     public function selectAll<T>(tableName:String, query:Dynamic):ArrayPromise<T> {
