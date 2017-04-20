@@ -122,6 +122,8 @@ class TrackRename extends Task1 {
             if ( focused )
                 track.session.blur( track );
 
+            // the Track's previous uri
+            var oldUri = track.uri;
             // nullify track's data
             track.data = null;
             // reassign track's provider
@@ -211,9 +213,19 @@ class TrackRename extends Task1 {
       * update any/all views displaying Track information
       */
     private function update_track_views(done : VoidCb):Void {
+        var uri = fn(p => ('file://'+(MediaSource.MSLocalPath(p).mediaSourceToUri())));
+        var oldUri = uri( name.previous );
         defer(function() {
-            var tv = track.getView();
-            if (tv != null) {
+            // relink the Track's view to it
+            var plv = track.player.page.playlistView;
+            if (plv != null) {
+                // get reference to the PlaylistView's internal cache of TrackViews
+                var tc = @:privateAccess plv._tc;
+                var tv = tc[oldUri];
+                if (tv != null) {
+                    tc.remove( oldUri );
+                    tc[track.uri] = tv;
+                }
                 tv.update();
             }
             defer( done );
