@@ -9,6 +9,7 @@ import ida.backend.idb.IDBCursorWalker in CursorWalker;
 
 import pman.core.*;
 import pman.media.*;
+import pman.async.*;
 
 import js.Browser.console;
 import Slambda.fn;
@@ -105,6 +106,18 @@ class MediaStore extends TableWrapper {
         return getMediaItemRowByUri( uri ).transform(function(row : Null<MediaItemRow>) {
             return (row != null ? mediaItem( row ) : null);
         });
+    }
+
+    /**
+      * get the id of a media_item row by its uri
+      */
+    public function getMediaItemIdByUri(uri:String, cb:Cb<Int>):Void {
+        getMediaItemRowByUri( uri ).then(function(row:Null<MediaItemRow>) {
+            if (row != null)
+                return cb(null, row.id);
+            else
+                return cb();
+        }).unless( cb );
     }
 
     /**
