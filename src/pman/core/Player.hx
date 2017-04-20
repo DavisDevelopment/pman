@@ -193,7 +193,7 @@ class Player extends EventDispatcher {
 	/**
 	  * Create a PromptBox, to prompt the user for information
 	  */
-	public function prompt(msg:String, ?placeholder:String, ?value:String, callback:Null<String>->Void):Void {
+	public function prompt(msg:String, ?placeholder:String, ?value:String, callback:Null<String>->Void):PromptBox {
 		var box = new PromptBox();
 		box.title = msg;
 		if (placeholder != null) {
@@ -214,6 +214,7 @@ class Player extends EventDispatcher {
 			box.close();
 		});
 		box.focus();
+		return box;
 	}
 
 	/**
