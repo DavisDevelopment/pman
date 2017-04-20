@@ -40,11 +40,14 @@ class CompileStyles extends Task {
       * execute [this] task
       */
     override function execute(callback : ?Dynamic->Void):Void {
+        trace('preparing to compile stylesheets');
         if (shouldCompile()) {
+            trace('compiling stylesheets');
             var comp = new CompileLess(input, output);
             comp.run( callback );
         }
         else {
+            trace('stylesheet compilation skipped');
             defer(function() callback());
         }
     }
