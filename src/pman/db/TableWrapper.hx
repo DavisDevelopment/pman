@@ -9,6 +9,7 @@ import ida.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.async.*;
 
 import js.Browser.console;
 import Slambda.fn;
@@ -127,6 +128,25 @@ class TableWrapper {
                 }
                 c.next();
             });
+        });
+    }
+    
+    /**
+      * iterate over the given Table, deleting every row for which [text] returns 'true'
+      */
+    public function deleteWheref<T>(tableName:String, test:T->Bool, done:VoidCb):Void {
+        var tr = db.transaction(tableName, 'readwrite');
+        tr.complete.once(function() {
+            done();
+        });
+        var o = tr.objectStore( tableName );
+        var cw = o.openCursor(function(c, w) {
+            // if the cursor is currently 'over' a row, and [test] returned 'true' for that row
+            if (c.entry != null && test(untyped c.entry)) {
+                //TODO delete c.entry;
+                trace( c.entry );
+            }
+            c.next();
         });
     }
 
