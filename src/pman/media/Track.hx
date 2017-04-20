@@ -332,6 +332,26 @@ class Track implements IComparable<Track> {
         });
     }
 
+    /**
+      * move [this] Track to Trash (delete it)
+      */
+    private function _delete(?done : Void->Void):Void {
+        if (done == null)
+            done = (function() null);
+
+        var name = title;
+        var tdel = new TrackDelete(this, main.db.mediaStore);
+        tdel.run(function(?error : Dynamic) {
+            if (error != null) {
+                (untyped __js__('console.error'))(error);
+            }
+            else {
+                if ( tdel.deleted )
+                    player.message('moved "${name}" to Trash');
+            }
+        });
+    }
+
 /* === TrackData Methods === */
 
     /**
