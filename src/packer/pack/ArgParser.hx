@@ -24,7 +24,12 @@ class ArgParser {
             ['installers', 'installer', 'i']
         ];
         availableFlags = [
-            ['--platform', '-p']
+            ['-platform', '-p'],
+            ['-arch', '-a'],
+            ['-compress', '-C'],
+            ['-concat', '-c'],
+            ['-release'],
+            ['-define', '-D']
         ];
 
         taskOptions = {
@@ -65,6 +70,14 @@ class ArgParser {
         while ( !args.empty ) {
             var s = args.pop();
             if (s.startsWith('-')) {
+                // sanitize [s]
+                for (a in availableFlags) {
+                    if (a.has( s )) {
+                        s = a[0];
+                        break;
+                    }
+                }
+
                 switch ( s ) {
                     case '-compress':
                         o.concat = true;
@@ -80,10 +93,10 @@ class ArgParser {
                         o.styles.concat = true;
                         o.scripts.concat = true;
 
-                    case '-D':
+                    case '-define':
                         o.app.haxeDefs.push(args.pop());
 
-                    case '-platform', '-p':
+                    case '-platform':
                         var plat = args.pop();
                         switch ( plat ) {
                             case 'all':
@@ -94,7 +107,7 @@ class ArgParser {
                                 o.platforms.push( plat );
                         }
 
-                    case '-arch', '-a':
+                    case '-arch':
                         var arch = args.pop();
                         switch ( arch ) {
                             case 'all':
