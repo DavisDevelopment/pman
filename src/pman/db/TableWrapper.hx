@@ -66,8 +66,8 @@ class TableWrapper {
     public function put<T>(tableName:String, row:T):Promise<T> {
         return Promise.create({
             var store = tos(tableName, 'readwrite');
-            var idp = store.put( row ).transform.fn(cast(_, Int));
-            idp.then(function(row_id : Int) {
+            var idp = store.put( row );
+            idp.then(function(row_id : Dynamic) {
                 @forward store.get( row_id ).transform.fn(cast _);
             });
             idp.unless(function(error : Null<Dynamic>) {
