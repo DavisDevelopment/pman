@@ -29,17 +29,14 @@ class BuildStandalones extends BatchTask {
             children.push( t );
 
         for (platform in o.platforms) {
+            var appClass:Class<PackStandalone> = (switch ( platform ) {
+                case 'linux', 'ubuntu': LinuxApp;
+                case 'win32', 'windows': WindowsApp;
+                default: PackStandalone;
+            });
             for (arch in o.arches) {
-                switch ( platform ) {
-                    case 'linux':
-                        q(new LinuxApp(o, arch));
-
-                    case 'win32', 'windows':
-                        q(new WindowsApp(o, arch));
-
-                    default:
-                        throw 'Error: $platform platform not yet supported';
-                }
+                var pack = Type.createInstance(appClass, untyped [o, arch]);
+                q( pack );
             }
         }
     }
