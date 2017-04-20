@@ -13,9 +13,10 @@ import pman.display.media.*;
 import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
-import pman.async.*;
 import pman.ui.pl.TrackView;
 import pman.media.info.Mark;
+import pman.async.*;
+import pman.async.tasks.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -32,6 +33,8 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 using tannus.ds.SortingTools;
+
+using pman.async.VoidAsyncs;
 
 /**
   * pman.media.Track -- object that centralizes media playback state
@@ -313,19 +316,17 @@ class Track implements IComparable<Track> {
         if (done == null)
             done = (function() null);
 
-        var path = getFsPath();
-        player.prompt('rename track', null, path, function(line : Null<String>) {
-            if (line == null) {
-                return done();
+        var ren = new TrackRename(this, main.db.mediaStore);
+        ren.run(function(?error:Dynamic) {
+            if (error != null) {
+                (untyped __js__('console.error'))(error);
             }
             else {
-                var newPath:Path = new Path( line );
-                if (FileSystem.exists( newPath )) {
-                    return done();
+                if (ren.renamed != null) {
+                    player.message('track renamed to "${ren.renamed.name}"');
                 }
                 else {
-                    var ren = new TrackRename(this, main.db.mediaStore, newPath);
-                    ren.perform( done );
+                    player.message('track was not renamed');
                 }
             }
         });
