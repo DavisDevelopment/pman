@@ -140,9 +140,20 @@ class BPlayerMain extends Application {
 	    var cleanDb = new pman.async.tasks.CleanDatabase( db );
 	    cleanDb.run( done );
 	}
+
+	/**
+	  * invoke task that converts the entire contents of the database to a JSON object
+	  */
 	public function exportDatabase(?done : VoidCb):Void {
 	    var exportDb = new pman.async.tasks.ExportDatabase( db );
 	    exportDb.run( done );
+	}
+
+	/**
+	  * create route to [path] on the HTTP server
+	  */
+	public function httpServe(path : Path):String {
+	    return ic.sendSync('HttpServe', untyped [path.toString()]);
 	}
 
 	/**
