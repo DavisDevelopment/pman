@@ -734,6 +734,24 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * create route to the current media on the http server
+	  */
+	public function httpRouteTo(?t : Track):Null<String> {
+	    if (t == null) {
+	        if (track == null)
+	            return null;
+            else
+                t = track;
+        }
+        var path = t.getFsPath();
+        if (path == null)
+            return null;
+        else {
+            return app.httpServe( path );
+        }
+	}
+
+	/**
 	  * transforms common urls that do not point to media files directly into urls that do
 	  */
 	private function _map_address(url : Url):Url {
