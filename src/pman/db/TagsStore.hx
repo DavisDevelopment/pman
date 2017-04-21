@@ -63,13 +63,13 @@ class TagsStore extends TableWrapper {
         return untyped tos('tags').get( name );
     }
     public function getTagRow_(name:String, done:Cb<TagRow>):Void {
-        getTagRow( name ).then( done ).unless( done );
+        getTagRow( name ).then(done.yield()).unless(done.raise());
     }
     public function getTag(name : String):Promise<Null<Tag>> {
         return getTagRow( name ).transform.fn(_ != null ? Tag.fromRow(_) : null);
     }
     public function getTag_(name:String, done:Cb<Tag>):Void {
-        getTag( name ).then(done).unless(done);
+        getTag( name ).then(done.yield()).unless(done.raise());
     }
 
     /**
