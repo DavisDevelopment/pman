@@ -31,7 +31,6 @@ class Server {
         this.main = main;
         _cc = new Map();
         _routes = new Map();
-        _routes['test'] = new Path('/home/ryan/Videos/ass.mp4');
     }
 
 /* === Instance Methods === */
