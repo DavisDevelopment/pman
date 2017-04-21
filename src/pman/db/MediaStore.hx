@@ -40,6 +40,9 @@ class MediaStore extends TableWrapper {
             return cast dynlist;
         }).array();
     }
+    public function getAllMediaItemRows_(done : Cb<Array<MediaItemRow>>):Void {
+        getAllMediaItemRows().then(done.yield()).unless(done.raise());
+    }
 
     /**
       * get an array of all media items
