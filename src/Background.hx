@@ -21,6 +21,7 @@ import pman.LaunchInfo;
 import pman.db.AppDir;
 import pman.ipc.MainIpcCommands;
 import pman.ww.*;
+import pman.server.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -35,6 +36,7 @@ class Background {
 		ipcCommands = new MainIpcCommands( this );
 		ipcCommands.bind();
 		appDir = new AppDir();
+		server = new Server( this );
 	}
 
 /* === Instance Methods === */
@@ -330,7 +332,7 @@ class Background {
 		updateMenu();
 
 		openPlayerWindow(function( bw ) {
-
+		    server.init();
 		});
 	}
 
@@ -389,6 +391,7 @@ class Background {
 	public var ipcCommands : MainIpcCommands;
 	public var appDir : AppDir;
 	//public var serverBoss : Boss;
+	public var server : Server;
 	private var _p:Null<Path> = null;
 
 	/* === Class Methods === */
