@@ -2,6 +2,7 @@ package pman.ipc;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.sys.*;
 
 import electron.main.IpcMain as Ipc;
 import electron.main.BrowserWindow;
@@ -30,6 +31,12 @@ class MainIpcCommands {
         b('UpdateMenu', function() bg.updateMenu());
         b('GetLaunchInfo', function() {
             send(bg.playerWindow, 'LaunchInfo', [bg.launchInfo()]);
+        });
+
+        Ipc.on('command:HttpServe', function(event, spath:String) {
+            var path = new Path(spath);
+            trace( path );
+            event.returnValue = bg.httpServe( path );
         });
     }
 
