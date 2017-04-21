@@ -100,6 +100,15 @@ class RendererIpcCommands {
             params = params.concat( args );
         Reflect.callMethod(Ipc, Ipc.send, params);
     }
+    /**
+      * send a command synchronously
+      */
+    public function sendSync(cmd:String, ?args:Array<Dynamic>):Dynamic {
+        var params:Array<Dynamic> = ['command:$cmd'];
+        if (args != null)
+            params = params.concat( args );
+        return Reflect.callMethod(Ipc, Ipc.sendSync, params);
+    }
 
 /* === Computed Instance Fields === */
 
