@@ -140,6 +140,10 @@ class BPlayerMain extends Application {
 	    var cleanDb = new pman.async.tasks.CleanDatabase( db );
 	    cleanDb.run( done );
 	}
+	public function exportDatabase(?done : VoidCb):Void {
+	    var exportDb = new pman.async.tasks.ExportDatabase( db );
+	    exportDb.run( done );
+	}
 
 	/**
 	  * display an error message
