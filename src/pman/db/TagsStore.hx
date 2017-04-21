@@ -94,6 +94,16 @@ class TagsStore extends TableWrapper {
         });
     }
 
+    // get all tag rows
+    public function getAllTagRows():ArrayPromise<TagRow> {
+        return Promise.create({
+            @forward (untyped tos('tags').getAll());
+        }).array();
+    }
+    public function getAllTagRows_(done : Cb<Array<TagRow>>):Void {
+        getAllTagRows().then(done.yield()).unless(done.raise());
+    }
+
 /* === Instance Fields === */
 }
 
