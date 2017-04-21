@@ -319,6 +319,13 @@ class Background {
 
 /* === Event Handlers === */
 
+    /**
+      * handle signal from player window to add route to given path
+      */
+    public function httpServe(path : Path):String {
+        return server.serve( path );
+    }
+
 	/**
 	 * when the Application is ready to start doing stuff
 	 */
