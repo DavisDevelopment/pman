@@ -164,6 +164,9 @@ class MediaStore extends TableWrapper {
             @forward store.get( id ).transform.fn(cast _);
         });
     }
+    public function getMediaInfoRow_(id:Int, done:Cb<MediaInfoRow>):Void {
+        getMediaInfoRow( id ).then(done.yield()).unless(done.raise());
+    }
 
     /**
       * create/push a new row for the given uri
