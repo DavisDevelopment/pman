@@ -24,10 +24,13 @@
   ],
   "dependencies": {
     "chromecast-api": "0.2.5",
+    "express": "^4.15.2",
     "fluent-ffmpeg": "^2.1.0",
     "jsmediatags": "3.4.0",
+    "local-ip": "^1.0.1",
     "mp3-duration": "^1.0.10",
-    "mp4box": "0.3.15"
+    "mp4box": "0.3.15",
+    "send-seekable": "^1.0.4"
   },
   "devDependencies": {
     "async": "^2.1.5",
