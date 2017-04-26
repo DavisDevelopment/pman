@@ -14,10 +14,13 @@ using Slambda;
 
 class Timer {
     /* Constructor Function */
-    public function new(duration : Float):Void {
+    public function new(duration:Float, ?action:Void->Void):Void {
         this.duration = duration;
         this.onInterval = new VoidSignal();
         this.lastTime = null;
+        if (action != null) {
+            onInterval.on( action );
+        }
     }
 
 /* === Instance Methods === */
@@ -35,6 +38,9 @@ class Timer {
             }
         }
     }
+
+    public inline function on(f : Void->Void) onInterval.on( f );
+    public inline function once(f : Void->Void) onInterval.once( f );
 
     private inline function now():Float return cdate().getTime();
 
