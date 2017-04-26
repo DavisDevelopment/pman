@@ -401,6 +401,17 @@ class Track implements IComparable<Track> {
     }
 
     /**
+      * check whether [this] Track references a real file
+      */
+    public function isRealFile():Bool {
+        var path = getFsPath();
+        if (path != null) {
+            return FileSystem.exists( path );
+        }
+        else return true;
+    }
+
+    /**
       * set whether [this] Track is starred
       */
     public function setStarred(value:Bool, ?done:Void->Void):Void {
