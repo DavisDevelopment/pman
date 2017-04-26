@@ -40,7 +40,7 @@ class TagsStore extends TableWrapper {
     }
     public function putTagRow_(row:TagRow, ?done:Cb<TagRow>):Void {
         if (done == null)
-            done = untyped fn([e=null,v=null]=>null);
+            done = untyped fn([e,v]=>null);
         var p = putTagRow( row );
         p.then(function( row ) {
             done(null, row);
