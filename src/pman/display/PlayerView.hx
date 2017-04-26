@@ -16,6 +16,7 @@ import pman.core.*;
 import pman.display.media.*;
 import pman.ui.*;
 import pman.ui.hud.*;
+import pman.ui.statusbar.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -32,6 +33,9 @@ class PlayerView extends Ent {
 
 		controls = new PlayerControlsView( this );
 		addSibling( controls );
+
+		statusBar = new PlayerStatusBar( this );
+		addSibling( statusBar );
 
 		messageBoard = new PlayerMessageBoard( player );
 		addSibling( messageBoard );
@@ -160,6 +164,7 @@ class PlayerView extends Ent {
 	public var player : Player;
 	public var controls : PlayerControlsView;
 	public var messageBoard : PlayerMessageBoard;
+	public var statusBar : PlayerStatusBar;
 	public var hud : PlayerHUD;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
