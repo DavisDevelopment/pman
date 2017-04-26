@@ -67,7 +67,7 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
         var stack = new AsyncStack();
         status = 'building action stack';
 
-        stack.push( attempt_load );
+        stack.push( try_load );
         stack.push( fill_missing_info );
 
         status = 'running action stack';
@@ -75,6 +75,24 @@ class TrackDataLoader extends StandardTask<String, TrackData> {
             status = 'load complete!';
             done();
         });
+    }
+
+    /**
+      * try to load the data, if such data can be loaded
+      */
+    private function try_load(next : Void->Void):Void {
+        switch ( track.source ) {
+            case MediaSource.MSLocalPath( path ):
+                if (FileSystem.exists( path )) {
+                    attempt_load( next );
+                }
+                else {
+                    next();
+                }
+
+            default:
+                attempt_load( next );
+        }
     }
 
     /**
