@@ -76,9 +76,6 @@ class Player extends EventDispatcher {
 		// [this] Player's list of components
 		components = new Array();
 
-		// the current playback target for [this] Player
-		target = PTThisDevice;
-
 		// create the ready-state fields
 		isReady = false;
 		readyEvent = new VoidSignal();
@@ -1216,6 +1213,9 @@ class Player extends EventDispatcher {
 	public var track(get, never):Null<Track>;
 	private inline function get_track():Null<Track> return session.focusedTrack;
 
+	public var target(get, never):PlaybackTarget;
+	private inline function get_target() return session.target;
+
 	public var c(get, never):PlayerController;
 	private inline function get_c() return controller;
 
@@ -1228,7 +1228,6 @@ class Player extends EventDispatcher {
 	public var session : PlayerSession;
 	public var isReady(default, null): Bool;
 	public var components : Array<PlayerComponent>;
-	public var target : PlaybackTarget;
 	public var controller : PlayerController;
 
 	private var readyEvent : VoidSignal;
