@@ -1149,8 +1149,8 @@ class Player extends EventDispatcher {
 	private inline function set_currentTime(v) return (c.currentTime = v);
 
 	public var volume(get, set):Float;
-	private inline function get_volume():Float return session.pp.volume;
-	private inline function set_volume(v : Float):Float return (session.pp.volume = v);
+	private inline function get_volume():Float return c.volume;
+	private inline function set_volume(v : Float):Float return (c.volume = v);
 
 	public var playbackRate(get, set):Float;
 	private inline function get_playbackRate():Float return session.pp.speed;
