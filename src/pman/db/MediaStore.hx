@@ -74,37 +74,11 @@ class MediaStore extends TableWrapper {
             uri: uri
         });
     }
-
-    /**
-      * obtain a media_item row by its URI when the primary key is not known
-      */
-    public function getMediaItemRowByUri_(uri : String):Promise<Null<MediaItemRow>> {
-        return Promise.create({
-            var row:Null<MediaItemRow> = null;
-            var store = tos( 'media_items' );
-
-            // iterate over all rows
-            function cursorStep(cursor:Cursor, walker:CursorWalker) {
-                if (cursor.entry != null) {
-                    // we now have the current row to work with
-                    var cr:Dynamic = cursor.entry;
-                    if (row == null && cr.uri == uri) {
-                        row = cast cr;
-                    }
-                }
-                cursor.next();
-            }
-
-            var cursorWalker:CursorWalker = store.openCursor( cursorStep );
-            cursorWalker.complete.once(function() {
-                trace('cursor-iteration complete');
-                return row;
-            });
-            cursorWalker.error.once(function(error) {
-                throw error;
-            });
-        });
+    public function getMediaItemRowByUri_(uri:String, cb:Cb<MediaItemRow>):Void {
+        getMediaItemRowByUri( uri ).then(cb.yield()).unless(cb.raise());
     }
+
+    
     public function getMediaItemByUri(uri : String):Promise<Null<MediaItem>> {
         return getMediaItemRowByUri( uri ).transform(function(row : Null<MediaItemRow>) {
             return (row != null ? mediaItem( row ) : null);
@@ -200,6 +174,9 @@ class MediaStore extends TableWrapper {
                 throw error;
             });
         });
+    }
+    public function newMediaItemRowFor_(uri:String, done:Cb<MediaItemRow>):Void {
+        newMediaItemRowFor( uri ).then(done.yield()).unless(done.raise());
     }
 
     /**
