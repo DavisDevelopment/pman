@@ -61,6 +61,9 @@ class Player extends EventDispatcher {
 		app = main;
 		this.page = page;
 
+		// [this] Player's controller
+		controller = new PlayerController( this );
+
 		// the app's color scheme
 		theme = new ColorScheme();
 
@@ -1213,6 +1216,9 @@ class Player extends EventDispatcher {
 	public var track(get, never):Null<Track>;
 	private inline function get_track():Null<Track> return session.focusedTrack;
 
+	public var c(get, never):PlayerController;
+	private inline function get_c() return controller;
+
 /* === Instance Fields === */
 
 	public var app : BPlayerMain;
@@ -1223,6 +1229,7 @@ class Player extends EventDispatcher {
 	public var isReady(default, null): Bool;
 	public var components : Array<PlayerComponent>;
 	public var target : PlaybackTarget;
+	public var controller : PlayerController;
 
 	private var readyEvent : VoidSignal;
 	private var eventTimes : Dict<String, Date> = {new Dict();};
