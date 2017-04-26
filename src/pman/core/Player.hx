@@ -1136,7 +1136,7 @@ class Player extends EventDispatcher {
 /* === Computed Instance Fields === */
 
 	public var duration(get, never):Duration;
-	private inline function get_duration():Duration return sim(_.getDuration(), new Duration());
+	private inline function get_duration() return c.duration;
 
 	public var durationTime(get, never):Float;
 	private inline function get_durationTime():Float return sim(_.getDurationTime(), 0);
