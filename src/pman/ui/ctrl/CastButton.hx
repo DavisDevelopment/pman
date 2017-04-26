@@ -105,6 +105,25 @@ class CastButton extends ImagePlayerControlButton {
 	    });
 	}
 
+	/**
+	  * get device status on a loop
+	  */
+	private function statusLoop(device : Device):Void {
+	    function gs(?error, ?status:DeviceStatus) {
+	        trace( status );
+
+	        device.getStatus( gs );
+	    }
+	    device.getStatus( gs );
+	}
+
+	/**
+	  * update [this] Button
+	  */
+	override function update(stage : Stage):Void {
+	    super.update( stage );
+	}
+
 /* === Instance Fields === */
 
 	private var device : Null<Device> = null;
