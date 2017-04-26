@@ -56,7 +56,8 @@ class WindowsInstaller extends Installer {
         options = {
             appDirectory: (path('releases/pman-win32-$arch').toString()),
             outputDirectory: (path('installers').toString()),
-            setupIcon: getIcon()
+            setupIcon: getIcon(),
+            noMsi: false
         };
     }
 }
