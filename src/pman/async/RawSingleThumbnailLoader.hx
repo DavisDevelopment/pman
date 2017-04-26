@@ -115,28 +115,41 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
 	  * obtain a thumbnail from the Track via ffmpeg
 	  */
     private function thumbProbe(time:Float, size:String, callback:Canvas->Void):Void {
+        // avoid attempting to load thumbnail from non-video tracks
         if (!track.type.equals( MTVideo ))
             return ;
+        // get the path to the directory in which thumbnails are stored
         var thumbPath:Path = App.getPath(ExtAppNamedPath.UserData).plusString( '_thumbs' );
+        // create the ffmpeg instance
         var m = new ffmpeg.FFfmpeg(track.getFsPath().toString());
         var paths:Array<Path> = [];
+        // listen for filenames
         m.onFileNames(function(filenames) {
             paths = filenames.map.fn(thumbPath.plusString(_));
         });
+        // when the ffmpeg task has completed
         m.onEnd(function() {
+            // create the uri
             var uri:String = ('file://${paths[0]}');
+            // load thumbnail as an image
             Img.load(uri, function( img ) {
+                // wait for the image to be finished loading
                 img.ready.once(function() {
-                    trace('IMAGE READY MOTHERFUCKER');
+                    // defer to the next stack
                     defer(function() {
+                        // convert image to a Canvas
                         var canvas = img.toCanvas();
+                        // destroy the image
                         @:privateAccess img.img.remove();
+                        // delete the thumbnail file
                         FileSystem.deleteFile( paths[0] );
+                        // announce completion
                         callback( canvas );
                     });
                 });
             });
         });
+        // invoke the ffmpeg task
         m.screenshots({
             folder: thumbPath.toString(),
             filename: '%s|%r|%f.png',
