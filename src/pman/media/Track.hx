@@ -228,7 +228,7 @@ class Track implements IComparable<Track> {
       * build the menu for [this] Track
       */
     public function buildMenu(callback : MenuTemplate -> Void):Void {
-        getData(function( data ) {
+        getData(function(?error, ?data) {
             var mt:MenuTemplate = new MenuTemplate();
 
             mt.push({
@@ -373,7 +373,10 @@ class Track implements IComparable<Track> {
       * shorthand method to edit the TrackData for [this] Track
       */
     public function editData(action:TrackData->Void, ?complete:Void->Void):Void {
-        getData(function(data : TrackData) {
+        getData(function(?error, ?data:TrackData) {
+            if (data == null) {
+                throw 'Error: TrackData is null';
+            }
             action( data );
             data.save(function() {
                 var v = getView();
