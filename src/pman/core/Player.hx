@@ -1161,8 +1161,8 @@ class Player extends EventDispatcher {
 	private inline function set_shuffle(v : Bool):Bool return (c.shuffle = v);
 
 	public var muted(get, set):Bool;
-	private inline function get_muted() return session.pp.muted;
-	private inline function set_muted(v) return (session.pp.muted = v);
+	private inline function get_muted() return c.muted;
+	private inline function set_muted(v) return (c.muted = v);
 
 	public var ended(get, never):Bool;
 	private inline function get_ended() return c.ended;
