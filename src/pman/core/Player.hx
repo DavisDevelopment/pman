@@ -26,6 +26,7 @@ import electron.ext.Menu;
 import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
 import pman.core.PlayerStatus;
+import pman.core.PlaybackTarget;
 import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
@@ -71,6 +72,9 @@ class Player extends EventDispatcher {
 
 		// [this] Player's list of components
 		components = new Array();
+
+		// the current playback target for [this] Player
+		target = PTThisDevice;
 
 		// create the ready-state fields
 		isReady = false;
@@ -1218,6 +1222,7 @@ class Player extends EventDispatcher {
 	public var session : PlayerSession;
 	public var isReady(default, null): Bool;
 	public var components : Array<PlayerComponent>;
+	public var target : PlaybackTarget;
 
 	private var readyEvent : VoidSignal;
 	private var eventTimes : Dict<String, Date> = {new Dict();};
