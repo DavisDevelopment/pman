@@ -188,21 +188,28 @@ class Track implements IComparable<Track> {
     /**
       * load the TrackData for [this] Track
       */
-    public function getData(callback : TrackData->Void):Void {
+    public function getData(done : Cb<TrackData>):Void {
         if (data == null) {
-            var loader = new TrackDataLoader(this, BPlayerMain.instance.db.mediaStore);
-            var dp = loader.load();
-            dp.then(function( data ) {
-                this.data = data;
-                var v = getView();
-                if (v != null) {
-                    v.update();
+            var loader = new LoadTrackData(this, BPlayerMain.instance.db.mediaStore);
+            loader.run(function(?error, ?td) {
+                if (error != null) {
+                    throw error;
+                    done( error );
                 }
-                callback( data );
+                else {
+                    this.data = td;
+                    var tv = getView();
+                    if (tv != null) {
+                        tv.update();
+                    }
+                    done(null, data);
+                }
             });
         }
         else {
-            defer(callback.bind( data ));
+            defer(function() {
+                done(null, data);
+            });
         }
     }
 
