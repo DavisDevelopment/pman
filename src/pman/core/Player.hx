@@ -1172,7 +1172,7 @@ class Player extends EventDispatcher {
 	*/
 
 	public var ended(get, never):Bool;
-	private inline function get_ended():Bool return sim(_.getEnded(), false);
+	private inline function get_ended() return c.ended;
 
 	public var track(get, never):Null<Track>;
 	private inline function get_track():Null<Track> return session.focusedTrack;
