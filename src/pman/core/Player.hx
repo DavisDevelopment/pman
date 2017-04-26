@@ -1145,12 +1145,8 @@ class Player extends EventDispatcher {
 	private inline function get_paused() return c.paused;
 
 	public var currentTime(get, set):Float;
-	private inline function get_currentTime():Float return sim(_.getCurrentTime(), 0.0);
-	private function set_currentTime(v : Float):Float {
-		sim(_.setCurrentTime( v ));
-		defer(dispatch.bind('seek', currentTime));
-		return currentTime;
-	}
+	private inline function get_currentTime() return c.currentTime;
+	private inline function set_currentTime(v) return (c.currentTime = v);
 
 	public var volume(get, set):Float;
 	private inline function get_volume():Float return session.pp.volume;
