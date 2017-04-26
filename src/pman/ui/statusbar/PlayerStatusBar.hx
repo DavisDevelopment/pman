@@ -42,6 +42,8 @@ class PlayerStatusBar extends Ent {
       */
     override function init(stage : Stage):Void {
         super.init( stage );
+
+        attach(new DefaultStatusBarItem());
     }
 
     /**
@@ -99,6 +101,7 @@ class PlayerStatusBar extends Ent {
         var old = item;
         item = i;
         item.attached( this );
+        item.prevItem = old;
     }
 
 /* === Computed Instance Fields === */
