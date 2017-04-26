@@ -78,6 +78,9 @@ class PlayerController {
                     status = Empty;
                 }
 
+            case PTChromecast( cc ):
+                return cc.getPlayerStatus();
+
             default:
                 status = Empty;
                 throw 'What the fuck';
@@ -89,6 +92,14 @@ class PlayerController {
       * handle per-frame logic
       */
     public function tick():Void {
+        switch ( player.target ) {
+            case PTThisDevice:
+                null;
+
+            case PTChromecast( cc ):
+                cc.tick();
+        }
+
         if (session.hasMedia()) {
             var pp = session.pp;
 
@@ -169,6 +180,9 @@ class PlayerController {
             case PTThisDevice:
                 return player.sim(_.getCurrentTime(), 0.0);
 
+            case PTChromecast(c):
+                return c.currentTime;
+
             default:
                 return 0.0;
         }
@@ -179,6 +193,9 @@ class PlayerController {
                 player.sim(_.setCurrentTime( newtime ));
                 defer(player.dispatch.bind('seek', currentTime));
                 return currentTime;
+
+            case PTChromecast(c):
+                return (c.currentTime = newtime);
 
             default:
                 return newtime;
@@ -244,6 +261,9 @@ class PlayerController {
             case PTThisDevice:
                 return player.sim(_.getVolume(), 1.0);
 
+            case PTChromecast(c):
+                return c.volume;
+
             default:
                 return 1.0;
         }
@@ -253,6 +273,9 @@ class PlayerController {
             case PTThisDevice:
                 player.sim(_.setVolume(v));
                 return mediaVolume;
+
+            case PTChromecast(c):
+                return (c.volume = v);
 
             default:
                 return v;
@@ -268,6 +291,9 @@ class PlayerController {
             case PTThisDevice:
                 return player.sim(_.getMuted(), false);
 
+            case PTChromecast(c):
+                return c.muted;
+
             default:
                 return false;
         }
@@ -277,6 +303,9 @@ class PlayerController {
             case PTThisDevice:
                 player.sim(_.setMuted(v));
                 return mediaMuted;
+
+            case PTChromecast( c ):
+                return (c.muted = v);
 
             default:
                 return v;
