@@ -39,6 +39,7 @@ class StatusBarItem extends Ent {
       */
     public function attached(sb : PlayerStatusBar):Void {
         statusBar = sb;
+        attachedOn = now;
     }
 
     /**
@@ -53,6 +54,12 @@ class StatusBarItem extends Ent {
       */
     override function update(stage : Stage):Void {
         super.update( stage );
+
+        if (duration > -1) {
+            if ((now - attachedOn) >= duration) {
+                delete();
+            }
+        }
     }
 
     /**
@@ -69,8 +76,31 @@ class StatusBarItem extends Ent {
         rect.cloneFrom( r );
     }
 
+    /**
+      * delete [this]
+      */
+    override function delete():Void {
+        super.delete();
+        statusBar.item = null;
+        if (prevItem != null) {
+            statusBar.attach( prevItem );
+        }
+    }
+
+/* === Computed Instance Fields === */
+
+    public var playerView(get, never):PlayerView;
+    private inline function get_playerView() return statusBar.playerView;
+
+    public var player(get, never):Player;
+    private inline function get_player() return statusBar.player;
+
 /* === Instance Fields === */
 
     public var duration : Float;
     public var statusBar : PlayerStatusBar;
+
+    @:allow( pman.ui.statusbar.PlayerStatusBar )
+    private var prevItem : Null<StatusBarItem> = null;
+    private var attachedOn : Null<Float> = null;
 }
