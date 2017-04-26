@@ -14,8 +14,10 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
 import pman.ui.ctrl.PlaybackSpeedWidget;
+import pman.async.*;
 
 import pman.tools.chromecast.*;
+import pman.tools.localip.LocalIp.get as localip;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
@@ -32,7 +34,7 @@ class CastButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = true;
-		enabled = false;
+		//enabled = false;
 	}
 
 /* === Instance Methods === */
@@ -49,42 +51,61 @@ class CastButton extends ImagePlayerControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-		if (browser == null) {
-			browser = Browser.create();
-			browser.deviceFound.on(function( device ) {
-				var name:String = device.name.htmlUnescape();
-				switch ( name ) {
-					case 'Ryans Room':
-						var m = {
-							url: 'http://commondatastorage.googleapis.com/gtv-videos-bucket/big_buck_bunny_1080p.mp4'
-						};
-						device.play(m, 0, function(err : Null<Dynamic>) {
-							if (err != null) {
-								trace( err );
-							}
-							else {
-								trace( 'playback started' );
-								device.pause(function(err) {
-									device.getStatus(function(err, status) {
-										trace( status );
-										device.stop(function(err) {
-											browser.destroy();
-											browser = null;
-										});
-									});
-								});
-							}
-						});
+	    castDevice(function(?err, ?device) {
+	        if (err != null)
+	            throw err;
 
-					default:
-						null;
-				}
-			});
-		}
-		browser.update();
+	        getUrl(function(?err, ?address) {
+	            if (err != null)
+	                throw err;
+	            device.play(address, 0, function(?error) {
+	                if (error != null)
+	                    throw error;
+	                device.getStatus(function(?err, ?status) {
+	                    if (err != null) throw err;
+	                    trace( status );
+	                });
+	            });
+	        });
+	    });
+	}
+
+    /**
+      * obtain a casting device
+      */
+	private function castDevice(done : Cb<Device>):Void {
+	    if (device != null) {
+	        return done(null, device);
+	    }
+        else {
+            var browser = new Browser();
+            browser.onDevice(function(d : Device) {
+                if (d.name.htmlUnescape() == 'Ryans Room') {
+                    this.device = d;
+                    browser.destroy();
+                    done(null, device);
+                }
+            });
+            browser.update();
+        }
+	}
+
+    /**
+      * obtain a url to the media to be casted
+      */
+	private function getUrl(done : Cb<String>):Void {
+	    var uuid = player.httpRouteTo( player.track );
+	    localip('wlo1', function(?error, ?ipAddress) {
+	        if (error != null)
+	            done(error, null);
+            else {
+                var url:String = 'http://$ipAddress:6969/watch/$uuid';
+                done(null, url);
+            }
+	    });
 	}
 
 /* === Instance Fields === */
 
-	private var browser : Null<Browser> = null;
+	private var device : Null<Device> = null;
 }
