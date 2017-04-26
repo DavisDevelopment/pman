@@ -54,6 +54,10 @@ class KeyboardCommands {
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
 	    _nextKeyDown.push( f );
 	}
+
+	/**
+	  * intercept the next 'keyup' event
+	  */
 	public inline function nextKeyUp(f : KeyboardEvent->Void):Void {
 	    _nextKeyUp.push( f );
 	}
@@ -166,6 +170,14 @@ class KeyboardCommands {
             case BackTick, LetterB:
                 // initiate that shit
                 p.view.controls.seekBar.bookmarkNavigation();
+
+            // :
+            case SemiColon if ( event.shiftKey ):
+                defer(function() {
+                    p.prompt('pmbash', null, null, function(line : Null<String>) {
+                        trace('cmd: $line');
+                    });
+                });
 
 		/* --- 'next-command-count' modifiers --- */
 
