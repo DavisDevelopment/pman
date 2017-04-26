@@ -17,10 +17,12 @@ import pman.ui.ctrl.PlaybackSpeedWidget;
 import pman.async.*;
 
 import pman.tools.chromecast.*;
+import pman.tools.chromecast.ExtDevice;
 import pman.tools.localip.LocalIp.get as localip;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
+import tannus.TSys as Sys;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -61,10 +63,7 @@ class CastButton extends ImagePlayerControlButton {
 	            device.play(address, 0, function(?error) {
 	                if (error != null)
 	                    throw error;
-	                device.getStatus(function(?err, ?status) {
-	                    if (err != null) throw err;
-	                    trace( status );
-	                });
+	                statusLoop( device );
 	            });
 	        });
 	    });
@@ -95,7 +94,11 @@ class CastButton extends ImagePlayerControlButton {
       */
 	private function getUrl(done : Cb<String>):Void {
 	    var uuid = player.httpRouteTo( player.track );
-	    localip('wlo1', function(?error, ?ipAddress) {
+	    var networkInterface:String = (switch (Sys.systemName()) {
+            case 'Win32': 'Wi-Fi';
+            default: 'wlo1';
+	    });
+	    localip(networkInterface, function(?error, ?ipAddress) {
 	        if (error != null)
 	            done(error, null);
             else {
