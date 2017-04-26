@@ -64,13 +64,6 @@ class TrackListDataLoader extends StandardTask<String, Array<TrackData>> {
       * method used to get the data for a single Track
       */
     private function gdt(t:Track, next:Void->Void):Void {
-        /*
-        t.getData(function( data ) {
-            datas[t.uri] = data;
-            progress( tp );
-            next();
-        });
-        */
         status = 'loading ${t.title}..';
         var loadr = new TrackDataLoader(t, BPlayerMain.instance.db.mediaStore);
         link(loadr, tp);
