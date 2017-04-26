@@ -1163,13 +1163,6 @@ class Player extends EventDispatcher {
 	public var muted(get, set):Bool;
 	private inline function get_muted() return session.pp.muted;
 	private inline function set_muted(v) return (session.pp.muted = v);
-	/*
-	private inline function get_muted():Bool return sim(_.getMuted(), false);
-	private inline function set_muted(v : Bool):Bool {
-		sim(_.setMuted( v ));
-		return muted;
-	}
-	*/
 
 	public var ended(get, never):Bool;
 	private inline function get_ended() return c.ended;
