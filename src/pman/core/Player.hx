@@ -36,6 +36,7 @@ import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 import pman.ds.*;
 import pman.async.*;
+import pman.async.tasks.*;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
@@ -769,13 +770,7 @@ class Player extends EventDispatcher {
 	  * add a batch of media items to the queue
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
-	    // ensure that there are no duplicate entries
-	    /*
-	    var trackSet:Set<Track> = new Set();
-	    trackSet.pushMany( items );
-	    items = trackSet.toArray();
-	    */
-
+	    items = items.filter.fn(_.isRealFile());
 	    function complete():Void {
 	        defer(function() {
 	            if (done != null) {
