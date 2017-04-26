@@ -1139,7 +1139,7 @@ class Player extends EventDispatcher {
 	private inline function get_duration() return c.duration;
 
 	public var durationTime(get, never):Float;
-	private inline function get_durationTime():Float return sim(_.getDurationTime(), 0);
+	private inline function get_durationTime() return c.durationTime;
 
 	public var paused(get, never):Bool;
 	private inline function get_paused():Bool return sim(_.getPaused(), true);
