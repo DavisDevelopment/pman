@@ -114,23 +114,26 @@ class PlayerControlsView extends Ent {
 
 		var mp = stage.getMousePosition();
 		hovered = (mp != null && containsPoint( mp ));
-		var events = ['mousemove', 'click'];
-		var times = events.map( stage.mostRecentOccurrenceTime  ).filter.fn(_ != null).map.fn(now - _);
-		if (!times.empty()) {
-			var last = times.min.fn( _ );
-			var nuie = (hovered || last <= uiHideDelay);
 
-            // if [uiEnabled] has just changed values
-			if (nuie != uie && !playingAnimation) {
-			    // invoke animation methods
-			    if ( nuie ) {
-			        showUi();
-			    }
-                else {
-                    hideUi();
+		if ( !_uieLocked ) {
+            var events = ['mousemove', 'click'];
+            var times = events.map( stage.mostRecentOccurrenceTime  ).filter.fn(_ != null).map.fn(now - _);
+            if (!times.empty()) {
+                var last = times.min.fn( _ );
+                var nuie = (hovered || last <= uiHideDelay);
+
+                // if [uiEnabled] has just changed values
+                if (nuie != uie && !playingAnimation) {
+                    // invoke animation methods
+                    if ( nuie ) {
+                        showUi();
+                    }
+                    else {
+                        hideUi();
+                    }
                 }
-			}
-		}
+            }
+        }
 
         if ( uiEnabled ) {
             if ( hovered ) {
