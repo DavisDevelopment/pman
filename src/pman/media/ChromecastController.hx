@@ -73,6 +73,28 @@ class ChromecastController extends CastingController<DeviceStatus> {
     }
 
     /**
+      * get PlayerStatus
+      */
+    public function getPlayerStatus():PlayerStatus {
+        if ( status.exists ) {
+            switch ( status.playerState ) {
+                case 'IDLE':
+                    return PlayerStatus.Empty;
+                case 'PAUSED':
+                    return PlayerStatus.Paused;
+                case 'BUFFERING':
+                    return PlayerStatus.Waiting;
+                case 'PLAYING':
+                    return PlayerStatus.Playing;
+
+                default:
+                    throw 'what the fuck';
+            }
+        }
+        else return PlayerStatus.Empty;
+    }
+
+    /**
       * pull status
       */
     private function pullStatus(?done : VoidCb):Void {
