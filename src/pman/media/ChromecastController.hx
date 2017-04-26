@@ -119,6 +119,60 @@ class ChromecastController extends CastingController<DeviceStatus> {
     }
 
     /**
+      * synchronize [device] with [this]'s cached state
+      */
+    private function sync(?done : VoidCb):Void {
+        if (done == null) {
+            done = (function(?error:Dynamic) {
+                if (error != null)
+                    throw error;
+            });
+        }
+        runCommands(function(?error) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                pullStatus(function(?error) {
+                    if (error != null) {
+                        done( error );
+                    }
+                    else {
+                        done();
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+      * run [commands]
+      */
+    private function runCommands(done : VoidCb):Void {
+        var a = commands.map( commandAsync );
+        commands = new Array();
+        a.series( done );
+    }
+
+    /**
+      * get a VoidAsync from the given command
+      */
+    private function commandAsync(c : ChromecastCommand):VoidAsync {
+        switch ( c ) {
+            case Pause:
+                return device.pause;
+            case Unpause:
+                return device.unpause;
+            case Volume( time ):
+                return device.setVolume.bind(time, _);
+            case VolumeMuted( muted ):
+                return device.setVolumeMuted.bind(muted, _);
+            case Seek( time ):
+                return device.seekTo.bind(time, _);
+        }
+    }
+
+    /**
       * add a command to the list
       */
     private function cmd(c : ChromecastCommand):Void {
@@ -130,23 +184,48 @@ class ChromecastController extends CastingController<DeviceStatus> {
 /* === Computed Instance Fields === */
 
     public var volume(get, set):Float;
-    private inline function get_volume() return status.ternary(_.volume.level, 1.0);
+    private function get_volume() {
+        for (c in commands) switch ( c ) {
+            case Volume( vol ):
+                return vol;
+            default: null;
+        }
+        return status.ternary(_.volume.level, 1.0);
+    }
     private function set_volume(v) {
-        cmd(Volume( v ));
+        if (volume != v)
+            cmd(Volume( v ));
         return volume;
     }
 
     public var muted(get, set):Bool;
-    private function get_muted() return status.ternary(_.volume.muted, false);
+    private function get_muted() {
+        for (c in commands) switch ( c ) {
+            case VolumeMuted( m ):
+                return m;
+            default: null;
+        }
+        return status.ternary(_.volume.muted, false);
+    }
     private function set_muted(v) {
-        cmd(VolumeMuted( v ));
+        if (muted != v)
+            cmd(VolumeMuted( v ));
         return muted;
     }
 
     public var currentTime(get, set):Float;
-    private function get_currentTime() return status.ternary(_.currentTime, 0.0);
+    private function get_currentTime() {
+        for (c in commands) switch ( c ) {
+            case Seek(time):
+                return time;
+            default:
+                null;
+        }
+        return status.ternary(_.currentTime, 0.0);
+    }
     private function set_currentTime(v) {
-        cmd(Seek( v ));
+        if (currentTime != v)
+            cmd(Seek( v ));
         return currentTime;
     }
 
@@ -154,7 +233,17 @@ class ChromecastController extends CastingController<DeviceStatus> {
     private function get_duration():Float return status.ternary(_.media.duration, 0.0);
 
     public var paused(get, never):Bool;
-    private function get_paused():Bool return (status.playerState == 'PAUSED');
+    private function get_paused():Bool {
+        for (c in commands) {
+            switch ( c ) {
+                case Pause:
+                    return true;
+                default:
+                    null;
+            }
+        }
+        return (status.playerState == 'PAUSED');
+    }
 
 /* === Instance Fields === */
 
