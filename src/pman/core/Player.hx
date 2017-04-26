@@ -414,42 +414,8 @@ class Player extends EventDispatcher {
 	/**
 	  * get the current player status
 	  */
-	@:access( pman.media.LocalMediaObjectPlaybackDriver )
 	public function getStatus():PlayerStatus {
-	    var status : PlayerStatus;
-	    if (session.hasMedia()) {
-	        if (Std.is(session.playbackDriver, LocalMediaObjectPlaybackDriver)) {
-                var mo:MediaObject = cast(cast(session.playbackDriver, LocalMediaObjectPlaybackDriver<Dynamic>).mediaObject, MediaObject);
-                var me = mo.getUnderlyingMediaObject();
-                var readyState:MediaReadyState = me.readyState;
-                switch ( readyState ) {
-                    case HAVE_NOTHING, HAVE_METADATA:
-                        status = Waiting;
-
-                    case HAVE_CURRENT_DATA, HAVE_FUTURE_DATA, HAVE_ENOUGH_DATA:
-                       if ( ended ) {
-                           status = Ended;
-                       }
-                       else if ( paused ) {
-                           status = Paused;
-                       }
-                       else {
-                           status = Playing;
-                       }
-
-                    default:
-                       status = Empty;
-                       throw 'What the fuck';
-                }
-	        }
-            else {
-                status = Empty;
-            }
-	    }
-        else {
-            status = Empty;
-        }
-	    return status;
+	    return c.getStatus();
 	}
 
 	/**
