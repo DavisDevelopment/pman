@@ -83,6 +83,8 @@ class SeekBar extends Ent {
     public function bookmarkNavigation():Void {
         if ( !bmnav ) {
             bmnav = true;
+            playerView.controls.lockUiVisibility();
+            playerView.controls.showUi();
             player.app.keyboardCommands.nextKeyDown( bmnavHandler );
         }
     }
@@ -98,6 +100,7 @@ class SeekBar extends Ent {
             }
         }
         bmnav = false;
+        playerView.controls.unlockUiVisibility();
     }
 
     /**
