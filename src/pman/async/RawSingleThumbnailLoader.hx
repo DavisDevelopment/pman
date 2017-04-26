@@ -15,6 +15,9 @@ import gryffin.display.Image in Img;
 import gryffin.display.Video;
 import foundation.Image in FImage;
 
+import electron.ext.App;
+import electron.ext.ExtApp;
+
 import gryffin.Tools.*;
 import foundation.Tools.*;
 import Math.*;
@@ -114,7 +117,7 @@ class RawSingleThumbnailLoader extends StandardTask<String, Canvas> {
     private function thumbProbe(time:Float, size:String, callback:Canvas->Void):Void {
         if (!track.type.equals( MTVideo ))
             return ;
-        var thumbPath:Path = track.player.app.appDir.appPath('_thumbs');
+        var thumbPath:Path = App.getPath(ExtAppNamedPath.UserData).plusString( '_thumbs' );
         var m = new ffmpeg.FFfmpeg(track.getFsPath().toString());
         var paths:Array<Path> = [];
         m.onFileNames(function(filenames) {
