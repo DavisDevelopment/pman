@@ -24,6 +24,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.async.VoidAsyncs;
 
 class ChromecastController extends CastingController<DeviceStatus> {
     /* Constructor Function */
@@ -32,11 +33,30 @@ class ChromecastController extends CastingController<DeviceStatus> {
 
         this.device = d;
         this.status = null;
-        this.statusTimer = new Timer(500, pullStatus.bind(null));
+        this.statusTimer = new Timer(500);
         this.commands = new Array();
     }
 
 /* === Instance Methods === */
+
+    /**
+      * initialize [this]
+      */
+    public function init(done : VoidCb):Void {
+        pullStatus(function(?error) {
+            if (error != null)
+                return done( error );
+
+            trace( status );
+            function sloop() {
+                sync(function(?err) {
+                    sloop();
+                });
+            }
+            sloop();
+            done();
+        });
+    }
 
     /**
       * each frame
