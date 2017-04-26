@@ -23,4 +23,14 @@ class LinuxApp extends PackStandalone {
     public function new(o:TaskOptions, arch:String, ?opts:Array<PackagerOptions>):Void {
         super(o, 'linux', arch, opts);
     }
+
+/* === Instance Methods === */
+
+    override function buildOptions(ol : Array<Dynamic>):PackagerOptions {
+        var po = super.buildOptions( ol );
+        if (go.hasFlag('-asar')) {
+            po.asar = true;
+        }
+        return po;
+    }
 }
