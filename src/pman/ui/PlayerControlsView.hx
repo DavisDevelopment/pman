@@ -200,7 +200,7 @@ class PlayerControlsView extends Ent {
 		r = playerView.rect;
 		w = r.w;
 		h = 55;
-		y = (r.h + yOffset);
+		y = (r.h - playerView.statusBar.h + yOffset);
 		x = 0;
 
 		__positionButtons();
