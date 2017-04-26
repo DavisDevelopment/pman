@@ -1157,8 +1157,8 @@ class Player extends EventDispatcher {
 	private inline function set_playbackRate(v : Float):Float return (c.playbackRate = v);
 
 	public var shuffle(get, set):Bool;
-	private inline function get_shuffle():Bool return session.pp.shuffle;
-	private inline function set_shuffle(v : Bool):Bool return (session.pp.shuffle = v);
+	private inline function get_shuffle():Bool return c.shuffle;
+	private inline function set_shuffle(v : Bool):Bool return (c.shuffle = v);
 
 	public var muted(get, set):Bool;
 	private inline function get_muted() return session.pp.muted;
