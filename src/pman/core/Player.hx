@@ -143,6 +143,8 @@ class Player extends EventDispatcher {
 	  */
 	public function tick():Void {
 	    dispatch('tick', null);
+	    controller.tick();
+
 	    var time:Float = gryffin.Tools.now;
 	    for (c in components) {
 	        c.onTick( time );
