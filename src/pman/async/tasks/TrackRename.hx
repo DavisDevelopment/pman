@@ -125,7 +125,7 @@ class TrackRename extends Task1 {
             // the Track's previous uri
             var oldUri = track.uri;
             // nullify track's data
-            track.data = null;
+            //track.data = null;
             // reassign track's provider
             track.provider = newProvider;
 
