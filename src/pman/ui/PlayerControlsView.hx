@@ -219,6 +219,20 @@ class PlayerControlsView extends Ent {
 	}
 
 	/**
+	  * prevent the ui from being autoHidden
+	  */
+	public function lockUiVisibility():Void {
+	    _uieLocked = true;
+	}
+
+	/**
+	  * unlock ui
+	  */
+	public function unlockUiVisibility():Void {
+	    _uieLocked = false;
+	}
+
+	/**
 	  * calculate the positions of the Buttons
 	  */
 	private function __positionButtons():Void {
@@ -291,4 +305,5 @@ class PlayerControlsView extends Ent {
 	public var playingAnimation:Bool = false;
 
 	private var cidm : Map<String, Int>;
+	private var _uieLocked:Bool = false;
 }
