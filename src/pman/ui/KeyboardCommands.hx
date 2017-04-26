@@ -156,6 +156,10 @@ class KeyboardCommands {
 					p.muted = !p.muted;
 				}
 
+			// S
+			case LetterS if ( event.shiftKey ):
+			    p.snapshot();
+
             // *
             case NumpadAsterisk:
                 if (p.track != null) {
