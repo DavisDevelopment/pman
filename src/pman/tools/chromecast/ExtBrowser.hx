@@ -8,4 +8,8 @@ extern class ExtBrowser extends EventEmitter {
 	public function new():Void;
 	public function update():Void;
 	public function destroy():Void;
+
+	inline public function onDevice(f : ExtDevice->Void):Void {
+	    on('deviceOn', f);
+	}
 }
