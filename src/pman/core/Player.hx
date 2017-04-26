@@ -929,7 +929,8 @@ class Player extends EventDispatcher {
             var time:Float = currentTime;
             track.editData(function( data ) {
                 if ( isended ) {
-                    data.marks = data.marks.filter.fn(!_.type.equals( LastTime ));
+                    //data.marks = data.marks.filter.fn(!_.type.equals( LastTime ));
+                    data.removeLastTimeMark();
                 }
                 else if (time > 0.0) {
                     data.addMark(new Mark(LastTime, time));
