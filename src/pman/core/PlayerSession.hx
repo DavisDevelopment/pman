@@ -21,6 +21,7 @@ import pman.core.history.PlayerHistoryItem;
 import pman.core.history.PlayerHistoryItem as PHItem;
 import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
+import pman.core.PlaybackTarget;
 
 import foundation.Tools.*;
 import electron.Tools.*;
@@ -55,6 +56,7 @@ class PlayerSession {
 		//focusedTrack = null;
 		//playlist = new Playlist();
 		history = new PlayerHistory( this );
+		target = PTThisDevice;
 
 		tabs = [new PlayerTab( this )];
 		activeTabIndex = 0;
@@ -477,6 +479,13 @@ class PlayerSession {
 	public var playlist(get, set):Playlist;
 	private inline function get_playlist() return tab.playlist;
 	private inline function set_playlist(v) return (tab.playlist = v);
+
+	public var target(default, set):PlaybackTarget;
+	private function set_target(v) {
+	    var old = target;
+	    var res = (target = v);
+	    return res;
+	}
 
 /* === Instance Fields === */
 
