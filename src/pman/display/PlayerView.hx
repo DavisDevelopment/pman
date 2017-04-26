@@ -93,37 +93,7 @@ class PlayerView extends Ent {
 	override function update(stage : Stage):Void {
 		// echo the playback properties onto the current media
 		if (cmr != null) {
-			// get a reference to the media's controller
-			var mc = player.session.playbackDriver;
-			var pp = player.session.pp;
-
-			// copy the data over
-			mc.setVolume( pp.volume );
-			mc.setPlaybackRate( pp.speed );
-			mc.setMuted( pp.muted );
-
-			cmr.update( stage );
-
-            // handle automatic skipping
-            var currentStatus = player.getStatus();
-            switch ( currentStatus ) {
-                case PlayerStatus.Ended:
-                    var ls = lastStatus;
-                    player.gotoNext({
-                        ready: function() {
-                            switch ( ls ) {
-                                case PlayerStatus.Playing:
-                                    player.play();
-
-                                default:
-                                    trace( ls );
-                            }
-                        }
-                    });
-
-                default:
-                    lastStatus = currentStatus;
-            }
+            cmr.update( stage );
 		}
 
 		player.tick();
