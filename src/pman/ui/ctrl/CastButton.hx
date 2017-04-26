@@ -10,6 +10,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 
 import pman.core.*;
+import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -60,10 +61,22 @@ class CastButton extends ImagePlayerControlButton {
 	        getUrl(function(?err, ?address) {
 	            if (err != null)
 	                throw err;
-	            device.play(address, 0, function(?error) {
+	            device.play(address, player.currentTime, function(?error) {
 	                if (error != null)
 	                    throw error;
-	                statusLoop( device );
+	                
+	                trace('butthole beads');
+                    var ccc = new ChromecastController( device );
+                    trace( ccc );
+                    ccc.init(function(?error) {
+                        if (error != null)
+                            throw error;
+                        else {
+                            trace('switching playback target..');
+                            player.session.target = PlaybackTarget.PTChromecast( ccc );
+                            trace( player.session.target );
+                        }
+                    });
 	            });
 	        });
 	    });
