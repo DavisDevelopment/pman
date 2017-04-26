@@ -197,12 +197,18 @@ class Track implements IComparable<Track> {
                     done( error );
                 }
                 else {
-                    this.data = td;
-                    var tv = getView();
-                    if (tv != null) {
-                        tv.update();
+                    if (td != null) {
+                        this.data = td;
+                        var tv = getView();
+                        if (tv != null) {
+                            tv.update();
+                        }
                     }
-                    done(null, data);
+                    else {
+                        throw 'Error: Loaded TrackData is null';
+                    }
+
+                    done(null, td);
                 }
             });
         }
