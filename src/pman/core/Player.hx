@@ -776,15 +776,9 @@ class Player extends EventDispatcher {
 	            if (done != null) {
 	                done();
 	            }
-	            /*
-	            items.loadDataForAll(function( datas ) {
-
-	            });
-	            */
 	            var dl = new TrackListDataLoader();
-	            showProgressBar(cast dl, new TopViewCanvasProgressBar(dl, this));
-	            dl.load(items, function(datas:Array<TrackData>) {
-
+	            dl.load(items, function(?error, ?result) {
+	                null;
 	            });
 	        });
 	    }
