@@ -21,6 +21,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.async.VoidAsyncs;
 
 class CastingController<Status> {
     /* Constructor Function */
@@ -35,11 +36,11 @@ class CastingController<Status> {
     }
 
     public function attach(player:Player, done:VoidCb):Void {
-        defer(done.bind());
+        defer(done.void());
     }
 
     public function detach(player:Player, done:VoidCb):Void {
-        defer(done.bind());
+        defer(done.void());
     }
 
     public function getStatus(done : Cb<Status>):Void {
