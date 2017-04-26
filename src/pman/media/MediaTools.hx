@@ -20,6 +20,8 @@ import pman.ds.*;
 import pman.media.MediaType;
 import pman.media.MediaSource;
 import pman.async.*;
+import pman.async.tasks.*;
+import pman.async.tasks.TrackListDataLoader;
 
 import js.html.MediaElement as NativeMediaObject;
 
@@ -78,7 +80,7 @@ class MediaTools {
     /**
       * load data for a list of Tracks
       */
-    public static function loadDataForAll(tracks:Array<Track>, ?done:Array<TrackData>->Void):Void {
+    public static function loadDataForAll(tracks:Array<Track>, ?done:Cb<TLDLResult>):Void {
         var loader = new TrackListDataLoader();
         loader.load(tracks, done);
     }
