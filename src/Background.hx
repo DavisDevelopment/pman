@@ -46,6 +46,11 @@ class Background {
 	 */
 	public function start():Void {
 
+        var sysname = Sys.systemName();
+        if (sysname == 'Win32') {
+            _handleSquirrelEvents();
+        }
+
 		App.onReady( _ready );
 		App.onAllClosed( _onAllClosed );
 		App.makeSingleInstance( _onSecondaryLaunch );
@@ -213,36 +218,11 @@ class Background {
             menu.append( playlists );
         }
 
-        /*
-	    var sessionOptions:Dynamic = {
-            label: 'Session',
-            submenu: [untyped
-            {
-                label: 'Save Current Session',
-                click: function(i, w) ic.send(w, 'SaveSession')
-            },
-            {type: 'separator'}
-            ]
-	    };
-	    var sessNames = appDir.allSavedSessionNames();
-	    for (name in sessNames) {
-	        sessionOptions.submenu.push({
-                label: name,
-                click: function(i, w) {
-                    ic.send(w, 'LoadSession', [name]);
-                }
-	        });
-	    }
-	    var session = new MenuItem( sessionOptions );
-	    menu.append( session );
-	    */
-
 	    var tools = new MenuItem({
             label: 'Tools',
             submenu: [
             {
                 label: 'Take Snapshot',
-                accelerator: 'Shift+S',
                 click: function(i,w) ic.send(w, 'Snapshot')
             },
             {type: 'separator'},
@@ -324,6 +304,24 @@ class Background {
       */
     public function httpServe(path : Path):String {
         return server.serve( path );
+    }
+
+    /**
+      * handle Squirrel events passed to [this] app
+      */
+    private function _handleSquirrelEvents():Void {
+        var argv = Sys.args();
+        if (argv.length == 2) {
+            var squirrelEvent = argv[1];
+            switch ( squirrelEvent ) {
+                case '--squirrel-install', '--squirrel-updated':
+                    //TODO perform installation operations
+                    close();
+
+                default:
+                    return ;
+            }
+        }
     }
 
 	/**
