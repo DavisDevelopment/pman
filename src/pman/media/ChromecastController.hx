@@ -169,6 +169,8 @@ class ChromecastController extends CastingController<DeviceStatus> {
                 return device.setVolumeMuted.bind(muted, _);
             case Seek( time ):
                 return device.seekTo.bind(time, _);
+            case Stop:
+                return device.stop.bind(_);
         }
     }
 
@@ -180,6 +182,10 @@ class ChromecastController extends CastingController<DeviceStatus> {
         commands = commands.filter.fn(_.getIndex() != index);
         commands.push( c );
     }
+
+    public function pause():Void cmd(Pause);
+    public function unpause():Void cmd(Unpause);
+    public function stop():Void cmd(Stop);
 
 /* === Computed Instance Fields === */
 
@@ -257,6 +263,7 @@ class ChromecastController extends CastingController<DeviceStatus> {
 enum ChromecastCommand {
     Pause;
     Unpause;
+    Stop;
     Seek(time : Float);
     Volume(volume : Float);
     VolumeMuted(muted : Bool);

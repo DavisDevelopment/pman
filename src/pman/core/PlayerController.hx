@@ -38,6 +38,27 @@ class PlayerController {
 /* === Instance Methods === */
 
     /**
+      * play the current media
+      */
+    public function play():Void {
+        player.sim(_.play());
+    }
+
+    /**
+      * pause the current media
+      */
+    public function pause():Void {
+        player.sim(_.pause());
+    }
+
+    /**
+      * toggle media playback
+      */
+    public function togglePlayback():Void {
+        player.sim(_.togglePlayback());
+    }
+
+    /**
       * get the current Player status
       */
     @:access( pman.media.LocalMediaObjectPlaybackDriver )

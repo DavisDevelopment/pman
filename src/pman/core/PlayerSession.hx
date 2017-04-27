@@ -53,6 +53,7 @@ class PlayerSession {
 		trackChanging = new Signal();
 		trackChanged = new Signal();
 		trackReady = new Signal();
+		targetChanged = new Signal();
 		//focusedTrack = null;
 		//playlist = new Playlist();
 		history = new PlayerHistory( this );
@@ -419,6 +420,8 @@ class PlayerSession {
 	            });
 	        });
 	    });
+
+	    targetChanged.on( _onTargetChanged );
 	}
 
 	/**
@@ -433,6 +436,29 @@ class PlayerSession {
 	  */
 	public static inline function file():File {
 	    return new File(filePath());
+	}
+
+	/**
+	  * handle changes to 'target'
+	  */
+	@:access( pman.media.Track )
+	private function _onTargetChanged(delta : Delta<PlaybackTarget>):Void {
+	    switch (delta.toPair()) {
+            case [PTThisDevice, PTChromecast( cc )]:
+                if (focusedTrack != null) {
+                    focusedTrack.driver = new ChromecastPlaybackDriver( cc );
+                }
+
+            case [PTChromecast(_), PTThisDevice]:
+                if (focusedTrack != null) {
+                    var t = focusedTrack;
+                    blur( t );
+                    focus( t );
+                }
+
+            default:
+                return ;
+	    }
 	}
 
 /* === Computed Instance Fields === */
@@ -484,6 +510,7 @@ class PlayerSession {
 	private function set_target(v) {
 	    var old = target;
 	    var res = (target = v);
+	    defer(targetChanged.call.bind(new Delta(res, old)));
 	    return res;
 	}
 
@@ -507,6 +534,8 @@ class PlayerSession {
 	public var trackChanging : Signal<Delta<Null<Track>>>;
 	// fired once the Player has prepared a Track
 	public var trackReady : Signal<Track>;
+	// fired when 'target' changes
+	public var targetChanged : Signal<Delta<PlaybackTarget>>;
 }
 
 @:structInit

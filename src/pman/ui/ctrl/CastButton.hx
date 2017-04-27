@@ -54,32 +54,44 @@ class CastButton extends ImagePlayerControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-	    castDevice(function(?err, ?device) {
-	        if (err != null)
-	            throw err;
+	    if (player.target.match(PTChromecast(_))) {
+	        switch ( player.target ) {
+                case PlaybackTarget.PTChromecast( cc ):
+                    cc.stop();
+                    player.session.target = PlaybackTarget.PTThisDevice;
 
-	        getUrl(function(?err, ?address) {
-	            if (err != null)
-	                throw err;
-	            device.play(address, player.currentTime, function(?error) {
-	                if (error != null)
-	                    throw error;
-	                
-	                trace('butthole beads');
-                    var ccc = new ChromecastController( device );
-                    trace( ccc );
-                    ccc.init(function(?error) {
+                default:
+                    null;
+	        }
+	    }
+        else {
+            castDevice(function(?err, ?device) {
+                if (err != null)
+                    throw err;
+
+                getUrl(function(?err, ?address) {
+                    if (err != null)
+                        throw err;
+                    device.play(address, player.currentTime, function(?error) {
                         if (error != null)
                             throw error;
-                        else {
-                            trace('switching playback target..');
-                            player.session.target = PlaybackTarget.PTChromecast( ccc );
-                            trace( player.session.target );
-                        }
+                        
+                        trace('butthole beads');
+                        var ccc = new ChromecastController( device );
+                        trace( ccc );
+                        ccc.init(function(?error) {
+                            if (error != null)
+                                throw error;
+                            else {
+                                trace('switching playback target..');
+                                player.session.target = PlaybackTarget.PTChromecast( ccc );
+                                trace( player.session.target );
+                            }
+                        });
                     });
-	            });
-	        });
-	    });
+                });
+            });
+        }
 	}
 
     /**

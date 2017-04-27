@@ -35,8 +35,9 @@ class MainIpcCommands {
 
         Ipc.on('command:HttpServe', function(event, spath:String) {
             var path = new Path(spath);
-            trace( path );
-            event.returnValue = bg.httpServe( path );
+            var id = bg.httpServe( path );
+            trace('$path => $id');
+            event.returnValue = id;
         });
     }
 
