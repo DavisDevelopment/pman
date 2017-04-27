@@ -34,6 +34,7 @@ extern class FFfmpeg extends EventEmitter {
     inline function onEnd(f : Void->Void):FFfmpeg {
         return untyped on('end', f);
     }
+    inline function onError(f : Dynamic->Buffer->Buffer->Void):FFfmpeg return untyped on('error', f);
 
 /* === Instance Fields === */
 
