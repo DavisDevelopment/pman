@@ -56,8 +56,9 @@ class WindowsInstaller extends Installer {
         options = {
             appDirectory: (path('releases/pman-win32-$arch').toString()),
             outputDirectory: (path('installers').toString()),
+            iconUrl: 'https://github.com/DavisDevelopment/pman/blob/master/dist/assets/icon128.ico?raw=true',
             setupIcon: getIcon(),
-            noMsi: false
+            noMsi: true
         };
     }
 }
