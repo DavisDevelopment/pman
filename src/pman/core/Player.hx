@@ -500,47 +500,20 @@ class Player extends EventDispatcher {
 	/**
 	  * capture snapshot of media
 	  */
-	public function snapshot(?done : Void->Void):Void {
-	    var ip:Bool = !paused;
-	    pause();
-
-	    // when complete
-	    function complete():Void {
-	        if ( ip ) {
-	            play();
-	        }
-	        if (done != null) {
-	            done();
-	        }
+	public function snapshot(?done : VoidCb):Void {
+	    if (!track.type.match(MTVideo)) {
+	        return ;
 	    }
 
-	    // first off, check whether there's even anything to take a 'snapshot' of
-	    if (session.hasMedia()) {
-	        if (track.type.equals( MediaType.MTVideo )) {
-	            var mediaObject = gmo();
-	            if (mediaObject != null) {
-	                var video:Video = cast mediaObject;
-	                var canvas = video.capture();
-	                var image = NativeImage.createFromDataURL(canvas.dataURI('image/png'));
-	                var snapPath:Path = app.db.preferences.snapshotPath;
-	                var snapDir:Directory = new Directory(snapPath, true);
-	                var snapFile = snapDir.file(Date.now().format('snapshot from %Y-%m-%d %H-%M-%S.png'));
-	                snapFile.write(image.toPNG());
-	                if ( app.db.preferences.showSnapshot ) {
-	                    //TODO show snapshot
-	                    defer( complete );
-	                }
-                    else {
-                        defer( complete );
-                    }
-	            }
-                else {
-                    defer( complete );
-                }
+	    var task = new SaveSnapshot(this, track, currentTime);
+	    task.run(function(?error, ?snapshotPath:Path) {
+	        if (error != null) {
+	            done( error );
 	        }
-            else defer( complete );
-	    }
-        else defer( complete );
+            else if (snapshotPath != null) {
+                trace( snapshotPath );
+            }
+	    });
 	}
 
     // get media object
