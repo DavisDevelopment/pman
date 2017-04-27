@@ -299,9 +299,13 @@ class Player extends EventDispatcher {
 	/**
 	  * save current playlist to the filesystem
 	  */
-	public function savePlaylist(saveAs:Bool=false, ?done:Void->Void):Void {
-	    trace(untyped [saveAs, done]);
+	public function savePlaylist(saveAs:Bool=false, ?name:String, ?done:Void->Void):Void {
+	    trace(untyped [saveAs, name, done]);
         var l:Playlist = session.playlist;
+
+        if (name != null) {
+            session.name = name;
+        }
 
 	    function finish():Void {
 	        var plf = app.appDir.playlistFile( session.name );
