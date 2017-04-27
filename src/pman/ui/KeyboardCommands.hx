@@ -8,6 +8,8 @@ import tannus.math.TMath.*;
 import gryffin.Tools.defer;
 
 import pman.core.*;
+import pman.format.pmsh.*;
+import pman.pmbash.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
@@ -179,7 +181,16 @@ class KeyboardCommands {
             case SemiColon if ( event.shiftKey ):
                 defer(function() {
                     p.prompt('pmbash', null, null, function(line : Null<String>) {
-                        trace('cmd: $line');
+                        var tokens = Tokenizer.runString( line );
+                        trace(tokens + '');
+                        var tree = Parser.run( tokens );
+                        trace(tree + '');
+                        var interp = new Interp();
+                        interp.execute(tree, function(?error) {
+                            if (error != null) {
+                                throw error;
+                            }
+                        });
                     });
                 });
 
