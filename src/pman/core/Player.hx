@@ -368,7 +368,7 @@ class Player extends EventDispatcher {
 	    function cb(path : Path) {
 	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
 	        if (!supportedFormats.has(path.extension.toLowerCase())) {
-	            path.extension = 'xpsf';
+	            path.extension = 'xspf';
 	        }
             var file = new File( path );
             switch (path.extension.toLowerCase()) {
@@ -390,7 +390,7 @@ class Player extends EventDispatcher {
 	    app.fileSystemSavePrompt({
             title: 'Export Playlist',
             buttonLabel: 'Save',
-            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.xpsf' )),
+            defaultPath: Std.string(App.getPath( Videos ).plusString( 'playlist.xspf' )),
             filters: [FileFilter.PLAYLIST],
             complete: cb
 	    });
