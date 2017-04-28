@@ -44,7 +44,7 @@ class MediaProvider {
 	public function getURI():String {
 		switch ( src ) {
 			case MediaSource.MSLocalPath( path ):
-				return 'file://${path.toString()}';
+				return 'file://${path.normalize().toString()}';
 
 			case MediaSource.MSUrl( url ):
 				return url.toString();
