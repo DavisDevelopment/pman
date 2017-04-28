@@ -62,6 +62,7 @@ class Background {
       * stop the background script
       */
 	public function close():Void {
+	    server.close();
 	    App.quit();
 	}
 
