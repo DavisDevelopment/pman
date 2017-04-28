@@ -64,7 +64,9 @@ class AppDir {
 	/**
 	  * get the Path to the saved_playlists directory
 	  */
-	public inline function playlistsPath():Path return path().plusString( 'saved_playlists' );
+	public function playlistsPath():Path {
+		return (path().plusString( 'saved_playlists' ));
+	}
 
 	/**
 	  * get the saved_playlists directory, creating it if necessary
@@ -94,6 +96,10 @@ class AppDir {
 	  * get the names of all saved playlists
 	  */
 	public function allSavedPlaylistNames():Array<String> {
+		var names = Fs.readDirectory(playlistsPath()).map.fn(Path.fromString(_));
+		return names.filter.fn(_.extension == 'xspf').map.fn(_.basename);
+	}
+	public function allSavedPlaylistNames_():Array<String> {
 	    var pld = playlistsDirectory();
 	    return pld.entries.map.fn( _.path ).filter.fn(_.extension == 'xspf').map(function(path) {
 	        return (new Path( path.name ).basename);
