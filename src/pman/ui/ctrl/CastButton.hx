@@ -120,7 +120,7 @@ class CastButton extends ImagePlayerControlButton {
 	private function getUrl(done : Cb<String>):Void {
 	    var uuid = player.httpRouteTo( player.track );
 	    var networkInterface:String = (switch (Sys.systemName()) {
-            case 'Win32': 'Wi-Fi';
+            case 'Windows': 'Wi-Fi';
             default: 'wlo1';
 	    });
 	    localip(networkInterface, function(?error, ?ipAddress) {
