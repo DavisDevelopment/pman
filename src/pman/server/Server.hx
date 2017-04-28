@@ -44,7 +44,11 @@ class Server {
         app = express();
         app.get('/watch/:uuid', sendSeekable, _respond.bind());
 
-        app.listen( 6969 );
+        _server = app.listen( 6969 );
+    }
+
+    public function close():Void {
+        _server.close();
     }
 
     public function serve(path : Path):String {
@@ -115,6 +119,7 @@ class Server {
     public var _cc : Map<String, Ctx>;
 
     private var app : Dynamic;
+    private var _server : Dynamic;
 
 /* === Static Fields === */
 
