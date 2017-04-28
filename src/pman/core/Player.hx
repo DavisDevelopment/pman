@@ -501,6 +501,12 @@ class Player extends EventDispatcher {
 	  * capture snapshot of media
 	  */
 	public function snapshot(?done : VoidCb):Void {
+		if (done == null) {
+			done = (function(?error) {
+				if (error != null)
+					throw error;
+			});
+		}
 	    if (!track.type.match(MTVideo)) {
 	        return ;
 	    }
