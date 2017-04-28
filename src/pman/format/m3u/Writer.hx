@@ -19,28 +19,33 @@ using pman.media.MediaTools;
 class Writer {
 	/* Constructor Function */
 	public function new():Void {
-
+		//
 	}
 
 /* === Instance Methods === */
 
-	public function encode(pl : Playlist):ByteArray {
-		buffer = new ByteArrayBuffer();
-		buffer.addString( '#EXTM3U\n' );
-		for (t in pl) {
-			addTrack( t );
+	public function encode(l : Playlist):ByteArray {
+		buffer = '#EXTM3U\r';
+		for (track in l) {
+			addTrack( track );
 		}
-		return buffer.getByteArray();
+		var bytes = ByteArray.ofString(buffer);
+		return bytes;
 	}
+
 	private inline function addTrack(track : Track):Void {
-		buffer.addString('\n#EXTINF:');
-		buffer.addString('123,${track.title}\n');
-		buffer.addString(track.provider.getURI() + '\n');
+		buffer += '\r#EXTINF:';
+		var sdur:String = '123';
+		if (track.data != null && track.data.meta != null && track.data.meta.duration != null) {
+			sdur = Std.string(track.data.meta.duration);
+		}
+		buffer += '$sdur,${track.title}\r';
+		buffer += (track.uri + '\r');
 	}
 
-	private var buffer : ByteArrayBuffer;
+	private var buffer:String;
 
-	public static inline function run(pl : Playlist):ByteArray {
-	    return new Writer().encode( pl );
+	public static inline function run(l : Playlist):ByteArray {
+		return new Writer().encode(l);
 	}
 }
