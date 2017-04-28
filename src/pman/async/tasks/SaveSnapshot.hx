@@ -49,10 +49,14 @@ class SaveSnapshot extends Task2<Path> {
       * execute [this] task
       */
     override function execute(done : Cb<Path>):Void {
-        if (systemName() == 'Win32') {
+        var sysname = systemName();
+        trace( sysname );
+        if (systemName() == 'Windows') {
             var toolPath = track.player.app.appDir.appPath('assets/ffmpeg-static');
-            FFfmpeg.setFfmpegPath(toolPath.plusString('ffmpeg.exe'));
-            FFfmpeg.setFfprobePath(toolPath.plusString('ffprobe.exe'));
+            var ffmpegPath = toolPath.plusString('ffmpeg.exe');
+            var ffprobePath = toolPath.plusString('ffprobe.exe');
+            FFfmpeg.setFfmpegPath( ffmpegPath );
+            FFfmpeg.setFfprobePath( ffprobePath );
         }
         take_snapshot( done );
     }
