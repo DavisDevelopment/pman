@@ -57,6 +57,7 @@ class CompileStyles extends Task {
       * determine whether it is even necessary to compile
       */
     private function shouldCompile():Bool {
+        return true;
         return (!Fs.exists( output ) || checks.anyNewerThan( output ));
     }
 
