@@ -51,6 +51,11 @@ class IDBDatabase {
 	}
 	*/
 
+/* === Computed Instance Fields === */
+
+    public var version(get, never):Int;
+    private inline function get_version():Int return db.version;
+
 /* === Instance Fields === */
 
 	public var db : Database;
