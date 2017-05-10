@@ -36,6 +36,8 @@ class PlayerPage extends Page {
 	  * when [this] Page opens
 	  */
 	override function open(body : Body):Void {
+	    super.open( body );
+
 		css['overflow'] = 'hidden';
 
 		var win = body.application.win;
@@ -53,6 +55,27 @@ class PlayerPage extends Page {
 	    #end
 
 		app.win.expose('player', player);
+	}
+
+	/**
+	  * reopen [this] Page
+	  */
+	override function reopen(body : Body):Void {
+	    super.reopen( body );
+
+	    css.set('display', 'block');
+
+	    stage.resume();
+	}
+
+	/**
+	  * close [this] Page
+	  */
+	override function close():Void {
+	    css.set('display', 'none');
+	    active = false;
+	    player.pause();
+	    stage.pause();
 	}
 
 	/**
