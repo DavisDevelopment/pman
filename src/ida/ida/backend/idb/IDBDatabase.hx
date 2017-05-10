@@ -1,5 +1,4 @@
 package ida.backend.idb;
-
 import tannus.ds.*;
 import tannus.html.Win;
 import tannus.html.fs.*;
@@ -8,6 +7,8 @@ import js.html.idb.*;
 import haxe.extern.EitherType in Either;
 
 import ida.Utils;
+
+using Lambda;
 
 class IDBDatabase {
 	/* Constructor Function */
@@ -25,6 +26,9 @@ class IDBDatabase {
 		return new IDBObjectStore( _store );
 	}
 
+	public inline function deleteObjectStore(name : String):Void {
+	    db.deleteObjectStore( name );
+	}
 	/**
 	  * Create and return a new Transaction object
 	  */
