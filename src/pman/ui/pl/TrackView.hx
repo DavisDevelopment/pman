@@ -96,7 +96,10 @@ class TrackView extends FlexRow {
 	    var td = track.data;
 
         title.text = track.title;
+        // view counter
         if (td != null) {
+            var vc:Element = '<span title="${td.views} views" class="views"><sup>(&nbsp;${td.views}&nbsp;)&nbsp;</sup></span>';
+            title.el.prepend( vc );
             if ( td.starred ) {
                 title.el.prepend('<span class="starred">*</span>');
             }
