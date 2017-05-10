@@ -85,7 +85,7 @@ class SeekBarMarkViewTooltip {
     public function update(colors:Array<Color>, x:Float):Void {
         ttr = new Rectangle();
         for (t in tb) {
-            t.color = colors[0];
+            //t.color = colors[0];
             t.fontSizeUnit = 'px';
 
             ttr.width = max(ttr.width, t.width);
@@ -93,10 +93,13 @@ class SeekBarMarkViewTooltip {
         }
         var t = tb[0];
         t.text = markView.name;
+        t.bold = true;
         t.fontSize = 12;
+        t.color = colors[0];
         t = tb[1];
-        t.text = markView.key().name;
+        t.text = ('(' + markView.key().name + ')');
         t.fontSize = 12;
+        t.color = player.theme.secondary;
 
         var mvl = @:privateAccess markView.bar.markViews;
         var prev = mvl[mvl.indexOf(markView)-1];
