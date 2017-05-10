@@ -91,11 +91,22 @@ class LoadTrackData extends Task2<TrackData> {
                         }
                         data = new TrackData( track );
                         data.pullRaw( irow );
-                        done();
+                        load_fields(irow, done);
                     });
                 }
             }
         });
+    }
+
+    /**
+      * load the data for the 'tags' and 'actors' fields
+      */
+    private function load_fields(row:MediaInfoRow, done:VoidCb):Void {
+        done();
+    }
+
+    private function load_tags(row:MediaInfoRow, done:VoidCb):Void {
+
     }
 
     /**
