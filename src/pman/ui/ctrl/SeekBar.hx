@@ -95,6 +95,7 @@ class SeekBar extends Ent {
     private function bmnavHandler(event : KeyboardEvent):Void {
         for (mv in markViews) {
             if (event.key == mv.key()) {
+                mv.tooltip.activate();
                 player.currentTime = mv.time;
                 break;
             }
