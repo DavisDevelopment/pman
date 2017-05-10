@@ -171,6 +171,8 @@ class SeekBarMarkViewTooltip {
     public var rect : Rectangle;
     public var margin:Float = 5.0;
     public var yOffset:Float = 0.0;
+    public var opacity:Float = 1.0;
+    public var activated : Bool = false;
 
     private var tb : Array<TextBox>;
     private var ttr : Rectangle;
