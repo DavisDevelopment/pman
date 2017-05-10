@@ -84,20 +84,27 @@ class Tools {
       * compare the last modified time
       */
     public static function compareLastModified(a:Path, b:Path):Int {
-        return Reflect.compare(Fs.stat(a).mtime.getTime(), Fs.stat(b).mtime.getTime());
+        inline function mtime(x) return Fs.stat( x ).mtime.getTime();
+        return Reflect.compare(mtime(a), mtime(b));
     }
 
     /**
       * check whether [a] is newer than [b]
       */
     public static function newerThan(a:Path, b:Path):Bool {
-        return (compareLastModified(a, b) > 1);
+        inline function mtime(x) return Fs.stat( x ).mtime.getTime();
+        return (mtime( a ) > mtime( b ));
     }
 
     /**
       * check whether any of the files referenced in [a] are newer than [b]
       */
     public static function anyNewerThan(a:Array<Path>, b:Path):Bool {
-        return a.any.fn(newerThan(_, b));
+        for (x in a) {
+            if (newerThan(x, b)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
