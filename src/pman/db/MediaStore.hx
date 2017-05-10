@@ -224,6 +224,8 @@ typedef MediaInfoRow = {
     views : Int,
     starred : Bool,
     marks : Array<String>,
+    tags : Array<Int>,
+    actors : Array<Int>,
     meta : Null<MediaInfoRowMeta>
 };
 
