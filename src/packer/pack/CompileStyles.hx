@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.sys.FileSystem as Fs;
 
 import haxe.Json;
 import js.Lib.require;
@@ -56,7 +57,7 @@ class CompileStyles extends Task {
       * determine whether it is even necessary to compile
       */
     private function shouldCompile():Bool {
-        return checks.anyNewerThan( output );
+        return (!Fs.exists( output ) || checks.anyNewerThan( output ));
     }
 
     private var input:Path;
