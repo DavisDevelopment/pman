@@ -53,6 +53,7 @@ class PManDatabase {
 			onready( done );
 		}
 
+        /*
 		var p = Database.open(DBNAME, DBVERSION, build_db);
 		p.then(function( db ) {
 			this.db = db;
@@ -62,6 +63,7 @@ class PManDatabase {
 		p.unless(function( error ) {
 			throw error;
 		});
+		*/
 	}
 
 /* === Database-Creation Methods === */
@@ -165,11 +167,11 @@ class PManDatabase {
       */
 	private function build_tagsTable(db : Database):Void {
 	    var tags = db.createObjectStore('tags', {
-            keyPath: 'name'
-            //autoIncrement: true
+            keyPath: 'id',
+            autoIncrement: true
 	    });
 	    inline function i(n, k, ?o) tags.createIndex(n,k,o);
-		//i('id', 'id', {unique: true});
+        i('id', 'id', {unique: true});
 	    i('name', 'name', {unique: true});
 	    i('type', 'type');
 	    i('data', 'data');
@@ -185,7 +187,9 @@ class PManDatabase {
 	    });
 	    inline function i(n, k, ?o) actors.createIndex(n,k,o);
 
+        i('id', 'id', {unique: true});
         i('name', 'name', {unique: true});
+        i('gender', 'gender');
 	}
 
 /* === Utility Methods === */
