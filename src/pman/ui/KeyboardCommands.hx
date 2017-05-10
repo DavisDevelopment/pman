@@ -113,6 +113,14 @@ class KeyboardCommands {
 			        sess.playlist.remove( ct );
 			    }
 
+            // jump to a random time in the track
+			case LetterR if ( event.noMods ):
+			    var check = fn(!(_.shiftKey||_.ctrlKey||_.altKey));
+			    nextWithin(check, 400, function() {
+			        var r = new Random();
+			        p.currentTime = r.randfloat(0.0, p.durationTime);
+			    });
+
             // snapshot
             case LetterS if ( event.shiftKey ):
                 p.snapshot();
