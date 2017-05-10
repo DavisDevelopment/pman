@@ -270,6 +270,13 @@ class KeyboardCommands {
         });
     }
 
+    /**
+      * handle double-taps of keys
+      */
+    private function onDoubleTap(check:KeyboardEvent->Bool, action:Void->Void):Void {
+        nextWithin(check, 350, action);
+    }
+
 	/**
 	  * get the seek time delta from the given Event
 	  */
