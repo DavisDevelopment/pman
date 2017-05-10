@@ -53,23 +53,31 @@ class TagsStore extends TableWrapper {
         putTagRow_(tag.toRow(), done);
     }
     public function add(name:String, ?type:TagType, ?done:Cb<TagRow>):Void {
-        addTag(new Tag(name, type), done);
+        addTag(new Tag(name, null, type), done);
     }
 
     /**
       * retrieve a row from [this] table
       */
-    public function getTagRow(name : String):Promise<Null<TagRow>> {
-        return untyped tos('tags').get( name );
+    public function getTagRow(id : Int):Promise<Null<TagRow>> {
+        return untyped tos('tags').get( id );
     }
-    public function getTagRow_(name:String, done:Cb<TagRow>):Void {
-        getTagRow( name ).then(done.yield()).unless(done.raise());
+    public function getTagRow_(id:Int, done:Cb<TagRow>):Void {
+        getTagRow( id ).then(done.yield()).unless(done.raise());
     }
-    public function getTag(name : String):Promise<Null<Tag>> {
-        return getTagRow( name ).transform.fn(_ != null ? Tag.fromRow(_) : null);
+    public function getTag(id : Int):Promise<Null<Tag>> {
+        return getTagRow( id ).transform.fn(_ != null ? Tag.fromRow(_) : null);
     }
-    public function getTag_(name:String, done:Cb<Tag>):Void {
-        getTag( name ).then(done.yield()).unless(done.raise());
+    public function getTag_(id:Int, done:Cb<Tag>):Void {
+        getTag( id ).then(done.yield()).unless(done.raise());
+    }
+    public function getTagRowByName(name : String):Promise<Null<TagRow>> {
+        return untyped select('tags', {
+            name: name
+        });
+    }
+    public function getTagRowByName_(name:String, done:Cb<TagRow>):Void {
+        getTagRowByName( name ).then(done.yield()).unless(done.raise());
     }
 
     /**
@@ -77,7 +85,7 @@ class TagsStore extends TableWrapper {
       */
     public function cogTagRow(name:String, ?type:TagType):Promise<TagRow> {
         return Promise.create({
-            getTagRow_(name, function(?error:Dynamic, ?row:TagRow) {
+            getTagRowByName_(name, function(?error:Dynamic, ?row:TagRow) {
                 if (error != null)
                     throw error;
                 else if (row != null)
@@ -108,6 +116,7 @@ class TagsStore extends TableWrapper {
 }
 
 typedef TagRow = {
+    id: Int,
     name: String,
     type: String,
     ?data: String
