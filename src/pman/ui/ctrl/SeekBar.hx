@@ -258,7 +258,7 @@ class SeekBar extends Ent {
         c.fill();
         c.restore();
 
-        if ( bmnav ) {
+        if (bmnav || mv.tooltip.activated) {
             mv.tooltip.paint(c, mr.centerX, mr.centerY);
         }
     }
