@@ -53,6 +53,14 @@ class PManDatabase {
 			onready( done );
 		}
 
+		build_spec();
+		dbspec.open(function(?error, ?database) {
+		    if (error != null)
+		        throw error;
+            this.db = database;
+            defer( or.fire );
+		});
+
         /*
 		var p = Database.open(DBNAME, DBVERSION, build_db);
 		p.then(function( db ) {
