@@ -8,6 +8,7 @@ import ida.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.db.spec.*;
 
 import js.Browser.console;
 import Slambda.fn;
@@ -64,6 +65,48 @@ class PManDatabase {
 	}
 
 /* === Database-Creation Methods === */
+
+    /**
+      * construct the database layout specification
+      */
+    private function build_spec():Void {
+        /* test db spec system */
+        dbspec = new DatabaseSpec( DBNAME );
+
+        // media_items table
+        var t = dbspec.addTable('media_items');
+        t.addIndices([
+            'id' => {primary: true},
+            'uri' => null
+        ]);
+        t.autoIncrement = true;
+
+        // media_info table
+        t = dbspec.addTable('media_info');
+        t.addIndices([
+            'id' => {primary: true},
+            'views'=>null,'duration'=>null,'marks'=>null,
+            'tags'=>null,'actors'=>null,'meta'=>null
+        ]);
+
+        // tags table
+        t = dbspec.addTable('tags');
+        t.addIndices([
+            'id' => {primary: true},
+            'name' => {unique: true},
+            'type' => null
+        ]);
+        t.autoIncrement = true;
+
+        // actors table
+        t = dbspec.addTable('actors');
+        t.addIndices([
+            'id' => {primary: true},
+            'name' => {unique: true},
+            'gender' => null
+        ]);
+        t.autoIncrement = true;
+    }
 
 	/**
 	  * construct the database as a whole
