@@ -297,6 +297,16 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * open the Preferences editor
+	  */
+	public function editPreferences():Void {
+	    if (app.body.currentPage == page) {
+	        var pp = new PreferencesPage( app );
+	        app.body.open( pp );
+	    }
+	}
+
+	/**
 	  * save current playlist to the filesystem
 	  */
 	public function savePlaylist(saveAs:Bool=false, ?name:String, ?done:Void->Void):Void {
