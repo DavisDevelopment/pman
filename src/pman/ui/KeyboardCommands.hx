@@ -2,10 +2,11 @@ package pman.ui;
 
 import tannus.events.*;
 import tannus.events.Key;
+import tannus.math.Random;
 
 import Std.*;
 import tannus.math.TMath.*;
-import gryffin.Tools.defer;
+import gryffin.Tools.*;
 
 import pman.core.*;
 import pman.format.pmsh.*;
@@ -13,6 +14,9 @@ import pman.pmbash.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
+import electron.Tools.defer;
+
+import Slambda.fn;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -246,6 +250,25 @@ class KeyboardCommands {
                 null;
 	    }
 	}
+
+    /**
+      * 
+      */
+    private function nextWithin(check:KeyboardEvent->Bool, maxDelay:Float, action:Void->Void):Void {
+        function _handler(event : KeyboardEvent):Void {
+            if (check( event )) {
+                action();
+                _nextKeyDown.remove( _handler );
+            }
+            else {
+                handleKeyDown( event );
+            }
+        }
+        nextKeyDown( _handler );
+        wait(ceil( maxDelay ), function() {
+            _nextKeyDown.remove( _handler );
+        });
+    }
 
 	/**
 	  * get the seek time delta from the given Event
