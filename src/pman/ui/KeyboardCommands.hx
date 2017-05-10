@@ -115,13 +115,27 @@ class KeyboardCommands {
 
             // jump to a random time in the track
 			case LetterR if ( event.noMods ):
-			    var check = fn(!(_.shiftKey||_.ctrlKey||_.altKey));
-			    nextWithin(check, 400, function() {
-			        var r = new Random();
-			        p.currentTime = r.randfloat(0.0, p.durationTime);
+			    onDoubleTap(fn(_.noMods), function(dblTapped) {
+			        if ( dblTapped ) {
+			            var r = new Random();
+			            p.currentTime = r.randfloat(0.0, p.durationTime);
+			        }
+                    else {
+                        trace('you pressed the R key');
+                    }
 			    });
 
-            // snapshot
+			case LetterR if ( event.shiftKey ):
+			    onDoubleTap(fn(_.shiftKey), function( didit ) {
+			        if ( didit ) {
+			            var r = new Random();
+			            p.gotoTrack(r.randint(0, p.session.playlist.length));
+			        }
+                    else {
+                        //
+                    }
+			    });
+			
             // toggle shuffle
             case LetterS if ( event.shiftKey ):
                 p.shuffle = !p.shuffle;
