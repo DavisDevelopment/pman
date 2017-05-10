@@ -36,6 +36,8 @@ class TrackData {
         views = 0;
         starred = false;
         marks = new Array();
+        tags = new Array();
+        actors = new Array();
     }
 
 /* === Instance Methods === */
@@ -67,6 +69,8 @@ class TrackData {
             views: views,
             starred: starred,
             marks: marks.map( Serializer.run ),
+            tags: [],
+            actors: [],
             meta: (meta != null ? meta.toRaw() : null)
         };
     }
@@ -203,6 +207,8 @@ class TrackData {
     public var views : Int;
     public var starred : Bool;
     public var marks : Array<Mark>;
+    public var tags : Array<Dynamic>;
+    public var actors : Array<Dynamic>;
 
     public var meta : Null<MediaMetadata>;
 }
