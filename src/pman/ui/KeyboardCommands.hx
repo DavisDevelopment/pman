@@ -127,6 +127,13 @@ class KeyboardCommands {
                 p.shuffle = !p.shuffle;
                 p.dispatch('toggle-shuffle', null);
 
+            case LetterS if ( event.noMods ):
+                onDoubleTap(fn(_.noMods), function( didit ) {
+                    if ( didit ) {
+                        p.snapshot();
+                    }
+                });
+
             // toggle controls visibility
 			case LetterH:
 				p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
