@@ -56,6 +56,11 @@ class IDBDatabase {
     public var version(get, never):Int;
     private inline function get_version():Int return db.version;
 
+    public var objectStoreNames(get, never):Array<String>;
+    private function get_objectStoreNames():Array<String> {
+        return (untyped (untyped __js__('Array.prototype.slice.call')(db.objectStoreNames, 0)));
+    }
+
 /* === Instance Fields === */
 
 	public var db : Database;
