@@ -55,6 +55,8 @@ class SaveSnapshot extends Task2<Path> {
             var toolPath = track.player.app.appDir.appPath('assets/ffmpeg-static');
             var ffmpegPath = toolPath.plusString('ffmpeg.exe');
             var ffprobePath = toolPath.plusString('ffprobe.exe');
+            trace(ffmpegPath);
+            trace(ffprobePath);
             FFfmpeg.setFfmpegPath( ffmpegPath );
             FFfmpeg.setFfprobePath( ffprobePath );
         }
