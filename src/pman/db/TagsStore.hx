@@ -83,7 +83,23 @@ class TagsStore extends TableWrapper {
     /**
       * create or retrieve a row from [this] table
       */
-    public function cogTagRow(name:String, ?type:TagType):Promise<TagRow> {
+    public function cogTagRow(name:String, ?type:TagType, done:Cb<ActorRow>):Void {
+        getTagRowByName_(name, function(?err, ?row) {
+            if (err != null)
+                done(err);
+            else if (row != null)
+                done(null, row);
+            else {
+                add(name, type, function(?err, ?row) {
+                    if (err != null)
+                        done(err);
+                    else
+                        done(null, row);
+                });
+            }
+        });
+    }
+    public function cogTagRold(name:String, ?type:TagType):Promise<TagRow> {
         return Promise.create({
             getTagRowByName_(name, function(?error:Dynamic, ?row:TagRow) {
                 if (error != null)
