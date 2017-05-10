@@ -27,6 +27,8 @@ import pman.display.media.*;
 import pman.ui.*;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
+import motion.Actuate;
+
 import tannus.math.TMath.*;
 import gryffin.Tools.*;
 
@@ -161,6 +163,27 @@ class SeekBarMarkViewTooltip {
         else {
             return colors.map( player.theme.restore );
         }
+    }
+
+    /**
+      * declare that [this] MarkViewTooltip has been 'activated' (selected)
+      */
+    public function activate():Void {
+        activated = true;
+        hide();
+    }
+
+    /**
+      * hide [this]
+      */
+    private function hide():Void {
+        var a = Actuate.tween(this, 0.75, {
+            opacity: 0.0
+        });
+        a.onComplete(function() {
+            activated = false;
+            opacity = 1.0;
+        });
     }
 
 /* === Computed Instance Fields === */
