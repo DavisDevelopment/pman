@@ -122,8 +122,10 @@ class KeyboardCommands {
 			    });
 
             // snapshot
+            // toggle shuffle
             case LetterS if ( event.shiftKey ):
-                p.snapshot();
+                p.shuffle = !p.shuffle;
+                p.dispatch('toggle-shuffle', null);
 
             // toggle controls visibility
 			case LetterH:
