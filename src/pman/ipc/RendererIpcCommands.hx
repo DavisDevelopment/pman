@@ -71,7 +71,7 @@ class RendererIpcCommands {
             player.snapshot();
         });
         b('EditPreferences', function() {
-            //TODO player.editPreferences
+            player.editPreferences();
         });
         b('EditMarks', function() {
             player.editBookmarks();
