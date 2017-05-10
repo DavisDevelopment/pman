@@ -157,6 +157,8 @@ class MediaStore extends TableWrapper {
                     views: 0,
                     starred: false,
                     marks: [],
+                    tags: [],
+                    actors: [],
                     meta: null
                 };
 
