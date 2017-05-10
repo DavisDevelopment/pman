@@ -52,6 +52,8 @@ class SeekBarMarkViewTooltip {
       * Paint [this]
       */
     public function paint(c:Ctx, x:Float, y:Float):Void {
+        c.save();
+        c.globalAlpha = opacity;
         var colors = getColors();
 
         update(colors, x);
@@ -74,6 +76,7 @@ class SeekBarMarkViewTooltip {
             var r = tbr[index];
             c.drawComponent(t, 0, 0, t.width, t.height, r.x, r.y, r.w, r.h);
         }
+        c.restore();
     }
 
     /**
