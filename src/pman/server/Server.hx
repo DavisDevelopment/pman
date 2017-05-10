@@ -47,10 +47,16 @@ class Server {
         _server = app.listen( 6969 );
     }
 
+    /**
+      * shutdown the server
+      */
     public function close():Void {
         _server.close();
     }
 
+    /**
+      * begin 'serving' the file at the given Path
+      */
     public function serve(path : Path):String {
         for (uid in _routes.keys()) {
             if (_routes[uid].str == path.str)
@@ -89,6 +95,9 @@ class Server {
         }
     }
 
+    /**
+      * get the Ctx object used to serve the given route
+      */
     private function _ctx(uid:String):Ctx {
         if (!_cc.exists( uid )) {
             var path:Path = _routes.get( uid );
