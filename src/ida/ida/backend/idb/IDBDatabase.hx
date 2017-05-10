@@ -29,6 +29,11 @@ class IDBDatabase {
 	public inline function deleteObjectStore(name : String):Void {
 	    db.deleteObjectStore( name );
 	}
+
+	public function hasObjectStore(name : String):Bool {
+	    return objectStoreNames.has( name );
+	}
+
 	/**
 	  * Create and return a new Transaction object
 	  */
