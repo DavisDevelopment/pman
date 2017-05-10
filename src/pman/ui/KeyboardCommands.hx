@@ -262,26 +262,27 @@ class KeyboardCommands {
     /**
       * 
       */
-    private function nextWithin(check:KeyboardEvent->Bool, maxDelay:Float, action:Void->Void):Void {
+    private function nextWithin(check:KeyboardEvent->Bool, maxDelay:Float, action:Bool->Void):Void {
         function _handler(event : KeyboardEvent):Void {
             if (check( event )) {
-                action();
+                action( true );
                 _nextKeyDown.remove( _handler );
             }
             else {
-                handleKeyDown( event );
+                action( false );
             }
         }
         nextKeyDown( _handler );
         wait(ceil( maxDelay ), function() {
             _nextKeyDown.remove( _handler );
+            action( false );
         });
     }
 
     /**
       * handle double-taps of keys
       */
-    private function onDoubleTap(check:KeyboardEvent->Bool, action:Void->Void):Void {
+    private function onDoubleTap(check:KeyboardEvent->Bool, action:Bool->Void):Void {
         nextWithin(check, 350, action);
     }
 
