@@ -214,6 +214,7 @@ class PManDatabase {
 /* === Instance Fields === */
 
 	//public var app : BPlayerMain;
+	public var dbspec : DatabaseSpec;
 	public var db : Database;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
@@ -226,6 +227,6 @@ class PManDatabase {
 /* === Static Fields === */
 
 	private static inline var DBNAME:String = 'pman';
-	private static inline var DBVERSION:Int = 1;
+	private static inline var DBVERSION:Int = 2;
 }
 
