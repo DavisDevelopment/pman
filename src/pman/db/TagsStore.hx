@@ -83,7 +83,7 @@ class TagsStore extends TableWrapper {
     /**
       * create or retrieve a row from [this] table
       */
-    public function cogTagRow(name:String, ?type:TagType, done:Cb<ActorRow>):Void {
+    public function cogTagRow(name:String, ?type:TagType, done:Cb<TagRow>):Void {
         getTagRowByName_(name, function(?err, ?row) {
             if (err != null)
                 done(err);
