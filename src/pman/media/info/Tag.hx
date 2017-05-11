@@ -46,18 +46,64 @@ class Tag {
       * convert to a TagRow
       */
     public function toRow():TagRow {
-        return {
-            id: id,
+        var row:TagRow = {
             name: name,
-            type: Serializer.run( type )
+            type: Serializer.run( type ),
+            aliases: aliases
         };
+        if (id != null)
+            row.id = id;
+        if (supers != null) {
+            row.supers = [];
+            for (s in supers) {
+
+            }
+        }
+        return row;
+    }
+
+    /**
+      * resolve derived tag's 'supers' into two-dimensional Array of dependencies that can be resolved top-down
+      */
+    public function resolveDependencies():Array<Array<Tag>> {
+        var deps:Array<Array<Tag>> = new Array();
+        // create, if necessary, and return a 'layer' of the dependency hierarchy
+        inline function layer(i : Int):Array<Tag> {
+            return deps[i] == null ? deps[i] = [] : deps[i];
+        }
+        // write an Array of tags onto the specified layer
+        inline function mergelayer(i:Int, dl:Array<Tag>)
+            deps[i] = layer( i ).concat( dl );
+
+        if (supers == null) {
+            return deps;
+        }
+        else {
+            for (st in supers) {
+                var dh = st.resolveDependencies();
+                for (i in 0...dh.length) {
+                    var l = dh[i];
+                    if (l != null) {
+                        mergelayer(i, l);
+                    }
+                }
+                layer(st.depCount()).push( st );
+            }
+            return deps;
+        }
+    }
+
+    public inline function depCount():Int {
+        return (supers == null ? 0 : supers.length);
     }
 
 /* === Instance Fields === */
 
-    public var id(default, null):Null<Int>;
-    public var name(default, null):String;
-    public var type(default, null):TagType;
+    public var id(default, null):Null<Int> = null;
+    public var name: String;
+    public var aliases: Array<String>;
+    public var supers: Null<Array<Tag>> = null;
+    public var type: TagType;
 
 /* === Static Methods === */
 
