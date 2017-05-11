@@ -38,4 +38,24 @@ class Asyncs {
         }
         next();
     }
+
+    public static function callEach<T>(i:Iterable<Async<T>>, done:Cb<Array<T>>):Void {
+        var index = [0, 0];
+        var values = [];
+        function _handle(n:Int, ?error:Dynamic, ?result:T):Void {
+            if (error != null)
+                done( error );
+            else {
+                values[n] = result;
+                index[1] += 1;
+                if (index[0] == index[1]) {
+                    done(null, values);
+                }
+            }
+        }
+        for (a in i) {
+            a(_handle.bind(index[0], _, _));
+            index[0] += 1;
+        }
+    }
 }
