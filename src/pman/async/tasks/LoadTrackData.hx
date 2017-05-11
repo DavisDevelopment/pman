@@ -29,11 +29,12 @@ using pman.async.VoidAsyncs;
 
 class LoadTrackData extends Task2<TrackData> {
     /* Constructor Function */
-    public function new(track:Track, store:MediaStore):Void {
+    public function new(track:Track, db:PManDatabase):Void {
         super();
 
         this.track = track;
-        this.store = store;
+        this.db = db;
+        this.store = db.mediaStore;
         this.data  = new TrackData( track );
     }
 
@@ -193,6 +194,7 @@ class LoadTrackData extends Task2<TrackData> {
 /* === Instance Fields === */
 
     public var track : Track;
+    public var db : PManDatabase;
     public var store : MediaStore;
     public var data : Null<TrackData>;
 }
