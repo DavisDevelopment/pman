@@ -73,7 +73,7 @@ class TrackListDataLoader extends Task1 {
       * load the TrackData for the given Track
       */
     private function gdt(track:Track, done:VoidCb):Void {
-        var loadr = new LoadTrackData(track, BPlayerMain.instance.db.mediaStore);
+        var loadr = new LoadTrackData(track, BPlayerMain.instance.db);
         loadr.run(function(?error, ?data) {
             if (error != null) {
                 if (Std.is(error, LoadTrackDataError)) {
