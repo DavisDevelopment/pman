@@ -105,6 +105,8 @@ class PManDatabase {
         t.addIndices([
             'id' => {primary: true},
             'name' => {unique: true},
+            'aliases' => null,
+            'supers' => null,
             'type' => null
         ]);
         t.autoIncrement = true;
