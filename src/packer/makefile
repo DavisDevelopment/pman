@@ -8,4 +8,4 @@ compile:
 	#cd ../../dist/ && chmod +x ./pack
 
 run:
-	cd ../../dist/ && ./pack rc pp
+	cd ../../dist/ && ./pack rc pp pk i -p linux -a x64
