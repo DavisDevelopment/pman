@@ -105,8 +105,18 @@ class LoadTrackData extends Task2<TrackData> {
         done();
     }
 
+    /**
+      * load tags
+      */
     private function load_tags(row:MediaInfoRow, done:VoidCb):Void {
-
+        row.tags.map.fn(x=>(function(f) db.tagsStore.getTag_(x,f))).series(function(?error, ?tags) {
+            if (error != null)
+                done( error );
+            else {
+                data.tags = tags;
+                done();
+            }
+        });
     }
 
     /**
