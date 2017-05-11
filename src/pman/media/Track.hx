@@ -190,7 +190,7 @@ class Track implements IComparable<Track> {
       */
     public function getData(done : Cb<TrackData>):Void {
         if (data == null) {
-            var loader = new LoadTrackData(this, BPlayerMain.instance.db.mediaStore);
+            var loader = new LoadTrackData(this, BPlayerMain.instance.db);
             loader.run(function(?error, ?td) {
                 if (error != null) {
                     throw error;
@@ -384,7 +384,10 @@ class Track implements IComparable<Track> {
                 throw 'Error: TrackData is null';
             }
             action( data );
-            data.save(function() {
+            data.save(function(?error) {
+                if (error != null)
+                    throw error;
+
                 var v = getView();
                 if (v != null) {
                     v.update();
