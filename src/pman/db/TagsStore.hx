@@ -132,8 +132,9 @@ class TagsStore extends TableWrapper {
 }
 
 typedef TagRow = {
-    id: Int,
+    ?id: Int,
     name: String,
-    type: String,
-    ?data: String
+    aliases: Array<String>,
+    ?supers: Array<Int>,
+    type: String
 };
