@@ -133,6 +133,43 @@ class Tag implements IComparable<Tag> {
         return tag;
     }
 
+    /**
+      * utilizing the database where necessary, build a Tag instance from a Tag row
+      */
+    public static function loadFromRow(row:TagRow, db:PManDatabase, done:Cb<Tag>):Void {
+        var tag = fromRow( row );
+        var steps:Array<VoidAsync> = new Array();
+        if (row.supers != null) {
+            for (depId in row.supers) {
+                steps.push(function(next : VoidCb) {
+                    db.tagsStore.getTagRow_(depId, function(?error, ?depRow) {
+                        if (error != null) {
+                            next( error );
+                        }
+                        else {
+                            if (depRow == null) {
+                                next('Error: Tag "${tag.name}" references a tag with id=${depId}; no such tag exists');
+                            }
+                            else {
+                                loadFromRow(depRow, db, function(?error, ?depTag:Tag) {
+                                    if (error != null) {
+                                        next( error );
+                                    }
+                                    else {
+                                        tag.supers.push( depTag );
+                                        next();
+                                    }
+                                });
+                            }
+                        }
+                    });
+                });
+            }
+        }
+        steps.series(function(?error) {
+            done(error, tag);
+        });
+    }
 }
 
 enum TagType {
