@@ -109,8 +109,25 @@ class TagsStore extends TableWrapper {
       */
     public function putTag(tag:Tag, done:Cb<TagRow>):Void {
         var steps:Array<VoidAsync> = new Array();
+        if (tag.id == null) {
+            steps.push(function(next:VoidCb) {
+                getTagRowByName( tag.name ).then(function(row) {
+                    if (row != null) {
+                        tag.id = row.id;
+                        next();
+                    }
+                    else {
+                        putTagRow_(new Tag(tag.name).toRow(), function(?err,?row) {
+                            next( err );
+                        });
+                    }
+                }).unless(next.raise());
+            });
+        }
         if (tag.supers != null) {
             for (dep in tag.supers) {
+                steps.push( dep.sync );
+                continue;
                 steps.push(function(next:VoidCb) {
                     putTag(dep, function(?err, ?row) {
                         next( err );
@@ -145,6 +162,12 @@ class TagsStore extends TableWrapper {
         getter(function(?error, ?tagRow) {
             if (error != null) {
                 done( error );
+            }
+            else if (tagRow == null) {
+                putTagRow_(new Tag(cast key).toRow(), function(?err, ?tagRow) {
+                    if (err != null) return done( err );
+                    Tag.loadFromRow(tagRow, dbr, done);
+                });
             }
             else {
                 Tag.loadFromRow(tagRow, dbr, done);
