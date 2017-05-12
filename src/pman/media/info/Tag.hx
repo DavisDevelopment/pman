@@ -115,6 +115,59 @@ class Tag implements IComparable<Tag> {
         return Reflect.compare(name, other.name);
     }
 
+    /**
+    /**
+      * pull data from the given TagRow
+      */
+    public function pullRow(row:TagRow, db:PManDatabase, done:VoidCb):Void {
+        id = row.id;
+        aliases = row.aliases;
+        var sups:Array<Tag> = (supers!=null?supers:[]);
+        supers = new Array();
+        var steps:Array<VoidAsync> = new Array();
+        if (row.supers != null) {
+            for (depId in row.supers) {
+                steps.push(function(next : VoidCb) {
+                    var existing = sups.firstMatch.fn(_.id == depId);
+                    if (existing == null) {
+                        db.tagsStore.pullTag(depId, function(?error, ?depTag) {
+                            if (error != null) {
+                                next( error );
+                            }
+                            else {
+                                if (depTag == null) {
+                                    next('Error: Tag "${name}" references a tag with id=${depId}; no such tag exists');
+                                }
+                                else {
+                                    supers.push( depTag );
+                                    next();
+                                }
+                            }
+                        });
+                    }
+                    else {
+                        db.tagsStore.getTagRow_(depId, function(?error, ?depRow) {
+                            if (error != null) {
+                                next( error );
+                            }
+                            else {
+                                if (depRow == null) {
+                                    next('Error: Tag "${name}" references a tag with id=${depId}; no such tag exists');
+                                }
+                                else {
+                                    existing.pullRow(depRow, db, next);
+                                }
+                            }
+                        });
+                    }
+                });
+            }
+        }
+        steps.series(function(?error) {
+            done( error );
+        });
+    }
+
 /* === Instance Fields === */
 
     public var name: String;
