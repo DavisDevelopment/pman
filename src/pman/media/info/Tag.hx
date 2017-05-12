@@ -209,7 +209,40 @@ class Tag implements IComparable<Tag> {
     }
 
     /**
+      * push [this] tag onto the database
+      */
+    public function push(done : VoidCb):Void {
+        var db = BPlayerMain.instance.db;
+        db.tagsStore.putTagRow_(toRow(), function(?error, ?row) {
+            done( error );
+        });
+    }
+
     /**
+      * synchronize [this] Tag with its corresponding row in the database
+      */
+    public function sync(done : VoidCb):Void {
+        var db = BPlayerMain.instance.db;
+        getRowFromDb(function(?error, ?row) {
+            if (error != null) {
+                done( error );
+            }
+            else if (row == null) {
+                trace('row not found, creating..');
+                db.tagsStore.putTagRow_(toRow(), function(?e, ?row) {
+                    if (e != null) 
+                        return done(e);
+                    trace('created row. resuming sync..');
+                    syncWithRow(row, db, done);
+                });
+            }
+            else {
+                trace('row found');
+                syncWithRow(row, db, done);
+            }
+        });
+    }
+
     /**
       * synchronize [this] Tag with the given Row
       */
