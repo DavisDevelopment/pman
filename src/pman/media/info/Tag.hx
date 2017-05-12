@@ -125,9 +125,14 @@ class Tag implements IComparable<Tag> {
 
 /* === Static Methods === */
 
+    /**
+      * build a Tag instance from a Tag row
+      */
     public static function fromRow(row : TagRow):Tag {
-        return new Tag(row.name, row.id, Unserializer.run(row.type));
+        var tag = new Tag(row.name, row.id, Unserializer.run(row.type), row.aliases);
+        return tag;
     }
+
 }
 
 enum TagType {
