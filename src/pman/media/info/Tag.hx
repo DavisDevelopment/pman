@@ -116,6 +116,13 @@ class Tag implements IComparable<Tag> {
     }
 
     /**
+      * check whether [this] Tag is described by the given word
+      */
+    public function is(word : String):Bool {
+        var kwl = keywords();
+        return kwl.has( word );
+    }
+
     /**
       * pull data from the given TagRow
       */
