@@ -211,6 +211,16 @@ class Tag implements IComparable<Tag> {
     /**
     /**
     /**
+      * clone data from [other] on [this]
+      */
+    public function pullFrom(t : Tag):Void {
+        name = t.name;
+        id = t.id;
+        aliases = t.aliases.copy();
+        supers = (t.supers != null ? t.supers.copy() : null);
+        type = Type.getEnum(type).createByIndex(type.getIndex());
+    }
+
     /**
       * 'fill' [this] tag by either
       * (A) doing nothing, if tag already has all its info
