@@ -99,7 +99,8 @@ class Mp4InfoLoader {
     private function chunkedRead(path:Path, chunkSize:Int, step:Buffer->Bool, complete:Void->Void, reject:Dynamic->Void):Void {
         Nfs.open(path.toString(), 'r', function(err, fid:Int) {
             if (err != null) {
-                throw err;
+                elog( err );
+                reject( err );
             }
 
             function readNextChunk():Void {
@@ -111,6 +112,13 @@ class Mp4InfoLoader {
                     }
 
                     if (nread == 0) {
+                        try {
+                            return Nfs.closeSync( fid );
+                        }
+                        catch (error : Dynamic) {
+                            return reject( error );
+                        }
+                        /*
                         Nfs.close(fid, function(err) {
                             if (err != null) {
                                 reject( err );
@@ -118,6 +126,7 @@ class Mp4InfoLoader {
                             }
                             complete();
                         });
+                        */
                     }
 
                     var data:Buffer;
@@ -153,6 +162,9 @@ class Mp4InfoLoader {
       */
     private function _loaded(info : Dynamic):Void {
         trace( info );
+    }
+    private inline function elog(error : Dynamic) {
+        untyped __js__('console.error')( error );
     }
 
     /**
