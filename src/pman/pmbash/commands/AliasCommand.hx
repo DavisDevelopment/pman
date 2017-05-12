@@ -30,7 +30,15 @@ class AliasCommand extends Command {
     public function new(?code:String, ?partial:PmshPartial):Void {
         super();
 
-        this.code = code;
+        if (partial != null) {
+            this.code = '';
+            this.partial = partial;
+        }
+        else {
+            this.code = code;
+            this.partial = (new Interpreter().parsePartial( code ));
+        }
+        _boundPartial = null;
     }
     override function execute(i:Interpreter, args:Array<Dynamic>, done:VoidCb):Void {
         i.executeString(code, done);
