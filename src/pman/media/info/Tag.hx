@@ -211,6 +211,18 @@ class Tag implements IComparable<Tag> {
     /**
     /**
     /**
+    /**
+      * check whether [this] Tag instance is 'empty'
+      */
+    public inline function isEmpty():Bool {
+        return (
+            (id == null) &&
+            (aliases.length == 0) &&
+            (supers == null || supers.length == 0)
+        );
+    }
+
+    /**
       * clone data from [other] on [this]
       */
     public function pullFrom(t : Tag):Void {
