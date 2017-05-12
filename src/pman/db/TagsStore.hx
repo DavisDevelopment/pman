@@ -76,8 +76,8 @@ class TagsStore extends TableWrapper {
         getTag( id ).then(done.yield()).unless(done.raise());
     }
     public function getTagRowByName(name : String):Promise<Null<TagRow>> {
-        return untyped select('tags', {
-            name: name
+        return find('tags', function(row : TagRow):Bool {
+            return (row.name == name || row.aliases.has( name ));
         });
     }
     public function getTagRowByName_(name:String, done:Cb<TagRow>):Void {
