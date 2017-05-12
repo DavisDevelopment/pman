@@ -125,6 +125,28 @@ class TagsStore extends TableWrapper {
             }
         });
     }
+
+    /**
+      * 
+      */
+    public function pullTag(key:EitherType<Int, String>, done:Cb<Tag>):Void {
+        var getter : Async<TagRow>;
+        if ((key is Int)) {
+            getter = getTagRow_.bind(cast(key, Int), _);
+        }
+        else if ((key is String)) {
+            getter = getTagRowByName_.bind(cast(key, String), _);
+        }
+        else {
+            throw 'Error: Invalid key';
+        }
+        getter(function(?error, ?tagRow) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                Tag.loadFromRow(tagRow, dbr, done);
+            }
         });
     }
 
