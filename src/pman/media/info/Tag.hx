@@ -33,7 +33,7 @@ using pman.async.Asyncs;
 @:expose('TrackTag')
 class Tag implements IComparable<Tag> {
     /* Constructor Function */
-    public inline function new(name:String, ?id:Int, ?type:TagType):Void {
+    public inline function new(name:String, ?id:Int, ?type:TagType, ?aliases:Array<String>):Void {
         this.id = id;
         this.name = name;
         this.type = (type != null ? type : Normal);
