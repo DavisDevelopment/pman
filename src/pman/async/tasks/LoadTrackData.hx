@@ -11,6 +11,7 @@ import pman.media.*;
 import pman.db.*;
 import pman.db.MediaStore;
 import pman.async.*;
+import pman.media.info.*;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -103,7 +104,7 @@ class LoadTrackData extends Task2<TrackData> {
       * load the data for the 'tags' and 'actors' fields
       */
     private function load_fields(row:MediaInfoRow, done:VoidCb):Void {
-        done();
+        [load_tags].map.fn(_.bind(row, _)).series( done );
     }
 
     /**
