@@ -212,6 +212,24 @@ class Tag implements IComparable<Tag> {
     /**
     /**
     /**
+      * load the copy of [this] Tag stored in the database
+      */
+    public function getFromDb(callback : Cb<Tag>):Void {
+        var db = BPlayerMain.instance.db;
+        db.tagsStore.pullTag(untyped (id != null ? id : untyped name), callback);
+    }
+    public function getRowFromDb(callback : Cb<TagRow>):Void {
+        var s = BPlayerMain.instance.db.tagsStore;
+        //((id != null)?s.getTagRow_.bind(id,_):s.getTagRowByName_.bind(name,_))( callback );
+        if (id == null) {
+            s.getTagRowByName_(name, callback);
+        }
+        else {
+            s.getTagRow_(id, callback);
+        }
+    }
+
+    /**
       * check whether [this] Tag instance is 'empty'
       */
     public inline function isEmpty():Bool {
