@@ -45,7 +45,6 @@ class Interp extends Interpreter {
             'plclear' => alias('pl clear'),
             'plsave' => alias('pl save'),
             'plexport' => alias('pl export'),
-            'ple' => alias('pl export'),
             'plshuffle' => alias('pl shuffle')
         ];
     }
