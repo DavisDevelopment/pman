@@ -68,7 +68,10 @@ class TableWrapper {
             var store = tos(tableName, 'readwrite');
             var idp = store.put( row );
             idp.then(function(row_id : Dynamic) {
-                @forward store.get( row_id ).transform.fn(cast _);
+                trace('row.primaryKey=$row_id');
+                defer(function() {
+                    @forward tos(tableName, 'readonly').get( row_id ).transform.fn(cast _);
+                });
             });
             idp.unless(function(error : Null<Dynamic>) {
                 if (error != null) {
