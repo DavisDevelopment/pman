@@ -111,11 +111,15 @@ class LoadTrackData extends Task2<TrackData> {
       * load tags
       */
     private function load_tags(row:MediaInfoRow, done:VoidCb):Void {
-        row.tags.map.fn(x=>(function(f) db.tagsStore.getTag_(x,f))).series(function(?error, ?tags) {
-            if (error != null)
+        var steps:Array<Async<Tag>> = row.tags.map.fn(tagId => db.tagsStore.pullTag.bind(tagId, _));
+        steps.series(function(?error, ?tags:Array<Tag>) {
+            if (error != null) {
                 done( error );
+            }
             else {
-                data.tags = tags;
+                for (tag in tags) {
+                    data.attachTag( tag );
+                }
                 done();
             }
         });
