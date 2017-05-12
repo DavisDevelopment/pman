@@ -242,6 +242,13 @@ class Interpreter {
         }
     }
 
+    /**
+      * create a partial from a String
+      */
+    public function parsePartial(exprString : String):PmshPartial {
+        return createPartialFromExpr(Parser.runString( exprString ));
+    }
+
 /* === Instance Fields === */
 
     public var commands : Map<String, Cmd>;
