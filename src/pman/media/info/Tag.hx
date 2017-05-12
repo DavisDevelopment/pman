@@ -211,6 +211,17 @@ class Tag implements IComparable<Tag> {
     /**
     /**
     /**
+      * synchronize [this] Tag with the given Row
+      */
+    public function syncWithRow(row:TagRow, db:PManDatabase, done:VoidCb):Void {
+        if (id == null)
+            id = row.id;
+        if (row.name != name && row.aliases.has( name ))
+            name = row.name;
+        
+        fillOut( done );
+    }
+
     /**
       * load the copy of [this] Tag stored in the database
       */
