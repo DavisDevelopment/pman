@@ -138,6 +138,25 @@ class Tag implements IComparable<Tag> {
         return kwl.toArray();
     }
 
+    /**
+      * declare that [this] tag inherits from the given tag
+      */
+    public function inherits(superTag : Tag):Tag {
+        if (supers == null) {
+            supers = [superTag];
+            return this;
+        }
+        else {
+            for (st in supers) {
+                if (superTag.name == st.name)
+                    return this;
+            }
+            supers.push( superTag );
+            return this;
+        }
+    }
+
+    /**
       * pull data from the given TagRow
       */
     public function pullRow(row:TagRow, db:PManDatabase, done:VoidCb):Void {
