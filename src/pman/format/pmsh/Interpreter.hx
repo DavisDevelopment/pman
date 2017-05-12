@@ -7,8 +7,10 @@ import tannus.TSys as Sys;
 import pman.async.*;
 import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
+import pman.format.pmsh.Cmd;
 
 import electron.Tools.*;
+import Slambda.fn;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -45,6 +47,37 @@ class Interpreter {
             environment[key] = env[key];
         }
     }
+    
+    /**
+      * set a variable
+      */
+    private inline function setenv(k:String, v:String) return environment.set(k, v);
+
+    /**
+      * write many variables, from any key->value data structure
+      */
+    private function env(vars : Dynamic):Void {
+        if ((vars is Map<String, String>)) {
+            var sm:Map<String, String> = vars;
+            for (k in sm.keys()) {
+                setenv(k, sm[k]);
+            }
+        }
+        else if ((vars is tannus.ds.dict.IDict<String, Dynamic>)) {
+            var sd:Dict<String, Dynamic> = vars;
+            for (k in sd.keys()) {
+                setenv(k, Std.string(sd[k]));
+            }
+        }
+        else {
+            var o:Object = vars;
+            for (key in o.keys) {
+                if (!Reflect.isFunction(o[key])) {
+                    setenv(key, o[key]);
+                }
+            }
+        }
+    }
 
     /**
       * initialize commands
@@ -52,6 +85,7 @@ class Interpreter {
     private function __initCommands():Void {
         //TODO
     }
+
 
     /**
       * execute the given expression
