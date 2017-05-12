@@ -214,6 +214,7 @@ class KeyboardCommands {
 
             // :
             case SemiColon if ( event.shiftKey ):
+                //TODO move this action into its own method associated with Player
                 defer(function() {
                     p.prompt('pmbash', null, null, function(line : Null<String>) {
                         var tokens = Tokenizer.runString( line );
@@ -227,6 +228,13 @@ class KeyboardCommands {
                             }
                         });
                     });
+                });
+
+            // ctrl+t
+            case LetterT if (event.ctrlKey || event.metaKey):
+                p.tdfprompt(function(?error) {
+                    if (error != null)
+                        throw error;
                 });
 
 		/* --- 'next-command-count' modifiers --- */
