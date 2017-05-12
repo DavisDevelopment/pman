@@ -40,7 +40,15 @@ class AliasCommand extends Command {
         }
         _boundPartial = null;
     }
-    override function execute(i:Interpreter, args:Array<Dynamic>, done:VoidCb):Void {
-        i.executeString(code, done);
+
+    /**
+      * creates an expression based on partial expression and the provided parameters,
+      * then executes that expression
+      */
+    override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
+        if (_boundPartial == null) {
+            _boundPartial = partial.bind();
+        }
+        _boundPartial(i, args, done);
     }
 }
