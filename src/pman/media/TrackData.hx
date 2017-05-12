@@ -97,19 +97,18 @@ class TrackData {
         // validate/assert/save tags
         steps.push(function(done:VoidCb) {
             var tsteps:Array<Async<TagRow>> = [];
+            var tagmap:Map<String, Tag> = new Map();
             for (t in tags) {
-                var tstep = db.tagsStore.cogTagRow.bind(t.name, t.type, _);
-                tsteps.push( tstep );
+                tagmap.set(t.name, t);
+                tsteps.push(db.tagsStore.putTag.bind(t, _));
             }
             tsteps.series(function(?err, ?rows) {
                 if (err != null) {
                     return done( err );
                 }
                 else {
-                    // once tags are saved, pull from the db-provided list of tag rows to 
-                    // ensure that all attached tags have ids before saving
-                    this.tags = rows.map.fn(Tag.fromRow(_));
-                    done();
+                    var pulls:Array<VoidAsync> = rows.map.fn(row => tagmap[row.name].pullRow.bind(row, db, _));
+                    pulls.series( done );
                 }
             });
         });
@@ -259,10 +258,6 @@ class TrackData {
     public function addTag(tagName : String):Tag {
         return attachTag(new Tag( tagName ));
     }
-
-    /**
-      *
-      */
 
     /**
       * attach an Actor instance to [this]
