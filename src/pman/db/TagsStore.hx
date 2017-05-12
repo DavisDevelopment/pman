@@ -38,7 +38,7 @@ class TagsStore extends TableWrapper {
       * write [row] onto the database
       */
     public function putTagRow(row : TagRow):Promise<TagRow> {
-        return cast put('tags', row);
+        return put('tags', row);
     }
     public function putTagRow_(row:TagRow, ?done:Cb<TagRow>):Void {
         if (done == null)
