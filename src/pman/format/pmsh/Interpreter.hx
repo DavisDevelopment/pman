@@ -107,7 +107,7 @@ class Interpreter {
     private function async(expr : Expr):VoidAsync {
         switch ( expr ) {
             case EBlock( body ):
-                return ((body.map.fn( async )).series.bind());
+                return ((body.map( async )).series.bind());
 
             case ESetVar(name, value):
                 return function(done:VoidCb):Void {
