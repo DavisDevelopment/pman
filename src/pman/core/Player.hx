@@ -39,6 +39,7 @@ import pman.ds.*;
 import pman.async.*;
 import pman.async.tasks.*;
 
+import Slambda.fn;
 import tannus.math.TMath.*;
 import foundation.Tools.*;
 import haxe.extern.EitherType;
@@ -247,6 +248,16 @@ class Player extends EventDispatcher {
 
 	        });
 	    });
+	}
+
+    /**
+      * prompt the user for tdf (tag(+)-definition format) input
+      */
+	public function tdfprompt(?done : VoidCb):Void {
+	    if (done == null)
+	        done = untyped fn(err => if (err!=null) console.error( err ));
+	    var box = new TdfPrompt( this );
+	    box.prompt( done );
 	}
 
 	/**
