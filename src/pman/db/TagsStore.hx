@@ -2,6 +2,7 @@ package pman.db;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.ds.EitherType as Either;
 import tannus.ds.promises.*;
 
 import ida.*;
@@ -23,6 +24,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.async.VoidAsyncs;
 
 class TagsStore extends TableWrapper {
     /* Constructor Function */
@@ -99,22 +101,7 @@ class TagsStore extends TableWrapper {
             }
         });
     }
-    public function cogTagRold(name:String, ?type:TagType):Promise<TagRow> {
-        return Promise.create({
-            getTagRowByName_(name, function(?error:Dynamic, ?row:TagRow) {
-                if (error != null)
-                    throw error;
-                else if (row != null)
-                    return row;
-                else {
-                    add(name, type, function(?error:Dynamic, ?row:TagRow) {
-                        if (error != null)
-                            throw error;
-                        else
-                            return row;
                     });
-                }
-            });
         });
     }
 
