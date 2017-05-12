@@ -135,7 +135,8 @@ class Interpreter {
                                             if (error != null)
                                                 done( error );
                                             else {
-                                                command.execute(this, args, done);
+                                                var commandArgs = paramWords.zipmap(args, fn([word, value] => new CmdArg(EWord(word), value)));
+                                                command.execute(this, commandArgs, done);
                                             }
                                         });
                                     }
