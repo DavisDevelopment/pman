@@ -234,3 +234,76 @@ class Interpreter {
     public var commands : Map<String, Cmd>;
     public var environment : Dict<String, String>;
 }
+
+@:access( pman.format.pmsh.Interpreter )
+@:structInit
+class PmshPartial {
+    public var cmd:Word;
+    public var params:Array<Expr>;
+
+    public function new(cmd:Word, params:Array<Expr>):Void {
+        this.cmd = cmd;
+        this.params = params;
+    }
+
+    /**
+      * create a command-invokation expression from [this] partial
+      */
+    public function toExpr(?additionalParams : Array<Expr>):Expr {
+        var fullParams = params;
+        if (additionalParams != null)
+            fullParams = fullParams.concat( additionalParams );
+        return ECommand(cmd, fullParams);
+    }
+
+    /**
+      * create an actual function that can be executed with additional arguments
+      */
+    public function bind():Interpreter->Array<CmdArg>->VoidCb->Void {
+        var icmd:Null<Cmd> = null;
+        var paramWords:Null<Array<Word>> = null;
+
+        return (function(i:Interpreter, argv:Array<CmdArg>, done:VoidCb) {
+            if (icmd == null && paramWords == null) {
+                i.resolve(i.wordToString( cmd ), function(?err, ?command:Cmd) {
+                    if (err != null) {
+                        done( err );
+                    }
+                    else if (command == null) {
+                        done('${i.wordToString( cmd )}: command not found');
+                    }
+                    else {
+                        icmd = command;
+                        i.expand(params, function(?err, ?words) {
+                            if (err != null)
+                                return done( err );
+                            else {
+                                paramWords = words;
+                                i.resolveArgValues(paramWords, function(?error, ?values) {
+                                    if (error != null) {
+                                        done( error );
+                                    }
+                                    else {
+                                        var zipper = fn([w,v]=>new CmdArg(EWord(w), v));
+                                        icmd.execute(i, paramWords.zipmap(values, zipper), done);
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            }
+            else {
+                i.resolveArgValues(paramWords, function(?error, ?values) {
+                    if (error != null) {
+                        done( error );
+                    }
+                    else {
+                        var zipper = fn([w,v]=>new CmdArg(EWord(w), v));
+                        icmd.execute(i, paramWords.zipmap(values, zipper), done);
+                    }
+                });
+            }
+        });
+    }
+}
