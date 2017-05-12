@@ -9,6 +9,7 @@ import pman.async.*;
 import pman.format.pmsh.*;
 import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
+import pman.format.pmsh.Cmd;
 import pman.pmbash.commands.*;
 
 import electron.Tools.*;
