@@ -208,6 +208,67 @@ class Tag implements IComparable<Tag> {
         });
     }
 
+    /**
+    /**
+    /**
+    /**
+      * 'fill' [this] tag by either
+      * (A) doing nothing, if tag already has all its info
+      * (B) pull info from db and writing it onto this tag instance
+      * (C) add brand new tag row to database
+      */
+    public function fillOut(done : VoidCb):Void {
+        var db = BPlayerMain.instance.db;
+        // if [this] tag is not empty
+        trace('filling in tag info..');
+        // if tag has id field
+        if (!isEmpty()) {
+            // fetch the row from the db
+            getFromDb(function(?err, ?row) {
+                if (err != null) {
+                    done( err );
+                }
+                // if no errors occurred fetching the row
+                else {
+                    // merge the 'aliases' fields
+                    trace('merging alias lists..');
+                    aliases = aliases.concat( row.aliases ).unique();
+                    aliases.sort.fn([x,y]=>Reflect.compare(x,y));
+                    trace('merge complete');
+                    done();
+                }
+            });
+        }
+        // if this tag is empty (only has name)
+        else {
+            return done('devour the cheeks');
+            // attempt to get the row for this tag
+            getFromDb(function(?err, ?dbt) {
+                if (err != null)
+                    done( err );
+                // if no row was found
+                else if (dbt == null) {
+                    // write new row onto database
+                    db.tagsStore.putTag(this, function(?err, ?dbtr) {
+                        if (err != null) {
+                            done( err );
+                        }
+                        else {
+                            // once written, pull data from the row onto this
+                            pullRow(dbtr, db, done);
+                        }
+                    });
+                }
+                // if row was found
+                else {
+                    // pull row data onto this
+                    pullFrom( dbt );
+                    done();
+                }
+            });
+        }
+    }
+
 /* === Instance Fields === */
 
     public var name: String;
