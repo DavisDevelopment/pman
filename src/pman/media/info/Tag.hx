@@ -12,10 +12,12 @@ import pman.media.*;
 import pman.db.MediaStore;
 import pman.db.TagsStore;
 import pman.media.MediaType;
+import pman.async.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
 
+import tannus.ds.SortingTools.*;
 import electron.Tools.defer;
 
 using StringTools;
@@ -24,13 +26,19 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
+using tannus.ds.SortingTools;
+using pman.async.VoidAsyncs;
+using pman.async.Asyncs;
 
-class Tag {
+@:expose('TrackTag')
+class Tag implements IComparable<Tag> {
     /* Constructor Function */
     public inline function new(name:String, ?id:Int, ?type:TagType):Void {
         this.id = id;
         this.name = name;
         this.type = (type != null ? type : Normal);
+        this.aliases = (aliases != null ? aliases : []);
+        this.supers = null;
     }
 
 /* === Instance Methods === */
@@ -93,14 +101,24 @@ class Tag {
         }
     }
 
+    /**
+      * check how many 'dependencies' this tag has
+      */
     public inline function depCount():Int {
         return (supers == null ? 0 : supers.length);
     }
 
+    /**
+      * compare [this] Tag to another Tag
+      */
+    public function compareTo(other : Tag):Int {
+        return Reflect.compare(name, other.name);
+    }
+
 /* === Instance Fields === */
 
-    public var id(default, null):Null<Int> = null;
     public var name: String;
+    public var id: Null<Int>;
     public var aliases: Array<String>;
     public var supers: Null<Array<Tag>> = null;
     public var type: TagType;
