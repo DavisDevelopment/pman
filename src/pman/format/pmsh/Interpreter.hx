@@ -229,6 +229,19 @@ class Interpreter {
         }
     }
 
+    /**
+      * creates a 'partial'
+      */
+    public function createPartialFromExpr(e : Expr):PmshPartial {
+        switch ( e ) {
+            case ECommand(nameWord, params), EBlock([ECommand(nameWord, params)]):
+                return new PmshPartial(nameWord, params);
+
+            default:
+                throw 'TypeError: partials may only be created from command-invokation expressions';
+        }
+    }
+
 /* === Instance Fields === */
 
     public var commands : Map<String, Cmd>;
