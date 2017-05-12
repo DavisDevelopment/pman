@@ -124,6 +124,20 @@ class Tag implements IComparable<Tag> {
     }
 
     /**
+      * obtain all 'keywords' that [this] tag would encompass
+      */
+    public function keywords():Array<String> {
+        var kwl = new Set();
+        kwl.push( name );
+        kwl.pushMany( aliases );
+        if (supers != null) {
+            for (dep in supers) {
+                kwl.pushMany(dep.keywords());
+            }
+        }
+        return kwl.toArray();
+    }
+
       * pull data from the given TagRow
       */
     public function pullRow(row:TagRow, db:PManDatabase, done:VoidCb):Void {
