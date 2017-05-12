@@ -101,7 +101,30 @@ class TagsStore extends TableWrapper {
             }
         });
     }
+
+    /**
+      * pushes a Tag onto the database, first pushing all of its supers
+      */
+    public function putTag(tag:Tag, done:Cb<TagRow>):Void {
+        var steps:Array<VoidAsync> = new Array();
+        if (tag.supers != null) {
+            for (dep in tag.supers) {
+                steps.push(function(next:VoidCb) {
+                    putTag(dep, function(?err, ?row) {
+                        next( err );
                     });
+                });
+            }
+        }
+        steps.series(function(?error) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                putTagRow_(tag.toRow(), done);
+            }
+        });
+    }
         });
     }
 
