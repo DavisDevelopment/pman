@@ -21,4 +21,9 @@ abstract Async<T> (Cb<T>->Void) from Cb<T>->Void {
             });
         });
     }
+
+    @:to
+    public function promiser():Void->Promise<T> {
+        return promise.bind();
+    }
 }
