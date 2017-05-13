@@ -226,15 +226,7 @@ class MediaTools {
 	    return Promise.create({
 	        switch ( src ) {
                 case MSLocalPath( path ):
-                    var lc = metadataLoaderClass( path );
-                    if (lc == null) {
-                        //throw 'Error: No metadata loader for "${path.extension}" files';
-                        return null;
-                    }
-                    else {
-                        var loader:MediaMetadataLoader = Type.createInstance(lc, [path]);
-                        @forward loader.getMetadata();
-                    }
+                    @forward new LoadMediaMetadata( path ).getMetadata();
 
                 default:
                     throw 'Error: Media metadata can only be loaded for media items located on the local filesystem';
@@ -245,6 +237,7 @@ class MediaTools {
     /**
       * get the metadata loader class associated with the mime type of the given path
       */
+    /*
 	private static function metadataLoaderClass(path : Path):Null<Class<MediaMetadataLoader>> {
 	    switch (path.extension.toLowerCase()) {
             case 'mp3':
@@ -255,6 +248,7 @@ class MediaTools {
                 return null;
 	    }
 	}
+	*/
 
     /**
       * trim leading '//' from String
