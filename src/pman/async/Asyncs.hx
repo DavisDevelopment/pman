@@ -1,5 +1,6 @@
 package pman.async;
 
+import tannus.ds.Promise;
 import tannus.ds.Stack;
 
 using Lambda;
@@ -57,5 +58,12 @@ class Asyncs {
             a(_handle.bind(index[0], _, _));
             index[0] += 1;
         }
+    }
+
+    public static function toPromise<T>(asyn : Cb<T>->Void):Promise<T> {
+        return new Async( asyn ).promise();
+    }
+    public static function toPromiser<T>(asyn : Cb<T>->Void):Void->Promise<T> {
+        return new Async( asyn ).promiser();
     }
 }
