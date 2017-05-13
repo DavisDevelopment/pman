@@ -54,7 +54,9 @@ class PlayerPage extends Page {
 		stage.addChild( fps );
 	    #end
 
-		app.win.expose('player', player);
+        var w = app.win;
+		w.expose('player', player);
+		w.exposeGetter('track', Getter.create(player.track));
 	}
 
 	/**
