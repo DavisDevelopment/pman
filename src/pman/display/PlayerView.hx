@@ -44,6 +44,7 @@ class PlayerView extends Ent {
         addSibling( hud );
 
 		currentMediaRenderer = null;
+		mediaRect = new Rectangle();
 	}
 
 /* === PMan Methods === */
@@ -166,6 +167,7 @@ class PlayerView extends Ent {
 	public var messageBoard : PlayerMessageBoard;
 	public var statusBar : PlayerStatusBar;
 	public var hud : PlayerHUD;
+	public var mediaRect : Rectangle;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
 
