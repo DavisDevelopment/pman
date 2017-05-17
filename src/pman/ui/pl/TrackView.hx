@@ -137,7 +137,7 @@ class TrackView extends Pane {
         }
         else {
             var trackPath = track.getFsPath();
-            if (trackPath == null) {
+            if (trackPath == null || !FileSystem.exists( trackPath )) {
                 size.text = '';
             }
             else {
