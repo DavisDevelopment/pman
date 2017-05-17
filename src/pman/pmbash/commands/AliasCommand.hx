@@ -25,7 +25,7 @@ using pman.async.VoidAsyncs;
 class AliasCommand extends Command {
     private var code : String;
     private var partial : PmshPartial;
-    private var _boundPartial : Null<Interpreter->Array<CmdArg>->VoidCb->Void>;
+    //private var _boundPartial : Null<Interpreter->Array<CmdArg>->VoidCb->Void>;
 
     public function new(?code:String, ?partial:PmshPartial):Void {
         super();
@@ -38,7 +38,7 @@ class AliasCommand extends Command {
             this.code = code;
             this.partial = (new Interpreter().parsePartial( code ));
         }
-        _boundPartial = null;
+        //_boundPartial = null;
     }
 
     /**
@@ -46,9 +46,10 @@ class AliasCommand extends Command {
       * then executes that expression
       */
     override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
-        if (_boundPartial == null) {
-            _boundPartial = partial.bind();
-        }
-        _boundPartial(i, args, done);
+        //if (_boundPartial == null) {
+            //_boundPartial = partial.bind();
+        //}
+        //_boundPartial(i, args, done);
+        i.execute(partial.toExpr(args.map.fn(_.expr)), done);
     }
 }
