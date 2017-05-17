@@ -66,7 +66,12 @@ class TrackListDataLoader extends Task1 {
       */
     override function execute(done : VoidCb):Void {
         var actions = tracks.map.fn(t => gdt.bind(t, _));
-        actions.callEach( done );
+        //actions.callEach( done );
+        actions = actions.chunk( 20 ).map(function(list) {
+            return list.callEach.bind( _ );
+        });
+        //actions.callEach( done );
+        actions.series( done );
     }
 
     /**
