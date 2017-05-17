@@ -89,6 +89,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		
 		if (this.pv == null) {
 			this.pv = pv;
+			vr = pv.mediaRect;
 		}
 
 		if ( prefs.directRender ) {
