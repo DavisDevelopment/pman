@@ -54,7 +54,12 @@
                 color: white;
                 cursor: pointer;
 
+                .row {
+                    margin-left: 0px;
+                }
+
                 .title {
+                    clear: left;
                     padding: 5px;
                     display: -webkit-box;
                     -webkit-line-clamp: 1;
@@ -95,7 +100,7 @@
                 }
 
                 /* highlighted */
-                &.focused, &.hovered, &:hover {
+                &.focused, &.hovered, &.selected {
                     background-color: @secondary;
 
                     .title {
@@ -103,6 +108,8 @@
                             color: white;
                         }
                     }
+                &:hover {
+                    background-color: mix(@primary, @secondary, 30%);
                 }
             }
         }
