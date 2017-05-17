@@ -41,7 +41,8 @@ import pman.async.tasks.*;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import electron.Tools.*;
+import gryffin.Tools.now;
 import haxe.extern.EitherType;
 
 using DateTools;
@@ -747,20 +748,26 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter.fn(_.isRealFile());
+	    var start = now;
 	    function complete():Void {
 	        defer(function() {
+	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
 	            if (done != null) {
 	                done();
 	            }
 	            var dl = new TrackListDataLoader();
+	            start = now;
 	            dl.load(items, function(?error, ?result) {
-	                null;
+                    trace('took ${now - start}ms for Player to load TrackData for ${items.length} tracks');
 	            });
 	        });
 	    }
 
 	    // initialize these items
+	    var initStart = now;
 	    items.initAll(function() {
+	        trace('took ${now - initStart}ms to "initialize" ${items.length} tracks');
+	        initStart = now;
             // if these are the first items added to the queue, autoLoad will be invoked once they are all added
             var autoLoad:Bool = session.playlist.empty();
             var willPlay:Null<Track> = null;
@@ -784,11 +791,13 @@ class Player extends EventDispatcher {
                 openTrack(willPlay, {
                     attached: function() {
                         //trace('Media linked to player by auto-load');
+                        trace('took ${now - initStart} to append ${items.length} tracks to queue');
                         complete();
                     }
                 });
             }
             else {
+                trace('took ${now - initStart} to append ${items.length} tracks to queue');
                 complete();
             }
         });
