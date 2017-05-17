@@ -106,29 +106,46 @@ class Player extends EventDispatcher {
 	private function initialize(stage : Stage):Void {
 	    var ad = app.appDir;
 	    var prefs = app.db.preferences;
+
+	    // if there are playback-properties saved
 	    if (ad.hasSavedPlaybackSettings()) {
+	        // attempt to restore them
 	        ad.loadPlaybackSettings(this, function() {
+	            // if sessions are set to auto restore
 	            if ( prefs.autoRestore ) {
+	                // then simply restore last session
                     session.restore(function() {
+                        // declare player ready
                         readyEvent.fire();
                     });
                 }
+                // if sessions are not set to auto restore
                 else {
                     defer(function() {
+                        // if there is a saved previous session
                         if (session.hasSavedState()) {
+                            // ask the user whether to restore it
                             confirm('Restore Previous Session?', function(restore : Bool) {
+                                // if the user chose to restore session
                                 if ( restore ) {
+                                    // restore it
                                     session.restore(function() {
+                                        // declare player ready
                                         readyEvent.fire();
                                     });
                                 }
+                                // if the user chose not to restore session
                                 else {
+                                    // delete the saved session
                                     session.deleteSavedState();
+                                    // declare the player ready
                                     readyEvent.fire();
                                 }
                             });
                         }
+                        // if there is no saved session
                         else {
+                            // declare player ready
                             readyEvent.fire();
                         }
                     });
@@ -136,6 +153,7 @@ class Player extends EventDispatcher {
 	        });
 	    }
         else {
+            // declare player ready
             defer( readyEvent.fire );
         }
 	}
