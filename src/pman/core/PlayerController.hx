@@ -13,6 +13,7 @@ import tannus.math.TMath.*;
 import gryffin.Tools.defer;
 
 import pman.core.*;
+import pman.core.PlayerPlaybackProperties;
 import pman.core.PlaybackTarget;
 import pman.core.PlayerStatus;
 import pman.media.*;
@@ -57,6 +58,13 @@ class PlayerController {
     public function togglePlayback():Void {
         player.sim(_.togglePlayback());
     }
+
+	/**
+	  * repeat the current track
+	  */
+	public function repeatTrack():Void{
+		player.currentTime = 0;
+	}
 
     /**
       * get the current Player status
@@ -132,16 +140,53 @@ class PlayerController {
             switch ( currentStatus ) {
                 case Ended:
                     var ls = lastStatus;
-                    player.gotoNext({
-                        ready: function() {
-                            switch ( ls ) {
+                    trace(repeat + "");
+                    switch (repeat) {
+                        case RepeatOff:
+                            if (session.indexOfCurrentMedia() == (session.playlist.length-1)) return;
+                            else{
+                                player.gotoNext({
+                                    ready: function() {
+                                        switch ( ls ) {
+                                            case Playing:
+                                                player.play();
+                                            default:
+                                                null;
+                                        }
+                                    }
+                                });
+                            }
+                        case RepeatIndefinite:
+                            repeatTrack();
+                            switch ( ls ){
                                 case Playing:
                                     player.play();
                                 default:
                                     null;
                             }
-                        }
-                    });
+                        case RepeatOnce:
+                            repeat = RepeatOff;
+                            repeatTrack();
+                            switch ( ls ){
+                                case Playing:
+                                    player.play();
+                                default:
+                                    null;
+                            }
+                        case RepeatPlaylist:
+                            player.gotoNext({
+                                ready: function() {
+                                    switch ( ls ) {
+                                        case Playing:
+                                            player.play();
+                                        default:
+                                            null;
+                                    }
+                                }
+                            });
+                        default:
+                            trace("HOW EVEN?!");
+                    }
                 default:
                     lastStatus = currentStatus;
             }
@@ -250,6 +295,10 @@ class PlayerController {
 	public var muted(get, set):Bool;
 	private inline function get_muted() return session.pp.muted;
 	private inline function set_muted(v) return (session.pp.muted = v);
+
+    public var repeat(get, set):RepeatType;
+	private inline function get_repeat() return session.pp.repeat;
+	private inline function set_repeat(v) return (session.pp.repeat = v);
 
     /**
       * whether or not the current media has ended
