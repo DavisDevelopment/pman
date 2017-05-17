@@ -70,6 +70,11 @@ class DefaultStatusBarItem extends StatusBarItem {
                 case MediaSource.MSUrl( url ):
                     tb.text = url;
             }
+
+            var t = player.track;
+            if (t.data != null && t.data.starred) {
+                tb.text = (' (favorited) ' + tb.text);
+            }
         }
 
         if (oldText != tb.text) {
