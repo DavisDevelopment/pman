@@ -73,7 +73,7 @@ class DefaultStatusBarItem extends StatusBarItem {
         }
 
         if (oldText != tb.text) {
-            tb.autoScale(null, rect.h, 0.5);
+            tb.autoScale(null, rect.h);
         }
     }
 
