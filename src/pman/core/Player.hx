@@ -540,6 +540,8 @@ class Player extends EventDispatcher {
 	        }
             else if (snapshotPath != null) {
                 trace( snapshotPath );
+                var vu = new SnapshotView(this, snapshotPath);
+                view.addSibling( vu );
             }
 	    });
 	}
