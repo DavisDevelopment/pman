@@ -24,12 +24,12 @@ class Common extends AppDirTransformer {
         var styles = new Directory(sub('styles'));
         var scripts = new Directory(sub('scripts'));
 
-        var names = Fs.readDirectory( styles.path );//.without(['pman.css', 'scaffolds.css']));
+        var names = Fs.readDirectory( styles.path );
         names.remove('pman.css');
         names.remove('scaffolds.css');
         for (n in names)
             del.push(sub('styles/$n'));
-        names = Fs.readDirectory( scripts.path );//.without(['background.min.js','all-libs.min.js','content.min.js']));
+        names = Fs.readDirectory( scripts.path );
         names.remove('background.min.js');
         names.remove('all-libs.min.js');
         names.remove('content.min.js');
