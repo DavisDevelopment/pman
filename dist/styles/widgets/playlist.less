@@ -99,6 +99,21 @@
                     }
                 }
 
+                .progress-track {
+                    width: 100%;
+                    height: 2px;
+                    display: block;
+                    padding: 0px;
+
+                    .progress {
+                        display: block;
+                        float: left;
+                        height: 100%;
+                        margin-bottom: 0px;
+                        background-color: @secondary;
+                    }
+                }
+
                 /* highlighted */
                 &.focused, &.hovered, &.selected {
                     background-color: @secondary;
@@ -108,6 +123,16 @@
                             color: white;
                         }
                     }
+
+                    .progress-track {
+                        background-color: lighten(@primary, 10%);
+
+                        .progress {
+                            background-color: lighten(@primary, 20%);
+                        }
+                    }
+                }
+
                 &:hover {
                     background-color: mix(@primary, @secondary, 30%);
                 }
