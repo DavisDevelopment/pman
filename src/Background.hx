@@ -22,6 +22,7 @@ import pman.db.AppDir;
 import pman.ipc.MainIpcCommands;
 import pman.ww.*;
 import pman.server.*;
+import pman.tools.BackgroundArgParser;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -37,6 +38,7 @@ class Background {
 		ipcCommands.bind();
 		appDir = new AppDir();
 		server = new Server( this );
+		argParser = new BackgroundArgParser();
 	}
 
 /* === Instance Methods === */
@@ -46,10 +48,13 @@ class Background {
 	 */
 	public function start():Void {
 
+        /*
         var sysname = Sys.systemName();
         if (sysname == 'Win32') {
             _handleSquirrelEvents();
         }
+        */
+        parseArgs(Sys.args());
 
 		App.onReady( _ready );
 		App.onAllClosed( _onAllClosed );
@@ -262,20 +267,15 @@ class Background {
 	/**
 	  * Get launch info
 	  */
-	public function launchInfo(?cwd:String, ?argv:Array<String>, ?env:Dynamic):RawLaunchInfo {
-	    if (cwd == null) {
-	        cwd = Sys.getCwd();
-	    }
-	    if (argv == null) {
-	        argv = Sys.args();
-	    }
-	    if (env == null) {
-	        env = MapTools.toObject(Sys.environment());
-	    }
+	public function launchInfo():RawLaunchInfo {
+	    var cwd = Sys.getCwd();
+        var paths = argParser.paths;
+        var env = MapTools.toObject(Sys.environment());
+
 	    return {
             cwd: cwd,
             env: env,
-            argv: argv
+            paths: paths.map.fn(_.toString())
 	    };
 	}
 
@@ -305,6 +305,13 @@ class Background {
       */
     public function httpServe(path : Path):String {
         return server.serve( path );
+    }
+
+    /**
+      * parse command-line arguments
+      */
+    private function parseArgs(argv : Array<String>):Void {
+        argParser.parse( argv );
     }
 
     /**
@@ -353,8 +360,8 @@ class Background {
 	  * when an attempt is made to launch a second instance of [this] application
 	  */
 	private function _onSecondaryLaunch(args:Array<String>, scwd:String):Void {
-	    var info = launchInfo(scwd, args);
-	    ic.send(playerWindow, 'LaunchInfo', [info]);
+		//var info = launchInfo();
+		//ic.send(playerWindow, 'LaunchInfo', [info]);
 	}
 
 	/**
@@ -399,6 +406,7 @@ class Background {
 	//public var serverBoss : Boss;
 	public var server : Server;
 	private var _p:Null<Path> = null;
+	private var argParser : BackgroundArgParser;
 
 	/* === Class Methods === */
 
