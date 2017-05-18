@@ -109,8 +109,6 @@ class BPlayerMain extends Application {
                     p.flag('src', 'command-line-input');
                 }
 
-                trace('opening page..');
-                
                 // open the player page
                 body.open( playerPage );
             });
