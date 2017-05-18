@@ -335,16 +335,8 @@ class AppDir {
             var u = new Unserializer( s );
             inline function val<T>():T return u.unserialize();
 
-            var pp = new PlayerPlaybackProperties(val(), val(), val(), val());
-            /*
-            p.playbackRate = val();
-            p.volume = val();
-            p.shuffle = val();
-            p.muted = val();
-            */
-            //p.onReady(function() {
-                p.session.playbackProperties.rebase( pp );
-            //});
+            var pp = new PlayerPlaybackProperties(val(), val(), val(), val(), val());
+            p.session.playbackProperties.rebase( pp );
 
             cb();
         }
