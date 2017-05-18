@@ -2,7 +2,8 @@
 all: compile run
 
 run:
-	cd ../dist/ && electron .
+	@read -p "Enter pman args: " args; \
+	cd ../dist/ && electron . $$args;
 
 compile:
 	haxe build.hxml && cd ../dist/ && ./pack preprocess

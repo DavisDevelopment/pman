@@ -157,6 +157,8 @@ class MediaStore extends TableWrapper {
                     views: 0,
                     starred: false,
                     marks: [],
+                    tags: [],
+                    actors: [],
                     meta: null
                 };
 
@@ -224,6 +226,8 @@ typedef MediaInfoRow = {
     views : Int,
     starred : Bool,
     marks : Array<String>,
+    tags : Array<Int>,
+    actors : Array<Int>,
     meta : Null<MediaInfoRowMeta>
 };
 

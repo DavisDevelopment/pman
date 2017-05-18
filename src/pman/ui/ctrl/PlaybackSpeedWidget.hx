@@ -33,7 +33,7 @@ class PlaybackSpeedWidget extends Ent {
 		controls = c;
 		button = b;
 
-		hide();
+		//hide();
 	}
 
 /* === Instance Methods === */
@@ -47,6 +47,7 @@ class PlaybackSpeedWidget extends Ent {
 		plus = new VolBtn('selectionExpand', Std.int(btnSize[0]), colors);
 
 		super.init( stage );
+		hide();
 		on('click', onClick);
 	}
 

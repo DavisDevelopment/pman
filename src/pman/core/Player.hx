@@ -40,8 +40,10 @@ import pman.ds.*;
 import pman.async.*;
 import pman.async.tasks.*;
 
+import Slambda.fn;
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import electron.Tools.*;
+import gryffin.Tools.now;
 import haxe.extern.EitherType;
 
 using DateTools;
@@ -62,6 +64,9 @@ class Player extends EventDispatcher {
 		app = main;
 		this.page = page;
 
+        // [this] Player's ready-state
+		_rs = new OnceSignal();
+
 		// [this] Player's controller
 		controller = new PlayerController( this );
 
@@ -77,10 +82,8 @@ class Player extends EventDispatcher {
 		// [this] Player's list of components
 		components = new Array();
 
-		// create the ready-state fields
-		isReady = false;
-		readyEvent = new VoidSignal();
-		readyEvent.once(function() isReady = true);
+        // Player flags
+		flags = new Dict();
 
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
@@ -103,40 +106,15 @@ class Player extends EventDispatcher {
 	  * initialize [this] Player, once it has been given a view
 	  */
 	private function initialize(stage : Stage):Void {
-	    var ad = app.appDir;
-	    var prefs = app.db.preferences;
-	    if (ad.hasSavedPlaybackSettings()) {
-	        ad.loadPlaybackSettings(this, function() {
-	            if ( prefs.autoRestore ) {
-                    session.restore(function() {
-                        readyEvent.fire();
-                    });
-                }
-                else {
-                    defer(function() {
-                        if (session.hasSavedState()) {
-                            confirm('Restore Previous Session?', function(restore : Bool) {
-                                if ( restore ) {
-                                    session.restore(function() {
-                                        readyEvent.fire();
-                                    });
-                                }
-                                else {
-                                    session.deleteSavedState();
-                                    readyEvent.fire();
-                                }
-                            });
-                        }
-                        else {
-                            readyEvent.fire();
-                        }
-                    });
-                }
-	        });
-	    }
-        else {
-            defer( readyEvent.fire );
-        }
+	    session.playbackProperties.changed.on(function( x ) {
+	        trace(x + '');
+	    });
+
+	    var startup = new PlayerStartup( this );
+	    startup.run(function(?error : Dynamic) {
+	        if (error != null)
+	            throw error;
+	    });
 	}
 
 	/**
@@ -250,6 +228,16 @@ class Player extends EventDispatcher {
 	    });
 	}
 
+    /**
+      * prompt the user for tdf (tag(+)-definition format) input
+      */
+	public function tdfprompt(?done : VoidCb):Void {
+	    if (done == null)
+	        done = untyped fn(err => if (err!=null) console.error( err ));
+	    var box = new TdfPrompt( this );
+	    box.prompt( done );
+	}
+
 	/**
 	  * show playlist view
 	  */
@@ -295,6 +283,16 @@ class Player extends EventDispatcher {
 	    editor.once('close', function(e) {
 	        editor.destroy();
 	    });
+	}
+
+	/**
+	  * open the Preferences editor
+	  */
+	public function editPreferences():Void {
+	    if (app.body.currentPage == page) {
+	        var pp = new PreferencesPage( app );
+	        app.body.open( pp );
+	    }
 	}
 
 	/**
@@ -412,7 +410,7 @@ class Player extends EventDispatcher {
 	/**
 	  * restore previously saved Session
 	  */
-	public function restoreState(?done : Void->Void):Void {
+	public function restoreState(?done : VoidCb):Void {
 	    session.restore( done );
 	}
 
@@ -481,14 +479,15 @@ class Player extends EventDispatcher {
 	  * wait until Player is ready
 	  */
 	public function onReady(callback : Void->Void):Void {
-		if ( isReady ) {
-			defer( callback );
-		}
-		else {
-			readyEvent.once(function() {
-				defer( callback );
-			});
-		}
+	    _rs.await( callback );
+		//if ( isReady ) {
+			//defer( callback );
+		//}
+		//else {
+			//readyEvent.once(function() {
+				//defer( callback );
+			//});
+		//}
 	}
 
 	/**
@@ -519,6 +518,8 @@ class Player extends EventDispatcher {
 	        }
             else if (snapshotPath != null) {
                 trace( snapshotPath );
+                var vu = new SnapshotView(this, snapshotPath);
+                view.addSibling( vu );
             }
 	    });
 	}
@@ -727,20 +728,26 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter.fn(_.isRealFile());
+	    var start = now;
 	    function complete():Void {
 	        defer(function() {
+	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
 	            if (done != null) {
 	                done();
 	            }
 	            var dl = new TrackListDataLoader();
+	            start = now;
 	            dl.load(items, function(?error, ?result) {
-	                null;
+                    trace('took ${now - start}ms for Player to load TrackData for ${items.length} tracks');
 	            });
 	        });
 	    }
 
 	    // initialize these items
+	    var initStart = now;
 	    items.initAll(function() {
+	        trace('took ${now - initStart}ms to "initialize" ${items.length} tracks');
+	        initStart = now;
             // if these are the first items added to the queue, autoLoad will be invoked once they are all added
             var autoLoad:Bool = session.playlist.empty();
             var willPlay:Null<Track> = null;
@@ -764,11 +771,13 @@ class Player extends EventDispatcher {
                 openTrack(willPlay, {
                     attached: function() {
                         //trace('Media linked to player by auto-load');
+                        trace('took ${now - initStart} to append ${items.length} tracks to queue');
                         complete();
                     }
                 });
             }
             else {
+                trace('took ${now - initStart} to append ${items.length} tracks to queue');
                 complete();
             }
         });
@@ -1117,6 +1126,39 @@ class Player extends EventDispatcher {
 	    return eventTimes[event];
 	}
 
+    /**
+      * get or set the value of a flag
+      */
+	public function flag<T>(key:String, ?value:T):Null<T> {
+	    if (value == js.Lib.undefined) {
+	        return flags[key];
+	    }
+        else {
+            return (flags[key] = value);
+        }
+	}
+
+	/**
+	  * verify existence of a flag
+	  */
+	public function hasFlag(flag : String):Bool {
+	    return flags.exists( flag );
+	}
+
+    /**
+      * delete a flag
+      */
+	public function removeFlag(flag : String):Bool {
+	    return flags.remove( flag );
+	}
+
+	/**
+	  * add a flag
+	  */
+	public inline function addFlag(flag : String):Void {
+	    this.flag(flag, true);
+	}
+
 /* === Computed Instance Fields === */
 
 	public var duration(get, never):Duration;
@@ -1164,6 +1206,9 @@ class Player extends EventDispatcher {
 	public var c(get, never):PlayerController;
 	private inline function get_c() return controller;
 
+	public var isReady(get, never): Bool;
+	private inline function get_isReady() return _rs.v;
+
 /* === Instance Fields === */
 
 	public var app : BPlayerMain;
@@ -1171,11 +1216,13 @@ class Player extends EventDispatcher {
 	public var theme : ColorScheme;
 	public var view : PlayerView;
 	public var session : PlayerSession;
-	public var isReady(default, null): Bool;
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
+	public var flags : Dict<String, Dynamic>;
 
-	private var readyEvent : VoidSignal;
+	//private var readyEvent : VoidSignal;
+	// ready signal
+	private var _rs : OnceSignal;
 	private var eventTimes : Dict<String, Date> = {new Dict();};
 }
 

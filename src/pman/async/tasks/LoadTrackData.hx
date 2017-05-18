@@ -11,6 +11,7 @@ import pman.media.*;
 import pman.db.*;
 import pman.db.MediaStore;
 import pman.async.*;
+import pman.media.info.*;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -29,11 +30,12 @@ using pman.async.VoidAsyncs;
 
 class LoadTrackData extends Task2<TrackData> {
     /* Constructor Function */
-    public function new(track:Track, store:MediaStore):Void {
+    public function new(track:Track, db:PManDatabase):Void {
         super();
 
         this.track = track;
-        this.store = store;
+        this.db = db;
+        this.store = db.mediaStore;
         this.data  = new TrackData( track );
     }
 
@@ -91,9 +93,34 @@ class LoadTrackData extends Task2<TrackData> {
                         }
                         data = new TrackData( track );
                         data.pullRaw( irow );
-                        done();
+                        load_fields(irow, done);
                     });
                 }
+            }
+        });
+    }
+
+    /**
+      * load the data for the 'tags' and 'actors' fields
+      */
+    private function load_fields(row:MediaInfoRow, done:VoidCb):Void {
+        [load_tags].map.fn(_.bind(row, _)).series( done );
+    }
+
+    /**
+      * load tags
+      */
+    private function load_tags(row:MediaInfoRow, done:VoidCb):Void {
+        var steps:Array<Async<Tag>> = row.tags.map.fn(tagId => db.tagsStore.pullTag.bind(tagId, _));
+        steps.series(function(?error, ?tags:Array<Tag>) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                for (tag in tags) {
+                    data.attachTag( tag );
+                }
+                done();
             }
         });
     }
@@ -172,6 +199,7 @@ class LoadTrackData extends Task2<TrackData> {
 /* === Instance Fields === */
 
     public var track : Track;
+    public var db : PManDatabase;
     public var store : MediaStore;
     public var data : Null<TrackData>;
 }

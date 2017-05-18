@@ -1,5 +1,4 @@
 package ida.backend.idb;
-
 import tannus.ds.*;
 import tannus.html.Win;
 import tannus.html.fs.*;
@@ -8,6 +7,8 @@ import js.html.idb.*;
 import haxe.extern.EitherType in Either;
 
 import ida.Utils;
+
+using Lambda;
 
 class IDBDatabase {
 	/* Constructor Function */
@@ -23,6 +24,14 @@ class IDBDatabase {
 	public function createObjectStore(name:String, ?options:CreateObjectStoreOptions) {
 		var _store = db.createObjectStore(name, options);
 		return new IDBObjectStore( _store );
+	}
+
+	public inline function deleteObjectStore(name : String):Void {
+	    db.deleteObjectStore( name );
+	}
+
+	public function hasObjectStore(name : String):Bool {
+	    return objectStoreNames.has( name );
 	}
 
 	/**
@@ -41,6 +50,16 @@ class IDBDatabase {
 		db.createMutableFile(name, type).fulfill();
 	}
 	*/
+
+/* === Computed Instance Fields === */
+
+    public var version(get, never):Int;
+    private inline function get_version():Int return db.version;
+
+    public var objectStoreNames(get, never):Array<String>;
+    private function get_objectStoreNames():Array<String> {
+        return (untyped (untyped __js__('Array.prototype.slice.call')(db.objectStoreNames, 0)));
+    }
 
 /* === Instance Fields === */
 

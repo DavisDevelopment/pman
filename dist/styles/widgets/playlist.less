@@ -3,13 +3,17 @@
 @import "../utils";
 
 .playlist {
-	overflow-y: scroll;
+	/*overflow-y: scroll;*/
+	max-height: 100vh;
+	flex-flow: column;
+	display: flex;
 
 	// The search widget
 	.search-box {
 		margin-left: auto;
 		margin-right: auto;
 		width: 100%;
+		flex: 0 1 auto;
 
 		input[type=text] {
 			font-size: 10pt;
@@ -25,6 +29,11 @@
 		    height: 45px;
 		    cursor: pointer;
 		}
+	}
+
+	.tracks {
+	    overflow-y: scroll;
+	    flex: 1 1 auto;
 	}
 
 	// the Track list widget
@@ -54,7 +63,12 @@
                 color: white;
                 cursor: pointer;
 
+                .row {
+                    margin-left: 0px;
+                }
+
                 .title {
+                    clear: left;
                     padding: 5px;
                     display: -webkit-box;
                     -webkit-line-clamp: 1;
@@ -67,6 +81,10 @@
                         font-weight: bold;
                         color: lighten(@secondary, 12%);
                         margin-right: 3px;
+                    }
+
+                    .unwatched {
+                        color: invert( @secondary );
                     }
                 }
 
@@ -90,8 +108,23 @@
                     }
                 }
 
+                .progress-track {
+                    width: 100%;
+                    height: 2px;
+                    display: block;
+                    padding: 0px;
+
+                    .progress {
+                        display: block;
+                        float: left;
+                        height: 100%;
+                        margin-bottom: 0px;
+                        background-color: @secondary;
+                    }
+                }
+
                 /* highlighted */
-                &.focused, &.hovered, &:hover {
+                &.focused, &.hovered, &.selected {
                     background-color: @secondary;
 
                     .title {
@@ -99,6 +132,18 @@
                             color: white;
                         }
                     }
+
+                    .progress-track {
+                        background-color: lighten(@primary, 10%);
+
+                        .progress {
+                            background-color: lighten(@primary, 20%);
+                        }
+                    }
+                }
+
+                &:hover {
+                    background-color: mix(@primary, @secondary, 30%);
                 }
             }
         }

@@ -4,14 +4,17 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 
+using Slambda;
+
 class LaunchInfo {
     public var cwd : Path;
-    public var argv : Array<String>;
     public var env : Map<String, String>;
-    public function new(cwd:Path, argv:Array<String>, env:Map<String,String>):Void {
-        this.cwd = cwd;
-        this.argv = argv;
-        this.env = env;
+    public var paths : Array<Path>;
+
+    public function new():Void {
+        cwd = new Path('/');
+        env = new Map();
+        paths = new Array();
     }
 
     public static function fromRaw(raw : RawLaunchInfo):LaunchInfo {
@@ -20,7 +23,12 @@ class LaunchInfo {
         for (key in Reflect.fields( raw.env )) {
             env[key] = Std.string(Reflect.getProperty(raw.env, key));
         }
-        return new LaunchInfo(cwd, raw.argv, env);
+        var paths:Array<Path> = raw.paths.map.fn(new Path(_));
+        var i = new LaunchInfo();
+        i.cwd = cwd;
+        i.env = env;
+        i.paths = paths;
+        return i;
     }
 }
 
@@ -33,7 +41,7 @@ typedef LaunchInfo = {
 */
 
 typedef RawLaunchInfo = {
-    argv: Array<String>,
+    paths: Array<String>,
     cwd: String,
     env: Dynamic
 };

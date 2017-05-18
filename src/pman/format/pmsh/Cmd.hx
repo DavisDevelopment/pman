@@ -27,11 +27,22 @@ class Cmd {
     /**
       * execute [this] Cmd
       */
-    public function execute(interp:Interpreter, args:Array<Dynamic>, done:VoidCb):Void {
+    public function execute(interp:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
         done();
     }
 
 /* === Instance Fields === */
 
     public var name : String;
+}
+
+@:structInit
+class CmdArg {
+    public var expr : Expr;
+    public var value : Dynamic;
+
+    public inline function new(e:Expr, v:Dynamic) {
+        expr = e;
+        value = v;
+    }
 }

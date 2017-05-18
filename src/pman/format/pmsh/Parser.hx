@@ -34,7 +34,9 @@ class Parser {
             }
         }
 
-        return EBlock( tree );
+        if (tree.length > 1 || tree.length == 0)
+            return EBlock( tree );
+        else return tree[0];
     }
 
     /**

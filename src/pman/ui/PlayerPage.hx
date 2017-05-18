@@ -12,14 +12,19 @@ import gryffin.display.*;
 
 import electron.ext.*;
 import electron.ext.Dialog;
+import electron.Tools.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.ds.OnceSignal;
 
 using StringTools;
 using Lambda;
 using Slambda;
 
+/*
+   controller for the app page that displays the media player interface
+*/
 class PlayerPage extends Page {
 	/* Constructor Function */
 	public function new(main : BPlayerMain):Void {
@@ -28,6 +33,11 @@ class PlayerPage extends Page {
 		addClass('ui_page');
 
 		app = main;
+
+		_playerCreated = new OnceSignal();
+
+		player = new Player(app, this);
+		defer( _playerCreated.announce );
 	}
 
 /* === Instance Methods === */
@@ -36,6 +46,8 @@ class PlayerPage extends Page {
 	  * when [this] Page opens
 	  */
 	override function open(body : Body):Void {
+	    super.open( body );
+
 		css['overflow'] = 'hidden';
 
 		var win = body.application.win;
@@ -44,15 +56,39 @@ class PlayerPage extends Page {
 		stage = new Stage( canvas );
 		stage.fill();
 
-		player = new Player(app, this);
+        player.view.stage = stage;
 		player.attachToStage( stage );
 
         #if debug
-		var fps = new FPSDisplay( player );
-		stage.addChild( fps );
+            var fps = new FPSDisplay( player );
+            stage.addChild( fps );
 	    #end
 
-		app.win.expose('player', player);
+        // expose values globally
+        var w = app.win;
+		w.expose('player', player);
+		w.exposeGetter('track', Getter.create(player.track));
+	}
+
+	/**
+	  * reopen [this] Page
+	  */
+	override function reopen(body : Body):Void {
+	    super.reopen( body );
+
+	    css.set('display', 'block');
+
+	    stage.resume();
+	}
+
+	/**
+	  * close [this] Page
+	  */
+	override function close():Void {
+	    css.set('display', 'none');
+	    active = false;
+	    player.pause();
+	    stage.pause();
 	}
 
 	/**
@@ -94,11 +130,29 @@ class PlayerPage extends Page {
 	    (isPlaylistViewOpen()?closePlaylistView:openPlaylistView)();
 	}
 
+    /**
+      * 
+      */
+	public function onPlayerCreated(f : Player->Void):Void {
+	    _playerCreated.await(function() {
+	        f( player );
+	    });
+	}
+
+	public function onPlayerReady(f : Player->Void):Void {
+	    onPlayerCreated(function(p) {
+	        p.onReady(function() {
+	            f( p );
+	        });
+	    });
+	}
+
 /* === Instance Fields === */
 
 	public var stage : Stage;
 	public var player : Player;
 	public var app : BPlayerMain;
+	public var _playerCreated : OnceSignal;
 
 	public var playlistView : Null<PlaylistView> = null;
 }

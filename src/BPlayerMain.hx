@@ -66,17 +66,12 @@ class BPlayerMain extends Application {
     private function init(cb : Void->Void):Void {
         onready( cb );
 
-
         // need to find a better way to do this
 		browserWindow = BrowserWindow.getAllWindows()[0];
 
         appDir = new AppDir();
 
-        db = new PManDatabase();
-        db.init(function() {
-            _rs.fire();
-        });
-
+        // handle pre-exit tasks
         var preCloseComplete:Bool = false;
         win.onbeforeunload = (untyped function(event : Dynamic) {
             if ( preCloseComplete ) {
@@ -90,6 +85,8 @@ class BPlayerMain extends Application {
                 return false;
             }
         });
+
+        defer( start );
     }
 
 	/**
@@ -99,15 +96,32 @@ class BPlayerMain extends Application {
 	override function start():Void {
 		title = 'BPlayer';
 
+        // create the PlayerPage
 		playerPage = new PlayerPage( this );
 
-		body.open( playerPage );
+		// when ready
+		onready(function() {
+		    var i = launchInfo;
+            // await creation of Player
+            playerPage.onPlayerCreated(function(p : Player) {
+                // -- set pre-launch player flags
+                if (i.paths.length > 0) {
+                    p.flag('src', 'command-line-input');
+                }
 
-		keyboardCommands = new KeyboardCommands( this );
-		keyboardCommands.bind();
+                // open the player page
+                body.open( playerPage );
+            });
 
-		dragManager = new DragDropManager( this );
-		dragManager.init();
+            // await readiness of the Player
+            playerPage.onPlayerReady(function(p : Player) {
+                keyboardCommands = new KeyboardCommands( this );
+                keyboardCommands.bind();
+
+                dragManager = new DragDropManager( this );
+                dragManager.init();
+            });
+        });
 
 		//__buildMenus();
         ipcCommands = new RendererIpcCommands( this );
@@ -268,69 +282,16 @@ class BPlayerMain extends Application {
 	/**
 	  * process the given LaunchInfo
 	  */
-	public function launchInfo(info : RawLaunchInfo):Void {
+	public function _provideLaunchInfo(info : RawLaunchInfo):Void {
 	    // get LaunchInfo
-	    var i:LaunchInfo = LaunchInfo.fromRaw( info );
-	    // get action being performed
-	    var action:String = getAction( i );
+	    launchInfo = LaunchInfo.fromRaw( info );
 
-        // perform that action
-        switch ( action ) {
-            case 'add':
-                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
-                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
-                player.addItemList( tracks );
-
-            case 'open':
-                player.clearPlaylist();
-                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
-                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
-                player.addItemList( tracks );
-
-            default:
-                trace('unhandled action: $action');
-        }
-	}
-
-	/**
-	  * compute the 'action' specified by the given LaunchInfo
-	  */
-	private function getAction(i : LaunchInfo):String {
-	    if (i.argv.length == 0) {
-	        return 'add';
-	    }
-        else {
-            var aa:String = i.argv[0];
-            try {
-                var aap = Path.fromString( aa );
-                // single-segment, not a valid path to a media file
-                if (aap.pieces.length == 1 && !FileFilter.ALL.test( aap )) {
-                    i.argv.shift();
-                    return aa;
-                }
-                else {
-                    return 'add';
-                }
-            }
-            catch (error : Dynamic) {
-                return 'add';
-            }
-        }
-	}
-
-    /**
-      * get the Array of Paths provided via command-line arguments
-      */
-	private function getPaths(info : LaunchInfo):Array<Path> {
-	    var paths:Array<Path> = new Array();
-	    var p:Null<Path> = null;
-	    for (arg in info.argv) {
-	        p = rta(arg, info.cwd, info.env);
-	        if (p != null) {
-	            paths.push( p );
-	        }
-	    }
-	    return paths;
+        // initialize the database
+        db = new PManDatabase();
+        db.init(function() {
+            // declare ready
+            _rs.fire();
+        });
 	}
 
 	/**
@@ -383,6 +344,7 @@ class BPlayerMain extends Application {
 	public var tray : Tray;
 	public var ipcCommands : RendererIpcCommands;
 	public var closingEvent : Signal2<Dynamic, AsyncStack>;
+	public var launchInfo : LaunchInfo;
 
 	private var _ready : Bool;
 	// ready signal
@@ -393,7 +355,9 @@ class BPlayerMain extends Application {
 	/* main function */
 	public static function main():Void {
 	    var app = new BPlayerMain();
-	    app.init( app.start );
+	    app.init(function() {
+	        //
+	    });
 	}
 
 /* === Static Fields === */

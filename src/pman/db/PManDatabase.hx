@@ -8,6 +8,7 @@ import ida.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.db.spec.*;
 
 import js.Browser.console;
 import Slambda.fn;
@@ -32,6 +33,7 @@ class PManDatabase {
 		configInfo = new ConfigInfo( this );
 		mediaStore = new MediaStore( this );
 		tagsStore = new TagsStore( this );
+		actorsStore = new ActorsStore( this );
 		preferences = Preferences.pull();
 	}
 
@@ -52,6 +54,15 @@ class PManDatabase {
 			onready( done );
 		}
 
+		build_spec();
+		dbspec.open(function(?error, ?database) {
+		    if (error != null)
+		        throw error;
+            this.db = database;
+            defer( or.fire );
+		});
+
+        /*
 		var p = Database.open(DBNAME, DBVERSION, build_db);
 		p.then(function( db ) {
 			this.db = db;
@@ -61,9 +72,54 @@ class PManDatabase {
 		p.unless(function( error ) {
 			throw error;
 		});
+		*/
 	}
 
 /* === Database-Creation Methods === */
+
+    /**
+      * construct the database layout specification
+      */
+    private function build_spec():Void {
+        /* test db spec system */
+        dbspec = new DatabaseSpec( DBNAME );
+
+        // media_items table
+        var t = dbspec.addTable('media_items');
+        t.addIndices([
+            'id' => {primary: true},
+            'uri' => null
+        ]);
+        t.autoIncrement = true;
+
+        // media_info table
+        t = dbspec.addTable('media_info');
+        t.addIndices([
+            'id' => {primary: true},
+            'views'=>null,'duration'=>null,'marks'=>null,
+            'tags'=>null,'actors'=>null,'meta'=>null
+        ]);
+
+        // tags table
+        t = dbspec.addTable('tags');
+        t.addIndices([
+            'id' => {primary: true},
+            'name' => {unique: true},
+            'aliases' => null,
+            'supers' => null,
+            'type' => null
+        ]);
+        t.autoIncrement = true;
+
+        // actors table
+        t = dbspec.addTable('actors');
+        t.addIndices([
+            'id' => {primary: true},
+            'name' => {unique: true},
+            'gender' => null
+        ]);
+        t.autoIncrement = true;
+    }
 
 	/**
 	  * construct the database as a whole
@@ -122,11 +178,11 @@ class PManDatabase {
       */
 	private function build_tagsTable(db : Database):Void {
 	    var tags = db.createObjectStore('tags', {
-            keyPath: 'name'
-            //autoIncrement: true
+            keyPath: 'id',
+            autoIncrement: true
 	    });
 	    inline function i(n, k, ?o) tags.createIndex(n,k,o);
-		//i('id', 'id', {unique: true});
+        i('id', 'id', {unique: true});
 	    i('name', 'name', {unique: true});
 	    i('type', 'type');
 	    i('data', 'data');
@@ -142,7 +198,9 @@ class PManDatabase {
 	    });
 	    inline function i(n, k, ?o) actors.createIndex(n,k,o);
 
+        i('id', 'id', {unique: true});
         i('name', 'name', {unique: true});
+        i('gender', 'gender');
 	}
 
 /* === Utility Methods === */
@@ -171,10 +229,12 @@ class PManDatabase {
 /* === Instance Fields === */
 
 	//public var app : BPlayerMain;
+	public var dbspec : DatabaseSpec;
 	public var db : Database;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
 	public var tagsStore : TagsStore;
+	public var actorsStore : ActorsStore;
 	public var preferences : Preferences;
 
 	private var or : VoidSignal;
@@ -183,6 +243,6 @@ class PManDatabase {
 /* === Static Fields === */
 
 	private static inline var DBNAME:String = 'pman';
-	private static inline var DBVERSION:Int = 1;
+	private static inline var DBVERSION:Int = 2;
 }
 

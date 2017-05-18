@@ -32,7 +32,6 @@ class VolumeButton extends ImagePlayerControlButton {
 		btnFloat = true;
 
 		widget = new VolumeWidget( this );
-		widget.hide();
 	}
 
 /* === Instance Methods === */
@@ -44,6 +43,8 @@ class VolumeButton extends ImagePlayerControlButton {
 		super.init( stage );
 
 		controls.addSibling( widget );
+
+		widget.hide();
 	}
 
 	override function update(stage : Stage):Void {

@@ -30,10 +30,10 @@ using Slambda;
 using tannus.math.TMath;
 using pman.Tools;
 
-class TrackView extends FlexRow {
+class TrackView extends Pane {
 	/* Constructor Function */
 	public function new(v:PlaylistView, t:Track):Void {
-		super([12, 0]);
+		super();
 
 		addClass( 'track' );
 
@@ -50,13 +50,16 @@ class TrackView extends FlexRow {
 	  */
 	override function populate():Void {
 
-		title = pane( 0 );
+        flex = new FlexRow([12, 0]);
+        append( flex );
+
+		title = flex.pane( 0 );
 		title.addClass( 'title' );
 		title.columns.on('small').is( 12 );
 		title.columns.on('small').expand = true;
 		title.columns.on('large').is( 9 );
 
-        info = pane( 1 );
+        info = flex.pane( 1 );
         info.addClass('info');
         info.columns.on('small').remove();
         info.columns.on('large').is( 3 );
@@ -66,6 +69,15 @@ class TrackView extends FlexRow {
 		size = new Pane();
 		size.addClass( 'size' );
 		info.append( size );
+
+		progressTrack = new Pane();
+		progressTrack.addClass( 'progress-track' );
+		append( progressTrack );
+
+		progress = new Pane();
+		progress.addClass( 'progress' );
+		progressTrack.append( progress );
+		progress.css.set('width', '25%');
 
 		/*
 		buttons = new Pane();
@@ -96,7 +108,11 @@ class TrackView extends FlexRow {
 	    var td = track.data;
 
         title.text = track.title;
+        // view counter
         if (td != null) {
+            var uw:Element = '<span class="unwatched"><sup>(U)</sup>&nbsp;</span>';
+            if (td.views == 0)
+                title.el.prepend( uw );
             if ( td.starred ) {
                 title.el.prepend('<span class="starred">*</span>');
             }
@@ -121,12 +137,23 @@ class TrackView extends FlexRow {
         }
         else {
             var trackPath = track.getFsPath();
-            if (trackPath == null) {
+            if (trackPath == null || !FileSystem.exists( trackPath )) {
                 size.text = '';
             }
             else {
                 var stats = FileSystem.stat( trackPath );
                 size.text = stats.size.formatSize();
+            }
+        }
+
+        if (td != null && td.meta != null) {
+            var lt = td.getLastTime();
+            if (lt == null) {
+                progress.css.set('width', '0%');
+            }
+            else {
+                var perc = tannus.math.Percent.percent(lt, td.meta.duration);
+                progress.css.set('width', perc.toString());
             }
         }
 	}
@@ -236,6 +263,7 @@ class TrackView extends FlexRow {
 
 /* === Instance Fields === */
 
+    public var flex : FlexRow;
     public var needsRebuild:Bool = false;
 	public var list : PlaylistView;
 	public var track : Track;
@@ -244,6 +272,8 @@ class TrackView extends FlexRow {
 	public var info : FlexPane;
 	public var buttons : Pane;
 	public var size : Pane;
+	public var progressTrack : Pane;
+	public var progress : Pane;
 
 	private var menuOpen : Bool = false;
 	private var eventInitted : Bool = false;

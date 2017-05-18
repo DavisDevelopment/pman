@@ -42,11 +42,12 @@ class Interp extends Interpreter {
             'next' => alias('player next'),
             'prev' => alias('player prev'),
             'previous' => alias('player previous'),
-            'plclear' => alias('pl clear'),
+            'clear' => alias('pl clear'),
             'plsave' => alias('pl save'),
             'plexport' => alias('pl export'),
-            'ple' => alias('pl export'),
-            'plshuffle' => alias('pl shuffle')
+            'plshuffle' => alias('pl shuffle'),
+            'speed' => alias('player speed'),
+            'volume' => alias('player volume')
         ];
     }
 }

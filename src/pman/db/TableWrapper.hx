@@ -68,7 +68,9 @@ class TableWrapper {
             var store = tos(tableName, 'readwrite');
             var idp = store.put( row );
             idp.then(function(row_id : Dynamic) {
-                @forward store.get( row_id ).transform.fn(cast _);
+                defer(function() {
+                    @forward tos(tableName, 'readonly').get( row_id ).transform.fn(cast _);
+                });
             });
             idp.unless(function(error : Null<Dynamic>) {
                 if (error != null) {
@@ -144,7 +146,7 @@ class TableWrapper {
             // if the cursor is currently 'over' a row, and [test] returned 'true' for that row
             if (c.entry != null && test(untyped c.entry)) {
                 //TODO delete c.entry;
-                trace( c.entry );
+                //trace( c.entry );
             }
             c.next();
         });
@@ -154,7 +156,7 @@ class TableWrapper {
       * delete a particular row of a particular table
       */
     public function deleteFrom(table:String, id:Dynamic, done:VoidCb):Void {
-        trace('deleting row identified by $id from `${db.db.name}.${table}`');
+        //trace('deleting row identified by $id from `${db.db.name}.${table}`');
         tos(table, 'readwrite').delete(id, function(error:Null<Dynamic>) {
             done( error );
         });

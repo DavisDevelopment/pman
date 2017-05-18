@@ -2,10 +2,11 @@ package pman.ui;
 
 import tannus.events.*;
 import tannus.events.Key;
+import tannus.math.Random;
 
 import Std.*;
 import tannus.math.TMath.*;
-import gryffin.Tools.defer;
+import gryffin.Tools.*;
 
 import pman.core.*;
 import pman.format.pmsh.*;
@@ -13,6 +14,9 @@ import pman.pmbash.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
+import electron.Tools.defer;
+
+import Slambda.fn;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -109,9 +113,40 @@ class KeyboardCommands {
 			        sess.playlist.remove( ct );
 			    }
 
-            // snapshot
+            // jump to a random time in the track
+			case LetterR if ( event.noMods ):
+			    onDoubleTap(fn(_.noMods), function(dblTapped) {
+			        if ( dblTapped ) {
+			            var r = new Random();
+			            p.currentTime = r.randfloat(0.0, p.durationTime);
+			        }
+                    else {
+                        trace('you pressed the R key');
+                    }
+			    });
+
+			case LetterR if ( event.shiftKey ):
+			    onDoubleTap(fn(_.shiftKey), function( didit ) {
+			        if ( didit ) {
+			            var r = new Random();
+			            p.gotoTrack(r.randint(0, p.session.playlist.length));
+			        }
+                    else {
+                        //
+                    }
+			    });
+			
+            // toggle shuffle
             case LetterS if ( event.shiftKey ):
-                p.snapshot();
+                p.shuffle = !p.shuffle;
+                p.dispatch('toggle-shuffle', null);
+
+            case LetterS if ( event.noMods ):
+                onDoubleTap(fn(_.noMods), function( didit ) {
+                    if ( didit ) {
+                        p.snapshot();
+                    }
+                });
 
             // toggle controls visibility
 			case LetterH:
@@ -179,6 +214,7 @@ class KeyboardCommands {
 
             // :
             case SemiColon if ( event.shiftKey ):
+                //TODO move this action into its own method associated with Player
                 defer(function() {
                     p.prompt('pmbash', null, null, function(line : Null<String>) {
                         var tokens = Tokenizer.runString( line );
@@ -192,6 +228,13 @@ class KeyboardCommands {
                             }
                         });
                     });
+                });
+
+            // ctrl+t
+            case LetterT if (event.ctrlKey || event.metaKey):
+                p.tdfprompt(function(?error) {
+                    if (error != null)
+                        throw error;
                 });
 
 		/* --- 'next-command-count' modifiers --- */
@@ -246,6 +289,33 @@ class KeyboardCommands {
                 null;
 	    }
 	}
+
+    /**
+      * 
+      */
+    private function nextWithin(check:KeyboardEvent->Bool, maxDelay:Float, action:Bool->Void):Void {
+        function _handler(event : KeyboardEvent):Void {
+            if (check( event )) {
+                action( true );
+                _nextKeyDown.remove( _handler );
+            }
+            else {
+                action( false );
+            }
+        }
+        nextKeyDown( _handler );
+        wait(ceil( maxDelay ), function() {
+            _nextKeyDown.remove( _handler );
+            action( false );
+        });
+    }
+
+    /**
+      * handle double-taps of keys
+      */
+    private function onDoubleTap(check:KeyboardEvent->Bool, action:Bool->Void):Void {
+        nextWithin(check, 350, action);
+    }
 
 	/**
 	  * get the seek time delta from the given Event

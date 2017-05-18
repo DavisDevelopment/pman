@@ -85,4 +85,7 @@ class VideoMetadata {
 }
 
 @:structInit
-class AudioMetadata {}
+class AudioMetadata {
+    public var channels: Int;
+    public var channel_layout: String;
+}

@@ -9,6 +9,7 @@ import pman.async.*;
 import pman.format.pmsh.*;
 import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
+import pman.format.pmsh.Cmd;
 import pman.pmbash.commands.*;
 
 import electron.Tools.*;
@@ -21,7 +22,8 @@ using Slambda;
 using pman.async.VoidAsyncs;
 
 class PlaylistCommand extends Command {
-    override function execute(i:Interpreter, args:Array<Dynamic>, done:VoidCb):Void {
+    override function execute(i:Interpreter, argv:Array<CmdArg>, done:VoidCb):Void {
+        var args = argv.map.fn( _.value );
         var action:String = args.shift();
         if (action == null) {
             return done();
