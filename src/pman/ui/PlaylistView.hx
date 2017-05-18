@@ -137,6 +137,12 @@ class PlaylistView extends Pane {
 			}
 			addTrack( trackView );
 		}
+		if (playlist.length == 0) {
+		    listRow.css.set('overflow-y', 'hidden');
+		}
+        else {
+		    listRow.css.set('overflow-y', 'scroll');
+        }
 		defer(function() {
 		    scrollToActive();
 		});
