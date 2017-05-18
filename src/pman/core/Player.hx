@@ -111,7 +111,10 @@ class Player extends EventDispatcher {
 	    // if there are playback-properties saved
 	    if (ad.hasSavedPlaybackSettings()) {
 	        // attempt to restore them
-	        ad.loadPlaybackSettings(this, function() {
+	        ad.loadPlaybackSettings(this, function(?err) {
+	            // report errors
+	            if (err != null)
+	                throw err;
 	            // if sessions are set to auto restore
 	            if ( prefs.autoRestore ) {
 	                // then simply restore last session
