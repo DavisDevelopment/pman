@@ -2,10 +2,16 @@ package pman.async;
 
 import tannus.ds.Stack;
 
+import haxe.macro.Expr;
+import haxe.macro.Context;
+
 using Lambda;
 using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
+
+using haxe.macro.ExprTools;
+using tannus.macro.MacroTools;
 
 /*
    pman.async.VoidAsyncs
@@ -56,5 +62,12 @@ class VoidAsyncs {
             n[0] += 1;
             va( handle );
         }
+    }
+
+    /**
+      * forward error to given VoidCb
+      */
+    public static macro function forward(callback:ExprOf<VoidCb>, error:ExprOf<Null<Dynamic>>) {
+        return macro if ($error != null) return $callback( $error );
     }
 }
