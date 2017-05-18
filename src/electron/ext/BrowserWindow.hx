@@ -109,6 +109,7 @@ typedef BrowserWindowOptions = {
 typedef WebPreferences = {
 	?devTools:Bool,
 	?nodeIntegration:Bool,
+	?nodeIntegrationInWorker:Bool,
 	?preload:String,
 	?session:Session,
 	?partition:String,
