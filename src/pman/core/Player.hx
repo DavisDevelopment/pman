@@ -79,9 +79,10 @@ class Player extends EventDispatcher {
 		components = new Array();
 
 		// create the ready-state fields
-		isReady = false;
-		readyEvent = new VoidSignal();
-		readyEvent.once(function() isReady = true);
+		//isReady = false;
+		_rs = new OnceSignal();
+		//readyEvent = new VoidSignal();
+		//readyEvent.once(function() isReady = true);
 
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
@@ -116,7 +117,8 @@ class Player extends EventDispatcher {
 	                // then simply restore last session
                     session.restore(function() {
                         // declare player ready
-                        readyEvent.fire();
+                        //readyEvent.fire();
+                        _rs.announce();
                     });
                 }
                 // if sessions are not set to auto restore
@@ -131,7 +133,8 @@ class Player extends EventDispatcher {
                                     // restore it
                                     session.restore(function() {
                                         // declare player ready
-                                        readyEvent.fire();
+                                        //readyEvent.fire();
+                                        _rs.announce();
                                     });
                                 }
                                 // if the user chose not to restore session
@@ -139,14 +142,16 @@ class Player extends EventDispatcher {
                                     // delete the saved session
                                     session.deleteSavedState();
                                     // declare the player ready
-                                    readyEvent.fire();
+                                    //readyEvent.fire();
+                                    _rs.announce();
                                 }
                             });
                         }
                         // if there is no saved session
                         else {
                             // declare player ready
-                            readyEvent.fire();
+                            //readyEvent.fire();
+                            _rs.announce();
                         }
                     });
                 }
@@ -154,7 +159,7 @@ class Player extends EventDispatcher {
 	    }
         else {
             // declare player ready
-            defer( readyEvent.fire );
+            defer( _rs.announce );
         }
 	}
 
@@ -520,14 +525,15 @@ class Player extends EventDispatcher {
 	  * wait until Player is ready
 	  */
 	public function onReady(callback : Void->Void):Void {
-		if ( isReady ) {
-			defer( callback );
-		}
-		else {
-			readyEvent.once(function() {
-				defer( callback );
-			});
-		}
+	    _rs.await( callback );
+		//if ( isReady ) {
+			//defer( callback );
+		//}
+		//else {
+			//readyEvent.once(function() {
+				//defer( callback );
+			//});
+		//}
 	}
 
 	/**
@@ -1209,6 +1215,9 @@ class Player extends EventDispatcher {
 	public var c(get, never):PlayerController;
 	private inline function get_c() return controller;
 
+	public var isReady(get, never): Bool;
+	private inline function get_isReady() return _rs.v;
+
 /* === Instance Fields === */
 
 	public var app : BPlayerMain;
@@ -1216,11 +1225,12 @@ class Player extends EventDispatcher {
 	public var theme : ColorScheme;
 	public var view : PlayerView;
 	public var session : PlayerSession;
-	public var isReady(default, null): Bool;
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
 
-	private var readyEvent : VoidSignal;
+	//private var readyEvent : VoidSignal;
+	// ready signal
+	private var _rs : OnceSignal;
 	private var eventTimes : Dict<String, Date> = {new Dict();};
 }
 
