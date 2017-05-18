@@ -98,16 +98,31 @@ class BPlayerMain extends Application {
 
         // create the PlayerPage
 		playerPage = new PlayerPage( this );
+
 		// when ready
 		onready(function() {
-		    // open PlayerPage
-            body.open( playerPage );
+		    var i = launchInfo;
+            // await creation of Player
+            playerPage.onPlayerCreated(function(p : Player) {
+                // -- set pre-launch player flags
+                if (i.paths.length > 0) {
+                    p.addFlag( 'from-cli' );
+                }
 
-            keyboardCommands = new KeyboardCommands( this );
-            keyboardCommands.bind();
+                trace('opening page..');
+                
+                // open the player page
+                body.open( playerPage );
+            });
 
-            dragManager = new DragDropManager( this );
-            dragManager.init();
+            // await readiness of the Player
+            playerPage.onPlayerReady(function(p : Player) {
+                keyboardCommands = new KeyboardCommands( this );
+                keyboardCommands.bind();
+
+                dragManager = new DragDropManager( this );
+                dragManager.init();
+            });
         });
 
 		//__buildMenus();
