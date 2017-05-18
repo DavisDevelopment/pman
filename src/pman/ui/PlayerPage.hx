@@ -15,6 +15,7 @@ import electron.ext.Dialog;
 
 import pman.core.*;
 import pman.media.*;
+import pman.ds.OnceSignal;
 
 using StringTools;
 using Lambda;
@@ -28,6 +29,8 @@ class PlayerPage extends Page {
 		addClass('ui_page');
 
 		app = main;
+
+		_playerCreated = new OnceSignal();
 	}
 
 /* === Instance Methods === */
@@ -47,13 +50,15 @@ class PlayerPage extends Page {
 		stage.fill();
 
 		player = new Player(app, this);
+		_playerCreated.announce();
 		player.attachToStage( stage );
 
         #if debug
-		var fps = new FPSDisplay( player );
-		stage.addChild( fps );
+            var fps = new FPSDisplay( player );
+            stage.addChild( fps );
 	    #end
 
+        // expose values globally
         var w = app.win;
 		w.expose('player', player);
 		w.exposeGetter('track', Getter.create(player.track));
@@ -124,6 +129,7 @@ class PlayerPage extends Page {
 	public var stage : Stage;
 	public var player : Player;
 	public var app : BPlayerMain;
+	public var _playerCreated : OnceSignal;
 
 	public var playlistView : Null<PlaylistView> = null;
 }
