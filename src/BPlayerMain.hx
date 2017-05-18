@@ -66,17 +66,12 @@ class BPlayerMain extends Application {
     private function init(cb : Void->Void):Void {
         onready( cb );
 
-
         // need to find a better way to do this
 		browserWindow = BrowserWindow.getAllWindows()[0];
 
         appDir = new AppDir();
 
-        db = new PManDatabase();
-        db.init(function() {
-            _rs.fire();
-        });
-
+        // handle pre-exit tasks
         var preCloseComplete:Bool = false;
         win.onbeforeunload = (untyped function(event : Dynamic) {
             if ( preCloseComplete ) {
@@ -90,6 +85,8 @@ class BPlayerMain extends Application {
                 return false;
             }
         });
+
+        defer( start );
     }
 
 	/**
@@ -99,15 +96,19 @@ class BPlayerMain extends Application {
 	override function start():Void {
 		title = 'BPlayer';
 
+        // create the PlayerPage
 		playerPage = new PlayerPage( this );
+		// when ready
+		onready(function() {
+		    // open PlayerPage
+            body.open( playerPage );
 
-		body.open( playerPage );
+            keyboardCommands = new KeyboardCommands( this );
+            keyboardCommands.bind();
 
-		keyboardCommands = new KeyboardCommands( this );
-		keyboardCommands.bind();
-
-		dragManager = new DragDropManager( this );
-		dragManager.init();
+            dragManager = new DragDropManager( this );
+            dragManager.init();
+        });
 
 		//__buildMenus();
         ipcCommands = new RendererIpcCommands( this );
@@ -271,66 +272,25 @@ class BPlayerMain extends Application {
 	public function launchInfo(info : RawLaunchInfo):Void {
 	    // get LaunchInfo
 	    var i:LaunchInfo = LaunchInfo.fromRaw( info );
-	    // get action being performed
-	    var action:String = getAction( i );
+	    trace( i );
 
-        // perform that action
-        switch ( action ) {
-            case 'add':
-                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
-                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
-                player.addItemList( tracks );
+	    // get paths from LaunchInfo
+	    var paths = i.paths.filter.fn(FileSystem.exists( _ ));
+	    // expand paths
+	    var pconverter = new PathListConverter();
+	    paths = pconverter.convert( paths );
+	    trace( paths );
+	    // resolve paths to Tracks
+	    var fconverter = new FileListConverter();
+	    var pl = fconverter.convert(paths.map.fn(new File( _ )));
+	    trace( pl );
 
-            case 'open':
-                player.clearPlaylist();
-                var uris:Array<String> = toUris(getPaths( i ).map.fn(_.toString()));
-                var tracks:Array<Track> = uris.map.fn(_.parseToTrack());
-                player.addItemList( tracks );
-
-            default:
-                trace('unhandled action: $action');
-        }
-	}
-
-	/**
-	  * compute the 'action' specified by the given LaunchInfo
-	  */
-	private function getAction(i : LaunchInfo):String {
-	    if (i.argv.length == 0) {
-	        return 'add';
-	    }
-        else {
-            var aa:String = i.argv[0];
-            try {
-                var aap = Path.fromString( aa );
-                // single-segment, not a valid path to a media file
-                if (aap.pieces.length == 1 && !FileFilter.ALL.test( aap )) {
-                    i.argv.shift();
-                    return aa;
-                }
-                else {
-                    return 'add';
-                }
-            }
-            catch (error : Dynamic) {
-                return 'add';
-            }
-        }
-	}
-
-    /**
-      * get the Array of Paths provided via command-line arguments
-      */
-	private function getPaths(info : LaunchInfo):Array<Path> {
-	    var paths:Array<Path> = new Array();
-	    var p:Null<Path> = null;
-	    for (arg in info.argv) {
-	        p = rta(arg, info.cwd, info.env);
-	        if (p != null) {
-	            paths.push( p );
-	        }
-	    }
-	    return paths;
+        // initialize the database
+        db = new PManDatabase();
+        db.init(function() {
+            // declare ready
+            _rs.fire();
+        });
 	}
 
 	/**
@@ -393,7 +353,9 @@ class BPlayerMain extends Application {
 	/* main function */
 	public static function main():Void {
 	    var app = new BPlayerMain();
-	    app.init( app.start );
+	    app.init(function() {
+	        //
+	    });
 	}
 
 /* === Static Fields === */
