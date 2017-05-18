@@ -106,7 +106,7 @@ class BPlayerMain extends Application {
             playerPage.onPlayerCreated(function(p : Player) {
                 // -- set pre-launch player flags
                 if (i.paths.length > 0) {
-                    p.addFlag( 'from-cli' );
+                    p.flag('src', 'command-line-input');
                 }
 
                 trace('opening page..');
