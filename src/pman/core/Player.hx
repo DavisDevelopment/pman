@@ -63,6 +63,9 @@ class Player extends EventDispatcher {
 		app = main;
 		this.page = page;
 
+        // [this] Player's ready-state
+		_rs = new OnceSignal();
+
 		// [this] Player's controller
 		controller = new PlayerController( this );
 
@@ -78,11 +81,8 @@ class Player extends EventDispatcher {
 		// [this] Player's list of components
 		components = new Array();
 
-		// create the ready-state fields
-		//isReady = false;
-		_rs = new OnceSignal();
-		//readyEvent = new VoidSignal();
-		//readyEvent.once(function() isReady = true);
+        // Player flags
+		flags = new Dict();
 
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
@@ -1227,6 +1227,7 @@ class Player extends EventDispatcher {
 	public var session : PlayerSession;
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
+	public var flags : Dict<String, Dynamic>;
 
 	//private var readyEvent : VoidSignal;
 	// ready signal
