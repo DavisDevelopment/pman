@@ -16,6 +16,7 @@ import pman.core.*;
 #end
 
 import pman.core.JsonData;
+import pman.async.*;
 
 import haxe.Json;
 import haxe.Serializer;
@@ -267,18 +268,42 @@ class AppDir {
 
 #if renderer_process
 
+    /**
+      * check for existence of file containing saved playback properties
+      */
     public inline function hasSavedPlaybackSettings():Bool {
         return Fs.exists(playbackSettingsPath().toString());
     }
 
+    /**
+      * write encoded playback-properties to file
+      */
     public inline function savePlaybackSettings(p : Player):Void {
         playbackSettingsFile().write(ByteArray.ofString(encodePlaybackSettings( p )));
     }
 
-    public inline function loadPlaybackSettings(p:Player, ?done:Void->Void):Void {
-        decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
+    /**
+      * read, decode, and restore saved playback properties
+      */
+    public function loadPlaybackSettings(p:Player, ?cb:VoidCb):Void {
+        function done(?error : Dynamic) {
+            if (cb != null) {
+                defer(function() cb(error));
+            }
+        }
+        //decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
+        try {
+            var encoded = Std.string(playbackSettingsFile().read());
+            decodePlaybackSettings(encoded, p, done);
+        }
+        catch (error : Dynamic) {
+            done( error );
+        }
     }
 
+    /**
+      * serialize playback properties
+      */
     private function encodePlaybackSettings(p : Player):String {
         var s = new Serializer();
         inline function w(x:Dynamic){
@@ -293,17 +318,28 @@ class AppDir {
         return s.toString();
     }
 
-    private function decodePlaybackSettings(s:String, p:Player, ?done:Void->Void):Void {
-        var u = new Unserializer( s );
-        inline function val<T>():T return u.unserialize();
+    /**
+      * decode and restore playback properties
+      */
+    private function decodePlaybackSettings(s:String, p:Player, ?done:VoidCb):Void {
+        inline function cb(?error) {
+            if (done != null) {
+                defer(function() done(error));
+            }
+        }
+        try {
+            var u = new Unserializer( s );
+            inline function val<T>():T return u.unserialize();
 
-        p.playbackRate = val();
-        p.volume = val();
-        p.shuffle = val();
-        p.muted = val();
+            p.playbackRate = val();
+            p.volume = val();
+            p.shuffle = val();
+            p.muted = val();
 
-        if (done != null) {
-            defer( done );
+            cb();
+        }
+        catch (error : Dynamic) {
+            cb( error );
         }
     }
 
