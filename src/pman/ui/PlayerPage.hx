@@ -127,6 +127,14 @@ class PlayerPage extends Page {
 	    (isPlaylistViewOpen()?closePlaylistView:openPlaylistView)();
 	}
 
+    /**
+      * 
+      */
+	public function onPlayerCreated(f : Player->Void):Void {
+	    _playerCreated.await(function() {
+	        f( player );
+	    });
+	}
 /* === Instance Fields === */
 
 	public var stage : Stage;
