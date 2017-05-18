@@ -269,21 +269,9 @@ class BPlayerMain extends Application {
 	/**
 	  * process the given LaunchInfo
 	  */
-	public function launchInfo(info : RawLaunchInfo):Void {
+	public function _provideLaunchInfo(info : RawLaunchInfo):Void {
 	    // get LaunchInfo
-	    var i:LaunchInfo = LaunchInfo.fromRaw( info );
-	    trace( i );
-
-	    // get paths from LaunchInfo
-	    var paths = i.paths.filter.fn(FileSystem.exists( _ ));
-	    // expand paths
-	    var pconverter = new PathListConverter();
-	    paths = pconverter.convert( paths );
-	    trace( paths );
-	    // resolve paths to Tracks
-	    var fconverter = new FileListConverter();
-	    var pl = fconverter.convert(paths.map.fn(new File( _ )));
-	    trace( pl );
+	    launchInfo = LaunchInfo.fromRaw( info );
 
         // initialize the database
         db = new PManDatabase();
@@ -343,6 +331,7 @@ class BPlayerMain extends Application {
 	public var tray : Tray;
 	public var ipcCommands : RendererIpcCommands;
 	public var closingEvent : Signal2<Dynamic, AsyncStack>;
+	public var launchInfo : LaunchInfo;
 
 	private var _ready : Bool;
 	// ready signal

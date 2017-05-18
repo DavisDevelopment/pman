@@ -76,8 +76,10 @@ class RendererIpcCommands {
         b('EditMarks', function() {
             player.editBookmarks();
         });
+
+        // launch info has been received
         b('LaunchInfo', function(e, info:RawLaunchInfo) {
-            main.launchInfo( info );
+            main._provideLaunchInfo( info );
         });
 
         b('AddComponent', function(e, name:String) {
