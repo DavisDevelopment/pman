@@ -3,13 +3,17 @@
 @import "../utils";
 
 .playlist {
-	overflow-y: scroll;
+	/*overflow-y: scroll;*/
+	max-height: 100vh;
+	flex-flow: column;
+	display: flex;
 
 	// The search widget
 	.search-box {
 		margin-left: auto;
 		margin-right: auto;
 		width: 100%;
+		flex: 0 1 auto;
 
 		input[type=text] {
 			font-size: 10pt;
@@ -25,6 +29,11 @@
 		    height: 45px;
 		    cursor: pointer;
 		}
+	}
+
+	.tracks {
+	    overflow-y: scroll;
+	    flex: 1 1 auto;
 	}
 
 	// the Track list widget

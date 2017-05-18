@@ -115,6 +115,7 @@ class PlaylistView extends Pane {
 		searchRow.addClass('search-box');
 		append( searchRow );
 		listRow = new Row();
+		listRow.addClass('tracks');
 		append( listRow );
 	}
 
