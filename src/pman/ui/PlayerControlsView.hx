@@ -41,6 +41,7 @@ class PlayerControlsView extends Ent {
 
 		defer(function() {
 			addButton(new PlaybackButton( this ));
+			addButton(new RepeatButton( this ));
 			addButton(new ShuffleButton( this ));
 			addButton(new PreviousButton( this ));
 

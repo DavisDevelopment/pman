@@ -9,13 +9,14 @@ using tannus.math.TMath;
 
 class PlayerPlaybackProperties {
 	/* Constructor Function */
-	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false):Void {
+	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false, ?repeat:RepeatType):Void {
 	    changed = new Signal();
 
 		this.speed = speed;
 		this.volume = volume;
 		this.shuffle = shuffle;
 		this.muted = muted;
+		this.repeat = (repeat != null) ? repeat : RepeatOff;
 	}
 
 /* === Instance Methods === */
@@ -24,7 +25,7 @@ class PlayerPlaybackProperties {
       * create and return a copy of [this]
       */
 	public function clone():PlayerPlaybackProperties {
-		return new PlayerPlaybackProperties(speed, volume, shuffle, muted);
+		return new PlayerPlaybackProperties(speed, volume, shuffle, muted, repeat);
 	}
 
 	/**
@@ -89,6 +90,16 @@ class PlayerPlaybackProperties {
 	    return muted;
 	}
 
+	public var repeat(default, set): RepeatType;
+	private function set_repeat(v : RepeatType):RepeatType {
+	    var hc = (repeat != v);
+	    repeat = v;
+	    if ( hc ) {
+	        sce(Repeat( repeat ));
+	    }
+	    return repeat;
+	}
+
 /* === Instance Fields === */
 
 	public var changed : Signal<PPChange>;
@@ -102,4 +113,12 @@ enum PPChange {
     Speed(d : Delta<Float>);
     Shuffle(newval : Bool);
     Muted(newval : Bool);
+	Repeat(newval : RepeatType);
+}
+
+enum RepeatType {
+	RepeatOff();
+	RepeatIndefinite();
+	RepeatOnce();
+	RepeatPlaylist();
 }

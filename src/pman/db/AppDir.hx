@@ -317,6 +317,7 @@ class AppDir {
         w( p.volume );
         w( p.shuffle );
         w( p.muted );
+		w( p.repeat );
 
         return s.toString();
     }

@@ -27,6 +27,7 @@ import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
 import pman.core.PlayerStatus;
 import pman.core.PlaybackTarget;
+import pman.core.PlayerPlaybackProperties;
 import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
@@ -1188,6 +1189,10 @@ class Player extends EventDispatcher {
 	public var muted(get, set):Bool;
 	private inline function get_muted() return c.muted;
 	private inline function set_muted(v) return (c.muted = v);
+
+	public var repeat(get, set):RepeatType;
+	private inline function get_repeat() return c.repeat;
+	private inline function set_repeat(v) return (c.repeat = v);
 
 	public var ended(get, never):Bool;
 	private inline function get_ended() return c.ended;

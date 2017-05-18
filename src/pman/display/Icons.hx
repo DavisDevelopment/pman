@@ -48,6 +48,7 @@ class Icons {
 	}
 	public static function cogIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'cog', f);
 	public static function clearIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'clear', f);
+	public static function repeatIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'repeat', f);
 
 	/**
 	  * create the Chromecast icon
