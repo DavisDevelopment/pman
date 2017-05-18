@@ -80,7 +80,12 @@ class Background {
 		var win:BrowserWindow = new BrowserWindow({
 			show: false,
 			width: 640,
-			height: 480
+			height: 480,
+			webPreferences: untyped {
+                nodeIntegration: true,
+                nodeIntegrationInWorker: true,
+                webSecurity: false
+			}
 		});
 		// load the html file onto that BrowserWindow
 		var dir:Path = ap( 'pages/index.html' );
