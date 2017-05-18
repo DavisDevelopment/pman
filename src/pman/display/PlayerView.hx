@@ -31,20 +31,27 @@ class PlayerView extends Ent {
 		
 		player = p;
 
-		controls = new PlayerControlsView( this );
-		addSibling( controls );
-
-		statusBar = new PlayerStatusBar( this );
-		addSibling( statusBar );
-
-		messageBoard = new PlayerMessageBoard( player );
-		addSibling( messageBoard );
-
-        hud = new PlayerHUD( this );
-        addSibling( hud );
-
 		currentMediaRenderer = null;
 		mediaRect = new Rectangle();
+
+        // await readiness of the Player
+        //player.onReady(function() {
+            // create controls view
+            controls = new PlayerControlsView( this );
+            addSibling( controls );
+
+            // create status bar
+            statusBar = new PlayerStatusBar( this );
+            addSibling( statusBar );
+
+            // create message board
+            messageBoard = new PlayerMessageBoard( player );
+            addSibling( messageBoard );
+
+            // create HUD
+            hud = new PlayerHUD( this );
+            addSibling( hud );
+        //});
 	}
 
 /* === PMan Methods === */
@@ -127,7 +134,11 @@ class PlayerView extends Ent {
 	  * calculate [this]'s geometry
 	  */
 	override function calculateGeometry(r : Rectangle):Void {
+		if ( !player.isReady )
+		    return ;
+
 		rect.cloneFrom( r );
+
 		if ( controls.uiEnabled ) {
 			h -= controls.h;
 		}
