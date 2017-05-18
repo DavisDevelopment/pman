@@ -36,6 +36,7 @@ class PlayerPlaybackProperties {
 	    volume = src.volume;
 	    shuffle = src.shuffle;
 	    muted = src.muted;
+	    repeat = src.repeat;
 	}
 
 	/**
