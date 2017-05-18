@@ -22,6 +22,7 @@ import pman.core.history.PlayerHistoryItem as PHItem;
 import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
 import pman.core.PlaybackTarget;
+import pman.async.*;
 
 import foundation.Tools.*;
 import electron.Tools.*;
@@ -37,6 +38,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 using tannus.math.RandomTools;
+using pman.async.VoidAsyncs;
 
 /**
   * Object used to represent the current media Playback context
@@ -62,7 +64,8 @@ class PlayerSession {
 		tabs = [new PlayerTab( this )];
 		activeTabIndex = 0;
 
-        _listen();
+        //_listen();
+        player.onReady( _listen );
 	}
 
 /* === Instance Methods === */
@@ -265,8 +268,8 @@ class PlayerSession {
 	/**
 	  * put a state onto [this]
 	  */
-	public function pullState(state:PlayerSessionState, ?done:Void->Void):Void {
-	    var stack = new AsyncStack();
+	public function pullState(state:PlayerSessionState, ?done:VoidCb):Void {
+	    var stack:Array<VoidAsync> = new Array();
 
 	    // pull the playlist
 	    stack.push(function(next) {
@@ -289,12 +292,14 @@ class PlayerSession {
 	        }
 	    });
 
-	    // run the tasks
-	    stack.run(function() {
-	        if (done != null) {
-	            done();
-	        }
-	    });
+	    if (done == null) {
+	        done = function(?error:Dynamic):Void {
+	            if (error != null)
+	                throw error;
+	        };
+	    }
+
+	    stack.series( done );
 	}
 
 	/**
@@ -309,7 +314,7 @@ class PlayerSession {
 	/**
 	  * load state
 	  */
-	public function restore(?done : Void->Void):Void {
+	public function restore(?done : VoidCb):Void {
 	    // get the File
 	    var f = file();
 	    // if the File exists
@@ -321,7 +326,7 @@ class PlayerSession {
 	    }
         else {
             if (done != null) {
-                defer( done );
+                defer(done.void());
             }
         }
 	}
