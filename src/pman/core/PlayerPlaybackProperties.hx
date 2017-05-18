@@ -28,6 +28,16 @@ class PlayerPlaybackProperties {
 	}
 
 	/**
+	  * copy data from [src] onto [this]
+	  */
+	public function rebase(src : PlayerPlaybackProperties):Void {
+	    speed = src.speed;
+	    volume = src.volume;
+	    shuffle = src.shuffle;
+	    muted = src.muted;
+	}
+
+	/**
 	  * sce -- schedule change event
 	  * schedule that 'changed' be fired with the given PPChange item during the next call stack
 	  */
