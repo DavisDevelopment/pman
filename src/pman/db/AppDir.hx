@@ -16,6 +16,7 @@ import pman.core.*;
 #end
 
 import pman.core.JsonData;
+import pman.core.PlayerPlaybackProperties;
 import pman.async.*;
 
 import haxe.Json;
@@ -288,12 +289,14 @@ class AppDir {
     public function loadPlaybackSettings(p:Player, ?cb:VoidCb):Void {
         function done(?error : Dynamic) {
             if (cb != null) {
-                defer(function() cb(error));
+                //defer(function() cb(error));
+                cb( error );
             }
         }
         //decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
         try {
             var encoded = Std.string(playbackSettingsFile().read());
+            trace('pp: "$encoded"');
             decodePlaybackSettings(encoded, p, done);
         }
         catch (error : Dynamic) {
@@ -324,17 +327,23 @@ class AppDir {
     private function decodePlaybackSettings(s:String, p:Player, ?done:VoidCb):Void {
         inline function cb(?error) {
             if (done != null) {
-                defer(function() done(error));
+                done( error );
             }
         }
         try {
             var u = new Unserializer( s );
             inline function val<T>():T return u.unserialize();
 
+            var pp = new PlayerPlaybackProperties(val(), val(), val(), val());
+            /*
             p.playbackRate = val();
             p.volume = val();
             p.shuffle = val();
             p.muted = val();
+            */
+            //p.onReady(function() {
+                p.session.playbackProperties.rebase( pp );
+            //});
 
             cb();
         }
