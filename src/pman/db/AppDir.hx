@@ -99,12 +99,6 @@ class AppDir {
 		var names = Fs.readDirectory(playlistsPath()).map.fn(Path.fromString(_));
 		return names.filter.fn(_.extension == 'xspf').map.fn(_.basename);
 	}
-	public function allSavedPlaylistNames_():Array<String> {
-	    var pld = playlistsDirectory();
-	    return pld.entries.map.fn( _.path ).filter.fn(_.extension == 'xspf').map(function(path) {
-	        return (new Path( path.name ).basename);
-	    });
-	}
 
 	/**
 	  * check if there is a saved playlist by the given name
