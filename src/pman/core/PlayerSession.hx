@@ -267,17 +267,14 @@ class PlayerSession {
 	  */
 	public function pullState(state:PlayerSessionState, ?done:Void->Void):Void {
 	    var stack = new AsyncStack();
-        //var tmp = player.shuffle;
 
 	    // pull the playlist
 	    stack.push(function(next) {
             var tmp = player.shuffle;
 	        player.shuffle = false;
 	        player.addItemList(state.playlist.toTracks(), function() {
-				//defer(function() {
-                    player.shuffle = tmp;
-                    next();
-                //});
+                player.shuffle = tmp;
+                next();
 	        });
 	    });
 
