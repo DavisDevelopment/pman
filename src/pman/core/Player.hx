@@ -129,6 +129,9 @@ class Player extends EventDispatcher {
                     defer(function() {
                         // if there is a saved previous session
                         if (session.hasSavedState()) {
+                            // declare readiness
+                            _rs.announce();
+
                             // ask the user whether to restore it
                             confirm('Restore Previous Session?', function(restore : Bool) {
                                 // if the user chose to restore session
@@ -137,7 +140,7 @@ class Player extends EventDispatcher {
                                     session.restore(function() {
                                         // declare player ready
                                         //readyEvent.fire();
-                                        _rs.announce();
+                                        //_rs.announce();
                                     });
                                 }
                                 // if the user chose not to restore session
@@ -146,7 +149,7 @@ class Player extends EventDispatcher {
                                     session.deleteSavedState();
                                     // declare the player ready
                                     //readyEvent.fire();
-                                    _rs.announce();
+                                    //_rs.announce();
                                 }
                             });
                         }
