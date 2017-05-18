@@ -31,11 +31,35 @@ class SearchTools {
     public static function getScore(term:SearchTerm, sources:Array<String>, strictness:Int=0):Int {
         switch ( term ) {
             case Word( word ):
-                return fiom(sources, word, strictness);
+                return wfsm(sources, word);
+                //return fiom(sources, word, strictness);
         }
     }
 
 /* === Utility Methods === */
+
+    /**
+      * scores [t] based on the number of times it occurs in [src]
+      */
+    public static function wordFindScore(src:String, t:String):Int {
+        var score:Int = 0, si:Int = 0, i:Int = src.indexOf(t, si);
+        while (i != -1) {
+            score++;
+            si = (i + t.length);
+            i = src.indexOf(t, si);
+        }
+        return score;
+    }
+
+    /**
+      * (multi-)wordFindScore
+      */
+    public static function wfsm(src:Array<String>, t:String):Int {
+        var score:Int = 0;
+        for (s in src)
+            score += wordFindScore(s, t);
+        return score;
+    }
 
     public static function name(q:QuickOpenItem):String {
         return switch ( q ) {
