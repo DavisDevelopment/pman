@@ -21,6 +21,9 @@ using StringTools;
 using Lambda;
 using Slambda;
 
+/*
+   controller for the app page that displays the media player interface
+*/
 class PlayerPage extends Page {
 	/* Constructor Function */
 	public function new(main : BPlayerMain):Void {
