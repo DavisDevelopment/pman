@@ -1172,6 +1172,39 @@ class Player extends EventDispatcher {
 	    return eventTimes[event];
 	}
 
+    /**
+      * get or set the value of a flag
+      */
+	public function flag<T>(key:String, ?value:T):Null<T> {
+	    if (value == js.Lib.undefined) {
+	        return flags[key];
+	    }
+        else {
+            return (flags[key] = value);
+        }
+	}
+
+	/**
+	  * verify existence of a flag
+	  */
+	public function hasFlag(flag : String):Bool {
+	    return flags.exists( flag );
+	}
+
+    /**
+      * delete a flag
+      */
+	public function removeFlag(flag : String):Bool {
+	    return flags.remove( flag );
+	}
+
+	/**
+	  * add a flag
+	  */
+	public inline function addFlag(flag : String):Void {
+	    this.flag(flag, true);
+	}
+
 /* === Computed Instance Fields === */
 
 	public var duration(get, never):Duration;
