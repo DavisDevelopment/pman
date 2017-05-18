@@ -6,6 +6,7 @@ import tannus.geom.*;
 import tannus.html.Element;
 import tannus.events.*;
 import tannus.events.Key;
+import tannus.sys.*;
 
 import crayon.*;
 import foundation.*;
@@ -31,6 +32,7 @@ using tannus.ds.ArrayTools;
 using tannus.ds.AnonTools;
 using Slambda;
 using tannus.ds.SortingTools;
+using pman.media.MediaTools;
 
 class SearchWidget extends Pane {
 	/* Constructor Function */
@@ -49,23 +51,35 @@ class SearchWidget extends Pane {
 	  * build [this]
 	  */
 	override function populate():Void {
-		/*
-		inputRow = new FlexRow([10, 2]);
-		append( inputRow );
-		*/
-		searchInput = new TextInput();
-		//inputRow.pane( 0 ).append( searchInput );
-		append( searchInput );
-		/*
-		submitButton = new Button( 'go' );
-		submitButton.small( true );
-		submitButton.expand( true );
-		inputRow.pane( 1 ).append( submitButton );
-		*/
+	    addClass('search-widget');
 
-		clear = pman.display.Icons.clearIcon(64, 64).toFoundationImage();
+		inputRow = new Pane();
+		inputRow.addClass('input-group');
+		append( inputRow );
+
+		searchInput = new TextInput();
+		searchInput.addClass('input-group-field');
+        inputRow.append( searchInput );
+
+        var igBtnPane:Element = new Element('<div class="input-group-button"/>');
+        inputRow.append( igBtnPane );
+        searchButton = new Element('<input type="submit" class="button" value="go"/>');
+        igBtnPane.append( searchButton );
+
+		clear = pman.display.Icons.clearIcon(64, 64, function(path) {
+		    path.style.fill = player.theme.primary.toString();
+		}).toFoundationImage();
 		clear.addClass('clear');
 		append( clear );
+
+		optionsRow = new FlexRow([6, 6]);
+		optionsRow.css.set('display', 'none');
+		append( optionsRow );
+
+		srcSelect = new Select();
+		srcSelect.option('queue', 'q');
+		srcSelect.option('all media', 'all');
+		optionsRow.pane( 1 ).append( srcSelect );
 
 		__events();
 
@@ -84,14 +98,6 @@ class SearchWidget extends Pane {
 	        clear.css.write({
 	            'display': 'block'
 	        });
-	        /*
-            var sr = searchInput.rect();
-            var cr = clear.rect();
-            cr.centerY = sr.centerY;
-            clear.css.write({
-                'top': '${cr.y}px'
-            });
-            */
         }
         else {
             clear.css.write({
@@ -121,26 +127,37 @@ class SearchWidget extends Pane {
 	  * the search has been 'submit'ed
 	  */
 	private function submit():Void {
+	    // get search data
 		var d:SearchData = getData();
-		
+		// if a search term was provided
 		if (d.search != null) {
+		    // create a search engine
 			var engine = new TrackSearchEngine();
-			engine.setContext(player.session.playlist.toArray());
+			// enable engine's strictness
+			engine.strictness = 1;
+			// set engine's context
+			engine.setContext(player.session.playlist.getRootPlaylist().toArray());
+			// set engine's search term
 			engine.setSearch( d.search );
+			// calculate search results
 			var matches = engine.getMatches();
-			// sort the matches by relevancy
+			// sort the results by relevancy
 			matches.sort(function(x, y) {
 				return -Reflect.compare(x.score, y.score);
 			});
+			// build playlist from results
 			var resultList:Playlist = new Playlist(matches.map.fn( _.item ));
-			resultList.parent = player.session.playlist;
+			resultList.parent = player.session.playlist.getRootPlaylist();
 			player.session.setPlaylist( resultList );
 		}
+		// if search term was empty
 		else {
+		    // reset track list to root
 		    var pl = player.session.playlist;
 		    player.session.setPlaylist(pl.getRootPlaylist());
 		}
 
+        // update display
 		defer( update );
 	}
 
@@ -188,8 +205,11 @@ class SearchWidget extends Pane {
 	public var player : Player;
 	public var playlistView : PlaylistView;
 
-	public var inputRow : FlexRow;
+	public var inputRow : Pane;
 	public var searchInput : TextInput;
+	public var searchButton : Element;
+	public var optionsRow : FlexRow;
+	public var srcSelect : Select<String>;
 	public var clear : foundation.Image;
 	//public var submitButton : Button;
 }
