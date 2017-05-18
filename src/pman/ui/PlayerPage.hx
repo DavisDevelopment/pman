@@ -135,6 +135,15 @@ class PlayerPage extends Page {
 	        f( player );
 	    });
 	}
+
+	public function onPlayerReady(f : Player->Void):Void {
+	    onPlayerCreated(function(p) {
+	        p.onReady(function() {
+	            f( p );
+	        });
+	    });
+	}
+
 /* === Instance Fields === */
 
 	public var stage : Stage;
