@@ -117,8 +117,8 @@ enum PPChange {
 }
 
 enum RepeatType {
-	RepeatOff();
-	RepeatIndefinite();
-	RepeatOnce();
-	RepeatPlaylist();
+	RepeatOff;
+	RepeatIndefinite;
+	RepeatOnce;
+	RepeatPlaylist;
 }
