@@ -89,13 +89,13 @@ class Background {
 	    #end
 		win.loadURL( 'file://$dir' );
 		win.setIcon( icon );
+		playerWindows.push( win );
 		
 		// wait for the window to be ready
 		win.once('ready-to-show', function() {
 			win.show();
 			win.maximize();
 			win.focus();
-			playerWindows.push( win );
 			defer(function() {
                 if (cb != null) {
                     cb( win );
