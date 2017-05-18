@@ -67,6 +67,7 @@ class CatJsLibs extends Concatenate {
       * check that [this] task is even necessary
       */
     private function shouldRun():Bool {
+        return false;
         return sources.anyNewerThan( dest );
     }
 

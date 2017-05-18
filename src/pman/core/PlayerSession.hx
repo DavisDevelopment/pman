@@ -382,6 +382,9 @@ class PlayerSession {
 
                 case Muted( nv ):
                     player.dispatch('change:muted', nv);
+
+				case Repeat( nv ):
+                    player.dispatch('change:repeat', nv);
 	        }
 	    });
 
@@ -481,6 +484,10 @@ class PlayerSession {
 	public var muted(get, set):Bool;
 	private inline function get_muted():Bool return pp.muted;
 	private inline function set_muted(v : Bool):Bool return (pp.muted = v);
+
+	public var repeat(get, set):RepeatType;
+	private inline function get_repeat():RepeatType return pp.repeat;
+	private inline function set_repeat(v : RepeatType):RepeatType return (pp.repeat = v);
 
 	public var mediaProvider(get, never):Null<MediaProvider>;
 	private inline function get_mediaProvider():Null<MediaProvider> return mft.ternary(_.provider, null);

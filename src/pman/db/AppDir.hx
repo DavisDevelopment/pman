@@ -295,6 +295,7 @@ class AppDir {
         w( p.volume );
         w( p.shuffle );
         w( p.muted );
+		w( p.repeat );
 
         return s.toString();
     }
@@ -307,6 +308,7 @@ class AppDir {
         p.volume = val();
         p.shuffle = val();
         p.muted = val();
+		p.repeat = val();
 
         if (done != null) {
             defer( done );
