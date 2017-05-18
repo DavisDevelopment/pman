@@ -12,6 +12,7 @@ import gryffin.display.*;
 
 import electron.ext.*;
 import electron.ext.Dialog;
+import electron.Tools.*;
 
 import pman.core.*;
 import pman.media.*;
@@ -34,6 +35,9 @@ class PlayerPage extends Page {
 		app = main;
 
 		_playerCreated = new OnceSignal();
+
+		player = new Player(app, this);
+		defer( _playerCreated.announce );
 	}
 
 /* === Instance Methods === */
@@ -52,8 +56,7 @@ class PlayerPage extends Page {
 		stage = new Stage( canvas );
 		stage.fill();
 
-		player = new Player(app, this);
-		_playerCreated.announce();
+        player.view.stage = stage;
 		player.attachToStage( stage );
 
         #if debug
