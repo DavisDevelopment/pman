@@ -105,68 +105,15 @@ class Player extends EventDispatcher {
 	  * initialize [this] Player, once it has been given a view
 	  */
 	private function initialize(stage : Stage):Void {
-	    var ad = app.appDir;
-	    var prefs = app.db.preferences;
+	    session.playbackProperties.changed.on(function( x ) {
+	        trace(x + '');
+	    });
 
-	    // if there are playback-properties saved
-	    if (ad.hasSavedPlaybackSettings()) {
-	        // attempt to restore them
-	        ad.loadPlaybackSettings(this, function(?err) {
-	            // report errors
-	            if (err != null)
-	                throw err;
-	            // if sessions are set to auto restore
-	            if ( prefs.autoRestore ) {
-	                // then simply restore last session
-                    session.restore(function() {
-                        // declare player ready
-                        //readyEvent.fire();
-                        _rs.announce();
-                    });
-                }
-                // if sessions are not set to auto restore
-                else {
-                    defer(function() {
-                        // if there is a saved previous session
-                        if (session.hasSavedState()) {
-                            // declare readiness
-                            _rs.announce();
-
-                            // ask the user whether to restore it
-                            confirm('Restore Previous Session?', function(restore : Bool) {
-                                // if the user chose to restore session
-                                if ( restore ) {
-                                    // restore it
-                                    session.restore(function() {
-                                        // declare player ready
-                                        //readyEvent.fire();
-                                        //_rs.announce();
-                                    });
-                                }
-                                // if the user chose not to restore session
-                                else {
-                                    // delete the saved session
-                                    session.deleteSavedState();
-                                    // declare the player ready
-                                    //readyEvent.fire();
-                                    //_rs.announce();
-                                }
-                            });
-                        }
-                        // if there is no saved session
-                        else {
-                            // declare player ready
-                            //readyEvent.fire();
-                            _rs.announce();
-                        }
-                    });
-                }
-	        });
-	    }
-        else {
-            // declare player ready
-            defer( _rs.announce );
-        }
+	    var startup = new PlayerStartup( this );
+	    startup.run(function(?error : Dynamic) {
+	        if (error != null)
+	            throw error;
+	    });
 	}
 
 	/**
@@ -462,7 +409,7 @@ class Player extends EventDispatcher {
 	/**
 	  * restore previously saved Session
 	  */
-	public function restoreState(?done : Void->Void):Void {
+	public function restoreState(?done : VoidCb):Void {
 	    session.restore( done );
 	}
 
