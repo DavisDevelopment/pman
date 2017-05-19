@@ -11,6 +11,10 @@ import gryffin.Tools.*;
 import pman.core.*;
 import pman.format.pmsh.*;
 import pman.pmbash.*;
+import pman.events.*;
+import pman.events.KeyboardEventDescriptor as Ked;
+import pman.events.KeyboardEventType;
+import pman.events.KeyboardEventType as Ket;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
@@ -32,6 +36,8 @@ class KeyboardCommands {
 		_nextKeyDown = new Array();
         _nextKeyUp = new Array();
 		//commands = new Map();
+		hkc = new HotkeyController();
+		_initHkc();
 	}
 
 /* === Instance Methods === */
@@ -52,6 +58,27 @@ class KeyboardCommands {
 	    var target = app.playerPage.stage;
 	    target.off('keydown', handleKeyDown);
 	    target.off('keyup', handleKeyUp);
+	}
+
+    /**
+      * 
+      */
+	private function _initHkc():Void {
+	    var c = hkc.down;
+
+        c.anyOn(function(e) {
+            if (e.key == Key.LetterE) {
+                e.stopPropogation();
+                c.inextWithin(fn(_.key == LetterI), function(status) {
+                    if ( status ) {
+                        trace('sequence <E,I>');
+                    }
+                    else {
+                        trace('sequence failed');
+                    }
+                });
+            }
+        });
 	}
 
 	/**
@@ -77,6 +104,12 @@ class KeyboardCommands {
             _nextKeyDown = [];
             return ;
 	    }
+
+        /*
+	    var ked = Ked.fromEvent( event );
+	    trace( ked );
+	    hkc.emit( event );
+	    */
 
 		switch ( event.key ) {
 			// Space
@@ -401,6 +434,7 @@ class KeyboardCommands {
     private var _nextKeyDown:Array<KeyboardEvent->Void>;
     private var _nextKeyUp:Array<KeyboardEvent->Void>;
 	private var nextCmdCount : Int;
+	private var hkc : HotkeyController;
 
 	//private var commands : Map<String, Void->Void>;
 }
