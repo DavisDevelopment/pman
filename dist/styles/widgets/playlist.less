@@ -15,20 +15,35 @@
 		width: 100%;
 		flex: 0 1 auto;
 
-		input[type=text] {
-			font-size: 10pt;
-			width: 100%;
-			height: auto;
-		}
+        .search-widget {
+            input[type=text] {
+                font-size: 10pt;
+                /*width: 100%;*/
+                height: auto;
+            }
 
-		img.clear {
-		    position: absolute;
-		    z-index: 2;
-		    right: -2px;
-		    top: 37px;
-		    height: 45px;
-		    cursor: pointer;
-		}
+            input[type=submit] {
+                font-size: 10pt;
+                height: auto;
+                padding: 0.5rem 0.7rem;
+                outline: solid 1px #1779BA;
+            }
+
+            img.clear {
+                position: absolute;
+                z-index: 2;
+                right: 38px;
+                top: 37px;
+                height: 45px;
+                cursor: pointer;
+            }
+
+            select {
+                width: 100%;
+                font-size: 10pt;
+                line-height: 9.0pt;
+            }
+        }
 	}
 
 	.tracks {
