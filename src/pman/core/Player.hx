@@ -106,10 +106,6 @@ class Player extends EventDispatcher {
 	  * initialize [this] Player, once it has been given a view
 	  */
 	private function initialize(stage : Stage):Void {
-	    session.playbackProperties.changed.on(function( x ) {
-	        trace(x + '');
-	    });
-
 	    var startup = new PlayerStartup( this );
 	    startup.run(function(?error : Dynamic) {
 	        if (error != null)
