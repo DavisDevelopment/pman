@@ -37,7 +37,7 @@ class CastButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = true;
-		//enabled = false;
+		enabled = false;
 	}
 
 /* === Instance Methods === */

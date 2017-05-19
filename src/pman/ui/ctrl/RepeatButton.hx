@@ -38,8 +38,7 @@ class RepeatButton extends ImagePlayerControlButton {
 	override function update(stage : Stage):Void {
 		super.update( stage );
 
-		var repeatMode:RepeatType = player.repeat;
-		switch (repeatMode) {
+		switch (player.repeat) {
 			case RepeatOff:
 				label = 'Off';
 			case RepeatOnce:
@@ -57,12 +56,12 @@ class RepeatButton extends ImagePlayerControlButton {
 
 	// set up icon info
 	override function initIcon():Void {
-		_il = [Icons.repeatIcon(iconSize, iconSize).toImage()];
+		_il = [Icons.repeatIcon(iconSize, iconSize, function(p){p.style.fill = 'transparent';}).toImage(), Icons.repeatIcon(iconSize, iconSize).toImage()];
 	}
 
 	// get the active icon at any given time
 	override function getIcon():Null<Image> {
-		return _il[0];
+		return _il[(player.repeat == RepeatOff) ? 0 : 1];
 	}
 	
 	// handle click events
