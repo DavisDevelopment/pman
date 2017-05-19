@@ -1,0 +1,28 @@
+-cp tannus/
+-cp gryffin/
+-cp foundation/src/
+-cp crayon/
+-cp ida/
+-cp vex/
+-cp hxpress/src/
+-cp hscript/
+
+-lib slambda
+-lib actuate
+-lib format
+-lib electron
+#-lib closure
+
+-D tannus
+-D node
+-D electron
+-D gryffin
+-D ida
+-D vex
+-D foundation
+
+--each
+
+-main pman.ww.Process
+-D worker
+-js ../dist/scripts/process.worker.js
