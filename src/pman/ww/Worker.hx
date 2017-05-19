@@ -40,14 +40,7 @@ class Worker {
 	  * process incoming packets
 	  */
 	private function onPacket(packet : Packet):Void {
-	    switch ( packet.type ) {
-            case 'command':
-                trace( packet.data );
-                send('command', [1, 2, 3, 4]);
-
-            default:
-                trace('Warning: Unhandled packet of type "${packet.type}"');
-	    }
+	    null;
 	}
 
 	/**
