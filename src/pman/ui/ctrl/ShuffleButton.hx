@@ -37,10 +37,8 @@ class ShuffleButton extends ImagePlayerControlButton {
 
 	// set up the icon data
 	override function initIcon():Void {
+		_il.push(Icons.shuffleIcon(iconSize, iconSize, function(p){p.style.fill = 'transparent';}).toImage());
 		_il.push(Icons.shuffleIcon(iconSize, iconSize).toImage());
-		_il.push(Icons.shuffleIcon(iconSize, iconSize, function(p) {
-			p.style.fill = player.theme.secondary.toString();
-		}).toImage());
 	}
 
 	// get the currently active icon at any given time
@@ -49,9 +47,9 @@ class ShuffleButton extends ImagePlayerControlButton {
 	}
 
     // get the 'glow color'
-	override function getGlowColor():String {
-	    return (player.shuffle ? player.theme.secondary.toString() : 'white');
-	}
+	//override function getGlowColor():String {
+        //return (player.shuffle ? player.theme.secondary.toString() : 'white');
+	//}
 
 	// handle click events
 	override function click(event : MouseEvent):Void {

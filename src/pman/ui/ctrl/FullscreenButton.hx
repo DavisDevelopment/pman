@@ -50,6 +50,6 @@ class FullscreenButton extends ImagePlayerControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-		player.setFullscreen(!player.isFullscreen());
+        player.setFullscreen(!player.isFullscreen());
 	}
 }
