@@ -21,6 +21,7 @@ using tannus.ds.ArrayTools;
 /**
   * class used to handle various long-running tasks from within a node subprocess
   */
+@:autoBuild(pman.ww.WorkerMacros.workerBuilder())
 class Worker {
 	/* Constructor Function */
 	public function new():Void {
