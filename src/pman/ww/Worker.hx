@@ -32,7 +32,7 @@ class Worker {
 	/**
 	  * entry point for the app
 	  */
-	public function start():Void {
+	private function __start():Void {
 		listenForMessages( _onMessage );
 	}
 
