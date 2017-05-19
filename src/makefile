@@ -6,7 +6,7 @@ run:
 	cd ../dist/ && electron . $$args;
 
 compile:
-	haxe build.hxml && cd ../dist/ && ./pack preprocess
+	haxe build.hxml workers.hxml && cd ../dist/ && ./pack preprocess
 
 compile-compress:
 	cd ../dist/ && ./pack -p linux -compress recompile preprocess
