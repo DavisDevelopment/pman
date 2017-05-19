@@ -28,3 +28,5 @@ dist/_thumbs/
 dist/pack
 
 dist/styles/pman\.css
+
+dist/scripts/process\.worker\.js
