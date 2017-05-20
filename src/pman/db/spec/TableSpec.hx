@@ -78,7 +78,6 @@ class TableSpec {
             if (ia != null) {
                 new Object( i ).write( ia );
                 addIndexSpec( i );
-                trace( i );
             }
         }
         return this;
