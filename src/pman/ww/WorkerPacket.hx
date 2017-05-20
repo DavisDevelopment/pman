@@ -16,8 +16,8 @@ abstract WorkerPacket (TWorkerPacket) from TWorkerPacket to TWorkerPacket {
     /**
       * check whether [this] packet is encoded
       */
-    public inline function isEncoded():Bool {
-        return (this.encoding != None);
+    public inline function isEncoded(?t : WorkerPacketEncoding):Bool {
+        return ((t != null ? t : this.encoding) != None);
     }
 
     /**
@@ -34,10 +34,11 @@ abstract WorkerPacket (TWorkerPacket) from TWorkerPacket to TWorkerPacket {
     /**
       * encode an unencoded packet
       */
-    public function encode(type : WorkerPacketEncoding):WorkerPacket {
+    public function encode(etype : WorkerPacketEncoding):WorkerPacket {
         var copy:WorkerPacket = clone();
+        //var etype:WorkerPacketEncoding = (type == null ? this.encoding : type);
         if (!isEncoded()) {
-            switch ( this.encoding ) {
+            switch ( etype ) {
                 case Json:
                     copy.encoding = Json;
                     copy.data = JSON.stringify( this.data );
@@ -65,14 +66,14 @@ abstract WorkerPacket (TWorkerPacket) from TWorkerPacket to TWorkerPacket {
                 return {
                     type: this.type,
                     encoding: None,
-                    data: JSON.parse(cast this.data)
+                    data: JSON.parse(untyped this.data)
                 };
 
             case Haxe:
                 return {
                     type: this.type,
                     encoding: None,
-                    data: Unserializer.run(cast this.data)
+                    data: Unserializer.run(untyped this.data)
                 };
 
             case None:
