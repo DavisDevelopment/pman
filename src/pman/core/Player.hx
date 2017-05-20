@@ -39,6 +39,7 @@ import pman.db.PManDatabase;
 import pman.ds.*;
 import pman.async.*;
 import pman.async.tasks.*;
+import pman.pmbash.Interp as PMBashInterp;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -55,6 +56,7 @@ using Slambda;
 using tannus.math.RandomTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
+using pman.async.Asyncs;
 
 class Player extends EventDispatcher {
 	/* Constructor Function */
@@ -84,6 +86,8 @@ class Player extends EventDispatcher {
 
         // Player flags
 		flags = new Dict();
+
+		pmbashInterp = new PMBashInterp();
 
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
@@ -805,7 +809,6 @@ class Player extends EventDispatcher {
 	  * get a media item by it's index in the playlist
 	  */
 	public inline function getTrack(index : Int):Null<Track> {
-		//return session.playlist[index];
 		return session.playlist[index];
 	}
 
@@ -814,7 +817,6 @@ class Player extends EventDispatcher {
 	  */
 	public inline function getTrackByOffset(offset : Int):Null<Track> {
         return getTrack(session.indexOfCurrentMedia() + offset);
-		//return session.playlist.getByOffset(session.focusedTrack, offset);
 	}
 
 	/**
@@ -841,12 +843,6 @@ class Player extends EventDispatcher {
 		else {
 			var newTrack:Track = delta.current;
 			app.title = 'PMan | ${newTrack.title}';
-			/*
-			message({
-                text: newTrack.title,
-                fontSize: '10pt'
-			});
-			*/
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
@@ -890,7 +886,6 @@ class Player extends EventDispatcher {
             var time:Float = currentTime;
             track.editData(function( data ) {
                 if ( isended ) {
-                    //data.marks = data.marks.filter.fn(!_.type.equals( LastTime ));
                     data.removeLastTimeMark();
                 }
                 else if (time > 0.0) {
@@ -981,21 +976,21 @@ class Player extends EventDispatcher {
 	  * pause playback of media
 	  */
 	public function pause():Void {
-		sim(_.pause());
+		c.pause();
 	}
 
 	/**
 	  * stop playback of media; this cannot be undone
 	  */
 	public function stop():Void {
-		sim(_.stop());
+        sim(_.stop());
 	}
 
 	/**
 	  * toggle the media's playback
 	  */
 	public function togglePlayback():Void {
-		sim(_.togglePlayback());
+		c.togglePlayback();
 	}
 
 	/**
@@ -1122,6 +1117,13 @@ class Player extends EventDispatcher {
 	    return eventTimes[event];
 	}
 
+	/**
+	  * execute a String of pmbash code
+	  */
+	public function exec(code:String, done:VoidCb):Void {
+	    pmbashInterp.executeString(code, done);
+	}
+
     /**
       * get or set the value of a flag
       */
@@ -1215,6 +1217,8 @@ class Player extends EventDispatcher {
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
 	public var flags : Dict<String, Dynamic>;
+
+	public var pmbashInterp : PMBashInterp;
 
 	//private var readyEvent : VoidSignal;
 	// ready signal
