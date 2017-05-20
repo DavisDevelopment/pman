@@ -24,6 +24,6 @@
 #--each
 --next
 
--main pman.ww.Process
+-main pman.ww.workers.HDDProbe
 -D worker
--js ../dist/scripts/process.worker.js
+-js ../dist/scripts/diskprobe.worker.js
