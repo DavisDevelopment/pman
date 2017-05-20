@@ -48,6 +48,11 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
     }
 
     @:to
+    public inline function toMediaProviders():Array<MediaProvider> {
+        return this.map.fn(_.mediaSourceToMediaProvider());
+    }
+
+    @:to
     public inline function toTracks():Array<Track> {
         return this.map.fn(new Track(_.mediaSourceToMediaProvider()));
     }
