@@ -91,6 +91,12 @@ class RendererIpcCommands {
                     null;
             }
         });
+
+        b('Exec', function(e, code:String) {
+            player.exec(code, function(?error) {
+                null;
+            });
+        });
     }
 
     /**
