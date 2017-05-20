@@ -52,6 +52,17 @@ class PlaylistCommand extends Command {
                     player.shufflePlaylist();
                     done();
 
+                case 'delete', 'del', 'remove', 'rm':
+                    var name = args.shift();
+                    try {
+                        var plfile = player.app.appDir.playlistFile( name );
+                        plfile.delete();
+                        done();
+                    }
+                    catch (error : Dynamic) {
+                        done();
+                    }
+
                 default:
                     done();
             }
