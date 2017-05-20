@@ -58,7 +58,7 @@ class VolumeButton extends ImagePlayerControlButton {
 	override function initIcon():Void {
 		//_il = [Icons.clockIcon(iconSize, iconSize).toImage()];
 		_il.push(Icons.volumeIcon(iconSize, iconSize).toImage());
-		_il.push(Icons.muteIcon(iconSize, iconSize, function(p){p.style.fill = 'transparent';}).toImage());
+		_il.push(Icons.muteIcon(iconSize, iconSize).toImage());
         //_il = [Icons.volumeIcon, Icons.muteIcon].map.fn(_(iconSize, iconSize).toImage());
 	}
 

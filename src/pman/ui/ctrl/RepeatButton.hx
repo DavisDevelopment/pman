@@ -35,33 +35,43 @@ class RepeatButton extends ImagePlayerControlButton {
         btnFloat = false;
 	}
 
-	override function update(stage : Stage):Void {
-		super.update( stage );
-
-		switch (player.repeat) {
-			case RepeatOff:
-				label = 'Off';
-			case RepeatOnce:
-				label ='Once';
-			case RepeatIndefinite:
-				label = 'On';
-			case RepeatPlaylist:
-				label = 'All';
-			default:
-				label = 'HOW EVEN?!';
-		}
-	}
+	
 
 /* === Instance Methods === */
 
+    /**
+      * update [this] Button's label
+      */
+    override function update(stage : Stage):Void {
+        super.update( stage );
+
+        switch ( player.repeat ) {
+            case RepeatOff:
+                label = '';
+
+            case RepeatOnce:
+                label ='Once';
+
+            case RepeatIndefinite:
+                label = 'On';
+
+            case RepeatPlaylist:
+                label = 'All';
+        }
+    }
+
 	// set up icon info
 	override function initIcon():Void {
-		_il = [Icons.repeatIcon(iconSize, iconSize, function(p){p.style.fill = 'transparent';}).toImage(), Icons.repeatIcon(iconSize, iconSize).toImage()];
+		_il = [
+			//Icons.repeatIcon(iconSize, iconSize, _fill(player.theme.primary.mix('#FFF', 0.5))).toImage(),
+			Icons.repeatIcon(iconSize, iconSize).toImage(),
+		    Icons.repeatIcon(iconSize, iconSize, _enabled()).toImage()
+		];
 	}
 
 	// get the active icon at any given time
 	override function getIcon():Null<Image> {
-		return _il[(player.repeat == RepeatOff) ? 0 : 1];
+		return _il[(player.repeat.equals( RepeatOff ) ? 0 : 1)];
 	}
 	
 	// handle click events

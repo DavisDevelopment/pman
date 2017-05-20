@@ -21,6 +21,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.ds.AnonTools;
 
 /**
   * button used for toggling fullscreen
@@ -37,8 +38,10 @@ class ShuffleButton extends ImagePlayerControlButton {
 
 	// set up the icon data
 	override function initIcon():Void {
-		_il.push(Icons.shuffleIcon(iconSize, iconSize, function(p){p.style.fill = 'transparent';}).toImage());
-		_il.push(Icons.shuffleIcon(iconSize, iconSize).toImage());
+		_il = Icons.shuffleIcon.with([
+		    _(iconSize, iconSize).toImage(),
+		    _(iconSize, iconSize, _enabled()).toImage()
+		]);
 	}
 
 	// get the currently active icon at any given time

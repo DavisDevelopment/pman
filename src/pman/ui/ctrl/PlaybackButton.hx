@@ -22,6 +22,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.ds.AnonTools;
 
 /**
   * button used for toggling playback
@@ -36,7 +37,10 @@ class PlaybackButton extends ImagePlayerControlButton {
 
 	// set up icon info
 	override function initIcon():Void {
-		_il = [Icons.playIcon(iconSize, iconSize, function(p){p.style.fill = p.style.stroke;}).toImage(), Icons.pauseIcon(iconSize, iconSize, function(p){p.style.fill = p.style.stroke;}).toImage()];
+	    _il = [
+	        Icons.playIcon(iconSize, iconSize).toImage(),
+	        Icons.pauseIcon(iconSize, iconSize).toImage()
+	    ];
 	}
 
 	// get the active icon at any given time
