@@ -20,9 +20,9 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.async.VoidAsyncs;
 
-class ExitCommand extends Command {
+class RestartCommand extends Command {
     override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
-        defer(main.ic.send('Reload'));
+        main.ic.send('Reload');
         done();
     }
 }
