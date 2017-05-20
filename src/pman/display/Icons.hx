@@ -71,8 +71,10 @@ class Icons {
 		return path(w, h, function(p) {
 			p.d = d;
 			p.style.fill = '#E6E6E6';
+			/*
 			p.style.stroke = '#E6E6E6';
 			p.style.strokeWidth = 2;
+			*/
 			if (f != null) f( p );
 		});
 	}
