@@ -111,6 +111,10 @@ class Worker {
 	    );
 	}
 
+	private inline function defer(f : Void->Void):Void {
+	    (untyped __js__('process.nextTick')( f ));
+	}
+
 /* === Computed Instance Fields === */
 
     public var self(get, never):Maybe<Dws>;
