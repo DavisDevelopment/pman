@@ -2,8 +2,9 @@
 all: compile run
 
 run:
-	@read -p "Enter pman args: " args; \
-	cd ../dist/ && electron . $$args;
+	#@read -p "Enter pman args: " args; \
+	#cd ../dist/ && electron . $$args;
+	cd ../dist/ && electron .
 
 compile:
 	haxe build.hxml workers.hxml && cd ../dist/ && ./pack preprocess
