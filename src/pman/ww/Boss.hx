@@ -18,8 +18,9 @@ class Boss {
     /**
       * initialize [this]
       */
-    public function init():Void {
+    public function init():Boss {
         _listen();
+        return this;
     }
 
     public function send(type:String, data:Dynamic, encoding:WorkerPacketEncoding=None):Void {
