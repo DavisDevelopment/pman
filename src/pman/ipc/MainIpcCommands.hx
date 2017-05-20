@@ -42,6 +42,13 @@ class MainIpcCommands {
     }
 
     /**
+      * send pmbash code to the player window to be executed
+      */
+    public function execInPlayer(code : String):Void {
+        send(bg.playerWindow, 'Exec', [code]);
+    }
+
+    /**
       * send command
       */
     public function send(w:BrowserWindow, cmd:String, ?args:Array<Dynamic>):Void {
