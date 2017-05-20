@@ -32,6 +32,7 @@ class Interp extends Interpreter {
             return new AliasCommand( code );
         commands = [
             'exit' => new ExitCommand(),
+            'relaunch' => new RestartCommand(),
             'playlist' => new PlaylistCommand(),
             'pl' => new PlaylistCommand(),
             'player' => new PlayerCommand(),
