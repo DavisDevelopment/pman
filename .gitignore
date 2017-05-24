@@ -30,3 +30,5 @@ dist/pack
 dist/styles/pman\.css
 
 dist/scripts/process\.worker\.js
+
+dist/scripts/diskprobe\.worker\.js
