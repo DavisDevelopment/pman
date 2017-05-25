@@ -27,7 +27,6 @@ using Slambda;
 
 /*
    Renderer for video media
-   TODO render the video element directly when possible
 */
 class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	/* Constructor Function */
@@ -105,6 +104,30 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		super.onDetached( pv );
 		if (underlay != null)
             underlay.destroy();
+	}
+
+	/**
+	  * when the Player gets closed
+	  */
+	override function onClose(p : Player):Void {
+	    if (underlay != null) {
+	        underlay.detach();
+	        underlay = null;
+	    }
+	}
+
+    /**
+      * when the player gets reopened
+      */
+	override function onReopen(p : Player):Void {
+		if ( prefs.directRender ) {
+            underlay = new VideoUnderlay( v );
+            underlay.appendTo( 'body' );
+        }
+        else if (underlay != null) {
+            underlay.detach();
+            underlay = null;
+        }
 	}
 
 /* === Computed Instance Fields === */
