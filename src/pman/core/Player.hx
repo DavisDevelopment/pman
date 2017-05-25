@@ -302,6 +302,7 @@ class Player extends EventDispatcher {
 	  */
 	public function close():Void {
 	    dispatch('close', null);
+	    pause();
 	    if (track != null && track.renderer != null) {
 	        track.renderer.onClose( this );
 	    }
