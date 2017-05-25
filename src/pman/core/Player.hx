@@ -1149,6 +1149,32 @@ class Player extends EventDispatcher {
 	    pmbashInterp.executeString(code, done);
 	}
 
+	/**
+	  * open a pmbash terminal
+	  */
+	public function terminal(?complete:VoidCb, ?code:String):Void {
+	    if (complete == null) {
+	        complete = (function(?e) null);
+	    }
+	    if (code == null) {
+	        code = '';
+	    }
+
+	    var term = new PMBashTerminal( this );
+	    term.readExpr(function(?error:Dynamic, ?expr) {
+	        if (error != null) {
+	            complete( error );
+	        }
+            else if (expr != null) {
+                pmbashInterp.execute(expr, complete);
+            }
+	    });
+	    term.open();
+	    defer(function() {
+	        term.focus();
+	    });
+	}
+
     /**
       * get or set the value of a flag
       */
