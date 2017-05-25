@@ -2,8 +2,6 @@ package pman.ui;
 
 import foundation.*;
 
-import tannus.chrome.FileSystem;
-
 import tannus.html.Element;
 import tannus.ds.Memory;
 import tannus.events.*;
@@ -26,13 +24,6 @@ class PromptBox extends Pane {
 
         modal = new Modal();
 		input = new TextInput();
-		/*
-		var auto = input.el.method( 'autocomplete' );
-		auto({
-			source: ['Ryan', 'Leah', 'Ian'],
-			appendTo: this.el
-		});
-		*/
 
 		titl = new LabelSpan();
 		append( titl );
@@ -135,9 +126,10 @@ class PromptBox extends Pane {
 	private function __listen():Void {
 		input.on('keydown', function(event : KeyboardEvent) {
 			event.stopPropogation();
+			keyup( event );
 		});
 
-		input.on('keyup', keyup);
+		//input.on('keyup', keyup);
 	}
 
 	/**
