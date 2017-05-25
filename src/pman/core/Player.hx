@@ -13,8 +13,6 @@ import tannus.math.Random;
 
 import gryffin.core.*;
 import gryffin.display.*;
-import gryffin.media.MediaObject;
-import gryffin.media.MediaReadyState;
 
 import electron.ext.App;
 import electron.ext.Dialog;
@@ -37,7 +35,11 @@ import pman.ui.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 import pman.ds.*;
+import pman.ww.WorkerPacket;
+import pman.ww.Boss;
+import pman.ww.workers.*;
 import pman.async.*;
+import pman.async.ReadStream;
 import pman.async.tasks.*;
 import pman.pmbash.Interp as PMBashInterp;
 
@@ -525,8 +527,9 @@ class Player extends EventDispatcher {
 	}
 
     // get media object
+    /*
     @:access( pman.media.LocalMediaObjectPlaybackDriver )
-	private function gmo():Null<MediaObject> {
+	private function gmo_():Null<MediaObject> {
 	    var pd = session.playbackDriver;
 	    if (pd == null) {
 	        return null;
@@ -540,6 +543,7 @@ class Player extends EventDispatcher {
             }
         }
 	}
+	*/
 
 	/**
 	  * add a bookmark to the current time
