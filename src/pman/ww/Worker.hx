@@ -101,6 +101,18 @@ class Worker {
         }
 	}
 
+	/**
+	  * terminate [this] process
+	  */
+	private function exit(code : Int):Void {
+	    if (isWebWorker()) {
+	        self.close();
+	    }
+        else {
+            process.exit( code );
+        }
+	}
+
     /**
       * check whether [this] is a WebWorker
       */
