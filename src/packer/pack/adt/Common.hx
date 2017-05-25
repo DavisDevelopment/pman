@@ -24,23 +24,31 @@ class Common extends AppDirTransformer {
         var styles = new Directory(sub('styles'));
         var scripts = new Directory(sub('scripts'));
 
-        var names = Fs.readDirectory( styles.path );
-        names.remove('pman.css');
-        names.remove('scaffolds.css');
-        for (n in names)
-            del.push(sub('styles/$n'));
-        names = Fs.readDirectory( scripts.path );
-        names.remove('background.min.js');
-        names.remove('all-libs.min.js');
-        names.remove('content.min.js');
-        for (n in names)
-            del.push(sub('scripts/$n'));
-        del.push(sub('pages/index.html'));
-        
-        if (ps.platform != 'win32') {
-            names.push('assets/ffmpeg-static/ffmpeg.exe');
-            names.push('assets/ffmpeg-static/ffprobe.exe');
+        if ( go.compress ) {
+            var names = Fs.readDirectory( styles.path );
+            names.remove('pman.css');
+            names.remove('scaffolds.css');
+            for (n in names)
+                del.push(sub('styles/$n'));
+            names = Fs.readDirectory( scripts.path );
+            names.remove('background.min.js');
+            names.remove('all-libs.min.js');
+            names.remove('content.min.js');
+            for (n in names)
+                del.push(sub('scripts/$n'));
+            if ( go.compress )
+                del.push(sub('pages/index.html'));
+            else
+                del.push(sub('pages/index.min.html'));
         }
+        else {
+
+        }
+        
+        //if (ps.platform != 'win32') {
+            //del.push(sub('assets/ffmpeg-static/ffmpeg.exe'));
+            //del.push(sub('assets/ffmpeg-static/ffprobe.exe'));
+        //}
 
         trace('deleting unnecessary files..');
         for (p in del) {
@@ -57,7 +65,12 @@ class Common extends AppDirTransformer {
 
     override function transformMeta(meta:Object, callback:Null<Dynamic>->Object->Void):Void {
         meta['name'] = 'pman';
-        meta['main'] = 'scripts/background.min.js';
+        if ( go.compress ) {
+            meta['main'] = 'scripts/background.min.js';
+        }
+        else {
+            meta['main'] = 'scripts/background.js';
+        }
 
         defer(callback.bind(null, meta));
     }

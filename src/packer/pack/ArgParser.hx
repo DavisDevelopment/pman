@@ -82,7 +82,6 @@ class ArgParser {
                     case '-compress':
                         o.concat = true;
                         o.compress = true;
-                        o.app.haxeDefs.push( 'compress' );
 
                     case '-release':
                         o.release = true;
@@ -175,9 +174,7 @@ class ArgParser {
                         queue(new CompileApp( o ));
 
                     case 'package':
-                        o.compress = true;
                         o.concat = true;
-                        o.app.haxeDefs.push( 'compress' );
                         var beforePack = o.directives.before( dName );
                         if (!(beforePack.has('recompile') && beforePack.has('preprocess'))) {
                             var batch = new BatchTask(cast untyped [
