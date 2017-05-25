@@ -298,6 +298,16 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * handle the closing of the Player page
+	  */
+	public function close():Void {
+	    dispatch('close', null);
+	    if (track != null && track.renderer != null) {
+	        track.renderer.onClose( this );
+	    }
+	}
+
+	/**
 	  * save current playlist to the filesystem
 	  */
 	public function savePlaylist(saveAs:Bool=false, ?name:String, ?done:Void->Void):Void {
