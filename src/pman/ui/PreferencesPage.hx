@@ -30,6 +30,7 @@ class PreferencesPage extends Page {
     public function new(app : BPlayerMain):Void {
         super();
 
+        addClass( 'ui_page' );
         addClass( 'prefeditor' );
 
         this.app = app;
@@ -46,7 +47,21 @@ class PreferencesPage extends Page {
         el.load('preferences.html', null, function(responseText:String, status:String, xhr) {
             defer(function() {
                 syncFields();
-                trace( fields );
+
+                e('#cancel').click(function(ev) {
+                    back();
+                });
+
+                e('#save').click(function(ev) {
+                    var p = app.db.preferences;
+                    p.autoPlay = fields.autoPlay.prop('checked');
+                    p.autoRestore = fields.autoRestore.prop('checked');
+                    p.directRender = fields.directRender.prop('checked');
+                    p.showAlbumArt = fields.showAlbumArt.prop('checked');
+                    p.showSnapshot = fields.showSnapshot.prop('checked');
+                    p.push();
+                    back();
+                });
             });
         });
     }
@@ -61,6 +76,13 @@ class PreferencesPage extends Page {
             df[name] = e('#$name');
         }
         this.fields = df;
+        var p = app.db.preferences;
+
+        fields.autoPlay.prop('checked', p.autoPlay);
+        fields.autoRestore.prop('checked', p.autoRestore);
+        fields.directRender.prop('checked', p.directRender);
+        fields.showAlbumArt.prop('checked', p.showAlbumArt);
+        fields.showSnapshot.prop('checked', p.showSnapshot);
     }
 
     private static inline function e(x : Dynamic):Element return new Element( x );
@@ -76,5 +98,6 @@ private typedef PFields = {
     autoRestore : Element,
     directRender : Element,
     showAlbumArt : Element,
+    showSnapshot : Element,
     snapshotPath : Element
 };
