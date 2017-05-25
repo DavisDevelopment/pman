@@ -78,3 +78,29 @@
     height: 100vh;
     background-color: white;
 }
+
+.pmbash {
+    position: absolute;
+    display: block;
+    z-index: 11111;
+    width: 90%;
+    top: 55px;
+
+    input[type="text"] {
+        display: block;
+        margin: 0;
+        width: 100%;
+        font-family: monospace;
+        font-size: 14px;
+        font-weight: bold;
+        appearance: none;
+        box-shadow: none;
+        border-radius: none;
+        background-color: #272822;
+        color: #46A72D;
+
+        &::before {
+            content: "pm>";
+        }
+    }
+}
