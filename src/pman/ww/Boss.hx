@@ -1,8 +1,12 @@
 package pman.ww;
 
 import tannus.io.Signal;
+import tannus.io.EventDispatcher;
+
 import pman.ww.WorkerPacket;
+
 import tannus.node.ChildProcess;
+
 import js.html.Worker as NWorker;
 
 import Slambda.fn;
@@ -11,6 +15,8 @@ class Boss {
     /* Constructor Function */
     public function new():Void {
         packetEvent = new Signal();
+        _pb = new EventDispatcher();
+        @:privateAccess _pb.__checkEvents = false;
     }
 
 /* === Instance Methods === */
@@ -48,8 +54,14 @@ class Boss {
     /**
       * register an event handler for the given type
       */
-    public inline function on<T>(type:String, handler:Dynamic->Void):Void {
-        packetEvent.when(fn(_.type == type), handler);
+    public function on<T>(type:String, handler:T->Void):Void {
+        _pb.on(type, handler);
+    }
+    public function once<T>(type:String, handler:T->Void):Void {
+        _pb.once(type, handler);
+    }
+    public function off<T>(type:String, handler:T->Void):Void {
+        _pb.off(type, handler);
     }
 
     /**
@@ -62,6 +74,7 @@ class Boss {
                 var pack:WorkerPacket = cast o;
                 pack = pack.decode();
                 packetEvent.call( pack );
+                _pb.dispatch(pack.type, pack.data);
             }
         });
     }
@@ -92,6 +105,8 @@ class Boss {
 /* === Instance Fields === */
 
     public var packetEvent : Signal<WorkerPacket>;
+    // packet broadcaster
+    public var _pb : EventDispatcher;
 
 /* === Static Methods === */
 
