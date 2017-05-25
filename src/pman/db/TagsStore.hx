@@ -44,14 +44,6 @@ class TagsStore extends TableWrapper {
         if (done == null)
             done = untyped fn([e,v]=>null);
         putTagRow( row ).then(done.yield()).unless(done.raise());
-        /*
-        p.then(function( row ) {
-            done(null, row);
-        });
-        p.unless(function( error ) {
-            done(error, null);
-        });
-        */
     }
     public function addTag(tag:Tag, ?done:Cb<TagRow>):Void {
         putTagRow_(tag.toRow(), done);
@@ -64,7 +56,7 @@ class TagsStore extends TableWrapper {
       * retrieve a row from [this] table
       */
     public function getTagRow(id : Int):Promise<Null<TagRow>> {
-        return untyped tos('tags').get( id );
+        return get('tags', id); 
     }
     public function getTagRow_(id:Int, done:Cb<TagRow>):Void {
         getTagRow( id ).then(done.yield()).unless(done.raise());
@@ -178,7 +170,7 @@ class TagsStore extends TableWrapper {
     // get all tag rows
     public function getAllTagRows():ArrayPromise<TagRow> {
         return Promise.create({
-            @forward (untyped tos('tags').getAll());
+            @forward getAll('tags');
         }).array();
     }
     public function getAllTagRows_(done : Cb<Array<TagRow>>):Void {

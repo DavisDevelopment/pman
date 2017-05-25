@@ -35,7 +35,7 @@ class TableWrapper {
     /**
       * get a usable reference to an objectStore
       */
-    public function tos(table:TransactionKey, ?mode:String, ?tmp:String):ObjectStore {
+    public function tos(db:Database, table:TransactionKey, ?mode:String, ?tmp:String):ObjectStore {
         var tableName:String = '';
         if (Std.is(table, String)) {
             tableName = cast table;
@@ -61,21 +61,49 @@ class TableWrapper {
     }
 
     /**
+      * GET
+      */
+    public function get<T>(table:String, id:Dynamic):Promise<Null<T>> {
+        return Promise.create({
+            dbr.cdb(function(db, done) {
+                @forward (untyped tos(db, table).get( id ));
+                done();
+            });
+        });
+    }
+
+    /**
+      * GET ALL
+      */
+    public function getAll<T>(table : String):ArrayPromise<T> {
+        return Promise.create({
+            dbr.cdb(function(db, done) {
+                @forward (untyped tos(db, table).getAll());
+                done();
+            });
+        }).array();
+    }
+
+    /**
       * PUT
       */
     public function put<T>(tableName:String, row:T):Promise<T> {
         return Promise.create({
-            var store = tos(tableName, 'readwrite');
-            var idp = store.put( row );
-            idp.then(function(row_id : Dynamic) {
-                defer(function() {
-                    @forward tos(tableName, 'readonly').get( row_id ).transform.fn(cast _);
+            dbr.cdb(function(db, done) {
+                var store = tos(db, tableName, 'readwrite');
+                var idp = store.put( row );
+                idp.then(function(row_id : Dynamic) {
+                    defer(function() {
+                        defer( done );
+                        @forward get(tableName, row_id);
+                    });
                 });
-            });
-            idp.unless(function(error : Null<Dynamic>) {
-                if (error != null) {
-                    throw error;
-                }
+                idp.unless(function(error : Null<Dynamic>) {
+                    if (error != null) {
+                        defer( done );
+                        throw error;
+                    }
+                });
             });
         });
     }
@@ -84,18 +112,25 @@ class TableWrapper {
       * perform [action] for each row where [test] returns true
       */
     public function walk<T>(table:String, action:T->Void, ?transaction:Transaction, ?test:T->Bool, ?end:Null<Dynamic>->Void):Void {
-        var o = (transaction != null ? transaction.objectStore( table ) : tos( table ));
-        var cw = o.openCursor(function(c, w) {
-            if (c.entry != null) {
-                if (test == null || test(untyped c.entry)) {
-                    action(untyped c.entry);
-                }
+        dbr.cdb(function(db, done) {
+            function dun(?error:Dynamic) {
+                if (end != null)
+                    end( error );
+                done();
             }
+
+            var o = (transaction != null ? transaction.objectStore( table ) : tos(db, table));
+            var cw = o.openCursor(function(c, w) {
+                if (c.entry != null) {
+                    if (test == null || test(untyped c.entry)) {
+                        action(untyped c.entry);
+                    }
+                }
+            });
+
+            cw.error.once(function(err) dun( err ));
+            cw.complete.once(function() dun( null ));
         });
-        if (end != null) {
-            cw.error.once(function(err) end( err ));
-            cw.complete.once(function() end( null ));
-        }
     }
 
     /**
@@ -117,18 +152,21 @@ class TableWrapper {
       */
     public function find<T>(tableName:String, test:T->Bool):Promise<T> {
         return Promise.create({
-            var result:Null<T> = null;
-            var transaction = db.transaction(tableName, 'readonly');
-            transaction.complete.once(function() {
-                return result;
-            });
-            var o = transaction.objectStore( tableName );
-            var cw = o.openCursor(function(c, w) {
-                if (c.entry != null && result == null && test(untyped c.entry)) {
-                    result = untyped c.entry;
-                    w.abort();
-                }
-                c.next();
+            dbr.cdb(function(db, done) {
+                var result:Null<T> = null;
+                var transaction = db.transaction(tableName, 'readonly');
+                transaction.complete.once(function() {
+                    defer( done );
+                    return result;
+                });
+                var o = transaction.objectStore( tableName );
+                var cw = o.openCursor(function(c, w) {
+                    if (c.entry != null && result == null && test(untyped c.entry)) {
+                        result = untyped c.entry;
+                        w.abort();
+                    }
+                    c.next();
+                });
             });
         });
     }
@@ -137,18 +175,29 @@ class TableWrapper {
       * iterate over the given Table, deleting every row for which [text] returns 'true'
       */
     public function deleteWheref<T>(tableName:String, test:T->Bool, done:VoidCb):Void {
-        var tr = db.transaction(tableName, 'readwrite');
-        tr.complete.once(function() {
-            done();
-        });
-        var o = tr.objectStore( tableName );
-        var cw = o.openCursor(function(c, w) {
-            // if the cursor is currently 'over' a row, and [test] returned 'true' for that row
-            if (c.entry != null && test(untyped c.entry)) {
-                //TODO delete c.entry;
-                //trace( c.entry );
-            }
-            c.next();
+        dbr.cdb(function(db, complete) {
+            var tr = db.transaction(tableName, 'readwrite');
+            tr.complete.once(function() {
+                complete();
+                done();
+            });
+            var o = tr.objectStore( tableName );
+            var cw = o.openCursor(function(c, w) {
+                // if the cursor is currently 'over' a row, and [test] returned 'true' for that row
+                if (c.entry != null && test(untyped c.entry)) {
+                    c.delete(function(error : Null<Dynamic>) {
+                        if (error != null) {
+                            complete();
+                            done( error );
+                        }
+                        else {
+                            c.next();
+                        }
+                    });
+                }
+                else
+                    c.next();
+            });
         });
     }
 
@@ -156,9 +205,11 @@ class TableWrapper {
       * delete a particular row of a particular table
       */
     public function deleteFrom(table:String, id:Dynamic, done:VoidCb):Void {
-        //trace('deleting row identified by $id from `${db.db.name}.${table}`');
-        tos(table, 'readwrite').delete(id, function(error:Null<Dynamic>) {
-            done( error );
+        dbr.cdb(function(db, complete) {
+            tos(db, table, 'readwrite').delete(id, function(error:Null<Dynamic>) {
+                complete();
+                done( error );
+            });
         });
     }
 
@@ -170,10 +221,16 @@ class TableWrapper {
         return cast filter(tableName, selecter);
     }
 
+    /**
+      * perform a SELECT query
+      */
     public function select<T>(tableName:String, query:Dynamic):Promise<Null<T>> {
         return cast find(tableName, _selecter( query ));
     }
 
+    /**
+      * create row-selection predicate function
+      */
     private function _selecter(query : Dynamic):Object->Bool {
         return (Std.is(query, String) ? _selecterFromORegex(cast query) : _selecterFromObject(new Object( query )));
     }

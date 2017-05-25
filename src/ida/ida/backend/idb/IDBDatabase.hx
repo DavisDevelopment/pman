@@ -1,4 +1,5 @@
 package ida.backend.idb;
+
 import tannus.ds.*;
 import tannus.html.Win;
 import tannus.html.fs.*;
@@ -43,13 +44,11 @@ class IDBDatabase {
 	}
 
 	/**
-	  * Create and return a new MutableFile
+	  * close [this] database
 	  */
-	/*
-	public function createMutableFile(name:String, ?type:String):Promise<Dynamic> {
-		db.createMutableFile(name, type).fulfill();
+	public inline function close():Void {
+	    db.close();
 	}
-	*/
 
 /* === Computed Instance Fields === */
 

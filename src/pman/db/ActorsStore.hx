@@ -72,7 +72,7 @@ class ActorsStore extends TableWrapper {
       * retrieve a row from [this] table by id
       */
     public function getActorRow(id : Int):Promise<Null<ActorRow>> {
-        return untyped tos('actors').get( id );
+        return get('actors', id);
     }
 
     /**
@@ -134,9 +134,7 @@ class ActorsStore extends TableWrapper {
 
     // get all tag rows
     public function getAllActorRows():ArrayPromise<ActorRow> {
-        return Promise.create({
-            @forward (untyped tos('actors').getAll());
-        }).array();
+        return getAll('actors');
     }
     public function getAllActorRows_(done : Cb<Array<ActorRow>>):Void {
         getAllActorRows().then(done.yield()).unless(done.raise());

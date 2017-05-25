@@ -5,6 +5,7 @@ import tannus.ds.*;
 import tannus.ds.promises.*;
 
 import ida.*;
+import ida.backend.idb.IDBDatabaseConnector.ConnBody;
 
 import pman.core.*;
 import pman.media.*;
@@ -55,24 +56,15 @@ class PManDatabase {
 		}
 
 		build_spec();
-		dbspec.open(function(?error, ?database) {
-		    if (error != null)
-		        throw error;
-            this.db = database;
-            defer( or.fire );
-		});
+		dbc = new DatabaseConnector(DBNAME, DBVERSION, untyped new DatabaseSpecBuilder( dbspec ).build);
+        defer( or.fire );
+	}
 
-        /*
-		var p = Database.open(DBNAME, DBVERSION, build_db);
-		p.then(function( db ) {
-			this.db = db;
-
-			defer( or.fire );
-		});
-		p.unless(function( error ) {
-			throw error;
-		});
-		*/
+	/**
+	  * connect to the database
+	  */
+	public function cdb(body : ConnBody):Void {
+	    dbc.connect( body );
 	}
 
 /* === Database-Creation Methods === */
@@ -231,6 +223,7 @@ class PManDatabase {
 	//public var app : BPlayerMain;
 	public var dbspec : DatabaseSpec;
 	public var db : Database;
+	public var dbc : DatabaseConnector;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
 	public var tagsStore : TagsStore;

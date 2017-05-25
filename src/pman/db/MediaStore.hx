@@ -35,10 +35,7 @@ class MediaStore extends TableWrapper {
       * get an Array of all media item rows
       */
     public function getAllMediaItemRows():ArrayPromise<MediaItemRow> {
-        var store = tos('media_items');
-        return store.getAll().transform(function(dynlist:Array<Dynamic>):Array<MediaItemRow> {
-            return cast dynlist;
-        }).array();
+        return getAll('media_items');
     }
     public function getAllMediaItemRows_(done : Cb<Array<MediaItemRow>>):Void {
         getAllMediaItemRows().then(done.yield()).unless(done.raise());
@@ -57,18 +54,12 @@ class MediaStore extends TableWrapper {
       * request a media_item row by its primary key
       */
     public function getMediaItemRow(id : Int):Promise<Null<MediaItemRow>> {
-        var t = db.transaction('media_items');
-        var store = t.objectStore('media_items');
-        function toMediaItem(dyn : Dynamic):Null<MediaItemRow> {
-            return cast dyn;
-        }
-        var prom = store.get( id ).transform( toMediaItem );
-        t.complete.once(function() {
-            trace('transaction complete');
-        });
-        return prom;
+        return get('media_items', id);
     }
 
+    /**
+      * select by 'uri'
+      */
     public function getMediaItemRowByUri(uri : String):Promise<Null<MediaItemRow>> {
         return cast select('media_items', {
             uri: uri
@@ -133,10 +124,7 @@ class MediaStore extends TableWrapper {
       * retrieve the media_info row associated with the given id
       */
     public function getMediaInfoRow(id : Int):Promise<MediaInfoRow> {
-        return Promise.create({
-            var store = tos( 'media_info' );
-            @forward store.get( id ).transform.fn(cast _);
-        });
+        return get('media_info', id);
     }
     public function getMediaInfoRow_(id:Int, done:Cb<MediaInfoRow>):Void {
         getMediaInfoRow( id ).then(done.yield()).unless(done.raise());
