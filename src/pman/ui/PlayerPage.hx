@@ -79,6 +79,7 @@ class PlayerPage extends Page {
 	    css.set('display', 'block');
 
 	    stage.resume();
+	    player.reopen();
 	}
 
 	/**
@@ -87,7 +88,7 @@ class PlayerPage extends Page {
 	override function close():Void {
 	    css.set('display', 'none');
 	    active = false;
-	    player.pause();
+	    player.close();
 	    stage.pause();
 	}
 
