@@ -308,6 +308,16 @@ class Player extends EventDispatcher {
 	}
 
 	/**
+	  * handle the player page reopening
+	  */
+	public function reopen():Void {
+	    dispatch('reopen', null);
+	    if (track != null && track.renderer != null) {
+	        track.renderer.onReopen( this );
+	    }
+	}
+
+	/**
 	  * save current playlist to the filesystem
 	  */
 	public function savePlaylist(saveAs:Bool=false, ?name:String, ?done:Void->Void):Void {
