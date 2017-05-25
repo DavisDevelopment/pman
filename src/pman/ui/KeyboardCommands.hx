@@ -249,18 +249,7 @@ class KeyboardCommands {
             case SemiColon if ( event.shiftKey ):
                 //TODO move this action into its own method associated with Player
                 defer(function() {
-                    p.prompt('pmbash', null, null, function(line : Null<String>) {
-                        var tokens = Tokenizer.runString( line );
-                        trace(tokens + '');
-                        var tree = Parser.run( tokens );
-                        trace(tree + '');
-                        var interp = new Interp();
-                        interp.execute(tree, function(?error) {
-                            if (error != null) {
-                                throw error;
-                            }
-                        });
-                    });
+                    p.terminal();
                 });
 
             // ctrl+t
