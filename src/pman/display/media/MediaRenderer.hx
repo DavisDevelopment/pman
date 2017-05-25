@@ -39,14 +39,14 @@ class MediaRenderer extends Ent {
 	  * invoked when [this] view has just been attached to the main view
 	  */
 	public function onAttached(pv : PlayerView):Void {
-		trace(Type.getClassName(Type.getClass( this )) + ' attached to the main view');
+		//trace(Type.getClassName(Type.getClass( this )) + ' attached to the main view');
 	}
 
 	/**
 	  * invoked when [this] view has just been detached from the main view
 	  */
 	public function onDetached(pv : PlayerView):Void {
-		trace(Type.getClassName(Type.getClass( this )) + ' detached from the main view');
+		//trace(Type.getClassName(Type.getClass( this )) + ' detached from the main view');
 	}
 
 	/**
