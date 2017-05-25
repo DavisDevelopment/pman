@@ -55,6 +55,15 @@ class MediaRenderer extends Ent {
 	public function onClose(p : Player):Void {
 	    //
 	}
+
+	/**
+	  * invoked when the Player page reopens
+	  */
+	public function onReopen(p : Player):Void {
+	    //
+	}
+
+	/**
 	  * unlink and deallocate [this]'s memory
 	  */
 	public function dispose():Void {
