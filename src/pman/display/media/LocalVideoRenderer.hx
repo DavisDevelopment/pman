@@ -57,7 +57,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		if (pv != null) {
 			var videoSize:Rectangle = ovr;
 			var viewport:Rectangle = pv.rect.clone();
-			var scale:Float = marScale(ovr, pv.rect);
+			var scale:Float = (marScale(ovr, pv.rect) * pv.player.scale);
 
 			// scale the video-rect
 			vr.width = (videoSize.width * scale);
