@@ -214,8 +214,23 @@ class KeyboardCommands {
 				p.playbackRate += (fncc() * 0.02);
 
 			// =
-			case Equals:
-				p.playbackRate = 1.0;
+			case Equals if (event.shiftKey && event.ctrlKey):
+                p.scale += 0.01;
+
+            case Equals if (event.noMods):
+                onDoubleTap(fn(_.noMods), function(didit) {
+                    if ( didit ) {
+                        p.scale = 1.0;
+                    }
+                    else {
+                        p.playbackRate = 1.0;
+                    }
+                });
+
+            case Minus:
+                if ( event.ctrlKey ) {
+                    p.scale -= 0.01;
+                }
 
 			// M
 			case LetterM:
@@ -316,19 +331,27 @@ class KeyboardCommands {
       * 
       */
     private function nextWithin(check:KeyboardEvent->Bool, maxDelay:Float, action:Bool->Void):Void {
+        var called:Bool = false;
         function _handler(event : KeyboardEvent):Void {
             if (check( event )) {
-                action( true );
+                if ( !called ) {
+                    action( true );
+                    called = true;
+                }
                 _nextKeyDown.remove( _handler );
             }
-            else {
+            else if ( !called ) {
                 action( false );
+                called = true;
             }
         }
         nextKeyDown( _handler );
         wait(ceil( maxDelay ), function() {
             _nextKeyDown.remove( _handler );
-            action( false );
+            if ( !called ) {
+                action( false );
+                called = true;
+            }
         });
     }
 
