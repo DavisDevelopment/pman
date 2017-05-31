@@ -387,6 +387,9 @@ class PlayerSession {
 
 				case Repeat( nv ):
                     player.dispatch('change:repeat', nv);
+
+                case Scale( d ):
+                    player.dispatch('change:scale', d);
 	        }
 	    });
 

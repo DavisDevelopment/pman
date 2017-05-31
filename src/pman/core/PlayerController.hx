@@ -300,6 +300,10 @@ class PlayerController {
 	private inline function get_repeat() return session.pp.repeat;
 	private inline function set_repeat(v) return (session.pp.repeat = v);
 
+	public var scale(get, set):Float;
+	private inline function get_scale() return session.pp.scale;
+	private inline function set_scale(v) return (session.pp.scale = v);
+
     /**
       * whether or not the current media has ended
       */
