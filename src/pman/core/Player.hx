@@ -1243,6 +1243,10 @@ class Player extends EventDispatcher {
 	private inline function get_repeat() return c.repeat;
 	private inline function set_repeat(v) return (c.repeat = v);
 
+	public var scale(get, set):Float;
+	private inline function get_scale() return c.scale;
+	private inline function set_scale(v) return (c.scale = v);
+
 	public var ended(get, never):Bool;
 	private inline function get_ended() return c.ended;
 
