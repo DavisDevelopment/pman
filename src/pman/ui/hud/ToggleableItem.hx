@@ -43,7 +43,8 @@ class ToggleableItem extends PlayerHUDItem {
             new ToggleField(this, 'muted', 'change:muted', Getter.create(player.muted?'yes':'no')),
             new ToggleField(this, 'shuffle', 'change:shuffle', Getter.create(player.shuffle?'yes':'no')),
             new ToggleField(this, 'speed', 'change:speed', Getter.create(round(player.playbackRate*100)+'%')),
-            new ToggleField(this, 'volume', 'change:volume', Getter.create(round(player.volume * 100)+'%'))
+            new ToggleField(this, 'volume', 'change:volume', Getter.create(round(player.volume * 100)+'%')),
+            new ToggleField(this, 'scale', 'change:scale', Getter.create(round(player.scale * 100)+'%'))
         ];
     }
 
