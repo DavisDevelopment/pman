@@ -9,7 +9,7 @@ using tannus.math.TMath;
 
 class PlayerPlaybackProperties {
 	/* Constructor Function */
-	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false, ?repeat:RepeatType):Void {
+	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false, ?repeat:RepeatType, scale:Float=1.0):Void {
 	    changed = new Signal();
 
 		this.speed = speed;
@@ -17,6 +17,7 @@ class PlayerPlaybackProperties {
 		this.shuffle = shuffle;
 		this.muted = muted;
 		this.repeat = (repeat != null) ? repeat : RepeatOff;
+		this.scale = scale;
 	}
 
 /* === Instance Methods === */
@@ -25,7 +26,7 @@ class PlayerPlaybackProperties {
       * create and return a copy of [this]
       */
 	public function clone():PlayerPlaybackProperties {
-		return new PlayerPlaybackProperties(speed, volume, shuffle, muted, repeat);
+		return new PlayerPlaybackProperties(speed, volume, shuffle, muted, repeat, scale);
 	}
 
 	/**
@@ -37,6 +38,7 @@ class PlayerPlaybackProperties {
 	    shuffle = src.shuffle;
 	    muted = src.muted;
 	    repeat = src.repeat;
+	    scale = src.scale;
 	}
 
 	/**
@@ -101,6 +103,17 @@ class PlayerPlaybackProperties {
 	    return repeat;
 	}
 
+	public var scale(default, set):Float;
+	private function set_scale(v : Float):Float {
+	    var ov = scale;
+	    var hc = (scale != v);
+	    scale = v;
+	    if ( hc ) {
+	        sce(Scale(new Delta(scale, ov)));
+	    }
+	    return scale;
+	}
+
 /* === Instance Fields === */
 
 	public var changed : Signal<PPChange>;
@@ -115,6 +128,7 @@ enum PPChange {
     Shuffle(newval : Bool);
     Muted(newval : Bool);
 	Repeat(newval : RepeatType);
+	Scale(d : Delta<Float>);
 }
 
 enum RepeatType {
