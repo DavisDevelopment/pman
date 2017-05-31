@@ -318,6 +318,7 @@ class AppDir {
         w( p.shuffle );
         w( p.muted );
 		w( p.repeat );
+		w( p.scale );
 
         return s.toString();
     }
@@ -335,7 +336,7 @@ class AppDir {
             var u = new Unserializer( s );
             inline function val<T>():T return u.unserialize();
 
-            var pp = new PlayerPlaybackProperties(val(), val(), val(), val(), val());
+            var pp = new PlayerPlaybackProperties(val(), val(), val(), val(), val(), val());
             p.session.playbackProperties.rebase( pp );
 
             cb();
