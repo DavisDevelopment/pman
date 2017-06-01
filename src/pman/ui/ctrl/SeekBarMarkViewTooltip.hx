@@ -38,27 +38,70 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class SeekBarMarkViewTooltip {
+class SeekBarMarkViewTooltip extends Ent {
     /* Constructor Function */
     public function new(mv : SeekBarMarkView):Void {
+        super();
+
         markView = mv;
 
         tb = [new TextBox(), new TextBox()];
         tbr = new Array();
         border = new Border(3.0, player.theme.primary.lighten( 20 ), 3.0);
+
+        on('click', onClick);
     }
 
 /* === Instance Methods === */
 
     /**
-      * Paint [this]
+      * update [this]
       */
-    public function paint(c:Ctx, x:Float, y:Float):Void {
+    override function update(stage : Stage):Void {
+        var mr:Rectangle = markView.rect();
+        var colors = getColors();
+
+        _update(colors, mr.centerX);
+    }
+
+    /**
+      * render [this]
+      */
+    override function render(stage:Stage, c:Ctx):Void {
+        //_paint(c, centerX, centerY);
         c.save();
         c.globalAlpha = opacity;
         var colors = getColors();
+        
+        c.beginPath();
+        c.fillStyle = colors[1];
+        c.drawRoundRect(rect, 3.0);
+        c.closePath();
+        c.fill();
 
-        update(colors, x);
+        c.beginPath();
+        c.strokeStyle = border.color;
+        c.lineWidth = border.width;
+        c.drawRoundRect(rect, border.radius);
+        c.closePath();
+        c.stroke();
+
+        for (index in 0...tb.length) {
+            var t = tb[index];
+            var r = tbr[index];
+            c.drawComponent(t, 0, 0, t.width, t.height, r.x, r.y, r.w, r.h);
+        }
+
+        c.restore();
+    }
+
+    /**
+      * Paint [this]
+      */
+    public function _paint(c:Ctx, x:Float, y:Float):Void {
+        c.save();
+        c.globalAlpha = opacity;
+        var colors = getColors();
 
         c.beginPath();
         c.fillStyle = colors[1];
@@ -84,7 +127,7 @@ class SeekBarMarkViewTooltip {
     /**
       * update [this]
       */
-    public function update(colors:Array<Color>, x:Float):Void {
+    public function _update(colors:Array<Color>, x:Float):Void {
         ttr = new Rectangle();
         for (t in tb) {
             //t.color = colors[0];
@@ -102,50 +145,26 @@ class SeekBarMarkViewTooltip {
         t.text = ('(' + markView.key().name + ')');
         t.fontSize = 12;
         t.color = player.theme.secondary;
+    }
 
-        var mvl = @:privateAccess markView.bar.markViews;
-        var prev = mvl[mvl.indexOf(markView)-1];
-        if (prev != null && rect != null && rect.containsRect( prev.tooltip.rect )) {
-            yOffset = (prev.tooltip.rect.h + prev.tooltip.yOffset + margin);
-            var tempy = yOffset;
-            yOffset = 0.0;
-            rect.y = (bar.controls.y - rect.height - margin - yOffset);
-            if (!rect.containsRect( prev.tooltip.rect )) {
-                yOffset = 0.0;
-            }
-            else {
-                yOffset = tempy;
-            }
-        }
-
+    /**
+      * calculate [this]'s geometry
+      */
+    override function calculateGeometry(_r : Rectangle):Void {
         inline function dbl(x:Float):Float return (x * 2);
 
-        rect = new Rectangle(0, 0, (ttr.width + dbl( margin )), (ttr.height + margin));
-        rect.centerX = x;
-        if ( true ) {
-            rect.y = (bar.controls.y - rect.height - margin - yOffset);
+        var mr = markView.rect();
+        w = (ttr.width + dbl( margin ));
+        h = (ttr.height + margin);
 
-            tbr = new Array();
-            var y:Float = (rect.y + margin);
-            for (t in tb) {
-                var r = new Rectangle(0, 0, t.width, t.height);
-                r.centerX = rect.centerX;
-                r.y = y;
-                y += (r.h - 2);
-                tbr.push( r );
-            }
-        }
-        else {
-            rect.y = (bar.y + bar.h + margin);
-            tbr = new Array();
-            var y:Float = (rect.y + margin);
-            for (t in tb) {
-                var r = new Rectangle(0, 0, t.width, t.height);
-                r.centerX = rect.centerX;
-                r.y = y;
-                y += (r.h - 2);
-                tbr.push( r );
-            }
+        tbr = new Array();
+        var yy:Float = (y + margin);
+        for (t in tb) {
+            var r = new Rectangle(0, 0, t.width, t.height);
+            r.centerX = centerX;
+            r.y = yy;
+            yy += (r.h - 2);
+            tbr.push( r );
         }
     }
 
@@ -156,7 +175,7 @@ class SeekBarMarkViewTooltip {
         if (colors == null) {
             var cols = new Array();
             cols.push(new Color(255, 255, 255));
-            cols.push(player.theme.primary);
+            cols.push( player.theme.primary );
             colors = cols.map( player.theme.save );
             return cols;
         }
@@ -170,13 +189,13 @@ class SeekBarMarkViewTooltip {
       */
     public function activate():Void {
         activated = true;
-        hide();
+        _hide();
     }
 
     /**
       * hide [this]
       */
-    private function hide():Void {
+    private function _hide():Void {
         var a = Actuate.tween(this, 0.75, {
             opacity: 0.0
         });
@@ -184,6 +203,16 @@ class SeekBarMarkViewTooltip {
             activated = false;
             opacity = 1.0;
         });
+    }
+
+    /**
+      * handle click events
+      */
+    private function onClick(event : MouseEvent):Void {
+        bar.controls.unlockUiVisibility();
+        bar.bmnav = false;
+        player.currentTime = markView.time;
+        @:privateAccess player.app.keyboardCommands._nextKeyDown = [];
     }
 
 /* === Computed Instance Fields === */
@@ -194,14 +223,20 @@ class SeekBarMarkViewTooltip {
     private var player(get, never):Player;
     private inline function get_player() return bar.player;
 
+    public var progress(get, never):Percent;
+    private inline function get_progress() return Percent.percent(markView.time, player.durationTime);
+
+    public var side(get, never):Bool;
+    private inline function get_side() return (progress.value >= 50.0);
+
 /* === Instance Fields === */
 
     public var markView : SeekBarMarkView;
-    public var rect : Rectangle;
     public var margin:Float = 5.0;
     public var yOffset:Float = 0.0;
     public var opacity:Float = 1.0;
     public var activated : Bool = false;
+    public var hovered : Bool = false;
 
     private var tb : Array<TextBox>;
     private var ttr : Rectangle;
