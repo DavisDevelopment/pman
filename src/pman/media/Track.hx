@@ -3,6 +3,8 @@ package pman.media;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.sys.FSEntry.FSEntryType;
+import tannus.sys.FileSystem as Fs;
 import tannus.http.Url;
 
 import gryffin.display.*;
@@ -484,6 +486,31 @@ class Track implements IComparable<Track> {
             size: size,
             timemarks: [time]
         });
+    }
+
+    /**
+      * get all snapshots attached to [this] Track
+      */
+    public function getSnapshots():Dict<Float, Ref<Image>> {
+        var ssd = new Directory(player.app.appDir.snapshotPath(), true);
+        var gs = new GlobStar('${title}@<time>.png', 'i');
+        var results:Dict<Float, Ref<Image>> = new Dict();
+        for (entry in ssd.entries) {
+            switch ( entry.type ) {
+                case File( file ):
+                    if (gs.test( file.path )) {
+                        var data:Dynamic = gs.match( file.path );
+                        if (data.time != null) {
+                            var time:Float = Std.parseFloat( data.time );
+                            results[time] = new Ref(new Getter(Image.load.bind('file://' + file.path)));
+                        }
+                    }
+
+                default:
+                    null;
+            }
+        }
+        return results;
     }
 
 /* === Computed Instance Fields === */
