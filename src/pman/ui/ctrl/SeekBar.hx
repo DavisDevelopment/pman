@@ -49,6 +49,7 @@ class SeekBar extends Ent {
         lhct = now;
 
         thumb = new ThumbPreviewBox( this );
+        markViewPanel = new SeekBarMarkViewTooltipPanel( this );
         ctb = new TextBox();
         dtb = new TextBox();
         __itb( ctb );
@@ -67,6 +68,7 @@ class SeekBar extends Ent {
         super.init( stage );
 
         controls.addSibling( thumb );
+        controls.addSibling( markViewPanel );
 
         on('click', onClick);
         on('contextmenu', onRightClick);
@@ -111,12 +113,15 @@ class SeekBar extends Ent {
         // previous markviews
         //var _pmv = markViews;
         markViews = new Array();
+        markViewPanel.clear();
         _lfml = null;
         if (player.track != null && player.track.data != null) {
             var marks = player.track.data.marks;
             for (m in marks) {
                 if (m.type.match(Named(_))) {
-                    markViews.push(new MarkView(this, m));
+                    var mv = new MarkView(this, m);
+                    markViews.push( mv );
+                    markViewPanel.addTooltip( mv.tooltip );
                 }
             }
         }
@@ -259,9 +264,9 @@ class SeekBar extends Ent {
         c.fill();
         c.restore();
 
-        if (bmnav || mv.tooltip.activated) {
-            mv.tooltip.paint(c, mr.centerX, mr.centerY);
-        }
+        //if (bmnav || mv.tooltip.activated) {
+            //mv.tooltip.paint(c, mr.centerX, mr.centerY);
+        //}
     }
 
     /**
@@ -472,6 +477,7 @@ class SeekBar extends Ent {
     private var viewed : Rectangle;
 
     private var thumb : ThumbPreviewBox;
+    private var markViewPanel : SeekBarMarkViewTooltipPanel;
     private var ctb:TextBox;
     private var dtb:TextBox;
     private var tb_margin:Float;
