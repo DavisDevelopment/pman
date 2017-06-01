@@ -213,12 +213,13 @@ class KeyboardCommands {
 			case CloseBracket:
 				p.playbackRate += (fncc() * 0.02);
 
-			// =
+			// Control+Shift+=
 			case Equals if (event.shiftKey && event.ctrlKey):
                 p.scale += 0.01;
 
+            // =
             case Equals if (event.noMods):
-                onDoubleTap(fn(_.noMods), function(didit) {
+                onDoubleTap(fn(_.key == Equals && _.noMods), function(didit) {
                     if ( didit ) {
                         p.scale = 1.0;
                     }
