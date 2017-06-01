@@ -267,6 +267,13 @@ class AppDir {
 	    return p;
 	}
 
+	/**
+	  * get the snapshot path
+	  */
+	public function snapshotPath():Path {
+        return (App.getPath( Pictures ).plusString('pman_snapshots'));
+	}
+
 #if renderer_process
 
     /**
