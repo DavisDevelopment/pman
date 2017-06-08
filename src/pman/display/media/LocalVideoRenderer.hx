@@ -13,6 +13,7 @@ import gryffin.display.Video;
 import pman.core.*;
 import pman.media.*;
 import pman.ui.VideoUnderlay;
+import pman.display.VideoFilter;
 
 import foundation.Tools.defer;
 import Std.*;
@@ -35,6 +36,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 
 		//canvas = new Canvas();
 		vr = new Rectangle();
+		filter = 'grayscale(75%)';
 	}
 
 /* === Instance Methods === */
@@ -44,7 +46,18 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
 	    if ( !prefs.directRender ) {
+	        c.save();
+	        if (filter != null) {
+                c.filter = filter;
+            }
             c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
+            c.restore();
+        }
+        else {
+            if (underlay != null) {
+                var cc = underlay.css;
+                cc.set('filter', (filter == null ? 'none' : filter.toString()));
+            }
         }
 	}
 
@@ -148,4 +161,5 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 
 	private var pv : Null<PlayerView> = null;
 	private var underlay : Null<VideoUnderlay> = null;
+	private var filter : Null<VideoFilter> = null;
 }
