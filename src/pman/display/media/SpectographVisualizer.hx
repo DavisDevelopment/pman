@@ -55,16 +55,6 @@ class SpectographVisualizer extends AudioVisualizer {
         var r = player.view.rect;
         c.clearRect(r.x, r.y, r.w, r.h);
 
-        /*
-        if ((renderer is LocalAudioRenderer)) {
-            var ar:LocalAudioRenderer = cast renderer;
-            if (ar.albumArt != null) {
-                var aa:Image = ar.albumArt;
-                c.drawComponent(aa, 0, 0, aa.width, aa.height, r.x, r.y, r.w, r.h);
-            }
-        }
-        */
-
         waveform(stage, c);
     }
 
@@ -117,29 +107,6 @@ class SpectographVisualizer extends AudioVisualizer {
                 });
             }
         }
-
-            /*
-            // draw the left and right channels, but diminished and inverted
-            if ( doubleRender ) {
-                // left
-                c.beginPath();
-                c.strokeStyle = colors[3];
-                c.lineWidth = 1;
-                drawAudioDataVertices(leftData, c, {
-                    value: diminishedInvert.bind(_, 0.44)
-                });
-                c.stroke();
-
-                // right
-                c.beginPath();
-                c.strokeStyle = colors[1];
-                c.lineWidth = 1;
-                drawAudioDataVertices(rightData, c, {
-                    value: diminish.bind(_, 0.44)
-                });
-                c.stroke();
-            }
-            */
     }
 
     /**
@@ -150,6 +117,9 @@ class SpectographVisualizer extends AudioVisualizer {
         return new Pair(d.slice(0, mid), d.slice(mid));
     }
 
+    /**
+      * draw waveform path
+      */
     private function drawWaveformPath(c:Ctx, lineWidth:Float, strokeStyle:Dynamic, data:AudioData<Int>, ?mod:Mod):Void {
         c.beginPath();
         c.strokeStyle = strokeStyle;
@@ -162,7 +132,6 @@ class SpectographVisualizer extends AudioVisualizer {
 	  * draw the spectograph for the given AudioData, onto the given Ctx
 	  */
 	public function drawAudioDataVertices(data:AudioData<Int>, c:Ctx, ?mod:Mod):Void {
-		//var rect:Array<Int> = [ceil(player.view.w), ceil(player.view.h)];
 		var mid:Float = (ceil( player.view.h ) / 2);
 		var sliceWidth:Float = (ceil( player.view.w ) * 1.0 / data.length);
 		var offset:Float, value:Int, n:Float, x:Float=0, y:Float;
