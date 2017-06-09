@@ -17,6 +17,7 @@ import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.ui.pl.TrackView;
 import pman.media.info.Mark;
+import pman.media.info.*;
 import pman.async.*;
 import pman.async.tasks.*;
 
@@ -511,6 +512,13 @@ class Track implements IComparable<Track> {
             }
         }
         return results;
+    }
+
+    /**
+      * get the Bundle for [this] Track
+      */
+    public function getBundle():Bundle {
+        return Bundles.getBundle( title );
     }
 
 /* === Computed Instance Fields === */
