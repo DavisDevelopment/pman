@@ -424,19 +424,13 @@ class KeyboardCommands {
 	}
 	private inline function fncc():Int return flushNextCmdCount();
 
-	/**
-	  * register a keyboard command
-	  */
-	//private inline function cmd(accelerator:String, f:Void->Void):Void {
-		//Gs.register(accelerator, f);
-		//commands[accelerator] = f;
-	//}
-
 /* === Computed Instance Fields === */
 
+    // shorthand reference to the Player
 	private var p(get, never):Player;
 	private inline function get_p():Player return app.player;
 
+    // shorthand reference to the Session
 	private var sess(get, never):PlayerSession;
 	private inline function get_sess():PlayerSession return p.session;
 
