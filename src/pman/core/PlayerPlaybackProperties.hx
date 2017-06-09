@@ -3,6 +3,9 @@ package pman.core;
 import tannus.io.Signal;
 import tannus.ds.Delta;
 
+import haxe.Serializer;
+import haxe.Unserializer;
+
 import electron.Tools.defer;
 
 using tannus.math.TMath;
@@ -39,6 +42,35 @@ class PlayerPlaybackProperties {
 	    muted = src.muted;
 	    repeat = src.repeat;
 	    scale = src.scale;
+	}
+
+	/**
+	  * serialize [this]
+	  */
+	@:keep
+	public function hxSerialize(s : Serializer):Void {
+	    inline function w(x : Dynamic) s.serialize( x );
+	    w( speed );
+	    w( volume );
+	    w( shuffle );
+	    w( muted );
+	    w( repeat );
+	    w( scale );
+	}
+
+	/**
+	  * unserialize [this]
+	  */
+	@:keep
+	public function hxUnserialize(u : Unserializer):Void {
+	    inline function v():Dynamic return u.unserialize();
+	    changed = new Signal();
+	    speed = v();
+	    volume = v();
+	    shuffle = v();
+	    muted = v();
+	    repeat = v();
+	    scale = v();
 	}
 
 	/**
