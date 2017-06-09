@@ -407,6 +407,11 @@ class KeyboardCommands {
 	}
 
 	/**
+	  * get the nextCommandCount
+	  */
+	public inline function getNextCmdCount():Int return nextCmdCount;
+
+	/**
 	  * modifies [nextCmdCount] field, in much the same way as typing number keys on a calculator
 	  */
 	private inline function modifyNextCmdCount(n : Int):Int {
