@@ -36,7 +36,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 
 		//canvas = new Canvas();
 		vr = new Rectangle();
-		filter = 'grayscale(75%)';
+		filter = null;
 	}
 
 /* === Instance Methods === */
