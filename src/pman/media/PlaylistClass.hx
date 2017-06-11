@@ -330,6 +330,15 @@ class PlaylistClass {
 	    return new Playlist(toSet().toArray());
 	}
 
+	/**
+	  * walk up the playlist 'hierarchy', applying [action] to every playlist until reaching the root
+	  */
+	public function ascend(action : Playlist->Void):Void {
+	    action( this );
+	    if (parent != null)
+	        parent.ascend( action );
+	}
+
 /* === Computed Instance Fields === */
 
 	// the number of items in [this] Playlist
