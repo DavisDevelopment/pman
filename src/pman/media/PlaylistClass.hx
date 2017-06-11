@@ -84,6 +84,13 @@ class PlaylistClass {
 	    return (indexOf( t ) > -1);
 	}
 
+	/**
+	  * get all tracks that occur before [t]
+	  */
+	public function before(t : Track):Array<Track> {
+	    return l.slice(0, (has(t)?indexOf(t):null));
+	}
+
 	  * insert the given Track at the given position
 	  */
 	public function insert(pos:Int, track:Track, report:Bool=true):Void {
