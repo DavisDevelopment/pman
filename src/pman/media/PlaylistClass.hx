@@ -73,7 +73,7 @@ class PlaylistClass {
 	/**
 	  * get the index of the given Track
 	  */
-	public function indexOf(track : Track):Int {
+	public inline function indexOf(track : Track):Int {
 		return l.indexOf( track );
 	}
 
