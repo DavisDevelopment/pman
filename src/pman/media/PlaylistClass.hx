@@ -91,6 +91,14 @@ class PlaylistClass {
 	    return l.slice(0, (has(t)?indexOf(t):null));
 	}
 
+	/**
+	  * get all tracks that occur after [t]
+	  */
+	public function after(t : Track):Array<Track> {
+	    return l.slice(has(t)?indexOf(t)+1:0);
+	}
+
+	/**
 	  * insert the given Track at the given position
 	  */
 	public function insert(pos:Int, track:Track, report:Bool=true):Void {
