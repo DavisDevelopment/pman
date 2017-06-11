@@ -6,6 +6,7 @@ import tannus.sys.*;
 import tannus.sys.FSEntry.FSEntryType;
 import tannus.sys.FileSystem as Fs;
 import tannus.http.Url;
+import tannus.geom.Rectangle;
 
 import gryffin.display.*;
 
@@ -28,6 +29,7 @@ import electron.*;
 import electron.Shell;
 import electron.Tools.defer;
 import Slambda.fn;
+import tannus.math.TMath.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -36,6 +38,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 using tannus.ds.SortingTools;
+using tannus.math.TMath;
 
 using pman.async.VoidAsyncs;
 
@@ -518,7 +521,30 @@ class Track implements IComparable<Track> {
       * get the Bundle for [this] Track
       */
     public function getBundle():Bundle {
-        return Bundles.getBundle( title );
+        return Bundles.getBundle( this );
+    }
+
+    /**
+      * 
+      */
+    public function getThumbs():Void {
+        var b = getBundle();
+        var count:Int = 6;
+        var size = '35%';
+        var thumbs = b.getThumbs(count, size);
+        if (thumbs != null) {
+            trace( thumbs );
+        }
+        else {
+            // listen for when the described thumbnail set exists
+            b.awaitThumbs(count, size, function(ts:Thumbs) {
+                thumbs = ts;
+                trace( thumbs );
+            });
+
+            // kick off the generation of those thumbnails
+            b.genThumbs(count, size);
+        }
     }
 
 /* === Computed Instance Fields === */
