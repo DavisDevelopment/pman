@@ -78,6 +78,12 @@ class PlaylistClass {
 	}
 
 	/**
+	  * check whether [this] Playlist contains an instance of [t]
+	  */
+	public function has(t : Track):Bool {
+	    return (indexOf( t ) > -1);
+	}
+
 	  * insert the given Track at the given position
 	  */
 	public function insert(pos:Int, track:Track, report:Bool=true):Void {
