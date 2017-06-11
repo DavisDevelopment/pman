@@ -264,6 +264,38 @@ class Track implements IComparable<Track> {
                 }
             });
 
+            (function() {
+                // utility function for adding a single track (this one) to a saved playlist
+                function add2(n : String) {
+                    main.appDir.editSavedPlaylist(n, function(sl : Playlist) {
+                        sl.push(this);
+                    });
+                }
+                var spli:MenuTemplate = [];
+                for (name in main.appDir.allSavedPlaylistNames()) {
+                    spli.push({
+                        label: name,
+                        click: function(i,w,e) add2(name)
+                    });
+                }
+                if (spli.length > 0)
+                    spli.push({type: 'separator'});
+                spli.push({
+                    label: 'New Playlist',
+                    click: function(i,w,e) {
+                        player.prompt('new playlist title', 'My Playlist Title', null, function(line) {
+                            if (line == null || line.empty())
+                                return;
+                            else add2( line );
+                        });
+                    }
+                });
+                mt.push({
+                    label: 'Add to Playlist',
+                    submenu: spli
+                });
+            }());
+
             mt.push({type: 'separator'});
 
             if (source.match(MSLocalPath(_))) {
