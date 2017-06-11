@@ -16,6 +16,7 @@ import pman.ui.*;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -52,5 +53,15 @@ class NextButton extends ImagePlayerControlButton {
 		if (nt != null) {
 			player.openTrack( nt );
 		}
+	}
+
+    // update tooltip
+	override function update(stage : Stage):Void {
+	    super.update( stage );
+	    var t = player.getNextTrack();
+	    if (t != null) {
+	        tooltip = t.title;
+	    }
+        else tooltip = null;
 	}
 }
