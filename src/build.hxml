@@ -24,15 +24,15 @@
 
 --each
 
--main Background
--D main_process
--js ../dist/scripts/background.js
-
---next 
-
 -main BPlayerMain
 -D debug
 -D renderer_process
 -D js-unflatten
 -js ../dist/scripts/content.js
+
+--next 
+
+-main Background
+-D main_process
+-js ../dist/scripts/background.js
 
