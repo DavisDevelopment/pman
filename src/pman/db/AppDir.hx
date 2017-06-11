@@ -12,6 +12,8 @@ import electron.Tools.*;
 #if renderer_process
 
 import pman.core.*;
+import pman.media.Playlist;
+import pman.Globals.*;
 
 #end
 
@@ -351,6 +353,30 @@ class AppDir {
         catch (error : Dynamic) {
             cb( error );
         }
+    }
+
+    /**
+      * utility method to make changes to a saved playlist
+      */
+    public function editSavedPlaylist(name:String, editor:Playlist->Void):Void {
+        var start:Float = now();
+        var playlist:Playlist = new Playlist();
+        var plf:File = playlistFile( name );
+        if ( plf.exists ) {
+            try {
+                var reader = new pman.format.xspf.Reader();
+                playlist = reader.read(plf.read().toString());
+            }
+            catch (error : Dynamic) {
+                null;
+            }
+        }
+        // apply changes to the playlist object
+        editor( playlist );
+        var data = pman.format.xspf.Writer.run( playlist );
+        plf.write( data );
+        var took:Float = (now() - start);
+        trace('edited saved playlist. took ${took}ms');
     }
 
 #end
