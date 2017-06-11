@@ -48,7 +48,28 @@ class Interp extends Interpreter {
             'plexport' => alias('pl export'),
             'plshuffle' => alias('pl shuffle'),
             'speed' => alias('player speed'),
+            'slow' => alias("speed $pbr_slow"),
+            'veryslow' => alias("speed $pbr_veryslow"),
+            'superslow' => alias("speed $pbr_superslow"),
+            'fast' => alias("speed $pbr_fast"),
+            'veryfast' => alias("speed $pbr_veryfast"),
+            'superfast' => alias("speed $pbr_superfast"),
             'volume' => alias('player volume')
         ];
+    }
+
+    override function __initEnvironment():Void {
+        super.__initEnvironment();
+        if (this.environment == null)
+            environment = new Dict();
+
+        env({
+            pbr_slow: '82',
+            pbr_veryslow: '62',
+            pbr_superslow: '40',
+            pbr_fast: '110',
+            pbr_veryfast: '178',
+            pbr_superfast: '230'
+        });
     }
 }
