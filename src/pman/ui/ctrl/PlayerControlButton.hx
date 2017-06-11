@@ -16,6 +16,7 @@ import pman.ui.*;
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -36,10 +37,10 @@ class PlayerControlButton extends Ent {
 		tb.fontSize = 11;
 		tb.fontSizeUnit = 'px';
 		tb.bold = true;
-		//tb.color = new Color(255, 255, 255);
-		//tb.backgroundColor = new Color(255, 0, 0);
-		//tb.padding = 1;
+		tt = new CanvasTooltip();
+		c.addSibling( tt );
 		label = null;
+		tooltip = null;
 		enabled = true;
 
 		__bindEvents();
@@ -53,15 +54,49 @@ class PlayerControlButton extends Ent {
 	override function update(stage : Stage):Void {
 		super.update( stage );
 
-		if ( !enabled ) {
-			hide();
-		}
-		else {
-			show();
-		}
+        // toggle [this] button's visibility by the value of [enabled]
+        (enabled?show:hide)();
 
-	    var mp = stage.getMousePosition();
+        // update the value of [hovered]
+        var _ph:Bool = hovered;
+	    var mp:Null<Point> = stage.getMousePosition();
 	    hovered = (mp != null && containsPoint( mp ));
+
+	    switch ([_ph, hovered]) {
+	        // mouse cursor has entered [this] button's content rectangle
+            case [false, true]:
+                hoverStartTime = now();
+                hoverIntended = false;
+                tt.hide();
+
+            // mouse cursor has left [this] button's content rectangle
+            case [true, false]:
+                hoverStartTime = 0.0;
+                hoverIntended = false;
+                tt.hide();
+
+            // mouse cursor has remained within the bounds of [this] button's content rectangle
+            case [true, true]:
+                // mouse cursor has been in the content rectangle for at least [hoverIntentDelay] milliseconds
+                // and the 'hoverintent' event has not yet been fired
+                if ((now() - hoverStartTime) >= hoverIntentDelay && !hoverIntended) {
+                    dispatch('hoverintent', mp);
+                    hoverIntended = true;
+                    tt.show();
+                }
+
+            // any other case
+            default:
+                null;
+	    }
+
+	    if (hoverIntended && tooltip != null) {
+	        tt.text = tooltip;
+	        tt.position.spacing = 10.0;
+	        tt.position.from.x = centerX;
+	        tt.position.from.y = y;
+			//tt.update( stage );
+	    }
 	}
 
 	/**
@@ -138,10 +173,17 @@ class PlayerControlButton extends Ent {
 	public var controls : PlayerControlsView;
 	public var btnFloat : BtnFloat;
 	public var label : Null<String>;
+	public var tooltip : Null<String>;
 	public var enabled : Bool;
 	public var hovered : Bool = false;
+	public var hoverIntended : Bool = false;
 
 	private var tb : TextBox;
+	private var tt : CanvasTooltip;
+
+    // 0.8sec
+	private var hoverIntentDelay : Float = 800;
+	private var hoverStartTime : Float = 0.0;
 }
 
 @:enum
