@@ -55,7 +55,13 @@ class Bundles {
     /**
       * create and return a new Bundle instance
       */
-    public static function getBundle(name : String):Bundle {
-        return new Bundle( name );
+    public static function getBundle(track : Track):Bundle {
+        if (!_bc.exists( track.title )) {
+            _bc[track.title] = new Bundle( track );
+        }
+        return _bc[track.title];
     }
+
+    // bundle cache
+    private static var _bc:Map<String, Bundle> = {new Map();};
 }
