@@ -27,17 +27,15 @@ extern class FFfmpeg extends EventEmitter {
     public function size(size : String):Void;
     public function videoSize(size : String):Void;
     public function withSize(size : String):Void;
+    public function renice(niceness : Int = 0):Void;
 
     public function screenshots(options:ScreenshotOptions):Void;
     inline public function onFileNames(f : Array<String>->Void):FFfmpeg {
         return untyped this.on('filenames', f);
     }
-
-    //@:overload(function(n:String,f:Function):FFfmpeg {})
-    //override function on(name:String, f:Function):Void;
-
-    //@:overload(function(n:String,f:Function):FFfmpeg {})
-    //override function once(name:String, f:Function):Void;
+    inline public function onProgress(f : FfmpegProgressEvent->Void):FFfmpeg {
+        return untyped this.on('progress', f);
+    }
 
     inline function onEnd(f : Void->Void):FFfmpeg {
         return untyped on('end', f);
@@ -169,3 +167,11 @@ typedef ScreenshotOptions = {
 };
 
 typedef Time = EitherType<Float, String>;
+typedef FfmpegProgressEvent = {
+    frames: Int,
+    currentFps: Float,
+    currentKbps: Float,
+    targetSize: Float,
+    timemark: Float,
+    percent: Float
+};
