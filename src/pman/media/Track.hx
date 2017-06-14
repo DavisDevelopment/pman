@@ -45,14 +45,18 @@ using pman.async.VoidAsyncs;
 /**
   * pman.media.Track -- object that centralizes media playback state
   */
-class Track implements IComparable<Track> {
+class Track extends EventDispatcher implements IComparable<Track> {
 	/* Constructor Function */
 	public function new(p:MediaProvider):Void {
+	    super();
+
 		provider = p;
 
 		media = null;
 		driver = null;
 		renderer = null;
+
+		__checkEvents = false;
 	}
 
 /* === Instance Methods === */
@@ -112,6 +116,10 @@ class Track implements IComparable<Track> {
 				deallocate();
 				nullify();
 			}
+            else {
+                var ps = driver.getPlaySignal();
+                ps.on(function() player.dispatch('play', null));
+            }
 			callback( error );
 		});
 	}
