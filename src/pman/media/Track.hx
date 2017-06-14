@@ -247,20 +247,72 @@ class Track implements IComparable<Track> {
                 label: 'Play',
                 click: function(i,w,e) player.openTrack( this )
             });
+
+            // place this track immediately after the currently-playing track
             mt.push({
                 label: 'Play Next',
-                click: function(i,w,e) playlist.move(this, fn(session.indexOfCurrentMedia() + 1))
-            });
-            mt.push({
-                label: 'Remove from Playlist',
                 click: function(i,w,e) {
-                    playlist.remove( this );
+                    playlist.ascend.fn(l=>l.move(this, fn(l.getRootPlaylist().indexOf(player.track)+1)));
                 }
             });
             mt.push({
                 label: (data != null && data.starred ? 'Unfavorite' : 'Favorite'),
                 click: function(i,w,e) {
                     toggleStarred();
+                }
+            });
+
+            mt.push({type: 'separator'});
+
+            // remove track from current session playlist (queue)
+            mt.push({
+                label: 'Remove From Queue',
+                click: function(i,w,e) {
+                    playlist.ascend.fn(_.remove(this, _.isRootPlaylist()));
+                }
+            });
+
+            // remove all tracks before [this] one from the queue
+            mt.push({
+                label: 'Remove All Previous Tracks From Queue',
+                click: function(i,w,e) {
+                    // get all tracks that are above [this] one in the list
+                    var affected = playlist.getRootPlaylist().before( this );
+                    if (affected.empty())
+                        return ;
+                    // pop off the last item in that list
+                    var last = affected.pop();
+                    // iterate over the rest
+                    for (t in affected) {
+                        // walking up the playlist hierarchy, removing each track and each layer of that hierarchy
+                        // never broadcasting a 'change' signal
+                        playlist.ascend.fn(_.remove(t, false));
+                    }
+                    // do the same to the last item, and broadcast the 'change' event
+                    // when the last track is removed from the root playlist
+                    playlist.ascend.fn(_.remove(last, _.isRootPlaylist()));
+                }
+            });
+
+            // remove all tracks after [this] one from the queue
+            mt.push({
+                label: 'Remove All Following Tracks From Queue',
+                click: function(i,w,e) {
+                    // get all tracks that are above [this] one in the list
+                    var affected = playlist.getRootPlaylist().after( this );
+                    if (affected.empty())
+                        return ;
+                    // pop off the last item in that list
+                    var last = affected.pop();
+                    // iterate over the rest
+                    for (t in affected) {
+                        // walking up the playlist hierarchy, removing each track and each layer of that hierarchy
+                        // never broadcasting a 'change' signal
+                        playlist.ascend.fn(_.remove(t, false));
+                    }
+                    // do the same to the last item, and broadcast the 'change' event
+                    // when the last track is removed from the root playlist
+                    playlist.ascend.fn(_.remove(last, _.isRootPlaylist()));
                 }
             });
 
