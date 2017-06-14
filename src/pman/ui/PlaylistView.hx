@@ -96,13 +96,13 @@ class PlaylistView extends Pane {
 	/**
 	  * refresh [this] view
 	  */
-	public function refresh():Void {
+	public function refresh(preserveScrollPos:Bool=false):Void {
 	    // save the current scroll pos
-		//var scrollY:Float = el.scrollTop();
+        var scrollY:Float = listRow.el.prop('scrollTop');
+        if (preserveScrollPos)
+            listRow.el.data('scrollTop', scrollY);
 	    // rebuild track list
 		rebuildTracks();
-		// restore scroll pos
-		//el.scrollTop( scrollY );
 	}
 
 	/**
@@ -225,6 +225,13 @@ class PlaylistView extends Pane {
 	  * scroll to the active track
 	  */
 	public function scrollToActive():Void {
+	    // if there is a scroll position saved
+	    if (listRow.el.data('scrollTop') != null) {
+	        // then restore that
+	        listRow.el.prop('scrollTop', listRow.el.data('scrollTop'));
+	        listRow.el.removeData('scrollTop');
+	        return ;
+	    }
 	    if (player.track == null)
 	        return ;
 	    var active:Null<TrackView> = viewFor( player.track );
@@ -232,13 +239,13 @@ class PlaylistView extends Pane {
 	        return ;
 
 	    var vr = rect();
-	    vr.y += el.scrollTop();
+	    vr.y += listRow.el.scrollTop();
 	    var ar = active.rect();
 	    var visible:Bool = active.el.plugin('isOnScreen');
 	    if ( !visible ) {
 	        // the center of the viewport
 	        var y:Float = (ar.y - (vr.h / 3));
-	        el.scrollTop( y );
+	        listRow.el.scrollTop( y );
 	    }
 	}
 
@@ -279,7 +286,7 @@ class PlaylistView extends Pane {
 	  * react to playlist-changes
 	  */
 	private function on_playlist_change(change : PlaylistChange):Void {
-        refresh();
+        refresh( true );
 	}
 
 	
