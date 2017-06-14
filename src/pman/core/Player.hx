@@ -872,7 +872,9 @@ class Player extends EventDispatcher {
 			var ms = app.db.mediaStore;
 			newTrack.editData(function( data ) {
 			    // increment the 'views'
-			    data.views++;
+			    if (getStatus().match(Playing)) {
+			        data.views++;
+			    }
 
                 // get previous playback progress (if available)
                 var lastTime:Null<Float> = data.getLastTime();
@@ -888,6 +890,16 @@ class Player extends EventDispatcher {
                     });
                 }
 			});
+
+			if (!getStatus().match(Playing)) {
+			    once('play', untyped function() {
+			        if (track == newTrack) {
+			            newTrack.editData(function(data) {
+			                data.views++;
+			            });
+			        }
+			    });
+			}
 		}
 
 		// automatically save the playback settings
