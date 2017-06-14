@@ -257,13 +257,19 @@ class KeyboardCommands {
                 }
 
             // bookmark navigation
-            case BackTick, LetterB:
+            case LetterB:
                 // initiate that shit
                 p.view.controls.seekBar.bookmarkNavigation();
 
             // :
             case SemiColon if ( event.shiftKey ):
                 //TODO move this action into its own method associated with Player
+                defer(function() {
+                    p.terminal();
+                });
+
+            // `
+            case BackTick:
                 defer(function() {
                     p.terminal();
                 });
