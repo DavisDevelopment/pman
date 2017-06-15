@@ -26,6 +26,7 @@ import pman.async.*;
 
 import foundation.Tools.*;
 import electron.Tools.*;
+import pman.Globals.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -108,13 +109,7 @@ class PlayerSession {
 	  * add a Media item onto the queue
 	  */
 	private function plpush(track : Track):Void {
-		if ( shuffle ) {
-			//playlist.insert([0, playlist.length].randint(), track);
-			playlist.shuffledPush( track );
-		}
-		else {
-			playlist.push( track );
-		}
+	    (shuffle?playlist.shuffledPush:playlist.push)( track );
 	}
 
 	/**
@@ -252,7 +247,6 @@ class PlayerSession {
 	  * check whether [this] Session has any media
 	  */
 	public inline function hasMedia():Bool {
-		//return mc.allValuesPresent();
 		return (focusedTrack != null);
 	}
 
@@ -306,21 +300,18 @@ class PlayerSession {
 	  * save state
 	  */
 	public function save():Void {
-	    var f = file();
 	    var state = getState();
-	    f.write(state.encode());
+	    Fs.write(filePath(), state.encode());
 	}
 
 	/**
 	  * load state
 	  */
 	public function restore(?done : VoidCb):Void {
-	    // get the File
-	    var f = file();
 	    // if the File exists
-	    if ( f.exists ) {
+	    if (hasSavedState()) {
 	        // decode the state
-	        var state = PlayerSessionState.decode(f.read());
+	        var state = PlayerSessionState.decode(Fs.read(filePath()));
 	        // pull the state onto [this] Session
 	        pullState(state, done);
 	    }
@@ -335,7 +326,6 @@ class PlayerSession {
 	  * check whether there is a session.dat file
 	  */
 	public function hasSavedState():Bool {
-		//return file().exists;
 		return FileSystem.exists(filePath());
 	}
 
@@ -344,12 +334,51 @@ class PlayerSession {
 	  */
 	public function deleteSavedState():Void {
 	    try {
-            //file().delete();
             FileSystem.deleteFile(filePath());
         }
         catch (error : Dynamic) {
             return ;
         }
+	}
+
+	/**
+	  * save the PlaypackProperties
+	  */
+	public function savePlaybackSettings():Void {
+	    Fs.write(psPath(), encodePlaybackSettings());
+	}
+
+	/**
+	  * load the PlaybackProperties
+	  */
+	public function loadPlaybackSettings():Void {
+	    try {
+	        var data = Fs.read(psPath());
+	        var props = decodePlaybackSettings( data );
+	        playbackProperties.rebase( props );
+	    }
+	    catch (error : Dynamic) {
+	        return ;
+	    }
+	}
+
+	/**
+	  * encode PlaybackProperties
+	  */
+	public function encodePlaybackSettings():ByteArray {
+	    var s = new Serializer();
+	    playbackProperties.hxSerialize( s );
+	    return ByteArray.ofString(s.toString());
+	}
+
+	/**
+	  * decode PlaybackProperties
+	  */
+	public function decodePlaybackSettings(data : ByteArray):PlayerPlaybackProperties {
+	    var u = new Unserializer(data.toString());
+	    var i = Type.createEmptyInstance( PlayerPlaybackProperties );
+	    i.hxUnserialize( u );
+	    return i;
 	}
 
 	/**
@@ -370,7 +399,7 @@ class PlayerSession {
 	    // on any change to the playback properties
 	    playbackProperties.changed.on(function( change ) {
 	        // save the playback settings
-	        player.app.appDir.savePlaybackSettings( player );
+	        savePlaybackSettings();
 
 	        switch ( change ) {
                 case Volume( d ):
@@ -416,13 +445,11 @@ class PlayerSession {
                 else {
                     player.track.editData(function( i ) {
                         i.setLastTime( player.currentTime );
-                        trace('editing TrackData');
                     }, next);
                 }
 	        });
 	        stack.push(function(next) {
 	            defer(function() {
-	                trace('saving session');
 	                player.saveState();
 	                next();
 	            });
@@ -439,11 +466,11 @@ class PlayerSession {
 	    return BPlayerMain.instance.appDir.lastSessionPath();
 	}
 
-	/**
-	  * get the session.dat File
-	  */
-	public static inline function file():File {
-	    return new File(filePath());
+    /**
+      * get the Path to the playback properties file
+      */
+	private static inline function psPath():Path {
+	    return bpmain.appDir.playbackSettingsPath();
 	}
 
 	/**

@@ -48,15 +48,15 @@ class PlayerStartup extends Task1 {
       * restore playback properties if there are any saved
       */
     private function restore_playbackProperties(done : VoidCb):Void {
-        if (appDir.hasSavedPlaybackSettings()) {
-            appDir.loadPlaybackSettings(player, function(?error : Dynamic) {
-                trace('playback properties loaded');
-                done( error );
-            });
-        }
-        else {
-            defer(done.void());
-        }
+        defer(function() {
+            try {
+                player.session.loadPlaybackSettings();
+                done();
+            }
+            catch (err:Dynamic) {
+                done( err );
+            }
+        });
     }
 
     /**

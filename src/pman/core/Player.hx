@@ -903,7 +903,7 @@ class Player extends EventDispatcher {
 		}
 
 		// automatically save the playback settings
-		app.appDir.savePlaybackSettings( this );
+		session.savePlaybackSettings();
 
 		// notify all components
 		components.iter.fn(_.onTrackChanged(delta));
