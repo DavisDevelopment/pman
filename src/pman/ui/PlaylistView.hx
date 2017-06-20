@@ -42,6 +42,11 @@ class PlaylistView extends Pane {
 		tracks = new Array();
 		_tc = new Map();
 
+	    var kc = player.app.keyboardCommands;
+	    if (!kc.hasModeHandler('playlist:sidebar')) {
+	        kc.registerModeHandler('playlist:sidebar', keycom);
+	    }
+
 		build();
 	}
 
@@ -55,6 +60,9 @@ class PlaylistView extends Pane {
 
 		player.session.trackChanged.on( on_track_change );
 		player.session.playlist.changeEvent.on( on_playlist_change );
+
+	    var kc = player.app.keyboardCommands;
+	    kc.mode = 'playlist:sidebar';
 
 		defer(function() {
             //searchWidget.searchInput.focus();
@@ -70,6 +78,9 @@ class PlaylistView extends Pane {
 		player.session.trackChanged.off( on_track_change );
 		player.session.playlist.changeEvent.off( on_playlist_change );
 		dispatch('close', null);
+		var kc = player.app.keyboardCommands;
+	    kc.mode = 'default';
+	    deselectAll();
 		detach();
 	}
 
