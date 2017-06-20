@@ -107,6 +107,14 @@ class KeyboardCommands {
 	public function deregisterModeHandler(modeName : String):Bool {
 	    return modeHandlers.remove( modeName );
 	}
+
+    /**
+      * check registry for a handler for the given mode
+      */
+	public function hasModeHandler(modeName : String):Bool {
+	    return modeHandlers.exists( modeName );
+	}
+
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
