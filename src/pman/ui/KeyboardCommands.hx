@@ -159,232 +159,234 @@ class KeyboardCommands {
             return ;
 	    }
 
-        /*
-	    var ked = Ked.fromEvent( event );
-	    trace( ked );
-	    hkc.emit( event );
-	    */
+        if (mode != 'default') {
+            var modeHandler = getModeHandler( mode );
+            (modeHandler || handleDefault)( event );
+        }
+        else {
+            switch ( event.key ) {
+                // Space
+                case Space:
+                    p.togglePlayback();
 
-		switch ( event.key ) {
-			// Space
-			case Space:
-				p.togglePlayback();
+                // N
+                case LetterN, Key.NumpadPlus:
+                    //p.gotoNext();
+                    p.gotoByOffset(fncc());
 
-			// N
-			case LetterN, Key.NumpadPlus:
-				//p.gotoNext();
-				p.gotoByOffset(fncc());
-
-			// P or -
-			case LetterP, Key.NumpadMinus:
-			    if ( event.shiftKey ) {
-			        p.gotoByOffset( -1 );
-			    }
-                else {
-                    var n = fncc();
-                    if (n == 1)
-                        p.gotoPrevious();
-                    else
-                        p.gotoByOffset( n );
-                }
-
-            // Backspace
-            case Backspace:
-                p.startOver();
-
-			// X
-			case LetterX:
-			    var ct = sess.focusedTrack;
-			    if (ct != null) {
-			        p.gotoByOffset( 1 );
-			        sess.playlist.remove( ct );
-			    }
-
-            // jump to a random time in the track
-			case LetterR if ( event.noMods ):
-			    onDoubleTap(fn(_.noMods), function(dblTapped) {
-			        if ( dblTapped ) {
-			            var r = new Random();
-			            p.currentTime = r.randfloat(0.0, p.durationTime);
-			        }
-                    else {
-                        trace('you pressed the R key');
-                    }
-			    });
-
-			case LetterR if ( event.shiftKey ):
-			    onDoubleTap(fn(_.shiftKey), function( didit ) {
-			        if ( didit ) {
-			            var r = new Random();
-			            p.gotoTrack(r.randint(0, p.session.playlist.length));
-			        }
-                    else {
-                        //
-                    }
-			    });
-			
-            // toggle shuffle
-            case LetterS if ( event.shiftKey ):
-                p.shuffle = !p.shuffle;
-                p.dispatch('toggle-shuffle', null);
-
-            case LetterS if ( event.noMods ):
-                onDoubleTap(fn(_.noMods), function( didit ) {
-                    if ( didit ) {
-                        p.snapshot();
-                    }
-                });
-
-            // toggle controls visibility
-			case LetterH:
-				p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
-
-			// Right Arrow key
-			case Right:
-				var n:Float = seekTimeDelta( event );
-				p.currentTime += n;
-
-			// Left Arrow key
-			case Left:
-				var n:Float = -seekTimeDelta( event );
-				p.currentTime += n;
-
-            // Up Arrow Key
-			case Up:
-			    var n:Float = volumeDelta( event );
-			    p.volume += n;
-
-			// Down Arrow Key
-			case Down:
-			    var n:Float = -volumeDelta( event );
-			    p.volume += n;
-
-			// [ key
-			case OpenBracket:
-				p.playbackRate -= (fncc() * 0.02);
-
-			// ] key
-			case CloseBracket:
-				p.playbackRate += (fncc() * 0.02);
-
-			// Control+Shift+=
-			case Equals if (event.shiftKey && event.ctrlKey):
-                p.scale += 0.01;
-
-            // =
-            case Equals if (event.noMods):
-                onDoubleTap(fn(_.key == Equals && _.noMods), function(didit) {
-                    if ( didit ) {
-                        p.scale = 1.0;
+                // P or -
+                case LetterP, Key.NumpadMinus:
+                    if ( event.shiftKey ) {
+                        p.gotoByOffset( -1 );
                     }
                     else {
-                        p.playbackRate = 1.0;
+                        var n = fncc();
+                        if (n == 1)
+                            p.gotoPrevious();
+                        else
+                            p.gotoByOffset( n );
                     }
-                });
 
-            case Minus:
-                if ( event.ctrlKey ) {
-                    p.scale -= 0.01;
-                }
+                // go to the beginning of the Track and erase playback progress
+                case Backspace:
+                    p.startOver();
 
-			// M
-			case LetterM:
-				if ( event.ctrlKey ) {
-					p.addBookmark();
-				}
-				else {
-					p.muted = !p.muted;
-				}
+                // remove current track from queue
+                case LetterX:
+                    var ct = sess.focusedTrack;
+                    if (ct != null) {
+                        p.gotoByOffset( 1 );
+                        sess.playlist.remove( ct );
+                    }
 
-			// S
-			case LetterS if ( event.shiftKey ):
-			    p.snapshot();
-
-            // *
-            case NumpadAsterisk:
-                if (p.track != null) {
-                    p.track.toggleStarred();
-                }
-            case Number8 if ( event.shiftKey ):
-                if (p.track != null) {
-                    p.track.toggleStarred();
-                }
-
-            // bookmark navigation
-            case LetterB:
-                // initiate that shit
-                p.view.controls.seekBar.bookmarkNavigation();
-
-            // :
-            case SemiColon if ( event.shiftKey ):
-                //TODO move this action into its own method associated with Player
-                defer(function() {
-                    p.terminal();
-                });
-
-            // `
-            case BackTick:
-                defer(function() {
-                    p.terminal();
-                });
-
-            // ctrl+t
-            case LetterT if (event.ctrlKey || event.metaKey):
-                if ( event.shiftKey ) {
-                    p.tdfprompt(function(?error) {
-                        if (error != null)
-                            throw error;
+                // jump to a random time in the track
+                case LetterR if ( event.noMods ):
+                    onDoubleTap(fn(_.noMods), function(dblTapped) {
+                        if ( dblTapped ) {
+                            var r = new Random();
+                            p.currentTime = r.randfloat(0.0, p.durationTime);
+                        }
+                        else {
+                            trace('you pressed the R key');
+                        }
                     });
-                }
-                else {
-                    sess.setTab(sess.newTab());
-                }
 
-		/* --- 'next-command-count' modifiers --- */
+                // jump to a random Track in the Playlist
+                case LetterR if ( event.shiftKey ):
+                    onDoubleTap(fn(_.shiftKey), function( didit ) {
+                        if ( didit ) {
+                            var r = new Random();
+                            p.gotoTrack(r.randint(0, p.session.playlist.length));
+                        }
+                        else {
+                            //
+                        }
+                    });
+                
+                // toggle shuffle
+                case LetterS if ( event.shiftKey ):
+                    p.shuffle = !p.shuffle;
+                    p.dispatch('toggle-shuffle', null);
 
-            // number 0
-			case Number0, Numpad0:
-				mncc( 0 );
+                // capture snapshot
+                case LetterS if ( event.noMods ):
+                    onDoubleTap(fn(_.noMods), function( didit ) {
+                        if ( didit ) {
+                            p.snapshot();
+                        }
+                    });
 
-            // number 1
-			case Number1, Numpad1:
-				numkey(1, event);
+                // toggle controls visibility
+                case LetterH:
+                    p.view.controls.uiEnabled = !p.view.controls.uiEnabled;
 
-            // number 2
-			case Number2, Numpad2:
-				numkey(2, event);
+                // Right Arrow key
+                case Right:
+                    var n:Float = seekTimeDelta( event );
+                    p.currentTime += n;
 
-            // number 3
-			case Number3, Numpad3:
-				numkey(3, event);
+                // Left Arrow key
+                case Left:
+                    var n:Float = -seekTimeDelta( event );
+                    p.currentTime += n;
 
-            // number 4
-			case Number4, Numpad4:
-				numkey(4, event);
+                // Up Arrow Key
+                case Up:
+                    var n:Float = volumeDelta( event );
+                    p.volume += n;
 
-            // number 5
-			case Number5, Numpad5:
-				numkey(5, event);
+                // Down Arrow Key
+                case Down:
+                    var n:Float = -volumeDelta( event );
+                    p.volume += n;
 
-            // number 6
-			case Number6, Numpad6:
-				numkey(6, event);
+                // [ key
+                case OpenBracket:
+                    p.playbackRate -= (fncc() * 0.02);
 
-            // number 7
-			case Number7, Numpad7:
-				numkey(7, event);
+                // ] key
+                case CloseBracket:
+                    p.playbackRate += (fncc() * 0.02);
 
-            // number 8
-			case Number8, Numpad8:
-				numkey(8, event);
+                // Control+Shift+=
+                case Equals if (event.shiftKey && event.ctrlKey):
+                    p.scale += 0.01;
 
-            // number 9
-			case Number9, Numpad9:
-				numkey(9, event);
+                // =
+                case Equals if (event.noMods):
+                    onDoubleTap(fn(_.key == Equals && _.noMods), function(didit) {
+                        if ( didit ) {
+                            p.scale = 1.0;
+                        }
+                        else {
+                            p.playbackRate = 1.0;
+                        }
+                    });
 
-			default:
-				null;
-		}
+                case Minus:
+                    if ( event.ctrlKey ) {
+                        p.scale -= 0.01;
+                    }
+
+                // M
+                case LetterM:
+                    if ( event.ctrlKey ) {
+                        p.addBookmark();
+                    }
+                    else {
+                        p.muted = !p.muted;
+                    }
+
+                // S
+                case LetterS if ( event.shiftKey ):
+                    p.snapshot();
+
+                // *
+                case NumpadAsterisk:
+                    if (p.track != null) {
+                        p.track.toggleStarred();
+                    }
+                case Number8 if ( event.shiftKey ):
+                    if (p.track != null) {
+                        p.track.toggleStarred();
+                    }
+
+                // bookmark navigation
+                case LetterB:
+                    // initiate that shit
+                    p.view.controls.seekBar.bookmarkNavigation();
+
+                // :
+                case SemiColon if ( event.shiftKey ):
+                    //TODO move this action into its own method associated with Player
+                    defer(function() {
+                        p.terminal();
+                    });
+
+                // `
+                case BackTick:
+                    defer(function() {
+                        p.terminal();
+                    });
+
+                // ctrl+t
+                case LetterT if (event.ctrlKey || event.metaKey):
+                    if ( event.shiftKey ) {
+                        p.tdfprompt(function(?error) {
+                            if (error != null)
+                                throw error;
+                        });
+                    }
+                    else {
+                        sess.setTab(sess.newTab());
+                    }
+
+            /* --- 'next-command-count' modifiers --- */
+
+                // number 0
+                case Number0, Numpad0:
+                    mncc( 0 );
+
+                // number 1
+                case Number1, Numpad1:
+                    numkey(1, event);
+
+                // number 2
+                case Number2, Numpad2:
+                    numkey(2, event);
+
+                // number 3
+                case Number3, Numpad3:
+                    numkey(3, event);
+
+                // number 4
+                case Number4, Numpad4:
+                    numkey(4, event);
+
+                // number 5
+                case Number5, Numpad5:
+                    numkey(5, event);
+
+                // number 6
+                case Number6, Numpad6:
+                    numkey(6, event);
+
+                // number 7
+                case Number7, Numpad7:
+                    numkey(7, event);
+
+                // number 8
+                case Number8, Numpad8:
+                    numkey(8, event);
+
+                // number 9
+                case Number9, Numpad9:
+                    numkey(9, event);
+
+                default:
+                    null;
+            }
+        }
 	}
 
     /**
