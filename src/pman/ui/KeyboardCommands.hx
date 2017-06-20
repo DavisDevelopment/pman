@@ -121,6 +121,21 @@ class KeyboardCommands {
 	public function getModeHandler(modeName : String):Maybe<KeyboardEvent->Void> {
 	    return modeHandlers[modeName];
 	}
+
+	/**
+	  * extend a mode handler
+	  */
+	public function extendModeHandler(parentModeName:String, modeName:String, handler:(KeyboardEvent->Void)->KeyboardEvent->Void):Void {
+	    var parentHandler:Null<KeyboardEvent->Void> = modeHandlers[parentModeName];
+	    if (parentHandler == null) {
+	        throw new js.Error('No handler for mode "$parentModeName"; Cannot extend');
+	    }
+	    registerModeHandler(modeName, function(event : KeyboardEvent):Void {
+	        handler(parentHandler, event);
+	    });
+	}
+
+	/**
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
