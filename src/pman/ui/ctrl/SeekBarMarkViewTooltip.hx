@@ -7,6 +7,7 @@ import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
 import tannus.math.Percent;
+import tannus.math.Random;
 import tannus.events.*;
 import tannus.events.Key;
 
@@ -37,6 +38,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.math.TMath;
 
 class SeekBarMarkViewTooltip extends Ent {
     /* Constructor Function */
@@ -48,6 +50,14 @@ class SeekBarMarkViewTooltip extends Ent {
         tb = [new TextBox(), new TextBox()];
         tbr = new Array();
         border = new Border(3.0, player.theme.primary.lighten( 20 ), 3.0);
+        var r = new Random();
+        color = (function() {
+            var base = r.choice([player.theme.secondary, player.theme.secondary.invert()]);
+            var hsl = base.toHsl();
+            hsl.hue += r.randfloat(-0.35, 0.35);
+            return Color.fromHsl( hsl );
+        }());
+        tuning = [r.randbool(), r.randbool()];
 
         on('click', onClick);
     }
@@ -68,17 +78,18 @@ class SeekBarMarkViewTooltip extends Ent {
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
-        //_paint(c, centerX, centerY);
         c.save();
         c.globalAlpha = opacity;
         var colors = getColors();
         
+        // draw background
         c.beginPath();
         c.fillStyle = colors[1];
         c.drawRoundRect(rect, 3.0);
         c.closePath();
         c.fill();
 
+        // draw border
         c.beginPath();
         c.strokeStyle = border.color;
         c.lineWidth = border.width;
@@ -86,11 +97,28 @@ class SeekBarMarkViewTooltip extends Ent {
         c.closePath();
         c.stroke();
 
+        // draw textual data
         for (index in 0...tb.length) {
             var t = tb[index];
             var r = tbr[index];
             c.drawComponent(t, 0, 0, t.width, t.height, r.x, r.y, r.w, r.h);
         }
+
+        // draw indicator
+        var m = markView;
+        var mr = m.rect();
+        c.strokeStyle = color;
+        c.lineWidth = 4.5;
+        c.beginPath();
+        var ix = (side ? x : x + w);
+        var dy = (player.view.controls.y - 2.0);
+        var tunums = [tuning[0]?0.60:0.40, tuning[1]?0.7:0.3];
+        c.moveTo(ix, centerY);
+        c.lineTo(ix.lerp(mr.centerX, tunums[0]), centerY);
+        c.lineTo(ix.lerp(mr.centerX, tunums[0]), centerY.lerp(dy, tunums[1]));
+        c.lineTo(mr.centerX, centerY.lerp(dy, tunums[1]));
+        c.lineTo(mr.centerX, dy);
+        c.stroke();
 
         c.restore();
     }
@@ -227,7 +255,11 @@ class SeekBarMarkViewTooltip extends Ent {
     private inline function get_progress() return Percent.percent(markView.time, player.durationTime);
 
     public var side(get, never):Bool;
-    private inline function get_side() return (progress.value >= 50.0);
+    private function get_side() {
+        var d = player.track.data;
+        //return (progress.value >= 50.0);
+        return (d.marks.indexOf(markView.mark) >= ceil(d.marks.length / 2));
+    }
 
 /* === Instance Fields === */
 
@@ -237,6 +269,8 @@ class SeekBarMarkViewTooltip extends Ent {
     public var opacity:Float = 1.0;
     public var activated : Bool = false;
     public var hovered : Bool = false;
+    public var color : Color;
+    public var tuning : Array<Bool>;
 
     private var tb : Array<TextBox>;
     private var ttr : Rectangle;
