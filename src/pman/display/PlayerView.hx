@@ -16,6 +16,7 @@ import pman.core.*;
 import pman.display.media.*;
 import pman.ui.*;
 import pman.ui.hud.*;
+import pman.ui.tabs.*;
 import pman.ui.statusbar.*;
 
 using StringTools;
@@ -51,6 +52,9 @@ class PlayerView extends Ent {
             // create HUD
             hud = new PlayerHUD( this );
             addSibling( hud );
+
+            tabBar = new TabViewBar( this );
+            addSibling( tabBar );
         //});
 	}
 
@@ -139,6 +143,11 @@ class PlayerView extends Ent {
 
 		rect.cloneFrom( r );
 
+        if ( tabBar.display ) {
+            h -= tabBar.h;
+            y += tabBar.h;
+        }
+
 		if ( controls.uiEnabled ) {
 			h -= controls.h;
 		}
@@ -178,6 +187,7 @@ class PlayerView extends Ent {
 	public var messageBoard : PlayerMessageBoard;
 	public var statusBar : PlayerStatusBar;
 	public var hud : PlayerHUD;
+	public var tabBar : TabViewBar;
 	public var mediaRect : Rectangle;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
