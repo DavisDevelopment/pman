@@ -27,6 +27,7 @@ import pman.async.*;
 import foundation.Tools.*;
 import electron.Tools.*;
 import pman.Globals.*;
+import Slambda.fn;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -74,13 +75,8 @@ class PlayerSession {
 	/**
 	  * get the index of the currently playing media
 	  */
-	public function indexOfCurrentMedia():Int {
-		if (hasMedia()) {
-			return playlist.indexOf( focusedTrack );
-		}
-		else {
-			return -1;
-		}
+	public inline function indexOfCurrentMedia():Int {
+	    return (focusedTrack != null ? playlist.indexOf( focusedTrack ) : -1);
 	}
 
 	/**
@@ -119,7 +115,7 @@ class PlayerSession {
 		var prev = focusedTrack;
 		var pre_delta:Delta<Null<Track>> = new Delta(track, prev);
 		trackChanging.call( pre_delta );
-		if (focusedTrack != null) {
+		if (focusedTrack != null && focusedTrack.isMounted()) {
 			blur( focusedTrack );
 		}
 		_mountIfNecessary(track, function() {
@@ -164,6 +160,7 @@ class PlayerSession {
 		// unlink the Track
 		if (track == focusedTrack) {
 			player.view.detachRenderer();
+			tab.blurredTrack = focusedTrack;
 			focusedTrack = null;
 
 			var post_delta = new Delta(null, track);
@@ -447,6 +444,41 @@ class PlayerSession {
 	}
 
 	/**
+	  * create a new tab
+	  */
+	public function newTab():Int {
+	    var nt = new PlayerTab( this );
+	    tabs.push( nt );
+	    return (tabs.length - 1);
+	}
+
+	/**
+	  * switch active tabs
+	  */
+	public function setTab(tabIndex : Int):PlayerTab {
+	    if (tabs[tabIndex] == null)
+	        return activeTab;
+	    if (tabIndex != activeTabIndex) {
+	        player.dispatch('tabswitching', null);
+	        blur();
+	        activeTabIndex = tabIndex;
+	        if (activeTab.blurredTrack != null) {
+	            focus( tab.blurredTrack );
+	            tab.blurredTrack = null;
+            }
+            else if (activeTab.playlist.length > 0) {
+                focus(activeTab.playlist[0]);
+            }
+	        player.dispatch('tabswitched', null);
+	    }
+        else if (activeTab.blurredTrack != null) {
+            focus( activeTab.blurredTrack );
+            activeTab.blurredTrack = null;
+        }
+	    return activeTab;
+	}
+
+	/**
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
@@ -522,6 +554,17 @@ class PlayerSession {
 	    });
 
 	    targetChanged.on( _onTargetChanged );
+
+        // handle tab switching events
+        player.on('tabswitching', untyped function() {
+            //
+        });
+	    player.on('tabswitched', untyped function() {
+	        var plView = player.getPlaylistView();
+	        if (plView != null) {
+	            plView.refresh();
+	        }
+	    });
 	}
 
 	/**
