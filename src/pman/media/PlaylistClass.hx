@@ -313,6 +313,7 @@ class PlaylistClass {
 	public function toJSON():Array<String> {
 	    return map.fn(_.provider.getURI());
 	}
+	//public function toStrings():Array<String> return toJSON();
 
     /**
       * convert [this] Playlist to a Set of Tracks
@@ -321,6 +322,13 @@ class PlaylistClass {
 	    var set:Set<Track> = new Set();
 	    set.pushMany( l );
 	    return set;
+	}
+
+    /**
+      * create a MediaSourceList from [this]
+      */
+	public function toMediaSourceList():MediaSourceList {
+	    return new MediaSourceList(map.fn(_.source));
 	}
 
     /**
@@ -362,5 +370,21 @@ class PlaylistClass {
 	public static function fromJSON(dataStrings : Array<String>):PlaylistClass {
 		var tracks:Array<Track> = dataStrings.map.fn(_.parseToTrack());
 		return new PlaylistClass( tracks );
+	}
+
+    /**
+      * build a Playlist from a MediaSourceList object
+      */
+	public static function fromMediaSourceList(msl : MediaSourceList):PlaylistClass {
+	    return new PlaylistClass(msl.map.fn(new Track(_.mediaSourceToMediaProvider())));
+	}
+
+    /**
+      * build a Playlist from an Array of Strings that represent references to playable media in some form or another
+      */
+	public static function fromStrings(sl : Iterable<String>):PlaylistClass {
+	    return new PlaylistClass([for (s in sl) {
+	        s.parseToTrack();
+	    }]);
 	}
 }
