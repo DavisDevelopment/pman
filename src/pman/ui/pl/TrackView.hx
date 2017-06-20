@@ -247,6 +247,22 @@ class TrackView extends Pane {
 		return cg( name );
 	}
 
+    private inline function _ag(name : String):Bool {
+        return !(untyped [null, 'false', 'f'].has(el.attr(name)));
+    }
+    private inline function _as(name:String, value:Bool):Void {
+        if (!value)
+            el.removeAttr( name );
+        else
+            el.attr(name, 'true');
+    }
+    private inline function a(name:String, ?value:Bool):Bool {
+        if (value != null) {
+            _as(name, value);
+        }
+        return _ag( name );
+    }
+
 /* === Computed Instance Fields === */
 
 	public var player(get, never):Player;
