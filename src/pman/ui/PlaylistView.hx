@@ -434,6 +434,13 @@ class PlaylistView extends Pane {
         else return null;
 	}
 
+    /**
+      *
+      */
+	public function getFirstSelectedTrack():Null<Track> {
+	    return getTrackSelection().ternary(_.get( 0 ), null);
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
