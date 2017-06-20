@@ -30,6 +30,7 @@ class AudioVisualizer {
     /* Constructor Function */
     public function new(r : Mor):Void {
         renderer = r;
+        viewport = new Rectangle();
     }
 
 /* === Instance Methods === */
@@ -45,7 +46,7 @@ class AudioVisualizer {
       * update data associated with visualization
       */
     public function update(stage : Stage):Void {
-
+        viewport = player.view.rect;
     }
 
     /**
@@ -97,29 +98,6 @@ class AudioVisualizer {
         }];
         mr.audioManager.buildTree( done );
     }
-    private function build_tree_(cb : Void->Void):Void {
-        /* == Build Nodes == */
-		context = new AudioContext();
-		var c = context;
-		
-		source = c.createSource( mediaObject );
-		splitter = c.createChannelSplitter( 2 );
-		merger = c.createChannelMerger( 2 );
-		leftAnalyser = c.createAnalyser();
-		rightAnalyser = c.createAnalyser();
-
-		/* == Connect Nodes == */
-		source.connect( splitter );
-		splitter.connect(leftAnalyser, [0]);
-		splitter.connect(rightAnalyser, [1]);
-		leftAnalyser.connect(merger, [0, 0]);
-		rightAnalyser.connect(merger, [0, 1]);
-		merger.connect( context.destination );
-
-		config();
-
-		defer( cb );
-    }
 
 /* === Computed Instance Fields === */
 
@@ -157,6 +135,7 @@ class AudioVisualizer {
 
     public var renderer : Mor;
     public var player : Null<Player> = null;
+    public var viewport : Rectangle;
 
     public var context : AudioContext;
     public var source : AudioSource;
