@@ -288,14 +288,14 @@ class AppDir {
     /**
       * write encoded playback-properties to file
       */
-    public inline function savePlaybackSettings(p : Player):Void {
+    public inline function savePlaybackSettings_(p : Player):Void {
         playbackSettingsFile().write(ByteArray.ofString(encodePlaybackSettings( p )));
     }
 
     /**
       * read, decode, and restore saved playback properties
       */
-    public function loadPlaybackSettings(p:Player, ?cb:VoidCb):Void {
+    public function loadPlaybackSettings_(p:Player, ?cb:VoidCb):Void {
         function done(?error : Dynamic) {
             if (cb != null) {
                 //defer(function() cb(error));
