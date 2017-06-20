@@ -364,6 +364,23 @@ class PlaylistView extends Pane {
 	}
 
 	/**
+	  * select Tracks
+	  */
+	public function selectTracks(f : TrackView -> Bool):Null<TrackSelection> {
+	    var list:Array<TrackView> = new Array();
+	    for (t in tracks) {
+	        if (t.selected = f( t )) {
+	            list.push( t );
+	        }
+	    }
+	    if (list.length > 0) {
+	        return new TrackSelection(playlist, list.map.fn(_.track));
+	    }
+        else {
+            return null;
+        }
+	}
+
 	  * get the list of TrackViews that are selected
 	  */
 	public function getSelectedTrackViews():Array<TrackView> {
