@@ -100,6 +100,13 @@ class KeyboardCommands {
 	public function registerModeHandler(modeName:String, handler:KeyboardEvent->Void):Void {
 	    modeHandlers[modeName] = handler;
 	}
+
+    /**
+      * deregister a mode handler
+      */
+	public function deregisterModeHandler(modeName : String):Bool {
+	    return modeHandlers.remove( modeName );
+	}
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
