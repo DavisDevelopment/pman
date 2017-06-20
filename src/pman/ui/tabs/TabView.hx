@@ -53,7 +53,14 @@ class TabView extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
+        var d = new Maybe(tab.track.ternary(_.data, null));
         var titleText:String = tab.title.ternary(_.slice(0, 15), '');
+        if (titleText != '') {
+            var starred = d.ternary(_.starred, false);
+            if (starred) {
+                titleText = ('*' + titleText).slice(0, 15);
+            }
+        }
         if (tb.text != titleText) {
             tb.text = titleText;
         }
