@@ -277,6 +277,11 @@ class TrackView extends Pane {
 	public var li(get, never):ListItem;
 	private inline function get_li():ListItem return cast this.parentWidget;
 
+    // whether [this] widget is highlighted
+	public var selected(get, set):Bool;
+	private inline function get_selected():Bool return cg('selected');
+	private inline function set_selected(v) return c('selected', v);
+
 /* === Instance Fields === */
 
     public var flex : FlexRow;
