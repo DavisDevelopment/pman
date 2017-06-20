@@ -441,6 +441,13 @@ class PlaylistView extends Pane {
 	    return getTrackSelection().ternary(_.get( 0 ), null);
 	}
 
+    /**
+      *
+      */
+	public function getLastSelectedTrack():Null<Track> {
+	    return getTrackSelection().ternary(_.get(_.length - 1), null);
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
