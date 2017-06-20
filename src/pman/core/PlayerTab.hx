@@ -104,6 +104,16 @@ class PlayerTab {
     public var player(get, never):Player;
     private inline function get_player() return session.player;
 
+    public var track(get, never):Maybe<Track>;
+    private inline function get_track():Maybe<Track> {
+        return new Maybe(focusedTrack || blurredTrack);
+    }
+
+    public var title(get, never):Maybe<String>;
+    private inline function get_title() {
+        return track.ternary(_.title, null);
+    }
+
 /* === Instance Fields === */
 
     public var session : PlayerSession;
