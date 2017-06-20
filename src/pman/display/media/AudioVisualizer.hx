@@ -52,25 +52,14 @@ class AudioVisualizer {
       * called when [this] gets attached to the media renderer
       */
     public function attached(done : Void->Void):Void {
-        build_tree(function() {
-            var win = tannus.html.Win.current;
-            win.expose('visualizer', this);
-            this.definePointer('fftSize', Ptr.create( fftSize ));
-            this.definePointer('smoothing', Ptr.create( smoothing ));
-
-            done();
-        });
+        build_tree( done );
     }
 
     /**
       * called when [this] gets detached from the media renderer
       */
     public function detached(done : Void->Void):Void {
-        context.close(function() {
-            var win = tannus.html.Win.current;
-            win.unexpose('visualizer');
-            done();
-        });
+        defer( done );
     }
 
 	/**
@@ -84,7 +73,31 @@ class AudioVisualizer {
     /**
       * build out the audio analysis tree
       */
-    private function build_tree(cb : Void->Void):Void {
+    private function build_tree(done : Void->Void):Void {
+        mr.audioManager.treeBuilders = [function(m : AudioManager):Void {
+            /* == Build Nodes == */
+            var c = context = m.context;
+            source = m.source;
+            destination = m.destination;
+
+            splitter = c.createChannelSplitter( 2 );
+            merger = c.createChannelMerger( 2 );
+            leftAnalyser = c.createAnalyser();
+            rightAnalyser = c.createAnalyser();
+
+            /* == Connect Nodes == */
+            source.connect( splitter );
+            splitter.connect(leftAnalyser, [0]);
+            splitter.connect(rightAnalyser, [1]);
+            leftAnalyser.connect(merger, [0, 0]);
+            rightAnalyser.connect(merger, [0, 1]);
+            merger.connect( destination );
+
+            config();
+        }];
+        mr.audioManager.buildTree( done );
+    }
+    private function build_tree_(cb : Void->Void):Void {
         /* == Build Nodes == */
 		context = new AudioContext();
 		var c = context;
@@ -147,6 +160,7 @@ class AudioVisualizer {
 
     public var context : AudioContext;
     public var source : AudioSource;
+    public var destination : AudioDestination;
     public var splitter : AudioChannelSplitter;
     public var merger : AudioChannelMerger;
     public var leftAnalyser : AudioAnalyser;
