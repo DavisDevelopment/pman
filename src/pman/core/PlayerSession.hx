@@ -479,6 +479,36 @@ class PlayerSession {
 	}
 
 	/**
+	  * close a Tab
+	  */
+	public function deleteTab(tabIndex : Int):Bool {
+	    if (tabs[tabIndex] == null) {
+	        return false;
+	    }
+        else {
+            var t = tabs[tabIndex];
+            var ct = tabs[activeTabIndex];
+            if (tabIndex == activeTabIndex) {
+                if (tabs.length == 1) {
+                    //TODO
+                }
+                else {
+                    var newIndex:Int = (tabIndex - 1);
+                    if (tabs[newIndex] == null)
+                        newIndex = (tabIndex + 1);
+                    ct = tabs[newIndex];
+                }
+            }
+            var newtabs = tabs.filter.fn(_ != t);
+            var newIndex = tabs.indexOf( ct );
+            setTab( newIndex );
+            tabs = newtabs;
+            activeTabIndex = tabs.indexOf( ct );
+            return true;
+        }
+	}
+
+	/**
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
