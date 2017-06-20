@@ -1,5 +1,7 @@
 package pman.ui;
 
+import tannus.ds.Dict;
+import tannus.ds.Maybe;
 import tannus.events.*;
 import tannus.events.Key;
 import tannus.math.Random;
@@ -38,6 +40,7 @@ class KeyboardCommands {
 		//commands = new Map();
 		hkc = new HotkeyController();
 		_initHkc();
+		modeHandlers = new Dict();
 	}
 
 /* === Instance Methods === */
@@ -475,6 +478,8 @@ class KeyboardCommands {
 /* === Instance Fields === */
 
 	public var app : BPlayerMain;
+	public var mode : String = 'default';
+	public var modeHandlers : Dict<String, KeyboardEvent->Void>;
 
     private var _nextKeyDown:Array<KeyboardEvent->Void>;
     private var _nextKeyUp:Array<KeyboardEvent->Void>;
