@@ -59,6 +59,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
                 cc.set('filter', (filter == null ? 'none' : filter.toString()));
             }
         }
+        if (visualizer != null) {
+            visualizer.render(stage, c);
+        }
 	}
 
 	/**
@@ -84,6 +87,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 			    underlay.setRect( vr );
 			}
 		}
+		if (visualizer != null) {
+		    visualizer.update( stage );
+		}
 	}
 
 	/**
@@ -108,6 +114,11 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay = new VideoUnderlay( v );
             underlay.appendTo( 'body' );
         }
+
+        //var av = new AudioVisualizer(cast this);
+        //attachVisualizer(av, function() {
+            //av.player = pv.player;
+        //});
 	}
 
 	/**
@@ -115,8 +126,10 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  */
 	override function onDetached(pv : PlayerView):Void {
 		super.onDetached( pv );
-		if (underlay != null)
-            underlay.destroy();
+		detachVisualizer(function() {
+            if (underlay != null)
+                underlay.destroy();
+        });
 	}
 
 	/**
@@ -127,6 +140,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	        underlay.detach();
 	        underlay = null;
 	    }
+	    detachVisualizer(function() {
+	        return ;
+	    });
 	}
 
     /**
@@ -141,6 +157,10 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay.detach();
             underlay = null;
         }
+        var av = new SpectographVisualizer(cast this);
+        attachVisualizer(av, function() {
+            av.player = pv.player;
+        });
 	}
 
 /* === Computed Instance Fields === */
