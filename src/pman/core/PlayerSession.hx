@@ -446,9 +446,11 @@ class PlayerSession {
 	/**
 	  * create a new tab
 	  */
-	public function newTab():Int {
+	public function newTab(?f : PlayerTab -> Void):Int {
 	    var nt = new PlayerTab( this );
 	    tabs.push( nt );
+	    if (f != null)
+	        f( nt );
 	    return (tabs.length - 1);
 	}
 
