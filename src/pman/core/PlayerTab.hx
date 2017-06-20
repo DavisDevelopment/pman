@@ -42,8 +42,10 @@ class PlayerTab {
     public function new(sess : PlayerSession):Void {
         session = sess;
 
+        type = Player;
         playlist = new Playlist();
         focusedTrack = null;
+        blurredTrack = null;
     }
 
 /* === Instance Methods === */
@@ -55,19 +57,69 @@ class PlayerTab {
 	    return (focusedTrack != null);
 	}
 
+	/**
+	  * check whether [this] Tab has focus
+	  */
+	public inline function hasFocus():Bool {
+	    return (session.activeTab == this);
+	}
+
+	/**
+	  * serialize [this] tab
+	  */
+	public function hxSerialize(s : Serializer):Void {
+	    inline function w(x:Dynamic) s.serialize( x );
+
+	    w( type );
+	    switch ( type ) {
+            case Player:
+                w(playlist.toStrings());
+                w(new Maybe(focusedTrack.or( blurredTrack )).ternary(playlist.indexOf( _ ), -1));
+
+            default:
+                w( null );
+	    }
+	}
+
+    /**
+      * unserialize [this] tab
+      */
+	public function hxUnserialize(u : Unserializer):Void {
+	    inline function v():Dynamic return u.unserialize();
+
+	    type = v();
+	    switch ( type ) {
+            case Player:
+                playlist = Playlist.fromStrings(v());
+                blurredTrack = playlist[v()];
+
+            default:
+                v();
+	    }
+	}
+
 /* === Computed Instance Fields === */
 
     // the Player instance
     public var player(get, never):Player;
     private inline function get_player() return session.player;
 
-    // [focusedTrack] as a Maybe instance
-    private var mft(get, never):Maybe<Track>;
-    private inline function get_mft():Maybe<Track> return focusedTrack;
-
 /* === Instance Fields === */
 
     public var session : PlayerSession;
+    public var type : TabType;
     public var playlist : Playlist;
-    public var focusedTrack : Null<Track>;
+
+    public var focusedTrack : Maybe<Track>;
+    public var blurredTrack : Maybe<Track>;
+}
+
+/*
+  enum representing different types of tabs
+  NOTE: will most likely need to be a full-featured enum
+ */
+@:enum
+abstract TabType (Int) from Int {
+    var Player = 0;
+    var Browser = 1;
 }
