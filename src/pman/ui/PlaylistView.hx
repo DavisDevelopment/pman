@@ -363,6 +363,12 @@ class PlaylistView extends Pane {
 	    return -1;
 	}
 
+	/**
+	  * get the list of TrackViews that are selected
+	  */
+	public function getSelectedTrackViews():Array<TrackView> {
+	    return tracks.filter.fn(_.selected);
+	}
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
