@@ -480,6 +480,7 @@ class PlaylistView extends Pane {
 	public var searchWidget : SearchWidget;
 	public var listRow : Row;
 	public var list : Null<List> = null;
+	public var focused(default, null): Bool = false;
 
 	private var _tc : Map<String, TrackView>;
 }
