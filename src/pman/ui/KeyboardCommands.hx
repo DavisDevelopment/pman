@@ -276,46 +276,73 @@ class KeyboardCommands {
 
             // ctrl+t
             case LetterT if (event.ctrlKey || event.metaKey):
-                p.tdfprompt(function(?error) {
-                    if (error != null)
-                        throw error;
-                });
+                if ( event.shiftKey ) {
+                    sess.setTab(sess.newTab());
+                }
+                else {
+                    p.tdfprompt(function(?error) {
+                        if (error != null)
+                            throw error;
+                    });
+                }
 
 		/* --- 'next-command-count' modifiers --- */
 
+            // number 0
 			case Number0, Numpad0:
 				mncc( 0 );
 
+            // number 1
 			case Number1, Numpad1:
-				mncc( 1 );
+				numkey(1, event);
 
+            // number 2
 			case Number2, Numpad2:
-				mncc( 2 );
+				numkey(2, event);
 
+            // number 3
 			case Number3, Numpad3:
-				mncc( 3 );
+				numkey(3, event);
 
+            // number 4
 			case Number4, Numpad4:
-				mncc( 4 );
+				numkey(4, event);
 
+            // number 5
 			case Number5, Numpad5:
-				mncc( 5 );
+				numkey(5, event);
 
+            // number 6
 			case Number6, Numpad6:
-				mncc( 6 );
+				numkey(6, event);
 
+            // number 7
 			case Number7, Numpad7:
-				mncc( 7 );
+				numkey(7, event);
 
+            // number 8
 			case Number8, Numpad8:
-				mncc( 8 );
+				numkey(8, event);
 
+            // number 9
 			case Number9, Numpad9:
-				mncc( 9 );
+				numkey(9, event);
 
 			default:
 				null;
 		}
+	}
+
+    /**
+      * handle the typing of a numeric key
+      */
+	private function numkey(n:Int, e:KeyboardEvent):Void {
+        if ( e.altKey ) {
+            sess.setTab(n - 1);
+        }
+        else {
+            mncc( n );
+        }
 	}
 
 	/**
