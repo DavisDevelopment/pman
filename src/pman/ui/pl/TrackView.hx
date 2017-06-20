@@ -179,9 +179,14 @@ class TrackView extends Pane {
 	private function onLeftClick(event : MouseEvent):Void {
 		event.cancel();
 
-		if (player.track != track) {
-			player.openTrack( track );
-		}
+        if (event.ctrlKey || list.anySelected()) {
+            selected = !selected;
+        }
+        else {
+            if (player.track != track) {
+                player.openTrack( track );
+            }
+        }
 	}
 	
 	/**
@@ -190,10 +195,19 @@ class TrackView extends Pane {
 	private function onRightClick(event : MouseEvent):Void {
 		event.cancel();
 
-        track.buildMenu(function( template ) {
-            var menu:Menu = template;
-            menu.popup();
-        });
+        if ( selected ) {
+            list.getTrackSelection().buildMenu(function(template) {
+                var menu:Menu = template;
+                menu.popup();
+            });
+        }
+        else {
+            list.selectTracks.fn(x => false);
+            track.buildMenu(function( template ) {
+                var menu:Menu = template;
+                menu.popup();
+            });
+        }
 	}
 
     /**
