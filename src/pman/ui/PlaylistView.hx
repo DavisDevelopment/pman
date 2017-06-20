@@ -448,6 +448,14 @@ class PlaylistView extends Pane {
 	    return getTrackSelection().ternary(_.get(_.length - 1), null);
 	}
 
+	/**
+	  * set the 'focused' state of [this] playlist view
+	  */
+	public function setFocused(value : Bool):Bool {
+	    var ret = (focused = value);
+	    return ret;
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
