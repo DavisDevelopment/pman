@@ -115,6 +115,12 @@ class KeyboardCommands {
 	    return modeHandlers.exists( modeName );
 	}
 
+    /**
+      * obtain a mode handler
+      */
+	public function getModeHandler(modeName : String):Maybe<KeyboardEvent->Void> {
+	    return modeHandlers[modeName];
+	}
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
