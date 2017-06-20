@@ -395,6 +395,13 @@ class PlaylistView extends Pane {
 	    return selectTracks.fn(tv=>true);
 	}
 
+	/**
+	  * deselect all tracks
+	  */
+	public function deselectAll():Null<TrackSelection> {
+	    return selectTracks.fn(tv=>false);
+	}
+
 	  * get the list of TrackViews that are selected
 	  */
 	public function getSelectedTrackViews():Array<TrackView> {
