@@ -388,6 +388,13 @@ class PlaylistView extends Pane {
 	    selectTracks.fn(selection.has( _.track ));
 	}
 
+	/**
+	  * select all tracks
+	  */
+	public function selectAll():Null<TrackSelection> {
+	    return selectTracks.fn(tv=>true);
+	}
+
 	  * get the list of TrackViews that are selected
 	  */
 	public function getSelectedTrackViews():Array<TrackView> {
