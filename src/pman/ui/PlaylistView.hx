@@ -456,6 +456,87 @@ class PlaylistView extends Pane {
 	    return ret;
 	}
 
+    /**
+      * handle incoming keyboard input when playlistview is open
+      */
+	private function keycom(event : KeyboardEvent):Void {
+	    var kc = player.app.keyboardCommands;
+	    if ( isOpen ) {
+	        trace('plkeycom: ${event.key.name}');
+	        switch ( event.key ) {
+	            // stop selecting
+                case Esc:
+                    event.cancel();
+                    deselectAll();
+
+                //
+                case Enter:
+                    if (anySelected()) {
+                        var sel = getTrackSelection();
+                        if (sel.length == 1) {
+                            player.openTrack(sel.get(0));
+                            viewFor(sel.get(0)).selected = false;
+                        }
+                        else {
+                            sel.invert().remove();
+                        }
+                    }
+
+                case Down if (event.noMods || event.shiftKey):
+                    var expand:Bool = event.shiftKey;
+                    var sel = getTrackSelection();
+                    if (sel == null && tracks.length > 0) {
+                        //tracks[0].selected = true;
+                        viewFor( player.track ).selected = true;
+                    }
+                    else {
+                        var lastTrack = sel.get(sel.length - 1);
+                        lastTrack = playlist[playlist.indexOf( lastTrack ) + 1];
+                        if (lastTrack == null)
+                            lastTrack = playlist[0];
+                        var view = viewFor( lastTrack );
+                        if (!expand)
+                            deselectAll();
+                        if (view != null) {
+                            view.selected = true;
+                        }
+                    }
+
+                case Up if (event.noMods || event.shiftKey):
+                    var expand:Bool = event.shiftKey;
+                    var sel = getTrackSelection();
+                    if (sel == null && tracks.length > 0) {
+                        //tracks[tracks.length - 1].selected = true;
+                        viewFor( player.track ).selected = true;
+                    }
+                    else {
+                        var firstTrack = sel.get( 0 );
+                        firstTrack = playlist[playlist.indexOf( firstTrack ) - 1];
+                        if (firstTrack == null)
+                            firstTrack = playlist[playlist.length - 1];
+                        var view = viewFor( firstTrack );
+                        if (!expand)
+                            deselectAll();
+                        if (view != null) {
+                            view.selected = true;
+                        }
+                    }
+
+                // select all
+                case LetterA if (event.ctrlKey || event.metaKey):
+                    event.preventDefault();
+                    untyped __js__('document.getSelection().empty()');
+                    selectAll();
+
+                default:
+                    kc.handleDefault( event );
+	        }
+	    }
+        else {
+            kc.handleDefault( event );
+        }
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
