@@ -93,6 +93,13 @@ class KeyboardCommands {
 	    handleKeyDown( event );
 	    mode = _mode;
 	}
+
+	/**
+	  * register a mode handler
+	  */
+	public function registerModeHandler(modeName:String, handler:KeyboardEvent->Void):Void {
+	    modeHandlers[modeName] = handler;
+	}
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
