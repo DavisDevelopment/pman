@@ -49,6 +49,20 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		m.destroy();
 	}
 
+    /**
+      * when [this] is attached to player view
+      */
+	override function onAttached(pv : PlayerView):Void {
+	    audioManager.activate();
+	}
+
+    /**
+      * when [this] is detached from player view
+      */
+	override function onDetached(pv : PlayerView):Void {
+	    return ;
+	}
+
 	/**
 	  * attach a visualizer to [this]
 	  */
