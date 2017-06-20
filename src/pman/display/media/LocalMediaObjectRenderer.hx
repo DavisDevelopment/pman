@@ -45,6 +45,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	override function dispose():Void {
 		super.dispose();
 
+		audioManager.deactivate();
 		m.destroy();
 	}
 
