@@ -85,6 +85,14 @@ class KeyboardCommands {
 	}
 
 	/**
+	  * emulate the default handling of the given event
+	  */
+	public function handleDefault(event : KeyboardEvent):Void {
+	    var _mode = mode;
+	    mode = 'default';
+	    handleKeyDown( event );
+	    mode = _mode;
+	}
 	  * intercept the next 'keydown' event
 	  */
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
