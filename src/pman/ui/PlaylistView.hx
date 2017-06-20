@@ -381,6 +381,13 @@ class PlaylistView extends Pane {
         }
 	}
 
+	/**
+	  * apply a pre-constructed selection
+	  */
+	public function applySelection(selection : TrackSelection):Void {
+	    selectTracks.fn(selection.has( _.track ));
+	}
+
 	  * get the list of TrackViews that are selected
 	  */
 	public function getSelectedTrackViews():Array<TrackView> {
