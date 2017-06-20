@@ -48,11 +48,26 @@ class SpectographVisualizer extends AudioVisualizer {
     }
 
     /**
+      * update [this]
+      */
+    override function update(stage : Stage):Void {
+        super.update( stage );
+
+        if (player.track.type.match( MTVideo )) {
+            viewport = player.view.mediaRect;
+            var r = viewport.clone();
+            r.height = 100.0;
+            r.y = (viewport.y + viewport.height - r.height);
+            viewport = r;
+        }
+    }
+
+    /**
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
         c.save();
-        var r = player.view.rect;
+        var r = viewport;
         c.clearRect(r.x, r.y, r.w, r.h);
 
         waveform(stage, c);
@@ -132,8 +147,8 @@ class SpectographVisualizer extends AudioVisualizer {
 	  * draw the spectograph for the given AudioData, onto the given Ctx
 	  */
 	public function drawAudioDataVertices(data:AudioData<Int>, c:Ctx, ?mod:Mod):Void {
-		var mid:Float = (ceil( player.view.h ) / 2);
-		var sliceWidth:Float = (ceil( player.view.w ) * 1.0 / data.length);
+		var mid:Float = viewport.centerY;
+		var sliceWidth:Float = (ceil( viewport.width ) * 1.0 / data.length);
 		var offset:Float, value:Int, n:Float, x:Float=0, y:Float;
 		for (i in 0...data.length) {
 			offset = ((data.length / 2) - abs((data.length / 2) - i));
