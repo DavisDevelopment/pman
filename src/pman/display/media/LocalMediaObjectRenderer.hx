@@ -34,6 +34,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		this.mediaController = c;
 
 		_av = null;
+		audioManager = new AudioManager(untyped this);
 	}
 
 /* === Instance Methods === */
@@ -99,4 +100,5 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 /* === Instance Fields === */
 
     public var _av : Null<AudioVisualizer>;
+    public var audioManager : AudioManager;
 }
