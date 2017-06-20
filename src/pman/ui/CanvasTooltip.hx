@@ -37,6 +37,7 @@ class CanvasTooltip extends Ent {
         tr = new Rectangle();
         //tt = new Triangle();
         tt = {
+            x: 0.0,
             w: 12.0,
             h: 12.0,
             t: new Triangle()
@@ -46,6 +47,7 @@ class CanvasTooltip extends Ent {
         border = new Border(4, theme.primary.lighten( 22 ), 3);
         padding = new Padding();
         padding.horizontal = 6.0;
+        bounds = new Rectangle();
         position = {
             from: new Point(),
             spacing: 0.0
@@ -54,6 +56,9 @@ class CanvasTooltip extends Ent {
 
 /* === Instance Methods === */
 
+    /**
+      * render [this] tooltip
+      */
     override function render(stage:Stage, c:Ctx):Void {
         c.save();
         c.shadowBlur = 8.0;
@@ -63,6 +68,9 @@ class CanvasTooltip extends Ent {
         c.restore();
     }
 
+    /**
+      *
+      */
     private function render_box(stage:Stage, c:Ctx):Void {
         c.beginPath();
 
@@ -70,9 +78,6 @@ class CanvasTooltip extends Ent {
         c.fillStyle = backgroundColor;
         c.strokeStyle = border.color;
         c.lineWidth = border.width;
-
-        //c.drawRoundRect(rect, border.radius);
-        //c.drawTriangle( tt );
 
         // -- build path
         // top-left to top-right
@@ -119,7 +124,11 @@ class CanvasTooltip extends Ent {
         calculateGeometry( stage.rect );
     }
 
+    /**
+      * calculate [this]'s geometry
+      */
     override function calculateGeometry(r : Rectangle):Void {
+        bounds = r;
         // compute content rectangle
         inline function dbl(x:Float) return (x*2);
         inline function half(x:Float) return (x / 2);
@@ -135,7 +144,7 @@ class CanvasTooltip extends Ent {
         tr.centerY = centerY;
 
         // compute the tail triangle points
-        var ttc = new Point(centerX, (y + h)); // tail top center
+        var ttc = new Point((centerX + tt.x), (y + h)); // tail top center
         tt.t.one.x = (ttc.x - half( tt.w ));
         tt.t.one.y = (y + h);
         tt.t.two.x = ttc.x;
@@ -193,10 +202,11 @@ class CanvasTooltip extends Ent {
     public var border : Border;
     public var padding : Padding;
     public var position : TooltipPosition;
+    public var bounds : Rectangle;
 
     private var t : TextBox;
     private var tr : Rectangle;
-    private var tt : {w:Float,h:Float,t:Triangle};
+    private var tt : {x:Float, w:Float,h:Float,t:Triangle};
 }
 
 typedef TooltipPosition = {
