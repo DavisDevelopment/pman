@@ -64,6 +64,7 @@ class AudioManager {
                         active = false;
                         _closing = false;
                         context = null;
+                        source.disconnect();
                         source = null;
                         destination = null;
                         if (done != null)
