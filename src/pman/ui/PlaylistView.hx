@@ -377,6 +377,17 @@ class PlaylistView extends Pane {
 	    return getSelectedTrackViews().map.fn( _.track );
 	}
 
+	/**
+	  * get the current Track selection
+	  */
+	public function getTrackSelection():Maybe<TrackSelection> {
+	    var selectedTracks = getSelectedTracks();
+	    if (selectedTracks.length > 0) {
+	        return new TrackSelection(playlist, selectedTracks);
+	    }
+        else return null;
+	}
+
 /* === Computed Instance Fields === */
 
 	public var session(get, never):PlayerSession;
