@@ -402,6 +402,14 @@ class PlaylistView extends Pane {
 	    return selectTracks.fn(tv=>false);
 	}
 
+	/**
+	  * check if any Tracks are selected
+	  */
+	public function anySelected():Bool {
+	    return tracks.any.fn( _.selected );
+	}
+
+	/**
 	  * get the list of TrackViews that are selected
 	  */
 	public function getSelectedTrackViews():Array<TrackView> {
