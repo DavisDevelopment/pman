@@ -5,6 +5,7 @@ import tannus.io.*;
 import tannus.geom.*;
 import tannus.html.Element;
 import tannus.events.*;
+import tannus.events.Key;
 
 import crayon.*;
 import foundation.*;
@@ -16,6 +17,7 @@ import electron.ext.*;
 import electron.ext.Dialog;
 
 import electron.Tools.*;
+import pman.Globals.*;
 
 import pman.core.*;
 import pman.media.*;
@@ -24,8 +26,10 @@ import pman.ui.pl.*;
 import pman.search.Match as SearchMatch;
 
 using StringTools;
+using tannus.ds.StringUtils;
 using Lambda;
 using Slambda;
+using tannus.ds.ArrayTools;
 
 class PlaylistView extends Pane {
 	/* Constructor Function */
@@ -74,12 +78,15 @@ class PlaylistView extends Pane {
 	  */
 	override function populate():Void {
 		buildRows();
+		/*
 		var hed = new Heading(4, 'Playlist');
 		hed.css['color'] = 'white';
 		if (player.session.name != null) {
 		    hed.text = player.session.name;
 		}
 		hedRow.append( hed );
+		*/
+
 		buildSearchWidget();
 		buildTrackList();
 
