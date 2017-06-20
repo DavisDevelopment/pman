@@ -251,9 +251,74 @@ class PlayerSession {
 	}
 
 	/**
+	  * encode [this] Session to a String
+	  */
+	public function encode():String {
+	    // prepare the Serializer
+	    var serializer = new Serializer();
+	    serializer.useCache = true;
+	    inline function w(x:Dynamic)
+	        serializer.serialize( x );
+
+	    // write the data
+	    w( tabs.length );
+	    w( activeTabIndex );
+	    for (tab in tabs) {
+	        tab.hxSerialize( serializer );
+	    }
+
+	    return serializer.toString();
+	}
+
+	/**
+	  * decode the given String to 
+	  */
+	public function decode(s:String, ?done:VoidCb):Void {
+	    var us = new Unserializer( s );
+	    inline function v():Dynamic return us.unserialize();
+
+	    var ntabs:Int = v(), tabi:Int = v();
+	    tabs = [];
+	    for (i in 0...ntabs) {
+	        var tab = new PlayerTab( this );
+	        tab.hxUnserialize( us );
+	        tabs.push( tab );
+	    }
+
+        var tasks:Array<VoidAsync> = [
+            (function(next) {
+                var utracks:Set<Track> = new Set();
+                for (t in tabs) {
+                    utracks.pushMany( t.playlist );
+                }
+                var loader = new pman.async.tasks.TrackListDataLoader();
+                loader.load(utracks.toArray(), function(?error, ?result) {
+                    trace( result );
+                });
+                defer(next.void());
+            }),
+            (function(next) {
+                defer(function() {
+                    setTab( tabi );
+                    next();
+                });
+            })
+        ];
+
+        if (done == null)
+            done = untyped fn(err => if (err != null) (untyped __js__('console.error')( err )));
+
+        tasks.series(function(?error : Dynamic) {
+            //if (error != null)
+                //(untyped __js__('console.error')( error ));
+            done( error );
+        });
+	}
+
+	/**
 	  * get state
 	  */
-	public function getState():PlayerSessionState {
+	public function getState_():PlayerSessionState {
 	    var state = new PlayerSessionState();
 	    state.pull( this );
 	    return state;
@@ -262,7 +327,7 @@ class PlayerSession {
 	/**
 	  * put a state onto [this]
 	  */
-	public function pullState(state:PlayerSessionState, ?done:VoidCb):Void {
+	public function pullState_(state:PlayerSessionState, ?done:VoidCb):Void {
 	    var stack:Array<VoidAsync> = new Array();
 
 	    // pull the playlist
@@ -299,9 +364,8 @@ class PlayerSession {
 	/**
 	  * save state
 	  */
-	public function save():Void {
-	    var state = getState();
-	    Fs.write(filePath(), state.encode());
+	public inline function save():Void {
+	    Fs.write(filePath(), encode());
 	}
 
 	/**
@@ -311,9 +375,10 @@ class PlayerSession {
 	    // if the File exists
 	    if (hasSavedState()) {
 	        // decode the state
-	        var state = PlayerSessionState.decode(Fs.read(filePath()));
+			//var state = PlayerSessionState.decode(Fs.read(filePath()));
 	        // pull the state onto [this] Session
-	        pullState(state, done);
+			//pullState(state, done);
+			decode(Fs.read(filePath()), done);
 	    }
         else {
             if (done != null) {
