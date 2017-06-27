@@ -91,7 +91,7 @@ class ToggleableItem extends PlayerHUDItem {
         w = tb.width;
         h = tb.height;
         x = (hr.x + hr.w - w - margin);
-        y = margin;
+        y = (hr.y + margin);
 
         super.calculateGeometry( r );
     }
