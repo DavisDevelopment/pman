@@ -1,5 +1,8 @@
 package pman.async;
 
+typedef Cb<T> = tannus.async.Cb<T>;
+
+/*
 @:callable
 abstract Cb<T> (?Dynamic->?T->Void) from ?Dynamic->?T->Void {
     public inline function new(f : ?Dynamic->?T->Void):Void {
@@ -21,3 +24,4 @@ abstract Cb<T> (?Dynamic->?T->Void) from ?Dynamic->?T->Void {
     public var f(get, never):?Dynamic->?T->Void;
     private inline function get_f():?Dynamic->?T->Void return this;
 }
+*/
