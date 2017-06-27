@@ -81,8 +81,8 @@ class TitleItem extends PlayerHUDItem {
 
         w = tb.width;
         h = tb.height;
-        x = margin;
-        y = margin;
+        x = (hr.x + margin);
+        y = (hr.y + margin);
 
         super.calculateGeometry( r );
     }
