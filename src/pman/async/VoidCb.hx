@@ -1,5 +1,8 @@
 package pman.async;
 
+typedef VoidCb = tannus.async.VoidCb;
+
+/*
 @:callable
 abstract VoidCb (?Dynamic->Void) from ?Dynamic->Void {
     public inline function new(f : ?Dynamic->Void):Void {
@@ -14,3 +17,4 @@ abstract VoidCb (?Dynamic->Void) from ?Dynamic->Void {
     public var f(get, never):?Dynamic->Void;
     private inline function get_f():?Dynamic->Void return this;
 }
+*/
