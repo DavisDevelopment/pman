@@ -17,6 +17,7 @@ import Std.*;
 import tannus.math.TMath.*;
 import electron.Tools.defer;
 import Slambda.fn;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -44,14 +45,28 @@ class TrackListDataLoader extends Task1 {
     public function load(tracks:Array<Track>, ?done:Cb<TLDLResult>):Void {
         this.tracks = tracks;
         this.datas = new Map();
+        var mic = new MediaIdCache();
+        var cachedIds = mic.get(tracks.map.fn(_.uri));
+        var numCached:Int = 0;
+        for (t in tracks) {
+            if (t.mediaId == null)
+                t.mediaId = cachedIds[t.uri];
+            if (t.mediaId != null)
+                numCached++;
+        }
+        trace('$numCached media ids were loaded from cache');
         run(function(?error) {
             var result = {
                 tracks: this.tracks,
                 data: new Array()
             };
+            var mset:Map<String,Int> = new Map();
             for (t in tracks) {
                 result.data.push(datas[t.uri]);
+                if (t.mediaId != null)
+                    mset[t.uri] = t.mediaId;
             }
+            mic.set( mset );
             if (done != null) {
                 if (error != null)
                     done(error, null);
