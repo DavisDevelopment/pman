@@ -276,84 +276,14 @@ class AppDir {
         return (App.getPath( Pictures ).plusString('pman_snapshots'));
 	}
 
+	/**
+	  * get the path to the mediaId cache file
+	  */
+	public function mediaIdCachePath():Path {
+	    return path().plusString('media_cache.json');
+	}
+
 #if renderer_process
-
-    /**
-      * check for existence of file containing saved playback properties
-      */
-    public inline function hasSavedPlaybackSettings():Bool {
-        return Fs.exists(playbackSettingsPath().toString());
-    }
-
-    /**
-      * write encoded playback-properties to file
-      */
-    public inline function savePlaybackSettings_(p : Player):Void {
-        playbackSettingsFile().write(ByteArray.ofString(encodePlaybackSettings( p )));
-    }
-
-    /**
-      * read, decode, and restore saved playback properties
-      */
-    public function loadPlaybackSettings_(p:Player, ?cb:VoidCb):Void {
-        function done(?error : Dynamic) {
-            if (cb != null) {
-                //defer(function() cb(error));
-                cb( error );
-            }
-        }
-        //decodePlaybackSettings(playbackSettingsFile().read().toString(), p, done);
-        try {
-            var encoded = Std.string(playbackSettingsFile().read());
-            trace('pp: "$encoded"');
-            decodePlaybackSettings(encoded, p, done);
-        }
-        catch (error : Dynamic) {
-            done( error );
-        }
-    }
-
-    /**
-      * serialize playback properties
-      */
-    private function encodePlaybackSettings(p : Player):String {
-        var s = new Serializer();
-        inline function w(x:Dynamic){
-            s.serialize( x );
-        }
-
-        w( p.playbackRate );
-        w( p.volume );
-        w( p.shuffle );
-        w( p.muted );
-		w( p.repeat );
-		w( p.scale );
-
-        return s.toString();
-    }
-
-    /**
-      * decode and restore playback properties
-      */
-    private function decodePlaybackSettings(s:String, p:Player, ?done:VoidCb):Void {
-        inline function cb(?error) {
-            if (done != null) {
-                done( error );
-            }
-        }
-        try {
-            var u = new Unserializer( s );
-            inline function val<T>():T return u.unserialize();
-
-            var pp = new PlayerPlaybackProperties(val(), val(), val(), val(), val(), val());
-            p.session.playbackProperties.rebase( pp );
-
-            cb();
-        }
-        catch (error : Dynamic) {
-            cb( error );
-        }
-    }
 
     /**
       * utility method to make changes to a saved playlist
