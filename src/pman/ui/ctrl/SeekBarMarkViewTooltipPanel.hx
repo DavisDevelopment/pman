@@ -92,6 +92,13 @@ class SeekBarMarkViewTooltipPanel extends Ent {
                 }
             }
         }
+
+        if (fps == null) {
+            fps = stage.get('..FPSDisplay').selected[0];
+            if (fps != null) {
+                calculateGeometry( rect );
+            }
+        }
     }
 
     /**
@@ -124,6 +131,9 @@ class SeekBarMarkViewTooltipPanel extends Ent {
         }
 
         p = new Point((pr.x + pr.w - margin), (pr.y + margin));
+        if (fps != null) {
+            p.y = (fps.y + fps.h + (margin * 2));
+        }
         for (t in right) {
             t.update( stage );
             t.x = (p.x - t.w);
@@ -190,4 +200,6 @@ class SeekBarMarkViewTooltipPanel extends Ent {
 
     public var bar : SeekBar;
     public var tips : Array<SeekBarMarkViewTooltip>;
+
+    public var fps : Null<FPSDisplay> = null;
 }
