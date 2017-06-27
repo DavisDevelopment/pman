@@ -77,7 +77,7 @@ class FPSDisplay extends Ent {
         x = (r.x + r.w - tb.width - 10);
         y = (r.y + 10);
         w = tb.width;
-        h = tb.height;
+        h = (tb.height / 4);
     }
 
 /* === Instance Fields === */
