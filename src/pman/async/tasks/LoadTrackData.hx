@@ -77,27 +77,39 @@ class LoadTrackData extends Task2<TrackData> {
       * attempt to load the data from the database
       */
     private function attempt_load(done : VoidCb):Void {
-        var uri:String = track.uri;
-        store.getMediaItemRowByUri_(uri, function(?error:Dynamic, ?row:MediaItemRow) {
-            if (error != null) {
-                return done( error );
-            }
-            else {
-                if (row == null) {
-                    return create_new( done );
+        if (track.mediaId != null) {
+            store.getMediaInfoRow_(track.mediaId, function(?error, ?irow) {
+                if (error != null)
+                    return done(error);
+                data = new TrackData( track );
+                data.pullRaw( irow );
+                load_fields(irow, done);
+            });
+        }
+        else {
+            var uri:String = track.uri;
+            store.getMediaItemRowByUri_(uri, function(?error:Dynamic, ?row:MediaItemRow) {
+                if (error != null) {
+                    return done( error );
                 }
                 else {
-                    store.getMediaInfoRow_(row.id, function(?error:Dynamic, ?irow:MediaInfoRow) {
-                        if (error != null) {
-                            return done( error );
-                        }
-                        data = new TrackData( track );
-                        data.pullRaw( irow );
-                        load_fields(irow, done);
-                    });
+                    if (row == null) {
+                        return create_new( done );
+                    }
+                    else {
+                        track.mediaId = row.id;
+                        store.getMediaInfoRow_(row.id, function(?error:Dynamic, ?irow:MediaInfoRow) {
+                            if (error != null) {
+                                return done( error );
+                            }
+                            data = new TrackData( track );
+                            data.pullRaw( irow );
+                            load_fields(irow, done);
+                        });
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
