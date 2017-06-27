@@ -2,6 +2,9 @@ package pman.async;
 
 import tannus.ds.*;
 
+typedef Async<T> = tannus.async.Async<T>;
+
+/*
 @:callable
 abstract Async<T> (Cb<T>->Void) from Cb<T>->Void {
     public inline function new(f : Cb<T>->Void)
@@ -27,3 +30,4 @@ abstract Async<T> (Cb<T>->Void) from Cb<T>->Void {
         return promise.bind();
     }
 }
+*/
