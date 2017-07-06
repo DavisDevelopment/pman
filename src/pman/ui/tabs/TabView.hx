@@ -202,8 +202,12 @@ class TabView extends Ent {
     public var ci(get, never):Null<Image>;
     private inline function get_ci() return closeIcon[closeHovered ? 1 : 0];
 
+    public var bd(get, never):Float;
+    private inline function get_bd() return bw / 2;
+
 /* === Instance Fields === */
 
+    public var bw : Float = 14;
     public var bar : TabViewBar;
     public var tab : PlayerTab;
 
