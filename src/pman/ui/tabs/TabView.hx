@@ -188,6 +188,13 @@ class TabView extends Ent {
         session.setTab(session.tabs.indexOf( tab ));
     }
 
+    /**
+      * get the 'inner' rectangle
+      */
+    public function getInnerRect():Rectangle {
+        return new Rectangle((x + bd), y, (w - bw), h);
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
