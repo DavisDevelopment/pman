@@ -8,6 +8,7 @@ import tannus.graphics.Color;
 
 import gryffin.core.*;
 import gryffin.display.*;
+import js.html.CanvasPattern;
 
 import pman.core.*;
 import pman.display.*;
@@ -143,17 +144,49 @@ class TabViewBar extends Ent {
 
         var colors = getColors();
 
-        c.save();
-        c.beginPath();
-        c.drawRect( rect );
-        c.fillStyle = colors[0];
-        c.closePath();
-        c.fill();
-        c.restore();
-
-        for (t in tabs) {
-            t.render(stage, c);
+        // get the pattern
+        if (pattern == null) {
+            pattern = buildPattern(c, colors, 4, 4);
         }
+
+        // draw the background
+        c.fillStyle = colors[0];
+        c.fillRect(x, y, w, h);
+        if (pattern != null) {
+            c.fillStyle = pattern;
+            c.fillRect(x, y, w, h);
+        }
+
+        // render then tabs
+        tabs.reverse();
+        var active:Null<TabView> = null;
+        for (t in tabs) {
+            if ( !t.active ) {
+                t.render(stage, c);
+            }
+            else {
+                active = t;
+            }
+        }
+        if (active != null) {
+            active.render(stage, c);
+        }
+        tabs.reverse();
+    }
+
+    /**
+      * build the pattern
+      */
+    private function buildPattern(c:Ctx, colors:Array<Color>, w:Int, h:Int):CanvasPattern {
+        var can = Canvas.create(w, h);
+        var cc = can.context;
+        cc.strokeStyle = colors[1];
+        cc.moveTo((can.width / 2), 0);
+        cc.lineTo((can.width / 2), can.height);
+        cc.moveTo(0, (can.height / 2));
+        cc.lineTo(can.width, (can.height / 2));
+        cc.stroke();
+        return c.createPattern(can, 'repeat');
     }
 
     /**
@@ -165,13 +198,14 @@ class TabViewBar extends Ent {
         w = playerView.w;
         h = 30;
 
-        var margin:Float = 3.8;
+        var margin:Float = 4.2;
         var tx:Float = 0.0;
 
-        for (t in tabs) {
+        for (i in 0...tabs.length) {
+            var t:TabView = tabs[i];
             tx += margin;
             t.x = tx;
-            tx += (t.w + margin);
+            tx += (t.w - t.bw + margin);
 
             t.calculateGeometry( rect );
         }
@@ -260,6 +294,7 @@ class TabViewBar extends Ent {
     public var playerView : PlayerView;
     public var tabs : Array<TabView>;
     public var hovered : Bool = false;
+    public var pattern : CanvasPattern;
 
     private var colors : Null<Array<Int>> = null;
 }
