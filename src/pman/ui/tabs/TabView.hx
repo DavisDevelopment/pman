@@ -168,6 +168,13 @@ class TabView extends Ent {
     }
 
     /**
+      * 'rightclick' event handler
+      */
+    public function onRightClick(event : MouseEvent):Void {
+        event.cancel();
+    }
+
+    /**
       * close [this] tab
       */
     public inline function close():Void {
