@@ -73,6 +73,7 @@ class TabView extends Ent {
         super.render(stage, c);
 
         var colors = bar.getColors();
+        var ir = getInnerRect();
 
         c.save();
 
@@ -86,9 +87,9 @@ class TabView extends Ent {
         // draw tab view outline
         c.beginPath();
         c.strokeStyle = colors[3];
-        c.lineWidth = 2.5;
+        c.lineWidth = 0.8;
         c.lineCap = 'square';
-        _path(c, 1.5, true);
+        _path(c, 2.0, true);
         if ( !active )
             c.closePath();
         c.stroke();
@@ -96,7 +97,7 @@ class TabView extends Ent {
         // draw the title
         if (tab.title != null && tab.title != '') {
             // draw the title's text
-            var tbr:Rectangle = new Rectangle((x + 3.0), (centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
+            var tbr:Rectangle = new Rectangle((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
             c.drawComponent(tb, 
                 0, 0, tb.width, tb.height,
                 tbr.x, tbr.y, tbr.w, tbr.h
@@ -105,7 +106,8 @@ class TabView extends Ent {
 
         // draw the closeButton
         var ci:Image = closeIcon[closeHovered?1:0];
-        var cir:Rectangle = new Rectangle((x + w - ci.width - 3.0), (y + ((h - ci.height) / 2)), ci.width, ci.height);
+        var cir:Rectangle = new Rectangle((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
+        // draw the hoveredness
         if ( closeHovered ) {
             var dif:Float = 2.5;
             var bge = new Ellipse(
@@ -137,11 +139,16 @@ class TabView extends Ent {
             w -= lw;
             h -= lw;
         }
+
+        // bottom-left
         c.moveTo(x, y + h);
-        c.lineTo(x, y + r);
-        c.quadraticCurveTo(x, y + r, x + r, y);
-        c.lineTo(x + w - r, y);
-		c.quadraticCurveTo(x + w, y, x + w, y + r);
+        // bottom-left to top-left
+        c.lineTo(x + bd, y + r);
+        c.quadraticCurveTo(x + bd, y + r, x + bd + r, y);
+        // top-left to top-right
+        c.lineTo(x + w - bd - r, y);
+		c.quadraticCurveTo(x + w - bd, y, x + w - bd, y + r);
+		// top-right to bottom-right
 		c.lineTo(x + w, y + h);
     }
 
@@ -149,7 +156,7 @@ class TabView extends Ent {
       * calculate [this] view's content rectangle
       */
     override function calculateGeometry(r : Rectangle):Void {
-        rect.w = (min(tb.width, 100) + 8.0 + closeIcon[0].width);
+        rect.w = (min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
         rect.h = 24.0;
         rect.y = (bar.y + (bar.h - rect.h));
     }
