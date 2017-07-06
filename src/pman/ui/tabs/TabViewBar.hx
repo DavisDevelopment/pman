@@ -123,9 +123,10 @@ class TabViewBar extends Ent {
                 }
             }
             if (ht != null) {
+                var htir = ht.getInnerRect();
                 cursor = 'pointer';
                 ht.hovered = true;
-                if (mp.containedBy((ht.x + ht.w - ht.ci.width - 3.0), (ht.y + ((ht.h - ht.ci.height) / 2)), ht.ci.width, ht.ci.height)) {
+                if (mp.containedBy((htir.x + htir.w - ht.ci.width - 3.0), (htir.y + ((htir.h - ht.ci.height) / 2)), ht.ci.width, ht.ci.height)) {
                     ht.closeHovered = true;
                 }
             }
