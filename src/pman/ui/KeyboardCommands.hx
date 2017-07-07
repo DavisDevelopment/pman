@@ -196,7 +196,7 @@ class KeyboardCommands {
                     var ct = sess.focusedTrack;
                     if (ct != null) {
                         p.gotoByOffset( 1 );
-                        sess.playlist.remove( ct );
+                        sess.removeItem( ct );
                     }
 
                 // jump to a random time in the track
