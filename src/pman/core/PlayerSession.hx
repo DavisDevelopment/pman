@@ -76,6 +76,13 @@ class PlayerSession {
 	}
 
 	/**
+	  * remove a Media item from the queue
+	  */
+	public function removeItem(track : Track):Bool {
+	    return tab.removeTrack( track );
+	}
+
+	/**
 	  * add a Media item onto the queue
 	  */
 	public function addItem(track:Track, ?done:Void->Void, autoLoad:Bool=true):Void {
