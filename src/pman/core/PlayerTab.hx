@@ -91,6 +91,12 @@ class PlayerTab {
 	    session.setTab(session.tabs.indexOf( this ));
 	}
 
+	/**
+	  * close [this] Tab
+	  */
+	public inline function close():Void {
+	    session.deleteTab(session.tabs.indexOf( this ));
+	}
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
