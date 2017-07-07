@@ -359,6 +359,18 @@ class TabViewBar extends Ent {
         return di;
     }
 
+    /**
+      * move the given TabView to a new index
+      */
+    public function moveTabView(tab:TabView, newIndex:Int):Void {
+        //var ntl = tabs.copy();
+        //ntl.remove( tab );
+        //ntl.insert(newIndex, tab);
+        //tabs = ntl;
+        //calculateGeometry( rect );
+        session.moveTab(tab.tab, newIndex);
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
