@@ -68,6 +68,12 @@ class PlayerTab {
 	}
 
 	/**
+	  * get the index of the current media
+	  */
+	public inline function indexOfCurrentMedia():Int {
+	    return track.ternary(playlist.indexOf(_), -1);
+	}
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
