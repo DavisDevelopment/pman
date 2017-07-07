@@ -143,6 +143,13 @@ class Icons {
 	}
 
 	/**
+	  * list icon
+	  */
+	public static function listIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'list', f);
+	}
+
+	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
 	  */
 	public static function namedPath(w:Int, h:Int, name:String, ?f:Path->Void):Document {
