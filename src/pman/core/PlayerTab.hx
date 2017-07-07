@@ -104,6 +104,10 @@ class PlayerTab {
         return playlist[index];
     }
 
+    public inline function getTrackIndex(track : Track):Int {
+        return playlist.indexOf( track );
+    }
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
