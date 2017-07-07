@@ -64,6 +64,14 @@ class TabView extends Ent {
         if (tb.text != titleText) {
             tb.text = titleText;
         }
+
+        if (mouseDown != null) {
+            var mp = stage.getMousePosition();
+            if (mp != null) {
+                dragRect = new Rectangle((mp.x - mouseDown.x), y, w, h);
+                //trace(dragRect.toString());
+            }
+        }
     }
 
     /**
@@ -71,6 +79,9 @@ class TabView extends Ent {
       */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
+        var _r = rect;
+        if (dragRect != null)
+            rect = dragRect;
 
         var colors = bar.getColors();
         var ir = getInnerRect();
@@ -125,6 +136,7 @@ class TabView extends Ent {
             cir.x, cir.y, cir.width, cir.height
         );
 
+        rect = _r;
         c.restore();
     }
 

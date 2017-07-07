@@ -33,7 +33,10 @@ class TabViewBar extends Ent {
         this.playerView = playerView;
         tabs = new Array();
 
-        on('click', onClick);
+        //on('click', onClick);
+        on('contextmenu', onRightClick);
+        on('mousedown', onMouseDown);
+        on('mouseup', onMouseUp);
     }
 
 /* === Instance Methods === */
@@ -107,10 +110,27 @@ class TabViewBar extends Ent {
         var mp = stage.getMousePosition();
         hovered = (mp != null && containsPoint( mp ));
 
+        var _ad = anyDragging;
+        anyDragging = false;
+
         for (t in tabs) {
             t.hovered = false;
             t.closeHovered = false;
             t.update( stage );
+            if ( t.dragging ) {
+                anyDragging = true;
+            }
+        }
+
+        switch ([_ad, anyDragging]) {
+            case [false, true]:
+                //TODO
+
+            case [true, false]:
+                //TODO
+
+            default:
+                null;
         }
 
         if ( hovered ) {
@@ -131,6 +151,10 @@ class TabViewBar extends Ent {
                 }
             }
             stage.cursor = cursor;
+        }
+
+        if ( anyDragging ) {
+            calculateGeometry( rect );
         }
     }
 
@@ -160,19 +184,23 @@ class TabViewBar extends Ent {
 
         // render then tabs
         tabs.reverse();
-        var active:Null<TabView> = null;
+        var priority:Array<Null<TabView>> = [null, null];
         for (t in tabs) {
-            if ( !t.active ) {
+            if (!t.active && !t.dragging) {
                 t.render(stage, c);
             }
             else {
-                active = t;
+                if ( t.active ) {
+                    priority[0] = t;
+                }
+                else if ( t.dragging ) {
+                    priority[1] = t;
+                }
             }
         }
-        if (active != null) {
-            active.render(stage, c);
-        }
         tabs.reverse();
+        for (t in priority) if (t != null)
+            t.render(stage, c);
     }
 
     /**
@@ -201,6 +229,16 @@ class TabViewBar extends Ent {
 
         var margin:Float = 4.2;
         var tx:Float = 0.0;
+        var cdt:Null<TabView> = null;
+        if ( anyDragging ) {
+            cdt = getDraggingTabView();
+        }
+        var oldTabs:Array<TabView> = tabs.copy();
+        if (cdt != null) {
+            var cdi = getDraggedIndex();
+            tabs.remove( cdt );
+            tabs.insert(cdi, cdt);
+        }
 
         for (i in 0...tabs.length) {
             var t:TabView = tabs[i];
@@ -210,6 +248,8 @@ class TabViewBar extends Ent {
 
             t.calculateGeometry( rect );
         }
+    
+        tabs = oldTabs;
     }
 
     /**
@@ -254,9 +294,15 @@ class TabViewBar extends Ent {
         for (tab in tabs) {
             removeTabView( tab );
         }
+        tabs = new Array();
         for (tab in session.tabs) {
             addTab( tab );
         }
+        defer(function() {
+            calculateGeometry( rect );
+        });
+    }
+
     /**
       * get a TabView by a Point
       */
@@ -273,7 +319,9 @@ class TabViewBar extends Ent {
       * 'click' event handler
       */
     public function onClick(event : MouseEvent):Void {
-        var p:Point = event.position;
+        getTabViewByPoint( event.position ).attempt(_.onClick( event ));
+    }
+
     /**
       * 'rightclick' event handler
       */
