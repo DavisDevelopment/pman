@@ -306,6 +306,8 @@ class TabViewBar extends Ent {
     public var tabs : Array<TabView>;
     public var hovered : Bool = false;
     public var pattern : CanvasPattern;
+    public var anyDragging : Bool = false;
 
     private var colors : Null<Array<Int>> = null;
+    private var lastMouseDown : Null<MouseEvent> = null;
 }
