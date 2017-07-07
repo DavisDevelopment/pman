@@ -29,27 +29,111 @@ class Icons {
 	public static function pauseIcon(w:Int, h:Int, ?f:Path->Void):Document {
 		return namedPath(w, h, 'pause', f);
 	}
-	public static function prevIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'previous', f);
-	public static function nextIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'next', f);
-	public static function expandIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'expand', f);
-	public static function collapseIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'collapse', f);
-	public static function clockIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'clock', f);
-	public static function muteIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'sound-muted', f);
-	public static function shuffleIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'shuffle', f);
-	public static function backIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'back', f);
+
+	/**
+	  * Previous icon
+	  */
+	public static function prevIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'previous', f);
+    }
+
+	/**
+	  * Next icon
+	  */
+	public static function nextIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'next', f);
+    }
+
+	/**
+	  * Expand icon
+	  */
+	public static function expandIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'expand', f);
+    }
+
+	/**
+	  * collapse icon
+	  */
+	public static function collapseIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'collapse', f);
+    }
+
+	/**
+	  * clock icon
+	  */
+	public static function clockIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'clock', f);
+    }
+
+	/**
+	  * mute icon
+	  */
+	public static function muteIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'sound-muted', f);
+    }
+
+	/**
+	  * shuffle icon
+	  */
+	public static function shuffleIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'shuffle', f);
+    }
+
+	/**
+	  * back icon
+	  */
+	public static function backIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'back', f);
+    }
+
+	/**
+	  * volume icon
+	  */
 	public static function volumeIcon(w:Int, h:Int, ?f:Path->Void):Document {
 		return namedPath(w, h, 'sound3', f);
 	}
+
+	/**
+	  * selection-expand icon
+	  */
 	public static function selectionExpand(w:Int, h:Int, ?f:Path->Void):Document {
 	    return namedPath(w, h, 'selection-expand', f);
 	}
+
+	/**
+	  * selection-collapse icon
+	  */
 	public static function selectionCollapse(w:Int, h:Int, ?f:Path->Void):Document {
 	    return namedPath(w, h, 'selection-collapse', f);
 	}
-	public static function cogIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'cog', f);
-	public static function clearIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'clear', f);
-	public static function repeatIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'repeat', f);
-	public static function closeIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'close', f);
+
+	/**
+	  * cog icon
+	  */
+	public static function cogIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'cog', f);
+    }
+
+	/**
+	  * clear icon
+	  */
+	public static function clearIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'clear', f);
+    }
+
+	/**
+	  * repeat icon
+	  */
+	public static function repeatIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'repeat', f);
+    }
+
+	/**
+	  * close icon
+	  */
+	public static function closeIcon(w:Int, h:Int, ?f:Path->Void):Document {
+	    return namedPath(w, h, 'close', f);
+    }
 
 	/**
 	  * create the Chromecast icon
