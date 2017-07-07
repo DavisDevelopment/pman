@@ -84,6 +84,13 @@ class PlayerTab {
 	    focus();
 	}
 
+    /**
+      * shift focus to [this] Tab
+      */
+	public inline function focus():Void {
+	    session.setTab(session.tabs.indexOf( this ));
+	}
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
