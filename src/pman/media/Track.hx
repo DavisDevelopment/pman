@@ -324,6 +324,22 @@ class Track extends EventDispatcher implements IComparable<Track> {
                 }
             });
 
+            // open [this] Track in a new Tab
+            mt.push({
+                label: 'Open in New Tab',
+                click: function(i, w, e) {
+                    function doit():Void {
+                        //playlist.remove( this );
+                        var tabIndex = session.newTab(function(tab) {
+                            tab.playlist.push( this );
+                            tab.blurredTrack = this;
+                        });
+                        //session.setTab( tabIndex );
+                    }
+                    doit();
+                }
+            });
+
             (function() {
                 // utility function for adding a single track (this one) to a saved playlist
                 function add2(n : String) {
