@@ -74,6 +74,16 @@ class PlayerTab {
 	    return track.ternary(playlist.indexOf(_), -1);
 	}
 
+	/**
+	  * open [this] Tab
+	  */
+	public function open():Void {
+	    if (!session.tabs.has( this )) {
+	        session.tabs.push( this );
+	    }
+	    focus();
+	}
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
