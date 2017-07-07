@@ -213,6 +213,9 @@ class TabView extends Ent {
     public var active(get, never):Bool;
     private inline function get_active() return (tab == session.activeTab);
 
+    public var dragging(get, never):Bool;
+    private inline function get_dragging() return (mouseDown != null);
+
     public var ci(get, never):Null<Image>;
     private inline function get_ci() return closeIcon[closeHovered ? 1 : 0];
 
