@@ -185,7 +185,7 @@ class TabView extends Ent {
       * close [this] tab
       */
     public inline function close():Void {
-        session.deleteTab(session.tabs.indexOf( tab ));
+        tab.close();
     }
 
     /**
