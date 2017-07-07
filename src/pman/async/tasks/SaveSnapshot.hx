@@ -21,6 +21,7 @@ import Std.*;
 import tannus.math.TMath.*;
 import electron.Tools.defer;
 import Slambda.fn;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -61,11 +62,18 @@ class SaveSnapshot extends Task2<Path> {
     }
 
     /**
-      * capture the snapshot itself
+      * create the snapshot
       */
     private function take_snapshot(done : Cb<Path>):Void {
-        var thumbPath:Path = (App.getPath( ExtAppNamedPath.Pictures ).plusString('pman_snapshots'));
-        var m = new FFfmpeg(trackPath);
+        generate_snapshot( done );
+    }
+
+    /**
+      * capture the snapshot itself
+      */
+    private function generate_snapshot(done : Cb<Path>):Void {
+        var thumbPath:Path = preferences.snapshotPath;
+        var m = new FFfmpeg( trackPath );
         var fileNames = new Array();
         m.onError(function(error, stdout, stderr) {
             done( error );
