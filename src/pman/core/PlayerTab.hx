@@ -108,6 +108,10 @@ class PlayerTab {
         return playlist.indexOf( track );
     }
 
+    public inline function hasTrack(track : Track):Bool {
+        return playlist.has( track );
+    }
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
