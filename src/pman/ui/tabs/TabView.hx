@@ -192,7 +192,7 @@ class TabView extends Ent {
       * select [this] tab
       */
     public inline function select():Void {
-        session.setTab(session.tabs.indexOf( tab ));
+        tab.focus();
     }
 
     /**
