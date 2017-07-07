@@ -230,4 +230,6 @@ class TabView extends Ent {
 
     public var hovered : Bool = false;
     public var closeHovered : Bool = false;
+    public var mouseDown : Null<Point> = null;
+    public var dragRect : Null<Rectangle> = null;
 }
