@@ -338,13 +338,27 @@ class TabViewBar extends Ent {
       * 'rightclick' event handler
       */
     public function onRightClick(event : MouseEvent):Void {
-        getTabViewByPoint( event.position ).attempt(_.onRightClick( event ));
+        var tab = getTabViewByPoint( event.position );
+        if (tab != null) {
+            tab.onRightClick( event );
+        }
+        else {
+            var pos = event.position;
+            buildMenu(function(?error, ?menu) {
+                if (menu != null) {
+                    menu.toMenu().popup(pos.x, pos.y);
+                }
+            });
+        }
     }
 
     /**
       * handle 'mousedown' events
       */
     public function onMouseDown(event : MouseEvent):Void {
+        if (event.button != 0) {
+            return ;
+        }
         var tab = getTabViewByPoint( event.position );
         if (tab != null) {
             lastMouseDown = event;
