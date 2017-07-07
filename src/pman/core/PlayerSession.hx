@@ -58,15 +58,11 @@ class PlayerSession {
 		trackChanged = new Signal();
 		trackReady = new Signal();
 		targetChanged = new Signal();
-		//focusedTrack = null;
-		//playlist = new Playlist();
-		history = new PlayerHistory( this );
 		target = PTThisDevice;
 
 		tabs = [new PlayerTab( this )];
 		activeTabIndex = 0;
 
-        //_listen();
         player.onReady( _listen );
 	}
 
