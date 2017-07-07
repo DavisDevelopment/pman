@@ -87,8 +87,16 @@ class GenerateThumbnail extends Task2<Path> {
         return 't%r.png';
     }
 
+    /**
+      * Promise the generated Path
+      */
+    public function generate():Promise<Path> {
+        return Asyncs.toPromise( execute );
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
     public var size : String;
+    public var path : Null<Path> = null;
 }
