@@ -72,7 +72,7 @@ class PlayerSession {
 	  * get the index of the currently playing media
 	  */
 	public inline function indexOfCurrentMedia():Int {
-	    return (focusedTrack != null ? playlist.indexOf( focusedTrack ) : -1);
+	    return activeTab.indexOfCurrentMedia();
 	}
 
 	/**
