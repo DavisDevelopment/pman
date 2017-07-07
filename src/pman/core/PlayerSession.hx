@@ -200,11 +200,6 @@ class PlayerSession {
 	    // ensure that [cb] is not null
 	    cb = fill_lcbo( cb );
 
-		// push history state
-		if (cb.trigger != History) {
-		    history.push(Media(LoadTrack( t )));
-		}
-
 		// shift focus to [t]
 		focus(t, function() {
 			if (cb.attached != null) {
@@ -701,8 +696,6 @@ class PlayerSession {
 	public var player : Player;
 	public var playbackProperties : PlayerPlaybackProperties;
 	//public var playlist : Playlist;
-
-	public var history : PlayerHistory;
 
 	// session name, assigned when session is saved or loaded
 	public var name : Null<String>;
