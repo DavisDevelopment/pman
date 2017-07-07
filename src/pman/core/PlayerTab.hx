@@ -123,6 +123,13 @@ class PlayerTab {
         return ret;
     }
 
+    public inline function insertTrack(pos:Int, track:Track, ?report:Bool):Void {
+        playlist.insert(pos, track, report);
+    }
+
+/* === Serialization Methods === */
+
+	/**
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
