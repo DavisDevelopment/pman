@@ -289,6 +289,17 @@ class TabViewBar extends Ent {
         return display ? super.containsPoint( p ) : false;
     }
 
+    /**
+      * find the first tabview for which [f] returned true
+      */
+    public function findTabView(f : TabView->Bool):Maybe<TabView> {
+        for (t in tabs) {
+            if (f( t ))
+                return t;
+        }
+        return null;
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
