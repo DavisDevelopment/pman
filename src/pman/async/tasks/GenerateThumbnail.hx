@@ -57,11 +57,12 @@ class GenerateThumbnail extends Task2<Path> {
             fileNames = names;
         });
         m.onEnd(function() {
-            done(null, fileNames.map(b.subpath)[0]);
+            path = b.subpath(fileNames[0]);
+            done(null, path);
         });
         m.screenshots({
             folder: b.path.toString(),
-            filename: 't%r.png',
+            filename: getFilenamePattern(),
             size: size,
             timemarks: [getTimeMark()]
         });
@@ -77,6 +78,13 @@ class GenerateThumbnail extends Task2<Path> {
             return r.randfloat(0.0, d.meta.duration);
         }
         else return 0.0;
+    }
+
+    /**
+      * get the pattern used to generate the filename
+      */
+    private function getFilenamePattern():String {
+        return 't%r.png';
     }
 
 /* === Instance Fields === */
