@@ -533,6 +533,7 @@ class Player extends EventDispatcher {
 	        return ;
 	    }
 
+        /*
 	    var task = new SaveSnapshot(this, track, currentTime);
 	    task.run(function(?error, ?snapshotPath:Path) {
 	        if (error != null) {
@@ -544,6 +545,17 @@ class Player extends EventDispatcher {
                 view.addSibling( vu );
             }
 	    });
+	    */
+	    var bundle = track.getBundle();
+	    var snapp = bundle.getSnapshot( currentTime );
+        snapp.then(function(path) {
+            trace( path );
+            var vu = new SnapshotView(this, path);
+            view.addSibling( vu );
+        });
+        snapp.unless(function(error) {
+            done( error );
+        });
 	}
 
     // get media object
