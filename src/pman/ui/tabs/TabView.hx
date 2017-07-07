@@ -9,7 +9,10 @@ import tannus.graphics.Color;
 import gryffin.core.*;
 import gryffin.display.*;
 
+import electron.MenuTemplate;
+
 import pman.core.*;
+import pman.async.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -23,6 +26,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.ds.AnonTools;
+using pman.async.VoidAsyncs;
 
 class TabView extends Ent {
     /* Constructor Function */
@@ -191,6 +195,12 @@ class TabView extends Ent {
       */
     public function onRightClick(event : MouseEvent):Void {
         event.cancel();
+        var pos = event.position;
+        buildMenu(function(?error, ?menu) {
+            if (menu != null) {
+                menu.toMenu().popup(pos.x, pos.y);
+            }
+        });
     }
 
     /**
@@ -221,6 +231,54 @@ class TabView extends Ent {
         var newIndex:Int = bar.getDraggedIndex();
         trace('new index: $newIndex');
         bar.moveTabView(this, newIndex);
+    }
+
+    /**
+      * build the context menu
+      */
+    public function buildMenu(complete : Cb<MenuTemplate>):Void {
+        defer(function() {
+            var menu:MenuTemplate = new MenuTemplate();
+            var tasks:Array<VoidAsync> = new Array();
+
+            tasks.push(function(done : VoidCb) {
+                bar.buildMenu(function(?error, ?barMenu) {
+                    if (error != null)
+                        done( error );
+                    else if (barMenu != null) {
+                        menu = menu.concat( barMenu );
+                        menu.push({type: 'separator'});
+                        done();
+                    }
+                });
+            });
+
+            tasks.push(function(done) {
+                menu.push({
+                    label: 'Close tab',
+                    click: function(i,w,e) {
+                        close();
+                    }
+                });
+
+                menu.push({
+                    label: 'Close other tabs',
+                    click: function(i,w,e) {
+                        for (tab in bar.tabs) {
+                            if (tab != this) {
+                                tab.close();
+                            }
+                        }
+                    }
+                });
+
+                done();
+            });
+
+            tasks.series(function(?error) {
+                complete(error, menu);
+            });
+        });
     }
 
 /* === Computed Instance Fields === */
