@@ -40,13 +40,13 @@ class CThumbs {
     public function new(bundle:Bundle, count:Int, size:String):Void {
         this.bundle = bundle;
         this.count = count;
-        var ss = bundle.asizeDimensions( size );
+        var ss = bundle.sizeDimensions( size );
         this.size = [ss.w, ss.h];
 
         this._items = bundle.getSetItems(count, size);
-        haxe.ds.ArraySort.sort(this._items, function(x:BundleItem, y:BundleItem) {
-            return Reflect.compare(x.set.i, y.set.i);
-        });
+        //haxe.ds.ArraySort.sort(this._items, function(x:BundleItem, y:BundleItem) {
+            //return Reflect.compare(x.set.i, y.set.i);
+        //});
         this.thumbs = [for (i in 0...length) null];
     }
 
