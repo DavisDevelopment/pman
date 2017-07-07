@@ -202,6 +202,15 @@ class TabView extends Ent {
         return new Rectangle((x + bd), y, (w - bw), h);
     }
 
+    /**
+      * end of dragging something
+      */
+    public function dragEnd():Void {
+        var newIndex:Int = bar.getDraggedIndex();
+        trace('new index: $newIndex');
+        bar.moveTabView(this, newIndex);
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
