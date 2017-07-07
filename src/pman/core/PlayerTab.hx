@@ -57,7 +57,7 @@ class PlayerTab {
 	  * check whether there is any media attached to [this] Tab
 	  */
 	public inline function hasMedia():Bool {
-	    return (focusedTrack != null);
+	    return track.exists;
 	}
 
 	/**
