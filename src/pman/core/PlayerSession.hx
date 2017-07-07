@@ -509,6 +509,17 @@ class PlayerSession {
 	}
 
 	/**
+	  * move TabView to a new index
+	  */
+	public function moveTab(tab:PlayerTab, index:Int):Void {
+	    var ntl = tabs.copy();
+	    ntl.remove( tab );
+	    ntl.insert(index, tab);
+	    activeTabIndex = ntl.indexOf( tab );
+	    tabs = ntl;
+	}
+
+	/**
 	  * fill in a LoadCallbackOptions object
 	  */
 	private function fill_lcbo(cb : Null<LoadCallbackOptions>):LoadCallbackOptions {
