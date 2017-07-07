@@ -11,6 +11,7 @@ import gryffin.display.Image;
 
 import pman.async.*;
 import pman.async.tasks.*;
+import pman.media.info.BundleItemType;
 
 import tannus.math.TMath.*;
 import electron.Tools.*;
@@ -40,12 +41,41 @@ class Bundle {
 /* === Instance Methods === */
 
     /**
+      * get a snapshot
+      */
+    public function getSnapshot(time:Float, ?size:String):Promise<Path> {
+        if (size == null) {
+            size = '100%';
+        }
+
+        return Promise.create({
+            var dim = sizeDimensions( size );
+            var res = findSnapshot(time, size);
+            if (res == null) {
+                var task = new GenerateBundleSnapshot(track, size, time);
+                task.generate()
+                    .then(function(path : Path) {
+                        return path;
+                    })
+                    .unless(function(error) {
+                        throw error;
+                    });
+            }
+            else {
+                defer(function() {
+                    return res.getPath();
+                });
+            }
+        });
+    }
+
+    /**
       * get the thumbnail for [this] track
       */
     public function getThumbnail(size : String):Promise<Image> {
         return Promise.create({
-            var d = asizeDimensions( size );
-            var res = filter.fn(_.thumb && _.set == null && _.time == null && (_.size.w == d.w && _.size.h == d.h));
+            var dim:Dimensions = sizeDimensions( size );
+            var res:Array<BundleItem> = getThumbnailsBySize( size );
             if (res.length == 0) {
                 var task = new GenerateThumbnail(track, size);
                 task.run(function(?error, ?path) {
@@ -67,23 +97,63 @@ class Bundle {
     /**
       * get list of thumbnail files
       */
-    public function getAllThumbnails():Array<BundleItem> {
-        return filter(function(i) {
-            // thumbnail that is not part of a set
-            return (i.thumb && i.set == null);
+    public function getThumbnails(?f : BundleItem->Bool):Array<BundleItem> {
+        return filter(function(item) {
+            return (item.isThumbnail() && (f != null ? f( item ) : true));
         });
+    }
+    public inline function getAllThumbnails() return getThumbnails();
+    public function getThumbnailsBySize(size:String) {
+        var dim = sizeDimensions( size );
+        return getThumbnails.fn(_.getDimensions().equals( dim ));
     }
 
     /**
-      * create an item
+      * get list of snapshot files
       */
-    public function item(size:String, ?time:Float, thumb:Bool=false, ?set:Array<Int>):BundleItem {
-        return {
-            time: time,
-            size: asizeDimensions( size ),
-            set: (set != null ? {i:set[0],n:set[1]} : null),
-            thumb: thumb
-        };
+    public function getSnapshots(?f : BundleItem->Bool):Array<BundleItem> {
+        return filter(function(item) {
+            return (item.isSnapshot() && (f != null ? f( item ) : true));
+        });
+    }
+    public inline function getAllSnapshots():Array<BundleItem> return getSnapshots();
+    public function getSnapshotsBySize(size : String):Array<BundleItem> {
+        var dim = sizeDimensions( size );
+        return getSnapshots.fn(_.getDimensions().equals(dim));
+    }
+    public function getSnapshotsByTime(time:Float, ?threshold:Float):Array<BundleItem> {
+        return getSnapshots.fn(i=>i.getTime().ternary(threshold!=null?_.almostEquals(time, threshold):_==time, false));
+    }
+    public function getSnapshotsByTimeRange(time_min:Float, time_max:Float) {
+        return getSnapshots.fn(i=>i.getTime().ternary(_.inRange(time_min, time_max), false));
+    }
+
+    /**
+      * get the first item for which [test] returns true
+      */
+    public function find(test : BundleItem->Bool):Maybe<BundleItem> {
+        for (item in items()) {
+            if (test( item )) {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    /**
+      * 'find' and snapshot item
+      */
+    public function findSnapshot(time:Float, ?size:String):Maybe<BundleItem> {
+        if (size == null)
+            size = '100%';
+        var dim = sizeDimensions( size );
+        return find(function(item) {
+            return (
+                item.isSnapshot() &&
+                (item.getTime().ternary(_ == time, false)) &&
+                (item.getDimensions().equals( dim ))
+            );
+        });
     }
 
     /**
@@ -127,42 +197,37 @@ class Bundle {
     public function remove(id : BundleItem):Void {
         var name = getNameForId( id );
         _ic.remove( name );
-        try {
-            FileSystem.deleteFile(subpath( name ));
-        }
-        catch (error : Dynamic) {
-            return ;
-        }
+        id.delete();
     }
 
     /**
       * get all items with the given size
       */
     public function getBySize(size : String):Array<BundleItem> {
-        var ss = asizeDimensions( size );
-        inline function eq(x, y)
-            return (x.w == y.w && x.h == y.h);
-        return filter.fn(eq(ss, _.size));
+        var ss = sizeDimensions( size );
+        return filter(function(item) {
+            var itemSize = item.getDimensions();
+            return (itemSize != null ? itemSize.equals( ss ) : false);
+        });
     }
 
     /**
       * get all items that belong to a set of the given size
       */
     public function getBySetSize(count : Int):Array<BundleItem> {
-        return filter(function(i : BundleItem) {
-            return (i.set != null && i.set.n == count);
-        });
+        return [];
+        //return filter(function(i : BundleItem) {
+            //return (i.set != null && i.set.n == count);
+        //});
     }
 
     /**
       * get all of the bundle items of a set
       */
     public function getSetItems(count:Int, size:String):Array<BundleItem> {
-        var ss = asizeDimensions( size );
-        inline function eq(x, y)
-            return (x.w == y.w && x.h == y.h);
+        var ss = sizeDimensions( size );
         return filter(function(i : BundleItem) {
-            return (eq(ss, i.size) && (i.set != null && i.set.n == count));
+            return i.getDimensions().equals( ss );
         });
     }
 
@@ -170,7 +235,10 @@ class Bundle {
       * get all items at the given time
       */
     public function getByTime(time:Float, threshold:Float=0.88):Array<BundleItem> {
-        return filter.fn(_.time.almostEquals(time, threshold));
+        return filter(function(item) {
+            var itemTime = item.getTime();
+            return if (itemTime != null) itemTime.almostEquals(time, threshold) else false;
+        });
     }
 
     /**
@@ -202,7 +270,7 @@ class Bundle {
       * iterate over all 'items' 
       */
     public function items():Iterator<BundleItem> {
-        return fnames().iterator().map(getItemId);
+        return (fnames().iterator()).map( getItemId );
     }
 
     /**
@@ -222,7 +290,9 @@ class Bundle {
     /**
       * get subpath of [this]
       */
-    public function subpath(s : String):Path return path.plusString( s );
+    public function subpath(s : String):Path {
+        return path.plusString( s );
+    }
 
     /**
       * check for existance of a file named [n] in the [path] directory
@@ -302,7 +372,7 @@ class Bundle {
     /**
       * get dimensions of thumbnail from 'size' string
       */
-    public function sizeDimensions(s : String):Rectangle {
+    public function sizeDimensionsRectangle(s : String):Rectangle {
         var dim = new Rectangle(0, 0, track.data.meta.video.width, track.data.meta.video.height);
         if (s.has( 'x' )) {
             var vec = [s.before('x'), s.after('x')];
@@ -332,9 +402,12 @@ class Bundle {
     /**
       * gets sizeDimensions as an anonymous object
       */
-    private function asizeDimensions(s : String):{w:Int, h:Int} {
-        var r = sizeDimensions( s );
-        return {w:floor(r.w), h:floor(r.h)};
+    private function sizeDimensions(s : String):Dimensions {
+        var r = sizeDimensionsRectangle( s );
+        return {
+            w: floor( r.w ),
+            h: floor( r.h )
+        };
     }
 
     /**
@@ -352,8 +425,8 @@ class Bundle {
     /**
       * thumbnail size as String from Rectangle
       */
-    private inline function strDimension(d : Rectangle):String {
-        return (floor( d.width ) + 'x' + floor( d.height ));
+    private inline function strDimension(d : Dimensions):String {
+        return d.toString();
     }
 
     /**
@@ -375,48 +448,15 @@ class Bundle {
     /**
       * parse a BundleItemId object from the given item name
       */
-    public function getItemId(name : String):BundleItem {
-        var time:Null<Float> = null;
-        var thumb:Bool = false;
-        var set:Null<{i:Int,n:Int}> = null;
-        var size:Array<Int> = [0,0];
-        if (name.has('@')) {
-            time = Std.parseFloat(name.after('@').before('.png'));
-            name = name.before('@');
-        }
-        if (name.startsWith('t')) {
-            thumb = true;
-            name = name.after('t');
-            if (name.startsWith('[')) {
-                set = name.after('[').before(']').split(':').map(Std.parseInt).with([i,n], {i:i,n:n});
-                name = name.after(']');
-            }
-        }
-        size = name.split('x').map(Std.parseInt);
-        return {
-            time: time,
-            thumb: thumb,
-            set: set,
-            size: {w:size[0], h:size[1]}
-        };
+    public inline function getItemId(name : String):BundleItem {
+        return new BundleItem(this, name);
     }
 
     /**
       * create a filename string from the given 'item id'
       */
-    public function getNameForId(id : BundleItem):String {
-        var s = '${id.size.w}x${id.size.h}';
-        if (id.time != null) {
-            s += '@${id.time}';
-        }
-        if (id.set != null) {
-            s = ('t[${id.set.i}:${id.set.n}]' + s);
-        }
-        else if ( id.thumb ) {
-            s = ('t' + s);
-        }
-        s += '.png';
-        return s;
+    public inline function getNameForId(id : BundleItem):String {
+        return id.name;
     }
 
     /**
@@ -433,6 +473,34 @@ class Bundle {
         tgee.on('${strDimension(sizeDimensions(size))}:$count', handler);
     }
 
+/* === Static Methods === */
+
+    /**
+      * parse BundleItemType from [s]
+      */
+    public static function getBundleItemType(s : String):BundleItemType {
+        var orig_s:String = s;
+        // thumbnail
+        if (s.startsWith('t')) {
+            s = s.slice( 1 );
+            return Thumbnail(basicSizeDimensions(s.beforeLast('.png')));
+        }
+        // snapshot
+        else if (s.startsWith('s')) {
+            s = s.slice( 1 ).beforeLast('.png');
+            var a = s.separate('@');
+            return Snapshot(Std.parseFloat(a.after), basicSizeDimensions(a.before));
+        }
+        // anything else
+        else {
+            throw new js.Error('Could not resolve BundleItemType from "$orig_s"');
+        }
+    }
+
+    public static function basicSizeDimensions(size : String):Dimensions {
+        return size.split('x').with([w, h], new Dimensions(Std.parseInt(w), Std.parseInt(h)));
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
@@ -444,10 +512,3 @@ class Bundle {
     // thumb-generation event emitter
     private var tgee : EventDispatcher;
 }
-
-typedef BundleItem = {
-    ?set: {i:Int, n:Int},
-    size: {w:Int, h:Int},
-    ?time: Float,
-    thumb: Bool
-};
