@@ -281,6 +281,19 @@ class TabViewBar extends Ent {
         getTabViewByPoint( event.position ).attempt(_.onRightClick( event ));
     }
 
+    /**
+      * handle 'mousedown' events
+      */
+    public function onMouseDown(event : MouseEvent):Void {
+        var tab = getTabViewByPoint( event.position );
+        if (tab != null) {
+            lastMouseDown = event;
+            var p = event.position;
+            tab.mouseDown = new Point((p.x - tab.rect.x), (p.y - tab.rect.y));
+            tab.dragRect = tab.rect.clone();
+        }
+    }
+
         for (t in tabs) {
             if (t.containsPoint( p )) {
                 t.onClick( event );
