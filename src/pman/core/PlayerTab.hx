@@ -97,6 +97,13 @@ class PlayerTab {
 	public inline function close():Void {
 	    session.deleteTab(session.tabs.indexOf( this ));
 	}
+
+/* === Playlist Methods === */
+
+    public inline function getTrack(index : Int):Maybe<Track> {
+        return playlist[index];
+    }
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
