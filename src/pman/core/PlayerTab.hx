@@ -112,6 +112,17 @@ class PlayerTab {
         return playlist.has( track );
     }
 
+    /**
+      * remove the given Track
+      */
+    public function removeTrack(track : Track):Bool {
+        var ret = playlist.remove( track );
+        if (playlist.length == 0) {
+            close();
+        }
+        return ret;
+    }
+
 	  * serialize [this] tab
 	  */
 	public function hxSerialize(s : Serializer):Void {
