@@ -97,6 +97,18 @@ class RendererIpcCommands {
                 null;
             });
         });
+
+        b('Tab:Select', function(e, index:Int) {
+            player.session.setTab( index );
+        });
+
+        b('Tab:Create', function() {
+            player.session.newTab();
+        });
+
+        b('Tab:Delete', function(e, index:Int) {
+            player.session.deleteTab( index );
+        });
     }
 
     /**
