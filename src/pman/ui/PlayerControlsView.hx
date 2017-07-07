@@ -46,6 +46,7 @@ class PlayerControlsView extends Ent {
 			addButton(new PreviousButton( this ));
 
 			addButton(new FullscreenButton( this ));
+			addButton(new PlaylistButton( this ));
 			addButton(new CastButton( this ));
 			addButton(new VolumeButton( this ));
 			addButton(new PlaybackSpeedButton( this ));
