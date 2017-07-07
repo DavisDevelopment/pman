@@ -341,6 +341,24 @@ class TabViewBar extends Ent {
         return findTabView.fn( _.dragging );
     }
 
+    /**
+      * get the 'dragged' index of the dragging tab
+      */
+    public function getDraggedIndex():Int {
+        var dt = getDraggingTabView();
+        if (dt == null)
+            return -1;
+        var di:Int = 0;
+        inline function dx():Float return dt.dragRect.x;
+        for (index in 0...tabs.length) {
+            var t:TabView = tabs[index];
+            if (dx() > t.rect.centerX) {
+                di++;
+            }
+        }
+        return di;
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
