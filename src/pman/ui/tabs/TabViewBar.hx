@@ -257,6 +257,16 @@ class TabViewBar extends Ent {
         for (tab in session.tabs) {
             addTab( tab );
         }
+    /**
+      * get a TabView by a Point
+      */
+    public function getTabViewByPoint(p : Point):Maybe<TabView> {
+        for (t in tabs) {
+            if (t.containsPoint( p )) {
+                return t;
+            }
+        }
+        return null;
     }
 
     /**
