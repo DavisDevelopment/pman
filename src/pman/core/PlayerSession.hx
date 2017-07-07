@@ -490,7 +490,7 @@ class PlayerSession {
             var ct = tabs[activeTabIndex];
             if (tabIndex == activeTabIndex) {
                 if (tabs.length == 1) {
-                    //TODO
+                    newTab();
                 }
                 else {
                     var newIndex:Int = (tabIndex - 1);
