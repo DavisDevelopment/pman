@@ -139,7 +139,7 @@ class PlayerTab {
 	    switch ( type ) {
             case Player:
                 w(playlist.toStrings());
-                w(new Maybe(focusedTrack.or( blurredTrack )).ternary(playlist.indexOf( _ ), -1));
+                w(indexOfCurrentMedia());
 
             default:
                 w( null );
