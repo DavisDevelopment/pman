@@ -8,6 +8,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 
 import pman.core.*;
+import pman.db.*;
 import pman.display.ColorScheme;
 
 import tannus.math.TMath.*;
@@ -47,4 +48,7 @@ class Globals {
 
     public static var theme(get, never):ColorScheme;
     private static inline function get_theme() return player.theme;
+
+    public static var database(get, never):PManDatabase;
+    private static inline function get_database() return bpmain.db;
 }
