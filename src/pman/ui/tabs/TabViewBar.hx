@@ -152,6 +152,15 @@ class TabViewBar extends Ent {
             }
             stage.cursor = cursor;
         }
+        else {
+            if ( anyDragging ) {
+                getDraggingTabView().attempt({
+                    _.mouseDown = null;
+                    _.dragRect = null;
+                    lastMouseDown = null;
+                });
+            }
+        }
 
         if ( anyDragging ) {
             calculateGeometry( rect );
