@@ -10,7 +10,10 @@ import gryffin.core.*;
 import gryffin.display.*;
 import js.html.CanvasPattern;
 
+import electron.MenuTemplate;
+
 import pman.core.*;
+import pman.async.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -420,12 +423,32 @@ class TabViewBar extends Ent {
       * move the given TabView to a new index
       */
     public function moveTabView(tab:TabView, newIndex:Int):Void {
-        //var ntl = tabs.copy();
-        //ntl.remove( tab );
-        //ntl.insert(newIndex, tab);
-        //tabs = ntl;
-        //calculateGeometry( rect );
         session.moveTab(tab.tab, newIndex);
+    }
+
+    /**
+      * build a context menu for [this]
+      */
+    public function buildMenu(done : Cb<MenuTemplate>):Void {
+        defer(function() {
+            var menu = new MenuTemplate();
+
+            menu.push({
+                label: 'New tab',
+                click: function(i,w,e) {
+                    session.newTab();
+                }
+            });
+
+            menu.push({
+                label: 'Save session',
+                click: function(i, w, e) {
+                    player.message('TODO: Reimplement session saving');
+                }
+            });
+
+            done(null, menu);
+        });
     }
 
 /* === Computed Instance Fields === */
