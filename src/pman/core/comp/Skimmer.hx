@@ -132,4 +132,7 @@ class Skimmer extends PlayerComponent {
     public var r : Random;
     public var ranges : Null<TimeRanges>;
     public var currentRange : Null<TimeRange>;
+    
+    public var min : Float;
+    public var max : Float;
 }
