@@ -37,6 +37,9 @@ using Slambda;
 using pman.media.MediaTools;
 using tannus.math.RandomTools;
 
+/**
+  * class to represent a Tab in the player window
+  */
 class PlayerTab {
     /* Constructor Function */
     public function new(sess : PlayerSession):Void {
