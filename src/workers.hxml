@@ -22,8 +22,14 @@
 #-D foundation
 
 #--each
---next
+#--next
 
--main pman.ww.workers.HDDProbe
--D worker
--js ../dist/scripts/diskprobe.worker.js
+#-main pman.ww.workers.HDDProbe
+#-D worker
+#-js ../dist/scripts/diskprobe.worker.js
+
+#--next
+
+#-main pman.ww.workers.TrackDataLoader
+#-D worker
+#-js ../dist/scripts/trackdataloader.worker.js
