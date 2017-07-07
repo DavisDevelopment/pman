@@ -334,6 +334,13 @@ class TabViewBar extends Ent {
         return null;
     }
 
+    /**
+      * get the TabView currently being dragged
+      */
+    public function getDraggingTabView():Maybe<TabView> {
+        return findTabView.fn( _.dragging );
+    }
+
 /* === Computed Instance Fields === */
 
     public var player(get, never):Player;
