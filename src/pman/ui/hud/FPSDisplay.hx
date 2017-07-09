@@ -1,4 +1,4 @@
-package pman.ui;
+package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
@@ -25,15 +25,13 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class FPSDisplay extends Ent {
+class FPSDisplay extends TextualHUDItem {
     /* Constructor Function */
-    public function new(player : Player):Void {
-        super();
+    public function new(hud : PlayerHUD):Void {
+        super( hud );
 
-        this.player = player;
         frames = new Pair(0, 0);
         lt = null;
-        tb = new TextBox();
         tb.color = new Color(34, 245, 51);
         tb.fontSize = 12;
     }
@@ -65,6 +63,8 @@ class FPSDisplay extends Ent {
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
+        super.render(stage, c);
+
         c.drawComponent(tb, 0, 0, tb.width, tb.height, x, y, tb.width, tb.height);
     }
 
@@ -82,8 +82,6 @@ class FPSDisplay extends Ent {
 
 /* === Instance Fields === */
 
-    public var player : Player;
     private var frames : Pair<Int, Int>;
     private var lt : Null<Float>;
-    private var tb : TextBox;
 }
