@@ -48,12 +48,6 @@ class Background {
 	 */
 	public function start():Void {
 
-        /*
-        var sysname = Sys.systemName();
-        if (sysname == 'Win32') {
-            _handleSquirrelEvents();
-        }
-        */
         parseArgs(Sys.args());
 
 		App.onReady( _ready );
@@ -74,7 +68,7 @@ class Background {
 	/**
 	  * open a new Player window
 	  */
-	public function openPlayerWindow(?cb : BrowserWindow -> Void):Void {
+	public function openPlayerWindow(?cb : BrowserWindow -> Void):Int {
 	    // create new hidden BrowserWindow
 	    var icon = NativeImage.createFromPath(ap('assets/icon64.png').toString());
 		var win:BrowserWindow = new BrowserWindow({
@@ -84,7 +78,13 @@ class Background {
 			webPreferences: untyped {
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
-                webSecurity: false
+                webSecurity: false,
+                experimentalFeatures: true,
+                experimentalCanvasFeatures: true,
+                blinkFeatures: [
+                    'Accelerated2dCanvas',
+                    'AudioWorklet'
+                ].join(',')
 			}
 		});
 		// load the html file onto that BrowserWindow
@@ -107,13 +107,71 @@ class Background {
                 }
             });
 		});
+
+		return win.id;
 	}
 
 	/**
 	  * build the menu
 	  */
-	public function buildMenu():Menu {
+	public function buildToolbarMenu():Menu {
 	    var menu:Menu = new Menu();
+
+        var pman_item = new MenuItem({
+            label: 'PMan',
+            submenu: [
+            {
+                label: 'New Window',
+                click: function(i, w) {
+                    //TODO
+                }
+            },
+            {type: 'separator'},
+            {
+                label: 'Preferences',
+                click: function(i,w) ic.send(w, 'EditPreferences')
+            },
+            {
+                label: 'About',
+                click: function(i, w) {
+                    ic.notify({
+                        text: 'Taste of my anal syrup',
+                        duration: 60000,
+                        color: '#28e63f',
+                        backgroundColor: '#222222',
+                        fontSize: '16pt'
+                    });
+                }
+            },
+            {
+                label: 'Help',
+                click: function(i, w) {
+                    ic.notify({
+                        text: 'you require help?\n\n\n - git gud',
+                        duration: 60000,
+                        color: '#28e63f',
+                        backgroundColor: '#222222',
+                        fontSize: '16pt'
+                    });
+                }
+            },
+            {type: 'separator'},
+            {
+                label: 'Reload',
+                accelerator: 'CommandOrControl+R',
+                click: function() {
+                    App.relaunch();
+                    close();
+                }
+            },
+            {
+                label: 'Quit',
+                accelerator: 'CommandOrControl+Q',
+                click: function() close()
+            }
+            ]
+        });
+        menu.append( pman_item );
 
 	    var media = new MenuItem({
             label: 'Media',
@@ -159,19 +217,6 @@ class Background {
                 click: function(i, w:BrowserWindow) {
                     w.webContents.toggleDevTools();
                 }
-            },
-            {
-                label: 'Reload App',
-                accelerator: 'CommandOrControl+R',
-                click: function() {
-                    App.relaunch();
-                    close();
-                }
-            },
-            {
-                label: 'Exit App',
-                accelerator: 'CommandOrControl+Q',
-                click: function() close()
             }
             ]
 	    });
@@ -238,10 +283,6 @@ class Background {
             },
             {type: 'separator'},
             {
-                label: 'Preferences',
-                click: function(i,w) ic.send(w, 'EditPreferences')
-            },
-            {
                 label: 'Bookmarks',
                 click: function(i,w) ic.send(w, 'EditMarks')
             },
@@ -266,7 +307,18 @@ class Background {
 	  * Update the application menu
 	  */
 	public inline function updateMenu():Void {
-	    Menu.setApplicationMenu(buildMenu());
+	    Menu.setApplicationMenu(buildToolbarMenu());
+	}
+
+	/**
+	  * build the Tray menu
+	  */
+	public function buildTrayMenu():Menu {
+	    var menu = new Menu();
+
+
+
+	    return menu;
 	}
 
 	/**
@@ -408,8 +460,9 @@ class Background {
 	public var playerWindows : Array<BrowserWindow>;
 	public var ipcCommands : MainIpcCommands;
 	public var appDir : AppDir;
-	//public var serverBoss : Boss;
-	public var server : Server;
+
+	public var tray : Null<Tray> = null;
+	public var server : Null<Server> = null;
 	private var _p:Null<Path> = null;
 	private var argParser : BackgroundArgParser;
 
