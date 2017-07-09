@@ -217,10 +217,17 @@ typedef MediaInfoRow = {
     tags : Array<Int>,
     actors : Array<Int>,
     meta : Null<MediaInfoRowMeta>
+    //?rating : Float,
+    //?description : String
 };
 
 typedef MediaInfoRowMeta = {
     duration : Float,
-    video : Null<{width:Int, height:Int}>,
+    video : Null<{
+        width:Int,
+        height:Int//,
+        //?frame_rate: String,
+        //?time_base: String
+    }>,
     audio: Null<{}>
 };
