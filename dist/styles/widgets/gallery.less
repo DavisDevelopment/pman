@@ -1,0 +1,49 @@
+
+@import "../theme";
+@import "../utils";
+
+.pm-header {
+    position: fixed;
+    z-index: 12;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 50px;
+    background-color: lighten(@primary, 10%);
+    border-bottom: solid darken(@primary, 13%) 2px;
+}
+
+.pm-search {
+    // container for the searchbox form inputs
+    .inputs {
+        // the text input itself
+        input[type='text'] {
+            color: darken(@primary, 35%);
+            height: auto;
+            font-size: 9pt;
+            padding: 6px;
+            margin-top: 7px;
+            margin-left: 8px;
+        }
+        div.input-group-button {
+            input[type=button] {
+                transform: scale(0.709);
+                background-color: @secondary;
+            }
+        }
+    }
+
+    // container for the autocompletion suggestions
+    .suggestions {
+        display: none;
+    }
+}
+
+.pm-container {
+    width: 100vw;
+    height: 100%;
+    background-color: @primary;
+    position: absolute;
+    top: 50px;
+    left: 0px;
+}
