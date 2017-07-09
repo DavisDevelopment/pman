@@ -54,9 +54,9 @@ class PlayerControlsView extends Ent {
 
 			addChild( seekBar );
 
-			//defer(function() {
-				//addSibling(trackControls = new TrackControlsView( this ));
-			//});
+            defer(function() {
+                addSibling(trackControls = new TrackControlsView( this ));
+            });
 		});
 
         // wait two seconds
