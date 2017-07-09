@@ -41,9 +41,9 @@ class Bundle {
 /* === Instance Methods === */
 
     /**
-      * get a snapshot
+      * get a snapshot item
       */
-    public function getSnapshot(time:Float, ?size:String):Promise<Path> {
+    public function getSnapshot(time:Float, ?size:String):Promise<BundleItem> {
         if (size == null) {
             size = '100%';
         }
@@ -55,7 +55,7 @@ class Bundle {
                 var task = new GenerateBundleSnapshot(track, size, time);
                 task.generate()
                     .then(function(path : Path) {
-                        return path;
+                        return new BundleItem(this, path.name);
                     })
                     .unless(function(error) {
                         throw error;
@@ -63,10 +63,17 @@ class Bundle {
             }
             else {
                 defer(function() {
-                    return res.getPath();
+                    return res;
                 });
             }
         });
+    }
+
+    /**
+      * get a snapshot path
+      */
+    public function getSnapshotPath(time:Float, ?size:String):Promise<Path> {
+        return getSnapshot(time, size).transform.fn(_.getPath());
     }
 
     /**
