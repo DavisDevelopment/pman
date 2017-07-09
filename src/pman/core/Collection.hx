@@ -9,7 +9,7 @@ using tannus.ds.StringTools;
 using Slambda;
 using tannus.ds.ArrayTools;
 
-class Gallery {
+class Collection {
     /* Constructor Function */
     public function new():Void {
         //
@@ -18,5 +18,6 @@ class Gallery {
 /* === Instance Methods === */
 
 /* === Instance Fields === */
+
 
 }
