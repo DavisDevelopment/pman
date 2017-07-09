@@ -17,6 +17,7 @@ import pman.events.*;
 import pman.events.KeyboardEventDescriptor as Ked;
 import pman.events.KeyboardEventType;
 import pman.events.KeyboardEventType as Ket;
+import pman.sid.Clipboard as Clip;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
@@ -192,12 +193,24 @@ class KeyboardCommands {
                     p.startOver();
 
                 // remove current track from queue
-                case LetterX:
+                case LetterX if ( event.noMods ):
                     var ct = sess.focusedTrack;
                     if (ct != null) {
                         p.gotoByOffset( 1 );
                         sess.removeItem( ct );
                     }
+
+                // copy
+                case LetterC if (event.metaKey || event.ctrlKey):
+                    //TODO copy
+                    Clip;
+
+                // paste
+                case LetterV if (event.metaKey || event.ctrlKey):
+                    //TODO paste
+
+                case LetterX if (event.metaKey || event.ctrlKey):
+                    //TODO cut
 
                 // jump to a random time in the track
                 case LetterR if ( event.noMods ):
