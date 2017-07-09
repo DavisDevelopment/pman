@@ -98,6 +98,18 @@ class RendererIpcCommands {
             });
         });
 
+        b('Notify', function(e, sdata:String) {
+            var data:Dynamic = sdata;
+            if (sdata.has('{') || sdata.has('}'))
+                data = haxe.Json.parse( sdata );
+            player.message(
+                if (Std.is(data, String))
+                    (cast data)
+                else
+                    (pman.ui.PlayerMessageBoard.messageOptionsFromJson(untyped data))
+            );
+        });
+
         b('Tab:Select', function(e, index:Int) {
             player.session.setTab( index );
         });
