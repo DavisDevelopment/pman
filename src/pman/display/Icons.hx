@@ -155,6 +155,8 @@ class Icons {
 
 	public static function ribbonIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'ribbon', f);
 
+	public static function heartIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'heart.hollow', f);
+
 	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
 	  */
