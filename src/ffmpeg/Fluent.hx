@@ -14,7 +14,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 
 @:jsRequire( 'fluent-ffmpeg' )
-extern class FFfmpeg extends EventEmitter {
+extern class Fluent extends EventEmitter {
     /* Constructor Function */
     public function new(src : String):Void;
 
@@ -54,6 +54,11 @@ extern class FFfmpeg extends EventEmitter {
     public static function _ffprobe(src:String, callback:Null<Dynamic>->ProbeResults->Void):Void;
     public static inline function probe(src:String, done:Cb<ProbeResults>):Void {
         _ffprobe(src, untyped done);
+    }
+
+    // wrap that shit
+    public static inline function ffmpeg(src : String):Fluent {
+        return new Fluent( src );
     }
 }
 
