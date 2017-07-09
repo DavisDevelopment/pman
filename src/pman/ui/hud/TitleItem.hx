@@ -28,16 +28,13 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class TitleItem extends PlayerHUDItem {
+class TitleItem extends TextualHUDItem {
     /* Constructor Function */
     public function new(hud : PlayerHUD):Void {
         super( hud );
 
-        tb = new TextBox();
         tb.fontFamily = 'Ubuntu';
         tb.fontSize = 20;
-        tb.fontSizeUnit = 'px';
-        tb.color = new Color(255, 255, 255);
     }
 
 /* === Instance Methods === */
@@ -67,11 +64,9 @@ class TitleItem extends PlayerHUDItem {
       */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
-
-        if (enabled && player.track != null) {
-            c.drawComponent(tb, 0, 0, tb.width, tb.height, x, y, w, h);
-        }
     }
+
+    override function shouldRenderText():Bool return (super.shouldRenderText() && player.track != null);
 
     /**
       * calculate [this]'s geometry
@@ -79,12 +74,9 @@ class TitleItem extends PlayerHUDItem {
     override function calculateGeometry(r : Rectangle):Void {
         var hr = hud.rect;
 
-        w = tb.width;
-        h = tb.height;
+        super.calculateGeometry( r );
         x = (hr.x + margin);
         y = (hr.y + margin);
-
-        super.calculateGeometry( r );
     }
 
     /**
@@ -99,8 +91,4 @@ class TitleItem extends PlayerHUDItem {
             return ((now - mrs.getTime()) <= duration);
         }
     }
-
-/* === Instance Fields === */
-
-    private var tb : TextBox;
 }
