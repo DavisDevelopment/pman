@@ -149,6 +149,8 @@ class Icons {
 	    return namedPath(w, h, 'list', f);
 	}
 
+	public static function starIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'star', f);
+
 	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
 	  */
