@@ -59,11 +59,6 @@ class PlayerPage extends Page {
         player.view.stage = stage;
 		player.attachToStage( stage );
 
-        #if debug
-            var fps = new FPSDisplay( player );
-            stage.addChild( fps );
-	    #end
-
         // expose values globally
         var w = app.win;
 		w.expose('player', player);
