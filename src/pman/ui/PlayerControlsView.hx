@@ -34,7 +34,7 @@ class PlayerControlsView extends Ent {
 		playerView = p;
 
 		uiEnabled = true;
-		uiHideDelay = 3500;
+		uiHideDelay = 5000;
 		cidm = new Map();
 		buttons = new Array();
 		seekBar = new SeekBar( this );
@@ -53,6 +53,10 @@ class PlayerControlsView extends Ent {
 			addButton(new NextButton( this ));
 
 			addChild( seekBar );
+
+			//defer(function() {
+				//addSibling(trackControls = new TrackControlsView( this ));
+			//});
 		});
 
         // wait two seconds
@@ -281,6 +285,7 @@ class PlayerControlsView extends Ent {
 	/**
 	  * get the background-color for the controls widget
 	  */
+	@:allow( pman.ui.ctrl.TrackControlsView )
 	private function getBackgroundColor():Color {
 		if (cidm.exists('bg')) {
 			return player.theme.restore(cidm['bg']);
@@ -302,6 +307,7 @@ class PlayerControlsView extends Ent {
 	public var playerView : PlayerView;
 	public var buttons : Array<PlayerControlButton>;
 	public var seekBar : SeekBar;
+	public var trackControls : TrackControlsView;
 
 	public var hovered : Bool = false;
 	public var uiEnabled : Bool;
