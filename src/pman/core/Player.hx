@@ -533,24 +533,11 @@ class Player extends EventDispatcher {
 	        return ;
 	    }
 
-        /*
-	    var task = new SaveSnapshot(this, track, currentTime);
-	    task.run(function(?error, ?snapshotPath:Path) {
-	        if (error != null) {
-	            done( error );
-	        }
-            else if (snapshotPath != null) {
-                trace( snapshotPath );
-                var vu = new SnapshotView(this, snapshotPath);
-                view.addSibling( vu );
-            }
-	    });
-	    */
 	    var bundle = track.getBundle();
 	    var snapp = bundle.getSnapshot( currentTime );
-        snapp.then(function(path) {
-            trace( path );
-            var vu = new SnapshotView(this, path);
+        snapp.then(function(item) {
+            trace( item );
+            var vu = new SnapshotView(this, item.getPath());
             view.addSibling( vu );
         });
         snapp.unless(function(error) {
