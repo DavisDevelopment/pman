@@ -42,7 +42,7 @@ class TrackStarredButton extends TrackControlButton {
 	// set up the icon data
 	override function initIcon():Void {
 	    _il = [
-	        Icons.starIcon(iconSize, iconSize, _outline('#FFF', 1.25)).toImage(),
+	        Icons.starIcon(iconSize, iconSize, _outline('#FFF', 3.0)).toImage(),
 	        Icons.starIcon(iconSize, iconSize, _fill(theme.secondary.lighten( 45.0 ))).toImage()
 	    ];
 	}
