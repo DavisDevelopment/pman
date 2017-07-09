@@ -159,6 +159,18 @@ class Icons {
 
 	public static function folderIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'folder', f);
 
+	public static function deleteIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'delete', f);
+	public static function filmIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'film', f);
+	public static function infoIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'info', f);
+	public static function musicIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'music', f);
+	public static function plusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'plus', f);
+	public static function saveIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'save', f);
+	public static function codeIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'code', f);
+	public static function editIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'edit', f);
+	public static function editPlusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'edit.plus', f);
+	public static function editMinusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'edit.minus', f);
+	public static function minusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'minus', f);
+
 	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
 	  */
