@@ -459,14 +459,14 @@ class KeyboardCommands {
 		var n:Float = 0;
 		// frame-by-frame mode
 		if ( event.altKey ) {
+		    var bn:Float = (1.0 / 30);
+		    n = (1.0 / 30);
+		    
 			if ( event.shiftKey ) {
-				n = (5.0 / 30);
-			}
-			else if ( event.ctrlKey ) {
-				n = (10.0 / 30);
+			    n *= 5.0;
 			}
 			else {
-				n = (1.0 / 30);
+				n /= 3.0;
 			}
 		}
 		else {
