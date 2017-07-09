@@ -25,6 +25,7 @@ extern class ExtApp {
 	public static function getName():String;
 	public static function makeSingleInstance(f : Array<String>->String->Void):Void;
 	public static function releaseSingleInstance():Void;
+	public static function getAppMemoryInfo():Array<{pid:Int,memory:MemoryInfo}>;
 
 	@:overload(function(path:String,o:{size:String},cb:Null<Dynamic>->NativeImage->Void):Void {})
 	public static function getFileIcon(path:String, callback:Null<Dynamic>->NativeImage->Void):Void;
@@ -39,6 +40,14 @@ extern class ExtApp {
 	    on('window-all-closed', f);
 	}
 }
+
+typedef MemoryInfo = {
+    pid: Int,
+    workingSetSize: Int,
+    peakWorkingSetSize: Int,
+    privateBytes: Int,
+    sharedBytes: Int
+};
 
 typedef ExtAppRelaunchOptions = {
 	?args:Array<String>,
