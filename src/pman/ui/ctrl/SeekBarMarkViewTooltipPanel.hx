@@ -25,6 +25,7 @@ import pman.media.info.Mark;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.hud.*;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
 import motion.Actuate;
