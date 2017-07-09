@@ -28,16 +28,13 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class ToggleableItem extends PlayerHUDItem {
+class ToggleableItem extends TextualHUDItem {
     /* Constructor Function */
     public function new(hud : PlayerHUD):Void {
         super( hud );
 
-        tb = new TextBox();
         tb.fontFamily = 'Ubuntu';
         tb.fontSize = 25;
-        tb.fontSizeUnit = 'px';
-        tb.color = new Color(255, 255, 255);
 
         toggleFields = [
             new ToggleField(this, 'muted', 'change:muted', Getter.create(player.muted?'yes':'no')),
@@ -76,11 +73,9 @@ class ToggleableItem extends PlayerHUDItem {
       */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
-
-        if (enabled && player.track != null) {
-            c.drawComponent(tb, 0, 0, tb.width, tb.height, x, y, w, h);
-        }
     }
+
+    override function shouldRenderText():Bool return (super.shouldRenderText() && player.track != null);
 
     /**
       * calculate [this]'s geometry
@@ -88,12 +83,9 @@ class ToggleableItem extends PlayerHUDItem {
     override function calculateGeometry(r : Rectangle):Void {
         var hr = hud.rect;
 
-        w = tb.width;
-        h = tb.height;
+        super.calculateGeometry( r );
         x = (hr.x + hr.w - w - margin);
         y = (hr.y + margin);
-
-        super.calculateGeometry( r );
     }
 
     /**
@@ -111,7 +103,7 @@ class ToggleableItem extends PlayerHUDItem {
 
 /* === Instance Fields === */
 
-    private var tb : TextBox;
+    //private var tb : TextBox;
     private var toggleFields : Array<ToggleField>;
     private var mrf : Null<ToggleField>=null;
 }
