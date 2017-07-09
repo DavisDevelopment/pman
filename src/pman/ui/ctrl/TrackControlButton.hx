@@ -10,6 +10,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 
 import vex.core.Path as VPath;
+import vex.core.Document as VDoc;
 
 import pman.core.*;
 import pman.display.*;
@@ -41,6 +42,20 @@ class TrackControlButton extends ImagePlayerControlButton {
         super.calculateGeometry( r );
 
         w = h = (iconSize);
+    }
+
+    /**
+      * utility method to create an icon
+      */
+    private inline function _icon(cf:Int->Int->?(VPath->Void)->VDoc, size:Int, ?mf:VPath->Void):Image {
+        return cf(size, size, mf).toImage();
+    }
+
+    /**
+      * utility to create an icon in a totally not type-safe manner
+      */
+    private inline function _iconus(name:String, size:Int, ?mod:VPath->Void):Image {
+        return _icon(Reflect.getProperty(Icons, name), size, mod);
     }
 
 /* === Computed Instance Fields === */
