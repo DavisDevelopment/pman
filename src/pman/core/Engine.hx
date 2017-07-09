@@ -6,7 +6,7 @@ import tannus.sys.Path;
 import tannus.sys.FileSystem as Fs;
 
 using StringTools;
-using tannus.ds.StringTools;
+using tannus.ds.StringUtils;
 using Slambda;
 using tannus.ds.ArrayTools;
 
