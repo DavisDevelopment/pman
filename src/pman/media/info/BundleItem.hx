@@ -24,6 +24,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.ds.IteratorTools;
+using pman.async.Asyncs;
 
 class BundleItem {
     /* Constructor Function */
@@ -92,6 +93,30 @@ class BundleItem {
         catch (error : Dynamic) {
             trace('BundleItem.delete Error: $error');
         }
+    }
+
+    /**
+      * get a URI for [this] BundleItem
+      */
+    public function getURI():String {
+        return ('file://' + getPath());
+    }
+
+    /**
+      * load an Image from [this] BundleItem
+      */
+    @:access( gryffin.display.Image )
+    public function toImage(done : Cb<Image>):Image {
+        var img = Image.load(getURI());
+        var sig = img.ready;
+        sig.once(function() {
+            defer(function() {
+                sig.once(function() {
+                    done(null, img);
+                });
+            });
+        });
+        return img;
     }
 
 /* === Instance Fields === */
