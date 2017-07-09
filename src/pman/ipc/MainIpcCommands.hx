@@ -6,6 +6,8 @@ import tannus.sys.*;
 
 import electron.main.IpcMain as Ipc;
 import electron.main.BrowserWindow;
+import electron.main.WebContents;
+import haxe.extern.EitherType;
 import electron.*;
 
 using StringTools;
@@ -53,13 +55,34 @@ class MainIpcCommands {
     }
 
     /**
+      * display a textual notification
+      */
+    public function notify(info:Dynamic, ?t:EitherType<BrowserWindow, WebContents>):Void {
+        if (!(info is String))
+            info = haxe.Json.stringify( info );
+        var dest = bg.playerWindow;
+        
+        // if there is no renderer window with which to display a notification
+        if (dest == null) {
+            //TODO use native notifications
+        }
+        else {
+            send(dest, 'Notify', [info]);
+        }
+    }
+
+    /**
       * send command
       */
-    public function send(w:BrowserWindow, cmd:String, ?args:Array<Dynamic>):Void {
+    public function send(w:EitherType<BrowserWindow, WebContents>, cmd:String, ?args:Array<Dynamic>):Void {
+        var c : WebContents;
+        if (!(w is WebContents))
+            c = cast(w, BrowserWindow).webContents;
+        else c = cast w;
         var params:Array<Dynamic> = ['command:$cmd'];
         if (args != null)
             params = params.concat( args );
-        Reflect.callMethod(w.webContents, w.webContents.send, params);
+        Reflect.callMethod(c, c.send, params);
     }
 
 /* === Instance Fields === */
