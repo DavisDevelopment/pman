@@ -49,6 +49,12 @@ class PlayerHUD extends Ent {
             addItem(new VolumeItem( this ));
             addItem(new TitleItem( this ));
             addItem(new ToggleableItem( this ));
+
+            #if debug
+
+            addItem(new FPSDisplay( this ));
+
+            #end
         });
     }
 
@@ -78,9 +84,10 @@ class PlayerHUD extends Ent {
     /**
       * add an item to [this]
       */
-    public inline function addItem(item : PlayerHUDItem):Void {
+    public inline function addItem(item : PlayerHUDItem):PlayerHUDItem {
         items.push( item );
         addChild( item );
+        return item;
     }
 
 /* === Instance Fields === */
