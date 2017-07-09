@@ -24,6 +24,7 @@ import pman.media.info.Mark;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.ctrl.SeekBar;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
 import tannus.math.TMath.*;
@@ -60,8 +61,8 @@ class SeekBarMarkView {
     }
 
     @:access(pman.ui.ctrl.SeekBar)
-    public inline function key():Maybe<Key> {
-        return ((SeekBar.KEYCODES)[bar.markViews.indexOf(this)]);
+    public inline function hotKey():Maybe<HotKey> {
+        return ((SeekBar.HOTKEYS)[bar.markViews.indexOf(this)]);
     }
 
 /* === Computed Instance Fields === */

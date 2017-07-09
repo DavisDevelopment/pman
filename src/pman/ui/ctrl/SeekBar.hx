@@ -96,7 +96,8 @@ class SeekBar extends Ent {
       */
     private function bmnavHandler(event : KeyboardEvent):Void {
         for (mv in markViews) {
-            if (event.key == mv.key()) {
+            var hkey = mv.hotKey();
+            if (hkey != null && hkey.key == event.key && hkey.shift == event.shiftKey) {
                 mv.tooltip.activate();
                 player.currentTime = mv.time;
                 break;
@@ -490,15 +491,35 @@ class SeekBar extends Ent {
     // last frame's mark list
     private var _lfml : Null<Array<Mark>> = null;
 
-    private static var KEYCODES:Array<Key> = {[
-        Number1,Number2,Number3,Number4,Number5,Number6,Number7,Number8,Number9,
-        LetterA,LetterB,LetterC,LetterD,LetterE,LetterF,LetterG,LetterH,LetterI,
-        LetterJ,LetterK,LetterL,LetterM,LetterN,LetterO,LetterP,LetterQ,LetterR,
-        LetterS,LetterT,LetterU,LetterV,LetterW,LetterY,LetterZ
-    ];};
+    private static var KEYCODES:Array<Key>;
+    private static var HOTKEYS:Array<HotKey>;
+
+    private static function __init__():Void {
+        KEYCODES = [
+            Number1,Number2,Number3,Number4,Number5,Number6,Number7,Number8,Number9,
+            LetterA,LetterB,LetterC,LetterD,LetterE,LetterF,LetterG,LetterH,LetterI,
+            LetterJ,LetterK,LetterL,LetterM,LetterN,LetterO,LetterP,LetterQ,LetterR,
+            LetterS,LetterT,LetterU,LetterV,LetterW,LetterY,LetterZ
+        ];
+        HOTKEYS = new Array();
+        for (i in 0...9) {
+            HOTKEYS.push({key: KEYCODES[i], shift: false});
+        }
+        for (i in 9...KEYCODES.length) {
+            HOTKEYS.push({key:KEYCODES[i], shift: false});
+        }
+        for (i in 9...KEYCODES.length) {
+            HOTKEYS.push({key:KEYCODES[i], shift: true});
+        }
+    }
 }
 
 typedef Thumbnail = {
     image : Canvas,
     loadedAt : Float
+};
+
+typedef HotKey = {
+    key: Key,
+    shift: Bool
 };

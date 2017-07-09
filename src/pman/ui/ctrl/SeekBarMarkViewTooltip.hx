@@ -170,7 +170,12 @@ class SeekBarMarkViewTooltip extends Ent {
         t.fontSize = 12;
         t.color = colors[0];
         t = tb[1];
-        t.text = ('(' + markView.key().name + ')');
+        var hk = markView.hotKey();
+        var keyName = hk.key.name.toLowerCase();
+        if ( hk.shift ) {
+            keyName = keyName.toUpperCase();
+        }
+        t.text = ('(' + keyName + ')');
         t.fontSize = 12;
         t.color = player.theme.secondary;
     }
