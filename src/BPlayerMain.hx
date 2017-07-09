@@ -13,6 +13,7 @@ import electron.ext.*;
 import electron.ext.Dialog;
 import electron.ext.MenuItem;
 import electron.Tools.defer;
+import electron.main.WebContents;
 
 import pman.LaunchInfo;
 import pman.core.*;
@@ -39,6 +40,8 @@ class BPlayerMain extends Application {
 	/* Constructor Function */
 	public function new():Void {
 		super();
+
+        engine = new Engine();
 
 		_ready = false;
 		_rs = new VoidSignal();
@@ -335,6 +338,7 @@ class BPlayerMain extends Application {
 
 /* === Instance Fields === */
 
+    public var engine : Engine;
 	public var playerPage : Null<PlayerPage>;
 	public var browserWindow : BrowserWindow;
 	public var keyboardCommands : KeyboardCommands;
