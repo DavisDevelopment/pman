@@ -157,6 +157,8 @@ class Icons {
 
 	public static function heartIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'heart.hollow', f);
 
+	public static function folderIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'folder', f);
+
 	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
 	  */
