@@ -132,6 +132,22 @@ class PlayerMessageBoard extends Ent {
 	
 	private var box : TextBox;
 	//private var msgStartTime:Float;
+
+    /**
+      * create and return a MessageOptions object from a JsonMessageOptions
+      */
+    public static function messageOptionsFromJson(o : JsonMessageOptions):MessageOptions {
+        var mo:MessageOptions = {
+            text: o.text,
+            duration: o.duration,
+            fontSize: o.fontSize
+        };
+        if (o.color != null)
+            mo.color = Color.fromString( o.color );
+        if (o.backgroundColor != null)
+            mo.backgroundColor = Color.fromString( o.backgroundColor );
+        return mo;
+    }
 }
 
 private class Message {
@@ -185,6 +201,8 @@ typedef MessageOptions = {
 	?backgroundColor : Color,
 	?fontSize : String
 };
+
+typedef JsonMessageOptions = {text: String, ?duration: Float, ?color: String, ?backgroundColor: String, ?fontSize: String};
 
 private typedef FontSize = {
 	size : Float,
