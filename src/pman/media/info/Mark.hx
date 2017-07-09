@@ -4,6 +4,8 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 
+import gryffin.display.Image;
+
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
@@ -38,6 +40,41 @@ class Mark {
       */
     public inline function clone():Mark {
         return new Mark(type, time);
+    }
+
+    /**
+      * get a BundleItem for [this] Mark
+      */
+    public function getThumbnailBundleItem(track:Track, ?size:String):Promise<BundleItem> {
+        var bundle = track.getBundle();
+        return bundle.getSnapshot(time, size);
+    }
+
+    /**
+      * get the URI for the thumbnail for [this] Mark
+      */
+    public function getThumbnailURI(track:Track, ?size:String):Promise<String> {
+        return getThumbnailBundleItem(track, size).transform.fn(_.getURI());
+    }
+
+    /**
+      * load the thumbnail for [this] Mark
+      */
+    public function getThumbnailImage(track:Track, ?size:String):Promise<Image> {
+        return Promise.create({
+            var p = getThumbnailBundleItem(track, size);
+            p.then(function( item ) {
+                item.toImage(function(?error, ?image) {
+                    if (error != null)
+                        throw error;
+                    else if (image != null)
+                        return image;
+                });
+            });
+            p.unless(function(error) {
+                throw error;
+            });
+        });
     }
 
     /**
