@@ -73,6 +73,9 @@ class SeekBarMarkViewTooltipPanel extends Ent {
       */
     override function update(stage : Stage):Void {
         if ( bar.bmnav ) {
+            tips.sort(function(x, y) {
+                return Reflect.compare(x.markView.mark.time, y.markView.mark.time);
+            });
             positionTips();
             var anyHovered:Bool = false;
             var mp = stage.getMousePosition();
