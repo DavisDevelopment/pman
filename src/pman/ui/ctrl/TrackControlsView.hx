@@ -36,15 +36,21 @@ class TrackControlsView extends Ent {
         controls = pcv;
         buttons = new Array();
 
-        iconSize = 30;
+        iconSize = 25;
         padding = new Padding();
-        padding.vertical = 4.0;
+        padding.vertical = 3.0;
         padding.horizontal = 4.0;
         layout = TcvLeft;
 
         // add all Buttons
         defer(function() {
+            addButton(new TrackAddToPlaylistButton( this ));
             addButton(new TrackStarredButton( this ));
+            //TODO separator
+            addButton(new TrackShowInfoButton( this ));
+            addButton(new TrackEditInfoButton( this ));
+            //TODO separator
+            addButton(new TrackMoveToTrashButton( this ));
         });
     }
 
@@ -58,19 +64,28 @@ class TrackControlsView extends Ent {
             return ;
 
         var colors = getColors();
-
         c.save();
         
-        if (!hovered)
-            c.globalAlpha = 0.45;
-        c.beginPath();
+        // set up drawing options
         c.fillStyle = colors[0];
-        c.drawRoundRect(rect, 2.0);
-        c.closePath();
+        c.strokeStyle = colors[1];
+        c.lineWidth = 1.5;
+
+        // function that builds a path around [this]'s content rectangle
+        inline function dr() {
+            c.beginPath();
+            c.drawRoundRect(rect, 3.0);
+        }
+
+        // draw the background
+        dr();
         c.fill();
 
-        super.render(stage, c);
+        // draw the border
+        dr();
+        c.stroke();
 
+        super.render(stage, c);
         c.restore();
     }
 
@@ -82,6 +97,23 @@ class TrackControlsView extends Ent {
 
         var mp = stage.getMousePosition();
         hovered = (mp != null && containsPoint( mp ));
+
+        if ( hovered ) {
+            var hoveredBtn = null;
+            for (b in buttons) {
+                b.hovered = false;
+                if (b.enabled && b.containsPoint( mp )) {
+                    hoveredBtn = b;
+                }
+            }
+            if (hoveredBtn != null) {
+                hoveredBtn.hovered = true;
+                stage.cursor = 'pointer';
+            }
+            else {
+                stage.cursor = 'default';
+            }
+        }
     }
 
     /**
@@ -90,18 +122,17 @@ class TrackControlsView extends Ent {
     override function calculateGeometry(r : Rectangle):Void {
         r = playerView.rect;
 
+        __calculateHeight();
         switch ( layout ) {
             case TcvLeft:
                 x = (r.x + padding.horizontal);
-                y = r.y;
                 w = (iconSize + padding.horizontal);
-                h = 0.0;
+                y = (controls.y - h - padding.vertical);
 
             case TcvRight:
                 w = (iconSize + padding.horizontal);
                 x = (r.x + r.w - w - padding.horizontal);
-                y = r.y;
-                h = 0.0;
+                y = (controls.y - h - padding.vertical);
         }
 
         __positionButtons();
@@ -130,22 +161,39 @@ class TrackControlsView extends Ent {
                 for (button in buttons) {
                     if ( !button.enabled )
                         continue;
-                    button.calculateGeometry( rect );
 
                     button.x = c.x;
                     button.y = c.y;
 
                     c.y += (button.h + padding.bottom + padding.top);
                 }
-                h = c.y;
         }
     }
 
+    /**
+      * calculate the total height of [this] widget based on its contents
+      */
+    private inline function __calculateHeight():Void {
+        var nh:Float = padding.top;
+        for (b in buttons) {
+            b.calculateGeometry( rect );
+
+            nh += (b.h + padding.vertical);
+        }
+        h = nh;
+    }
+
+    /**
+      * get an Array of Colors to be used in the display of [this]
+      */
     private function getColors():Array<Color> {
         if (colors == null) {
             var colors = [];
+
             var cbg = controls.getBackgroundColor();
             colors.push(cbg.lighten( 15 ));
+            colors.push(colors[0].lighten( 15 ));
+
             this.colors = colors.map( theme.save );
             return colors;
         }
@@ -179,6 +227,7 @@ class TrackControlsView extends Ent {
     public var layout : TcvLayout;
 
     private var colors : Null<Array<Int>>=null;
+    private var playingAnimation : Bool = false;
 }
 
 enum TcvLayout {
