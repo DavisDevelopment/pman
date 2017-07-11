@@ -21,6 +21,7 @@ import electron.ext.MenuItem;
 import pman.core.*;
 import pman.media.*;
 import pman.media.info.Mark;
+import pman.media.info.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
@@ -38,9 +39,10 @@ using Slambda;
 
 class SeekBarMarkView {
     /* Constructor Function */
-    public function new(b:SeekBar, m:Mark){
+    public function new(b:SeekBar, ut:MarkViewType):Void {
         bar = b;
-        mark = m;
+        //mark = m;
+        type = ut;
         tooltip = new SeekBarMarkViewTooltip( this );
     }
 
@@ -69,21 +71,41 @@ class SeekBarMarkView {
 
     public var name(get, never):String;
     private function get_name() {
-        switch ( mark.type ) {
-            case Named( n ):
-                return n;
+        switch ( type ) {
+            case MTReal( mark ):
+                switch ( mark.type ) {
+                    case Named( n ):
+                        return n;
+                    default:
+                        throw 'Error: MarkView can only be attached to Marks of the Named(_) type, not ${mark.type}';
+                }
+
             default:
-                throw 'Error: MarkView can only be attached to Marks of the Named(_) type, not ${mark.type}';
+                throw 'Error: snapshot-implied moments of interest do not have names';
         }
     }
 
     public var time(get, never):Float;
-    private inline function get_time():Float return mark.time;
+    private function get_time():Float {
+        return switch ( type ) {
+            case MTReal(mark): mark.time;
+            case MTImplied(item): item.getTime();
+        };
+    }
+
+    public var mark(get, never):Maybe<Mark>;
+    private function get_mark() {
+        return switch ( type ) {
+            case MTReal(m): m;
+            default: null;
+        };
+    }
 
 /* === Instance Fields === */
 
     public var bar : SeekBar;
-    public var mark : Mark;
+    //public var mark : Mark;
+    public var type : MarkViewType;
     public var tooltip : SeekBarMarkViewTooltip;
 }
 
