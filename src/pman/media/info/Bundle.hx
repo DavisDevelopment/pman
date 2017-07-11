@@ -77,6 +77,14 @@ class Bundle {
     }
 
     /**
+      * get path to snapshot item
+      */
+    public function getPathToSnapshot(time:Float, size:String):Path {
+        var dim = sizeDimensions( size );
+        return path.plusString('s${dim.toString()}@$time.png');
+    }
+
+    /**
       * get the thumbnail for [this] track
       */
     public function getThumbnail(size : String):Promise<Image> {
