@@ -534,9 +534,8 @@ class Player extends EventDispatcher {
 	    }
 
 	    var bundle = track.getBundle();
-	    var snapp = bundle.getSnapshot( currentTime );
+	    var snapp = bundle.getSnapshot(currentTime, '80%');
         snapp.then(function(item) {
-            trace( item );
             var vu = new SnapshotView(this, item.getPath());
             view.addSibling( vu );
         });
