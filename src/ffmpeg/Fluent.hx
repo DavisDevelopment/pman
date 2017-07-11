@@ -4,6 +4,8 @@ import tannus.node.*;
 
 import haxe.Constraints.Function;
 import haxe.extern.EitherType;
+import haxe.extern.EitherType as Either;
+import haxe.extern.Rest;
 
 import pman.async.*;
 
@@ -24,10 +26,34 @@ extern class Fluent extends EventEmitter {
     public function addInput(src : String):Void;
     public function mergeAdd(src : String):Void;
 
+    public function inputOption(option : Either<String, Array<String>>):Void;
+    public function inputOptions(options : Rest<String>):Void;
+    public function addInputOption(option : Either<String, Array<String>>):Void;
+
     public function size(size : String):Void;
     public function videoSize(size : String):Void;
     public function withSize(size : String):Void;
     public function renice(niceness : Int = 0):Void;
+
+    //public function videoFilter(filters:Either<String, {
+        //filter: String,
+        //options: Either<String, Either<Array<Dynamic>, Dynamic>>
+    //}>):Void;
+
+    @:overload(function(filter : Rest<String>):Void {})
+    @:overload(function(filter : Array<String>):Void {})
+    public function videoFilter(filter_o : Rest<{filter: String, options:Dynamic}>):Void;
+
+    public function fps(rate : Float):Void;
+    public function aspect(aspect : Either<String, Float>):Void;
+    public function autopad(?color:String):Void;
+    public function output(dest:Either<String, WritableStream>):Void;
+    public function duration(time : Float):Void;
+    public function seek(time : Float):Void;
+    public function format(outputFormat : String):Void;
+    public function run():Void;
+    public function execute():Void;
+    public function save(path : String):Void;
 
     public function screenshots(options:ScreenshotOptions):Void;
     inline public function onFileNames(f : Array<String>->Void):FFfmpeg {
@@ -58,6 +84,7 @@ extern class Fluent extends EventEmitter {
 
     // wrap that shit
     public static inline function ffmpeg(src : String):Fluent {
+        FluentTools._gather();
         return new Fluent( src );
     }
 }
