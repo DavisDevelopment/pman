@@ -411,10 +411,7 @@ class Bundle {
       */
     private function sizeDimensions(s : String):Dimensions {
         var r = sizeDimensionsRectangle( s );
-        return {
-            w: floor( r.w ),
-            h: floor( r.h )
-        };
+        return new Dimensions(floor(r.w), floor(r.h));
     }
 
     /**
