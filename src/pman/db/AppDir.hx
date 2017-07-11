@@ -313,4 +313,12 @@ class AppDir {
 
 /* === Instance Fields === */
 
+/* === Static Methods === */
+
+    public static function getAppPath(?s : String):Path {
+	    var p:Path = App.getAppPath();
+	    if (s != null)
+	        p = p.plusString( s );
+	    return p;
+    }
 }
