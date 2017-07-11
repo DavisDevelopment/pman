@@ -38,6 +38,14 @@ class SnapshotView extends Ent {
         this.path = path;
         image = Image.load('file://' + path);
         this.duration = duration;
+
+        var iconSize:Int = 20;
+        if (icons == null) {
+            icons = [
+                Icons.editIcon(iconSize, iconSize).toImage(),
+                Icons.deleteIcon(iconSize, iconSize).toImage()
+            ];
+        }
     }
 
 /* === Instance Methods === */
@@ -52,8 +60,13 @@ class SnapshotView extends Ent {
             lastTime = now;
         }
         else {
-            if ((now - lastTime) >= duration) {
+            var mp:Maybe<Point> = null;
+            hovered = (mp = stage.getMousePosition()).ternary(containsPoint(_), false);
+            if (!hovered && (now - lastTime) >= duration) {
                 delete();
+            }
+            else if ( hovered ) {
+
             }
         }
     }
@@ -62,6 +75,12 @@ class SnapshotView extends Ent {
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
+        /*
+        --[TODO]--
+           render minimal gui when hovered,
+           giving the user the option to give the snapshot a name and make it a bookmark,
+           delete it, or manually assign it as (one of) the thumbnail for that media.
+        */
         c.drawComponent(image, 0, 0, image.width, image.height, x, y, w, h);
     }
 
@@ -81,7 +100,10 @@ class SnapshotView extends Ent {
     public var player : Player;
     public var path : Path;
     public var duration : Float;
+    public var hovered : Bool = false;
 
     public var image : Image;
     private var lastTime : Null<Float> = null;
+
+    private static var icons : Null<Array<Image>> = null;
 }
