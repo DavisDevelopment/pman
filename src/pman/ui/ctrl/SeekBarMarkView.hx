@@ -86,3 +86,8 @@ class SeekBarMarkView {
     public var mark : Mark;
     public var tooltip : SeekBarMarkViewTooltip;
 }
+
+enum MarkViewType {
+    MTReal(mark : Mark);
+    MTImplied(item : BundleItem);
+}
