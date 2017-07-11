@@ -106,16 +106,18 @@ class BundleItem {
       * load an Image from [this] BundleItem
       */
     @:access( gryffin.display.Image )
-    public function toImage(done : Cb<Image>):Image {
+    public function toImage(?done : Cb<Image>):Image {
         var img = Image.load(getURI());
-        var sig = img.ready;
-        sig.once(function() {
-            defer(function() {
-                sig.once(function() {
-                    done(null, img);
+        if (done != null) {
+            var sig = img.ready;
+            sig.once(function() {
+                defer(function() {
+                    sig.once(function() {
+                        done(null, img);
+                    });
                 });
             });
-        });
+        }
         return img;
     }
 
