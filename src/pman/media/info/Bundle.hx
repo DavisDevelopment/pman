@@ -85,6 +85,32 @@ class Bundle {
     }
 
     /**
+      * watch [this] Bundle for changes made to its contents
+      */
+    public function watch(handler : BundleItem->Void):Void {
+        tgee.on('change', handler);
+
+        if (_watcher == null) {
+            _watcher = tannus.node.Fs.watch(path, function(filename, type) {
+                var item:BundleItem = new BundleItem(this, subpath( filename ));
+
+                tgee.dispatch('change', item);
+            });
+        }
+    }
+
+    /**
+      * stop responding to changes made to the bundle
+      */
+    public function unwatch(?handler : BundleItem->Void):Void {
+        tgee.off('change', handler);
+        if (_watcher != null && !tgee.hasListener('change', handler)) {
+            _watcher.close();
+            _watcher = null;
+        }
+    }
+
+    /**
       * get the thumbnail for [this] track
       */
     public function getThumbnail(size : String):Promise<Image> {
@@ -523,4 +549,5 @@ class Bundle {
 
     // thumb-generation event emitter
     private var tgee : EventDispatcher;
+    private var _watcher : Maybe<tannus.node.Fs.FSWatcher> = null;
 }
