@@ -47,6 +47,7 @@ class PlaylistView extends Pane {
 	        kc.registerModeHandler('playlist:sidebar', keycom);
 	    }
 
+        __bind();
 		build();
 	}
 
@@ -58,9 +59,8 @@ class PlaylistView extends Pane {
 	public function open():Void {
 		player.page.append( this );
 
-		player.session.trackChanged.on( on_track_change );
-		player.session.playlist.changeEvent.on( on_playlist_change );
-
+        unbind();
+        bind();
 	    var kc = player.app.keyboardCommands;
 	    kc.mode = 'playlist:sidebar';
 
@@ -75,9 +75,8 @@ class PlaylistView extends Pane {
 	  * close [this] view
 	  */
 	public function close():Void {
-		player.session.trackChanged.off( on_track_change );
-		player.session.playlist.changeEvent.off( on_playlist_change );
 		dispatch('close', null);
+		unbind();
 		var kc = player.app.keyboardCommands;
 	    kc.mode = 'default';
 	    deselectAll();
@@ -109,6 +108,36 @@ class PlaylistView extends Pane {
         };
 		el.plugin('resizable', [resizeOptions]);
 		*/
+	}
+
+	/**
+	  * bind events to the current Tab
+	  */
+	public function bind():Void {
+		player.session.trackChanged.on( on_track_change );
+		player.session.playlist.changeEvent.on( on_playlist_change );
+	}
+
+	/**
+	  * unbind events from the current tab
+	  */
+	public function unbind():Void {
+		player.session.trackChanged.off( on_track_change );
+		player.session.playlist.changeEvent.off( on_playlist_change );
+	}
+
+	/**
+	  * bind events to the Player
+	  */
+	private function __bind():Void {
+	    player.on('tabswitching', untyped function() {
+	        unbind();
+	    });
+
+	    player.on('tabswitched', untyped function() {
+	        bind();
+	        refresh( true );
+	    });
 	}
 
 	/**
@@ -306,8 +335,6 @@ class PlaylistView extends Pane {
 	private function on_playlist_change(change : PlaylistChange):Void {
         refresh( true );
 	}
-
-	
 
 	/**
 	  * delete [this]
