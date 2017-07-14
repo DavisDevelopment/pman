@@ -21,9 +21,11 @@ import electron.ext.MenuItem;
 import pman.core.*;
 import pman.media.*;
 import pman.media.info.Mark;
+import pman.media.info.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.ui.ctrl.SeekBarMarkView;
 import pman.ui.ctrl.SeekBarMarkView as MarkView;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
@@ -35,6 +37,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.math.TMath;
 
 @:access( pman.ui.PlayerControlsView )
 class SeekBar extends Ent {
@@ -74,9 +77,7 @@ class SeekBar extends Ent {
         on('contextmenu', onRightClick);
         on('mousemove', onMouseMove);
 
-        sess.trackChanged.on(function(delta) {
-            buildMarkViews();
-        });
+        __listen();
     }
 
     /**
@@ -114,19 +115,66 @@ class SeekBar extends Ent {
         // previous markviews
         //var _pmv = markViews;
         markViews = new Array();
+        navMarkViews = new Array();
         markViewPanel.clear();
         _lfml = null;
-        if (player.track != null && player.track.data != null) {
-            var marks = player.track.data.marks;
-            for (m in marks) {
-                if (m.type.match(Named(_))) {
-                    var mv = new MarkView(this, m);
-                    markViews.push( mv );
-                    markViewPanel.addTooltip( mv.tooltip );
-                }
+        
+        for (mvt in getMarkViewTypes()) {
+            var markView = new MarkView(this, mvt);
+            markViews.push( markView );
+            if (markView.canNavigateTo()) {
+                navMarkViews.push( markView );
+                markViewPanel.addTooltip( markView.tooltip );
             }
         }
-        markViews.sort.fn([a,b]=>Reflect.compare(a.time, b.time));
+    }
+
+    /**
+      * obtain list of MarkViewType values
+      */
+    private function getMarkViewTypes():Array<MarkViewType> {
+        var types:Array<MarkViewType> = new Array();
+        if (player.track != null && player.track.data != null) {
+            var marks = player.track.data.marks;
+            var markTimes:Array<Float> = new Array();
+            for (m in marks) if (m.type.match(Named(_))) {
+                types.push(MarkViewType.MTReal( m ));
+                if (!inFloats(m.time, markTimes))
+                    markTimes.push( m.time );
+            }
+
+            var bundle = player.track.getBundle();
+            var ssitems = bundle.getAllSnapshots();
+            var times:Array<Float> = new Array();
+            for (item in ssitems) {
+                var time = item.getTime();
+                if (time != null && !inFloats(time, times))
+                    times.push( time );
+            }
+            for (time in times) {
+                types.push(MarkViewType.MTSnapshot( time ));
+            }
+        }
+
+        // get type time
+        function typetime(t : MarkViewType):Float {
+            return switch (t) {
+                case MarkViewType.MTReal(m): m.time;
+                case MarkViewType.MTSnapshot(time): time;
+            };
+        }
+        haxe.ds.ArraySort.sort(types, function(x, y) {
+            return Reflect.compare(typetime(x), typetime(y));
+        });
+        return types;
+    }
+
+    private function inFloats(n:Float, i:Iterable<Float>, threshold:Float=1.0):Bool {
+        for (x in i) {
+            if (n.almostEquals(x, threshold))
+                return true;
+        }
+        return false;
     }
 
     /**
@@ -226,9 +274,15 @@ class SeekBar extends Ent {
         c.fill();
 
         // draw the bookmark tabs
+        var deferred = [];
         for (mv in markViews) {
-            drawMarkView(mv, stage, c);
+            if (mv.canNavigateTo())
+                deferred.push( mv );
+            else
+                drawMarkView(mv, stage, c);
         }
+        for (mv in deferred)
+            drawMarkView(mv, stage, c);
 
         // draw the seek-caret
         if ( hovered ) {
@@ -253,21 +307,26 @@ class SeekBar extends Ent {
       * draw the given mark view
       */
     private function drawMarkView(mv:MarkView, stage:Stage, c:Ctx):Void {
-        var mr = mv.rect();
-
         c.save();
-        c.shadowBlur=3.5;
-        c.shadowColor = getBackgroundColor().toString();
-        c.beginPath();
-        c.fillStyle = getForegroundColor().darken( 35 ).toString();
-        c.drawRect( mr );
-        c.closePath();
-        c.fill();
-        c.restore();
 
-        //if (bmnav || mv.tooltip.activated) {
-            //mv.tooltip.paint(c, mr.centerX, mr.centerY);
-        //}
+        var p:Point = mv.pos();
+        var mw:Float = 0;
+
+        switch (mv.getIndicatorType()) {
+            case MarkViewIndicator.MIBox(fill):
+                mw = (0.575 * h);
+                p.x -= (mw / 2);
+                c.fillStyle = fill;
+                c.fillRect(p.x, p.y, mw, h);
+
+            case MarkViewIndicator.MIBar(color):
+                mw = 1.5;
+                p.x -= (mw / 2);
+                c.fillStyle = color;
+                c.fillRect(p.x, p.y, mw, h);
+        }
+
+        c.restore();
     }
 
     /**
@@ -443,6 +502,33 @@ class SeekBar extends Ent {
         return (hovered ? hoveredProgress : progress).of(pd.getDurationTime());
     }
 
+    /**
+      * bind any needed event handlers
+      */
+    private function __listen():Void {
+        var bundle:Maybe<Bundle> = player.track!=null?player.track.getBundle():null;
+        sess.trackChanged.on(function(delta) {
+            if (bundle != null)
+                bundle.unwatch( __bundleChanged );
+            buildMarkViews();
+            bundle = delta.current.ternary(_.getBundle(),null);
+            if (bundle != null) {
+                bundle.watch( __bundleChanged );
+            }
+        });
+
+        if (bundle != null) {
+            bundle.watch( __bundleChanged );
+        }
+    }
+
+    /**
+      * respond to changes occurring on a Track's Bundle instance
+      */
+    private function __bundleChanged(change : BundleItem):Void {
+        buildMarkViews();
+    }
+
 /* === Computed Instance Fields === */
 
     public var playerView(get, never):PlayerView;
@@ -488,6 +574,7 @@ class SeekBar extends Ent {
     private var loadingThumbnail:Bool = false;
     private var thumbnail : Null<Thumbnail> = null;
     private var markViews : Array<MarkView>;
+    private var navMarkViews : Array<MarkView>;
     // last frame's mark list
     private var _lfml : Null<Array<Mark>> = null;
 

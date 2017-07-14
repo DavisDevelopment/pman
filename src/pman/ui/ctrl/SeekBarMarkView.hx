@@ -37,13 +37,17 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
+@:access( pman.ui.ctrl.SeekBar )
 class SeekBarMarkView {
     /* Constructor Function */
     public function new(b:SeekBar, ut:MarkViewType):Void {
         bar = b;
         //mark = m;
         type = ut;
-        tooltip = new SeekBarMarkViewTooltip( this );
+
+        if (canNavigateTo()) {
+            tooltip = new SeekBarMarkViewTooltip( this );
+        }
     }
 
 /* === Instance Methods === */
@@ -62,9 +66,52 @@ class SeekBarMarkView {
         return r;
     }
 
+    public inline function pos():Point {
+        return new Point((bar.x + prog().of(bar.w)), bar.y);
+    }
+
     @:access(pman.ui.ctrl.SeekBar)
-    public inline function hotKey():Maybe<HotKey> {
-        return ((SeekBar.HOTKEYS)[bar.markViews.indexOf(this)]);
+    public function hotKey():Maybe<HotKey> {
+        if (canNavigateTo()) {
+            return ((SeekBar.HOTKEYS)[bar.navMarkViews.indexOf(this)]);
+        }
+        else return null;
+    }
+
+    /**
+      * get the color with which [this] shall be displayed
+      */
+    public function getColor():Color {
+        if (color == null) {
+            switch ( type ) {
+                case MTReal( mark ):
+                    color = bar.getForegroundColor().darken( 35 );
+
+                case MTSnapshot( time ):
+                    color = bar.getForegroundColor().greyscale();
+            }
+        }
+        return color;
+    }
+
+    /**
+      * get the type of indicator that [this] view shall have on the seekbar
+      */
+    public function getIndicatorType():MarkViewIndicator {
+        switch ( type ) {
+            case MTReal(_):
+                return MIBox(getColor());
+
+            case MTSnapshot(_):
+                return MIBar(getColor());
+        }
+    }
+
+    /**
+      * whether [this] mark view can be jumped to via the bookmark navigation interface
+      */
+    public function canNavigateTo():Bool {
+        return type.match(MTReal(_));
     }
 
 /* === Computed Instance Fields === */
@@ -89,7 +136,7 @@ class SeekBarMarkView {
     private function get_time():Float {
         return switch ( type ) {
             case MTReal(mark): mark.time;
-            case MTImplied(item): item.getTime();
+            case MTSnapshot(t): t;
         };
     }
 
@@ -107,9 +154,17 @@ class SeekBarMarkView {
     //public var mark : Mark;
     public var type : MarkViewType;
     public var tooltip : SeekBarMarkViewTooltip;
+
+    private var color : Null<Color> = null;
 }
 
 enum MarkViewType {
     MTReal(mark : Mark);
-    MTImplied(item : BundleItem);
+    MTSnapshot(time : Float);
+    //MTImplied(item : BundleItem);
+}
+
+enum MarkViewIndicator {
+    MIBox(fill:Color);
+    MIBar(color:Color);
 }
