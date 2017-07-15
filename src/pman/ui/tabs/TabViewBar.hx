@@ -122,6 +122,7 @@ class TabViewBar extends Ent {
             t.update( stage );
             if ( t.dragging ) {
                 anyDragging = true;
+                lastDraggingTab = t;
             }
         }
 
@@ -157,11 +158,12 @@ class TabViewBar extends Ent {
         }
         else {
             if ( anyDragging ) {
-                getDraggingTabView().attempt({
-                    _.mouseDown = null;
-                    _.dragRect = null;
+                var tv = getDraggingTabView();
+                if (tv != null) {
+                    tv.mouseDown = null;
+                    tv.dragRect = null;
                     lastMouseDown = null;
-                });
+                }
             }
         }
 
@@ -374,10 +376,9 @@ class TabViewBar extends Ent {
     public function onMouseUp(event : MouseEvent):Void {
         if (lastMouseDown != null && (event.position.distanceFrom( lastMouseDown.position ) < 33)) {
             onClick( event );
-            getTabViewByPoint( event.position ).attempt({
-                _.mouseDown = null;
-                _.dragRect = null;
-            });
+            var tv = getTabViewByPoint( event.position ).or( lastDraggingTab );
+            tv.mouseDown = null;
+            tv.dragRect = null;
         }
 
         for (t in tabs) {
@@ -486,4 +487,5 @@ class TabViewBar extends Ent {
 
     private var colors : Null<Array<Int>> = null;
     private var lastMouseDown : Null<MouseEvent> = null;
+    private var lastDraggingTab : Null<TabView> = null;
 }
