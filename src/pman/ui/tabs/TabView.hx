@@ -274,6 +274,16 @@ class TabView extends Ent {
                     }
                 });
 
+                menu.push({
+                    label: 'Duplicate',
+                    click: function(i,w,e) {
+                        session.newTab(function(clonedTab) {
+                            clonedTab.playlist = tab.playlist.copy();
+                            clonedTab.blurredTrack = tab.track;
+                        });
+                    }
+                });
+
                 done();
             });
 
