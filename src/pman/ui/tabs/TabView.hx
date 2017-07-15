@@ -181,8 +181,10 @@ class TabView extends Ent {
       * 'click' event handler
       */
     public function onClick(event : MouseEvent):Void {
-        var cir:Rectangle = new Rectangle((x + w - ci.width - 3.0), (y + ((h - ci.height) / 2)), ci.width, ci.height);
-        if (cir.containsPoint( event.position )) {
+        //var ir = getInnerRect();
+        //var cir:Rectangle = new Rectangle((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
+        //if (cir.containsPoint( event.position )) {
+        if ( closeHovered ) {
             close();
         }
         else {
