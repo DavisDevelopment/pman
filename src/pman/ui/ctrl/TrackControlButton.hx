@@ -34,6 +34,8 @@ class TrackControlButton extends ImagePlayerControlButton {
         super( c.controls );
 
         tcontrols = c;
+        tt.position.direction = Right;
+        tt.position.spacing = 5.0;
     }
 
 /* === Instance Methods === */

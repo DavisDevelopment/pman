@@ -95,6 +95,8 @@ class PlayerControlButton extends Ent {
 	        tt.position.spacing = 10.0;
 	        tt.position.from.x = centerX;
 	        tt.position.from.y = y;
+	        tt.position.from.width = rect.width;
+	        tt.position.from.height = rect.height;
 			//tt.update( stage );
 	    }
 	}
