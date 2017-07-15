@@ -49,8 +49,9 @@ class CanvasTooltip extends Ent {
         padding.horizontal = 6.0;
         bounds = new Rectangle();
         position = {
-            from: new Point(),
-            spacing: 0.0
+            from: new Rectangle(),
+            spacing: 0.0,
+            direction: Top
         };
     }
 
@@ -79,33 +80,39 @@ class CanvasTooltip extends Ent {
         c.strokeStyle = border.color;
         c.lineWidth = border.width;
 
-        // -- build path
-        // top-left to top-right
-        var r = border.radius;
-		c.moveTo(x + r, y);
-		c.lineTo(x + w - r, y);
-		c.quadraticCurveTo(x + w, y, x + w, y + r);
+        switch ( position.direction ) {
+            case Top:
+                // -- build path
+                // top-left to top-right
+                var r = border.radius;
+                c.moveTo(x + r, y);
+                c.lineTo(x + w - r, y);
+                c.quadraticCurveTo(x + w, y, x + w, y + r);
 
-        // top-left to bottom-right
-		c.lineTo(x + w, y + h - r);
-		c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+                // top-left to bottom-right
+                c.lineTo(x + w, y + h - r);
+                c.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
 
-		// bottom-right to right side of tail
-		c.lineToPoint( tt.t.three );
+                // bottom-right to right side of tail
+                c.lineToPoint( tt.t.three );
 
-		// right side of tail to tip of tail
-		c.lineToPoint( tt.t.two );
+                // right side of tail to tip of tail
+                c.lineToPoint( tt.t.two );
 
-		// tip of tail to left side of tail
-		c.lineToPoint( tt.t.one );
+                // tip of tail to left side of tail
+                c.lineToPoint( tt.t.one );
 
-		// left side of tail to bottom-left
-		c.lineTo(x + r, y + h);
-		c.quadraticCurveTo(x, y + h, x, y + h - r);
+                // left side of tail to bottom-left
+                c.lineTo(x + r, y + h);
+                c.quadraticCurveTo(x, y + h, x, y + h - r);
 
-        // bottom-left to top-left
-		c.lineTo(x, y + r);
-		c.quadraticCurveTo(x, y, x + r, y);
+                // bottom-left to top-left
+                c.lineTo(x, y + r);
+                c.quadraticCurveTo(x, y, x + r, y);
+
+            default:
+                c.drawRect( rect );
+        }
 
         // finalize and render path
         c.closePath();
@@ -128,29 +135,92 @@ class CanvasTooltip extends Ent {
       * calculate [this]'s geometry
       */
     override function calculateGeometry(r : Rectangle):Void {
-        bounds = r;
-        // compute content rectangle
         inline function dbl(x:Float) return (x*2);
         inline function half(x:Float) return (x / 2);
-        w = (t.width + dbl(border.width) + padding.left + padding.right);
-        h = (t.height + dbl(border.width) + padding.top + padding.bottom);
-        centerX = position.from.x;
-        y = (position.from.y - h - position.spacing);
 
-        // compute text box bounding rectangle
-        tr.width = t.width;
-        tr.height = t.height;
-        tr.centerX = centerX;
-        tr.centerY = centerY;
+        var pf:Rectangle = position.from;
 
-        // compute the tail triangle points
-        var ttc = new Point((centerX + tt.x), (y + h)); // tail top center
-        tt.t.one.x = (ttc.x - half( tt.w ));
-        tt.t.one.y = (y + h);
-        tt.t.two.x = ttc.x;
-        tt.t.two.y = (ttc.y + tt.h);
-        tt.t.three.x = (ttc.x + half( tt.w ));
-        tt.t.three.y = (y + h);
+        switch ( position.direction ) {
+            case Top:
+                // compute content rectangle
+                w = (t.width + dbl(border.width) + padding.left + padding.right);
+                h = (t.height + dbl(border.width) + padding.top + padding.bottom);
+                centerX = pf.centerX;
+                y = (pf.y - h - position.spacing);
+
+                // compute text box bounding rectangle
+                tr.width = t.width;
+                tr.height = t.height;
+                tr.centerX = centerX;
+                tr.centerY = centerY;
+
+                // compute the tail triangle points
+                var ttc = new Point((centerX + tt.x), (y + h)); // tail top center
+                tt.t.one.x = (ttc.x - half( tt.w ));
+                tt.t.one.y = (y + h);
+                tt.t.two.x = ttc.x;
+                tt.t.two.y = (ttc.y + tt.h);
+                tt.t.three.x = (ttc.x + half( tt.w ));
+                tt.t.three.y = (y + h);
+
+            case Bottom:
+                // compute content rectangle
+                w = (t.width + dbl(border.width) + padding.left + padding.right);
+                h = (t.height + dbl(border.width) + padding.top + padding.bottom);
+                centerX = pf.centerX;
+                y = (pf.y + pf.h + h + position.spacing);
+
+                // compute text box bounding rectangle
+                tr.width = t.width;
+                tr.height = t.height;
+                tr.centerX = centerX;
+                tr.centerY = centerY;
+
+                // compute the tail triangle points
+                var ttc = new Point((centerX + tt.x), y); // tail top center
+                tt.t.one.x = (ttc.x - half( tt.w ));
+                tt.t.one.y = y;
+                tt.t.two.x = ttc.x;
+                tt.t.two.y = ttc.y + tt.h;
+                tt.t.three.x = (ttc.x + half( tt.w ));
+                tt.t.three.y = y;
+
+            case Right:
+                // compute content rectangle
+                w = (t.width + dbl(border.width) + padding.left + padding.right);
+                h = (t.height + dbl(border.width) + padding.top + padding.bottom);
+                x = ((pf.x + pf.w) + position.spacing);
+                centerY = pf.centerY;
+
+                // compute text bounding rectangle
+                tr.width = t.width;
+                tr.height = t.height;
+                tr.centerX = centerX;
+                tr.centerY = centerY;
+
+                // compute the tail triangle points
+                var ttc = new Point(x, centerY);
+                var i = tt.t;
+                i.one.x = ttc.x;
+                i.one.y = (ttc.y - half( tt.w ));
+                i.two.x = (ttc.x - tt.h);
+                i.two.y = ttc.y;
+                i.three.x = ttc.x;
+                i.three.y = (ttc.y + half( tt.w ));
+
+            case Left:
+                //TODO
+        }
+    }
+
+    /**
+      * compute whether [this] is entirely inside the viewport
+      */
+    public function isInsideViewport():Bool {
+        return !(
+            (x < bounds.x || (x + w) > (bounds.x + bounds.w)) ||
+            (y < bounds.y || (y + h) > (bounds.y + bounds.h))
+        );
     }
 
 /* === Computed Instance Fields === */
@@ -210,6 +280,14 @@ class CanvasTooltip extends Ent {
 }
 
 typedef TooltipPosition = {
-    from: Point,
-    spacing: Float
+    from: Rectangle,
+    spacing: Float,
+    direction: TooltipPositionDirection
 };
+
+enum TooltipPositionDirection {
+    Top;
+    Left;
+    Bottom;
+    Right;
+}
