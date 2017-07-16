@@ -336,6 +336,11 @@ class AppDir {
     public function encodePlaylist(l : Playlist):ByteArray {
         return pman.format.xspf.Writer.run( l );
     }
+
+    public inline function writePlaylist(n:String, l:Playlist):Void {
+        Fs.write(playlistsPath().plusString(n + '.xspf'), encodePlaylist( l ));
+    }
+
 #end
 
 /* === Instance Fields === */
