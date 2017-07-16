@@ -96,6 +96,14 @@ class AppDir {
 	    return playlistsDirectory().file(name + '.xspf');
 	}
 
+	public function playlistFileData(name : String):Maybe<ByteArray> {
+	    var path = playlistsPath().plusString(name + '.xspf');
+	    if (Fs.exists( path )) {
+	        return Fs.read( path );
+	    }
+        else return null;
+	}
+
 	/**
 	  * get the names of all saved playlists
 	  */
