@@ -296,7 +296,7 @@ class AppDir {
     /**
       * utility method to make changes to a saved playlist
       */
-    public function editSavedPlaylist(name:String, editor:Playlist->Void):Void {
+    public function editSavedPlaylist(name:String, editor:Playlist->Void, ?complete:Void->Void):Void {
         var start:Float = now();
         var playlist:Playlist = new Playlist();
         var plf:File = playlistFile( name );
@@ -315,7 +315,11 @@ class AppDir {
         plf.write( data );
         var took:Float = (now() - start);
         trace('edited saved playlist. took ${took}ms');
+        if (complete != null) {
+            complete();
+        }
     }
+    
 
 #end
 
