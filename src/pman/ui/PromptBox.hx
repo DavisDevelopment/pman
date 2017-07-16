@@ -4,6 +4,7 @@ import foundation.*;
 
 import tannus.html.Element;
 import tannus.ds.Memory;
+import tannus.ds.Maybe;
 import tannus.events.*;
 import tannus.events.Key;
 
@@ -86,8 +87,20 @@ class PromptBox extends Pane {
 	/**
 	  * Read a single line of input from [this]
 	  */
-	public inline function readLine(f : String->Void):Void {
-		once('line', f);
+	public function readLine(f : Maybe<String>->Void):Void {
+	    var called:Bool = false;
+		once('line', function(text) {
+		    if ( !called ) {
+		        f( text );
+		        called = true;
+		    }
+		});
+		once('blank', untyped function() {
+		    if (!called) {
+                f( null );
+                called = true;
+            }
+		});
 	}
 
 	/**
@@ -142,6 +155,9 @@ class PromptBox extends Pane {
 					// dispatch('line', value);
 					line( value );	
 				}
+                else {
+                    empty();
+                }
 				close();
 
 			default:
@@ -154,6 +170,13 @@ class PromptBox extends Pane {
 	  */
 	private function line(l : String):Void {
 		dispatch('line', value);
+	}
+
+	/**
+	  * handles the entering of an empty line
+	  */
+	private function empty():Void {
+	    dispatch('blank', null);
 	}
 
 	/**
