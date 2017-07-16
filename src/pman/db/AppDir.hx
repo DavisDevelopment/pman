@@ -328,6 +328,10 @@ class AppDir {
         else return readPlaylist( data );
     }
 
+    public function readPlaylist(data : ByteArray):Playlist {
+        var reader = new pman.format.xspf.Reader();
+        return reader.read(data.toString());
+    }
 #end
 
 /* === Instance Fields === */
