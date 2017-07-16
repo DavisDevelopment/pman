@@ -191,9 +191,12 @@ class Player extends EventDispatcher {
 		    box.value = value;
 		}
 		box.open();
-		box.readLine(function(text : String) {
+		box.readLine(function(text : Null<String>) {
+		    if (text == null) {
+		        return callback( null );
+		    }
 			text = text.trim();
-			if (text.empty()) {
+            if (text.empty()) {
 				callback( null );
 			}
 			else {
