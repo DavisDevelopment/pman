@@ -320,6 +320,13 @@ class AppDir {
         }
     }
     
+    public function getSavedPlaylist(name : String):Maybe<Playlist> {
+        var data = playlistFileData( name );
+        if (data == null) {
+            return null;
+        }
+        else return readPlaylist( data );
+    }
 
 #end
 
