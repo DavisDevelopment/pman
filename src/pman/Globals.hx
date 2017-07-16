@@ -52,6 +52,9 @@ class Globals {
     public static var database(get, never):PManDatabase;
     private static inline function get_database() return bpmain.db;
 
+    public static var appDir(get, never):AppDir;
+    private static inline function get_appDir() return bpmain.appDir;
+
     public static var preferences(get, never):Preferences;
     private static inline function get_preferences() return database.preferences;
 }
