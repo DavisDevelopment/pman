@@ -332,6 +332,10 @@ class AppDir {
         var reader = new pman.format.xspf.Reader();
         return reader.read(data.toString());
     }
+
+    public function encodePlaylist(l : Playlist):ByteArray {
+        return pman.format.xspf.Writer.run( l );
+    }
 #end
 
 /* === Instance Fields === */
