@@ -36,9 +36,24 @@ class TrackAddToPlaylistButton extends TrackControlButton {
         iconSize = c.iconSize;
 		btnFloat = Right;
 		tooltip = 'Add to Playlist';
+		widget = new PlaylistChooserWidget( this );
 	}
 
 /* === Instance Methods === */
+
+    override function init(stage : Stage):Void {
+        super.init( stage );
+        tcontrols.addSibling( widget );
+        widget.hide();
+    }
+
+    override function render(stage:Stage, c:Ctx):Void {
+        super.render(stage, c);
+    }
+
+    override function update(stage:Stage):Void {
+        super.update( stage );
+    }
 
 	// set up the icon data
 	override function initIcon():Void {
@@ -54,6 +69,20 @@ class TrackAddToPlaylistButton extends TrackControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-	    //TODO
+	    if (widget._hidden) {
+	        var prom = widget.open();
+	    }
+        else widget.hide();
+
+	    if ( showWidget ) {
+	        widget.refresh();
+	    }
 	}
+
+    public var showWidget(get, never): Bool;
+    private inline function get_showWidget() return !widget._hidden;
+
+/* === Instance Fields === */
+
+    public var widget : PlaylistChooserWidget;
 }
