@@ -26,6 +26,7 @@ abstract VideoFilter (CVideoFilter) from CVideoFilter {
     public static inline function fromString(s : String):VideoFilter return CVideoFilter.fromString( s );
 }
 
+@:expose('VideoFilter')
 class CVideoFilter {
     /* Constructor Function */
     public function new(type : VideoFilterType):Void {
@@ -52,5 +53,28 @@ class CVideoFilter {
       */
     public static function fromString(s : String):VideoFilter {
         return new VideoFilter(s.fromString());
+    }
+
+    /**
+      * create a VideoFilter from an untyped value
+      */
+    public static function fromDynamic(x : Dynamic):VideoFilter {
+        if ((x is String)) {
+            return fromString(cast x);
+        }
+        else if ((x is CVideoFilter)) {
+            return cast x;
+        }
+        else if ((x is VideoFilterType)) {
+            return new VideoFilter(cast x);
+        }
+        else {
+            try {
+                return fromString(Std.string( x ));
+            }
+            catch (error : Dynamic) {
+                throw 'Cannot create VideoFilter from $x';
+            }
+        }
     }
 }
