@@ -20,7 +20,15 @@ class PlayerViewOptions extends EventDispatcher {
     public function new():Void {
         super();
         __checkEvents = false;
+
+        videoFilter = null;
+        videoFilterRaw = true;
     }
 
+/* === Instance Methods === */
+
 /* === Instance Fields === */
+
+    public var videoFilter : Null<VideoFilter>;
+    public var videoFilterRaw : Bool;
 }
