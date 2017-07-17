@@ -80,6 +80,9 @@ class Player extends EventDispatcher {
 		// create the Player's view
 		view = new PlayerView( this );
 
+		// create the Player's view options
+		viewOptions = new PlayerViewOptions();
+
 		// create the Player's Session
 		session = new PlayerSession( this );
 
@@ -1280,6 +1283,7 @@ class Player extends EventDispatcher {
 	public var page : PlayerPage;
 	public var theme : ColorScheme;
 	public var view : PlayerView;
+	public var viewOptions : PlayerViewOptions;
 	public var session : PlayerSession;
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
