@@ -7,7 +7,12 @@ import tannus.geom.Angle;
 import tannus.css.Value;
 import tannus.css.vals.Lexer;
 
+import gryffin.display.*;
+
 import pman.display.VideoFilterType;
+
+import tannus.math.TMath.*;
+import Std.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -52,7 +57,7 @@ class VideoFilterTools {
                             a(Brightness(new Percent( num )));
 
                         case 'contrast':
-                            a(Contrast(new Percent( num )));
+                            a(Contrast(int( num )));
 
                         case 'grayscale':
                             a(Grayscale(new Percent( num )));
@@ -89,5 +94,67 @@ class VideoFilterTools {
         else {
             return List( filters );
         }
+    }
+
+    /**
+      * get list of filter types
+      */
+    public static function getAll(filter : VideoFilterType):Array<VideoFilterType> {
+        var res = [];
+        switch ( filter ) {
+            case List( list ):
+                for (x in list) {
+                    res = res.concat(getAll( x ));
+                }
+
+            default:
+                res.push( filter );
+        }
+        return res;
+    }
+
+    /**
+      * apply the given filter to the given Pixels
+      */
+    public static function applyToPixels(filter:VideoFilterType, pixels:Pixels):Void {
+        var filters = getAll( filter );
+        pixels.applyShader({
+            for (x in filters) {
+                switch ( x ) {
+                    case Brightness( amount ):
+                        red = int(red + amount);
+                        green = int(green + amount);
+                        blue = int(blue + amount);
+
+                    case Contrast( amount ):
+                        color = color.contrast( amount );
+
+                    case Grayscale( amount ):
+                        color = color.greyscale(amount.of( 1.0 ));
+
+                    case HueRotate( amount ):
+                        var hsl = color.toHsl();
+                        hsl.hue += amount.radians;
+                        color = Color.fromHsl( hsl );
+
+                    case Invert( amount ):
+                        color = color.invert(amount.of( 1.0 ));
+
+                    case Opacity( amount ):
+                        alpha = int(amount.of( 255 ));
+
+                    case Saturate( amount ):
+                        var hsl = color.toHsl();
+                        hsl.saturation = amount.of(hsl.saturation);
+                        color = Color.fromHsl( hsl );
+
+                    case Sepia( amount ):
+                        color = color.sepia(amount.of( 1.0 ));
+
+                    default:
+                        null;
+                }
+            }
+        });
     }
 }
