@@ -92,7 +92,7 @@ class Bundle {
 
         if (_watcher == null) {
             _watcher = tannus.node.Fs.watch(path, function(type,filename) {
-                var item:BundleItem = new BundleItem(this, subpath( filename ));
+                var item:BundleItem = new BundleItem(this, subpath( filename ).name);
 
                 tgee.dispatch('change', item);
             });
