@@ -42,6 +42,10 @@ class CVideoFilter {
         return type.toString();
     }
 
+    public inline function applyToPixels(pixels : gryffin.display.Pixels) {
+        type.applyToPixels( pixels );
+    }
+
 /* === Instance Fields === */
 
     public var type : VideoFilterType;
