@@ -12,7 +12,7 @@ using tannus.ds.ArrayTools;
 enum VideoFilterType {
     Blur(size : Float);
     Brightness(amount : Float);
-    Contrast(amount : Percent);
+    Contrast(amount : Int);
     Grayscale(amount : Percent);
     HueRotate(amount : Angle);
     Invert(amount : Percent);
