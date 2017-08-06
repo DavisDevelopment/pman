@@ -47,7 +47,10 @@ class TrackRename extends Task1 {
                 if ((error is CancelTrackRename)) {
                     renamed = null;
                     return done();
-                } else return done( error );
+                } 
+                else {
+                    return done( error );
+                }
             }
             else {
                 ([
@@ -119,8 +122,9 @@ class TrackRename extends Task1 {
             // cache whether the Track is focused
             focused = (track.session.focusedTrack == track);
             // defocus the Track if necessary
-            if ( focused )
+            if ( focused ) {
                 track.session.blur( track );
+            }
 
             // the Track's previous uri
             var oldUri = track.uri;
@@ -164,6 +168,9 @@ class TrackRename extends Task1 {
                     nirp.then(function(newInfoRow) {
                         // print it to the console
                         trace(newInfoRow);
+                        // update the Track's id field
+                        track.mediaId = newInfoRow.id;
+                        @:privateAccess track.data = null;
                         // declare this step complete
                         defer(done.void());
                     });
