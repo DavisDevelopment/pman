@@ -1,6 +1,6 @@
 package vex.svg;
 
-import tannus.ds.Memory;
+import tannus.ds.*;
 import tannus.ds.Obj;
 
 import vex.core.*;
@@ -9,8 +9,10 @@ import js.html.svg.Element in NativeElement;
 
 import Std.*;
 
-using Lambda;
+using Slambda;
 using tannus.ds.ArrayTools;
+using StringTools;
+using tannus.ds.StringUtils;
 
 class SVGElement extends BaseElement {
 	/* Constructor Function */
@@ -160,6 +162,18 @@ class SVGElement extends BaseElement {
 			s += '\n';
 		s += toXml().print( pretty );
 		return s;
+	}
+
+	/**
+	  * access property
+	  */
+	public function prop<T>(name:String, ?value:T):Maybe<T> {
+	    if (value == null) {
+	        return o[name];
+	    }
+        else {
+            return o[name] = value;
+        }
 	}
 
 /* === Computed Instance Fields === */
