@@ -39,6 +39,7 @@ class PlayerControlButton extends Ent {
 		tb.bold = true;
 		tt = new CanvasTooltip();
 		c.addSibling( tt );
+		tt.hide();
 		label = null;
 		tooltip = null;
 		enabled = true;
