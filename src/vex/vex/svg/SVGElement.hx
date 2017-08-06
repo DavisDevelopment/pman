@@ -176,6 +176,26 @@ class SVGElement extends BaseElement {
         }
 	}
 
+	/**
+	  * access attributes
+	  */
+	//public function attr(name:String, ?value:String):Maybe<String> {
+	   //return if (value == null) getAttribute(name) else setAttribute(name, value);
+	//}
+
+    /**
+      * get list of classnames
+      */
+    public function getClasses():Array<String> {
+        var c = classattr;
+        if (c == null) {
+            return [];
+        }
+        else {
+            return c.split(' ').map.fn(_.trim()).filter.fn(_.length != -1);
+        }
+    }
+
 /* === Computed Instance Fields === */
 
 /* === Instance Fields === */
