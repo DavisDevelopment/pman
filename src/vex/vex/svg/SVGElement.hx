@@ -196,6 +196,11 @@ class SVGElement extends BaseElement {
         }
     }
 
+    public function setClasses(v : Array<String>):Array<String> {
+        classattr = v.join(' ');
+        return v;
+    }
+
 /* === Computed Instance Fields === */
 
 /* === Instance Fields === */
