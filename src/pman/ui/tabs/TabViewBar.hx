@@ -176,45 +176,47 @@ class TabViewBar extends Ent {
       * render [this] widget
       */
     override function render(stage:Stage, c:Ctx):Void {
-        if ( !display )
-            return ;
+        if ( display ) {
+            super.render(stage, c);
 
-        super.render(stage, c);
+            var colors = getColors();
 
-        var colors = getColors();
+            // get the pattern
+            if (pattern == null) {
+                pattern = buildPattern(c, colors, 4, 4);
+            }
 
-        // get the pattern
-        if (pattern == null) {
-            pattern = buildPattern(c, colors, 4, 4);
-        }
-
-        // draw the background
-        c.fillStyle = colors[0];
-        c.fillRect(x, y, w, h);
-        if (pattern != null) {
-            c.fillStyle = pattern;
+            // draw the background
+            c.fillStyle = colors[0];
             c.fillRect(x, y, w, h);
-        }
+            if (pattern != null) {
+                c.fillStyle = pattern;
+                c.fillRect(x, y, w, h);
+            }
 
-        // render then tabs
-        tabs.reverse();
-        var priority:Array<Null<TabView>> = [null, null];
-        for (t in tabs) {
-            if (!t.active && !t.dragging) {
-                t.render(stage, c);
-            }
-            else {
-                if ( t.active ) {
-                    priority[0] = t;
+            // render then tabs
+            tabs.reverse();
+            var priority:Array<Null<TabView>> = [null, null];
+            for (t in tabs) {
+                if (!t.active && !t.dragging) {
+                    t.render(stage, c);
                 }
-                else if ( t.dragging ) {
-                    priority[1] = t;
+                else {
+                    if ( t.active ) {
+                        priority[0] = t;
+                    }
+                    else if ( t.dragging ) {
+                        priority[1] = t;
+                    }
+                }
+            }
+            tabs.reverse();
+            for (t in priority) {
+                if (t != null) {
+                    t.render(stage, c);
                 }
             }
         }
-        tabs.reverse();
-        for (t in priority) if (t != null)
-            t.render(stage, c);
     }
 
     /**
