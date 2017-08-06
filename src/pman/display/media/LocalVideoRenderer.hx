@@ -18,6 +18,7 @@ import pman.display.VideoFilter;
 import foundation.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -25,6 +26,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.graphics.ColorTools;
 
 /*
    Renderer for video media
@@ -34,7 +36,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	public function new(m:Media, mc:MediaController):Void {
 		super(m, mc);
 
-		//canvas = new Canvas();
+		canvas = new Canvas();
 		vr = new Rectangle();
 		filter = null;
 	}
@@ -45,13 +47,26 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  * render [this] View
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
-	    if ( !prefs.directRender ) {
-	        c.save();
-	        if (filter != null) {
+	    if (underlay == null) {
+	        if (!filterRaw && filter != null) {
                 c.filter = filter;
             }
-            c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
-            c.restore();
+            _paint();
+            //c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
+            //try {
+                //var pixels = c.getPixels(vr.x, vr.y, vr.w, vr.h);
+                //pixels.applyShader({
+                    //var avg:Int = round((red + green + blue) / 3);
+                    //red = green = blue = avg;
+                //});
+                //canvas = Canvas.fromPixels( pixels );
+                //c.clearRect(vr.x, vr.y, vr.w, vr.h);
+                //c.drawComponent(canvas, 0, 0, canvas.width, canvas.height, vr.x, vr.y, vr.width, vr.height);
+            //}
+            //catch (e : Dynamic) {
+                //null;
+            //}
+            c.drawComponent(canvas, 0, 0, canvas.width, canvas.height, vr.x, vr.y, vr.width, vr.height);
         }
         else {
             if (underlay != null) {
@@ -59,8 +74,31 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
                 cc.set('filter', (filter == null ? 'none' : filter.toString()));
             }
         }
+
         if (visualizer != null) {
             visualizer.render(stage, c);
+        }
+	}
+
+	/**
+	  * paint [this] to the canvas
+	  */
+	private function _paint():Void {
+	    if (canvas.width != v.width || canvas.height != v.height) {
+	        canvas.resize(v.width, v.height);
+	    }
+	    var cc = canvas.context;
+	    cc.drawComponent(v, 0, 0, v.width, v.height, 0, 0, v.width, v.height);
+	    if (filterRaw && filter != null) {
+            try {
+                var pixels = cc.getPixels(0, 0, canvas.width, canvas.height);
+                filter.applyToPixels( pixels );
+                pixels.write(cc, 0, 0, 0, 0, pixels.width, pixels.height);
+                //pixels.save();
+            }
+            catch (error : Dynamic) {
+                trace( error );
+            }
         }
 	}
 
@@ -90,6 +128,24 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		if (visualizer != null) {
 		    visualizer.update( stage );
 		}
+
+        var vo = player.viewOptions;
+        this.filter = vo.videoFilter;
+        this.filterRaw = vo.videoFilterRaw;
+        this.directRender = (filterRaw || preferences.directRender);
+
+        if ( directRender ) {
+            if (underlay != null) {
+                underlay.destroy();
+                underlay = null;
+            }
+        }
+        else {
+            if (underlay == null) {
+                underlay = new VideoUnderlay( v );
+                underlay.appendTo( 'body' );
+            }
+        }
 	}
 
 	/**
@@ -157,10 +213,12 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay.detach();
             underlay = null;
         }
+        /*
         var av = new SpectographVisualizer(cast this);
         attachVisualizer(av, function() {
             av.player = pv.player;
         });
+        */
 	}
 
 /* === Computed Instance Fields === */
@@ -182,4 +240,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	private var pv : Null<PlayerView> = null;
 	private var underlay : Null<VideoUnderlay> = null;
 	private var filter : Null<VideoFilter> = null;
+	private var directRender : Bool = false;
+	private var filterRaw : Bool = false;
 }
