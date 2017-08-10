@@ -36,6 +36,7 @@ class SVGStyle {
 
 		o.define('stroke', stroke);
 		o.define('strokeWidth', strokeWidth);
+		o.define('lineJoin', lineJoin);
 		o.define('fill', fill);
 	}
 
@@ -45,7 +46,9 @@ class SVGStyle {
 	public function cloneFrom(src : SVGStyle):Void {
 		stroke = src.stroke;
 		strokeWidth = src.strokeWidth;
+		lineJoin = src.lineJoin;
 		fill = src.fill;
+		fillOpacity = src.fillOpacity;
 	}
 
 /* === Computed Instance Fields === */
@@ -67,17 +70,21 @@ class SVGStyle {
 
 	public var fillOpacity(get, set):Float;
 	private inline function get_fillOpacity():Float return (e.hasAttribute('fill-opacity') ? parseFloat(e.attr('fill-opacity')) : 1);
-	private inline function set_fillOpacity(v : Float):Float return parseFloat(e.attr('fill-opacity', v));
+	private inline function set_fillOpacity(v : Float):Float return parseFloat(e.attr('fill-opacity', v+''));
 
 	public var strokeWidth(get, set):Float;
 	private inline function get_strokeWidth():Float return (e.hasAttribute('stroke-width') ? parseFloat(e.getAttribute('stroke-width')) : 1);
-	private inline function set_strokeWidth(v : Float):Float return parseFloat(e.attr('stroke-width', v));
+	private inline function set_strokeWidth(v : Float):Float return parseFloat(e.attr('stroke-width', v+''));
 
 	public var lineJoin(get, set):Null<String>;
 	private inline function get_lineJoin():Null<String> return (e.hasAttribute('stroke-linejoin') ? e.attr('stroke-linejoin') : null);
 	private inline function set_lineJoin(v : Null<String>):Null<String> {
 		return e.attr('stroke-linejoin', v);
 	}
+
+	public var filter(get, set):String;
+	private inline function get_filter() return e.attr('filter');
+	private inline function set_filter(v) return e.attr('filter', v);
 
 /* === Instance Fields === */
 
