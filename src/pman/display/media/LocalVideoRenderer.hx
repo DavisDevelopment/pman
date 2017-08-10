@@ -52,20 +52,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
                 c.filter = filter;
             }
             _paint();
-            //c.drawComponent(v, 0, 0, v.width, v.height, vr.x, vr.y, vr.width, vr.height);
-            //try {
-                //var pixels = c.getPixels(vr.x, vr.y, vr.w, vr.h);
-                //pixels.applyShader({
-                    //var avg:Int = round((red + green + blue) / 3);
-                    //red = green = blue = avg;
-                //});
-                //canvas = Canvas.fromPixels( pixels );
-                //c.clearRect(vr.x, vr.y, vr.w, vr.h);
-                //c.drawComponent(canvas, 0, 0, canvas.width, canvas.height, vr.x, vr.y, vr.width, vr.height);
-            //}
-            //catch (e : Dynamic) {
-                //null;
-            //}
             c.drawComponent(canvas, 0, 0, canvas.width, canvas.height, vr.x, vr.y, vr.width, vr.height);
         }
         else {
@@ -170,11 +156,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay = new VideoUnderlay( v );
             underlay.appendTo( 'body' );
         }
-
-        //var av = new AudioVisualizer(cast this);
-        //attachVisualizer(av, function() {
-            //av.player = pv.player;
-        //});
 	}
 
 	/**
@@ -213,12 +194,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay.detach();
             underlay = null;
         }
-        /*
-        var av = new SpectographVisualizer(cast this);
-        attachVisualizer(av, function() {
-            av.player = pv.player;
-        });
-        */
 	}
 
 /* === Computed Instance Fields === */
