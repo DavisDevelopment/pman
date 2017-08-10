@@ -206,6 +206,11 @@ class SVGElement extends BaseElement {
     public var classattr(get, set):Maybe<String>;
     private inline function get_classattr() return attr('class');
     private inline function set_classattr(v) return attr('class', v);
+
+    public var classes(get, set):Array<String>;
+    private inline function get_classes() return getClasses();
+    private inline function set_classes(v) return setClasses(v);
+
 /* === Instance Fields === */
 
 	/* the underlying SVG Element */
