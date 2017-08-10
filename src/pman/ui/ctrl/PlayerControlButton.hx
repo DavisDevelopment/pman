@@ -38,8 +38,8 @@ class PlayerControlButton extends Ent {
 		tb.fontSizeUnit = 'px';
 		tb.bold = true;
 		tt = new CanvasTooltip();
-		c.addSibling( tt );
-		tt.hide();
+		//c.addSibling( tt );
+		//tt.hide();
 		label = null;
 		tooltip = null;
 		enabled = true;
@@ -91,6 +91,10 @@ class PlayerControlButton extends Ent {
                 null;
 	    }
 
+        if (tooltip != null && tooltip.trim().length == 0) {
+            tooltip = null;
+        }
+
 	    if (hoverIntended && tooltip != null) {
 	        tt.text = tooltip;
 	        tt.position.spacing = 10.0;
@@ -98,7 +102,7 @@ class PlayerControlButton extends Ent {
 	        tt.position.from.y = y;
 	        tt.position.from.width = rect.width;
 	        tt.position.from.height = rect.height;
-			//tt.update( stage );
+			tt.update( stage );
 	    }
 	}
 
@@ -111,6 +115,10 @@ class PlayerControlButton extends Ent {
 		if (label != null) {
 			__drawLabel(stage, c);
 		}
+
+        if (hoverIntended && tooltip != null) {
+            tt.render(stage, c);
+        }
 	}
 
 	/**
