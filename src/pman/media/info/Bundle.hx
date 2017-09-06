@@ -85,6 +85,10 @@ class Bundle {
     }
 
     /**
+      * get path to individual preview
+      */
+
+    /**
       * watch [this] Bundle for changes made to its contents
       */
     public function watch(handler : BundleItem->Void):Void {
