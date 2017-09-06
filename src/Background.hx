@@ -37,7 +37,7 @@ class Background {
 		ipcCommands = new MainIpcCommands( this );
 		ipcCommands.bind();
 		appDir = new AppDir();
-		server = new Server( this );
+		//server = new Server( this );
 		argParser = new BackgroundArgParser();
 	}
 
@@ -61,7 +61,8 @@ class Background {
       * stop the background script
       */
 	public function close():Void {
-	    server.close();
+	    if (server != null)
+            server.close();
 	    App.quit();
 	}
 
@@ -361,6 +362,10 @@ class Background {
       * handle signal from player window to add route to given path
       */
     public function httpServe(path : Path):String {
+        if (server == null) {
+            server = new Server( this );
+            server.init();
+        }
         return server.serve( path );
     }
 
@@ -402,7 +407,7 @@ class Background {
 		updateMenu();
 
 		openPlayerWindow(function( bw ) {
-		    server.init();
+			//server.init();
 		});
 	}
 
