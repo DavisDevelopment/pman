@@ -58,7 +58,7 @@ class TabView extends Ent {
         super.update( stage );
 
         var d = new Maybe(tab.track.ternary(_.data, null));
-        var titleText:String = tab.title.ternary(_.slice(0, 15), '');
+        var titleText:String = tab.title.ternary(_.slice(0, 15), 'New Tab');
         if (titleText != '') {
             var starred = d.ternary(_.starred, false);
             if (starred) {
@@ -110,7 +110,7 @@ class TabView extends Ent {
         c.stroke();
 
         // draw the title
-        if (tab.title != null && tab.title != '') {
+        if (tb.text != null && tb.text != '') {
             // draw the title's text
             var tbr:Rectangle = new Rectangle((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
             c.drawComponent(tb, 
