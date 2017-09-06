@@ -74,7 +74,7 @@ class PlayerStartup extends Task1 {
                     startup_load_session( done );
 
                 case 'cli', 'command-line-input':
-                    startup_load_cli( done );
+                    VoidAsyncs.series([startup_load_session, startup_load_cli], done);
 
                 default:
                     done('Error: Invalid src flag "$src"');
@@ -130,8 +130,14 @@ class PlayerStartup extends Task1 {
         var tracks = resolve_tracks( paths );
         declareReady(function(?err) {
             done.forward( err );
-            player.addItemList(tracks, function() {
-                done();
+            if (!(player.session.activeTab != null && player.session.activeTab.playlist.length > 0)) {
+                var newTabIndex = player.session.newTab();
+                player.session.setTab( newTabIndex );
+            }
+            defer(function() {
+                player.addItemList(tracks, function() {
+                    done();
+                });
             });
         });
     }
