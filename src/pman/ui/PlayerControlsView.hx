@@ -230,6 +230,16 @@ class PlayerControlsView extends Ent {
 	public function getButton(index : Int):Null<PlayerControlButton> {
 	    return buttons[index];
 	}
+
+	public function getButtonByName(name : String):Null<PlayerControlButton> {
+	    for (btn in buttons) {
+	        if (btn.name == name) {
+	            return btn;
+	        }
+	    }
+	    return null;
+	}
+
 	/**
 	  * prevent the ui from being autoHidden
 	  */
