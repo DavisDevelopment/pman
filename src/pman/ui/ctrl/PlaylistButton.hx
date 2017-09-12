@@ -34,6 +34,7 @@ class PlaylistButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = Right;
+		name = 'toggle-playlist';
 	}
 
 /* === Instance Methods === */
