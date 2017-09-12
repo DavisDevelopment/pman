@@ -55,6 +55,9 @@ class PlayerView extends Ent {
 
             tabBar = new TabViewBar( this );
             addSibling( tabBar );
+
+            dragDropWidget = new DragDropWidget( this );
+            addSibling( dragDropWidget );
         //});
 	}
 
@@ -188,6 +191,7 @@ class PlayerView extends Ent {
 	public var statusBar : PlayerStatusBar;
 	public var hud : PlayerHUD;
 	public var tabBar : TabViewBar;
+	public var dragDropWidget : DragDropWidget;
 	public var mediaRect : Rectangle;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
