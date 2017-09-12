@@ -160,8 +160,7 @@ class DragDropWidget extends Ent {
                 else if (nextBtn.containsPoint( dp )) {
                     specialCaseInvoked = true;
                     specop = function(done : VoidCb) {
-                        playNextBatch( event.tracks );
-                        done();
+                        playNextBatch(event.tracks, done);
                     };
                 }
             }
@@ -187,7 +186,7 @@ class DragDropWidget extends Ent {
     /**
       * queue a 'batch' of tracks to play after the current one
       */
-    private function playNextBatch(list:Array<Track>) {
+    private function playNextBatch(list:Array<Track>, done:VoidCb) {
         var tracks = player.session.playlist.toArray();
         var current = player.session.focusedTrack;
         var index = player.session.indexOfCurrentMedia();
@@ -208,6 +207,7 @@ class DragDropWidget extends Ent {
             player.shuffle = temp;
             var dl = new pman.async.tasks.TrackListDataLoader();
             dl.load( list );
+            defer(done.void());
         });
     }
 
