@@ -79,6 +79,7 @@ extern class Fluent extends EventEmitter {
     @:native('ffprobe')
     public static function _ffprobe(src:String, callback:Null<Dynamic>->ProbeResults->Void):Void;
     public static inline function probe(src:String, done:Cb<ProbeResults>):Void {
+        FluentTools._gather();
         _ffprobe(src, untyped done);
     }
 
