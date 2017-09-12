@@ -21,6 +21,7 @@ import pman.media.*;
 
 import Std.*;
 import electron.Tools.defer;
+import Slambda.fn;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -49,9 +50,11 @@ class DragDropManager {
 	  */
 	private function bind_events():Void {
 		// the list of drag events being bound
-		var events:Array<String> = ['dragenter', 'dragleave', 'dragover', 'dragend', 'drop'];
+		var events:Array<String> = ['dragenter', 'dragleave', 'dragover', 'dragend'];
 		var target = app.body;
-		target.forwardEvents(events, null, DragDropEvent.fromJqEvent);
+		var mapper = fn(new PlayerDragDropEvent(DragDropEvent.fromJqEvent(_)));
+		target.forwardEvents(events, null, mapper);
+		target.forwardEvent('drop', null, DragDropEvent.fromJqEvent);
 		target.on('dragenter', onDragEnter);
 		target.on('dragleave', onDragLeave);
 		target.on('dragover', onDragOver);
@@ -62,31 +65,35 @@ class DragDropManager {
 	/**
 	  * when [this] manager becomes the drop target of the dragged object
 	  */
-	private function onDragEnter(event : DragDropEvent):Void {
+	private function onDragEnter(event : PlayerDragDropEvent):Void {
 	    app.player.dispatch('dragenter', event);
+	    trace('drag-enter');
 	}
 
 	/**
 	  * when the dragged object leaves [this] manager's area of influence
 	  */
-	private function onDragLeave(event : DragDropEvent):Void {
+	private function onDragLeave(event : PlayerDragDropEvent):Void {
 	    app.player.dispatch('dragleave', event);
+	    trace('drag-leave');
 	}
 
 	/**
 	  * as the dragged object is being dragged within [this] manager's area of influence
 	  */
-	private function onDragOver(event : DragDropEvent):Void {
+	private function onDragOver(event : PlayerDragDropEvent):Void {
 		event.preventDefault();
 
 		app.player.dispatch('dragover', event);
+		trace('drag-over');
 	}
 
 	/**
 	  * when the current drag operation is being ended
 	  */
-	private function onDragEnd(event : DragDropEvent):Void {
+	private function onDragEnd(event : PlayerDragDropEvent):Void {
 		app.player.dispatch('dragend', event);
+		trace('drag-end');
 	}
 
 	/**
@@ -103,8 +110,11 @@ class DragDropManager {
 		// if the DataTransfer has the [items] field
 		if (dt.items != null) {
 			for (item in dt.items) {
+			    // if the item is a FileSystem entry
 				if (item.kind == DKFile) {
+				    // get that entry
 				    var entry = item.getEntry();
+				    // if the entry points to a Directory
 				    if ( entry.isDirectory ) {
 				        var webDir:WebDir = new WebDir(cast entry);
 				        stack.push(function(next) {
@@ -118,7 +128,9 @@ class DragDropManager {
                             });
                         });
 				    }
+				    // otherwise it must point to a standard file
                     else {
+                        // so get a reference to that file
                         var webFile = item.getFile();
                         if (webFile != null) {
                             stack.push(function(next) {
@@ -153,9 +165,52 @@ class DragDropManager {
 
 		// load the Tracks into the Playlist
 		stack.run(function() {
-            app.player.addItemList(tracks, function() {
-                trace( tracks );
-            });
+		    // create new Event object
+		    var playerEvent = new PlayerDragDropEvent(event, tracks);
+		    
+		    // dispatch the event
+		    app.player.dispatch('drop', playerEvent);
+
+            // if .preventDefault() was called on [playerEvent]
+            if ( playerEvent.defaultPrevented ) {
+                // do not perform default behavior
+                return ;
+            }
+
+		    // function to load the tracks into the Player
+		    function addem(?f : Void->Void):Void {
+		        app.player.addItemList(tracks, function() {
+		            trace('${tracks.length} tracks were dropped onto the window');
+		            if (f != null)
+		                defer( f );
+		        });
+		    }
+
+            var askNewTab = true;
+            if ( askNewTab ) {
+                // ask user if they'd like to open the dragged items in a new tab
+                app.player.confirm('Would you like to open these items in a new tab?', function(answerIsYes) {
+                    if ( answerIsYes ) {
+                        // save the current tab index
+                        var cti = app.player.session.activeTabIndex;
+                        // get the index of the newly created tab
+                        var nti = app.player.session.newTab();
+                        // switch to the new tab
+                        app.player.session.setTab( nti );
+                        // load in the tracks
+                        addem(function() {
+                            // then switch back to the original tab
+                            app.player.session.setTab( cti );
+                        });
+                    }
+                    else {
+                        addem();
+                    }
+                });
+            }
+            else {
+                addem();
+            }
         });
 	}
 
