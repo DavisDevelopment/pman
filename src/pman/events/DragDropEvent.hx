@@ -2,6 +2,7 @@ package pman.events;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.geom.*;
 import tannus.events.*;
 import tannus.html.fs.WebFile;
 
@@ -9,6 +10,7 @@ import js.html.DragEvent as NativeDragEvent;
 import js.jquery.Event as JqEvent;
 
 import pman.ds.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -30,6 +32,12 @@ class DragDropEvent extends Event {
 			stopPropogation();
 		});
 	}
+
+/* === Instance Methods === */
+
+    public function globalPosition():Point {
+        return new Point(e.pageX, e.pageY);
+    }
 
 /* === Computed Instance Fields === */
 
