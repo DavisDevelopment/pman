@@ -30,6 +30,7 @@ class PlaybackSpeedButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = true;
+		name = 'playback-speed';
 
 		widget = new PlaybackSpeedWidget(controls, this);
 	}
