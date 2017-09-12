@@ -33,9 +33,14 @@ class SearchTools {
             case Word( word ):
                 return wfsm(sources, word);
                 //return fiom(sources, word, strictness);
+<<<<<<< Updated upstream
 
 			default:
 				return 0;
+=======
+            default:
+                return 0;
+>>>>>>> Stashed changes
         }
     }
 
