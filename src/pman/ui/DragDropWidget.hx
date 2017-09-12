@@ -189,16 +189,26 @@ class DragDropWidget extends Ent {
       */
     private function playNextBatch(list:Array<Track>) {
         var tracks = player.session.playlist.toArray();
-        var index = tracks.indexOf( player.track );
-        player.clearPlaylist();
-        var hunks:Array<Array<Track>> = [
-            tracks.slice(0, index),
-            list,
-            tracks.slice(index + 1)
-        ];
-        trace( hunks );
-        var toAdd:Array<Track> = (hunks.flatten().array());
-        player.addItemList( toAdd );
+        var current = player.session.focusedTrack;
+        var index = player.session.indexOfCurrentMedia();
+        var temp = player.shuffle;
+        player.shuffle = false;
+        defer(function() {
+            var hunks:Array<Array<Track>> = [
+                tracks.before( current ),
+                [current],
+                list,
+                tracks.after( current )
+            ];
+            var toAdd:Array<Track> = new Array();
+            for (hunk in hunks) {
+                toAdd = toAdd.concat( hunk );
+            }
+            player.session.setPlaylist(new Playlist( toAdd ));
+            player.shuffle = temp;
+            var dl = new pman.async.tasks.TrackListDataLoader();
+            dl.load( list );
+        });
     }
 
 /* === Computed Instance Fields === */
