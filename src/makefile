@@ -21,6 +21,9 @@ pack:
 build-installers:
 	cd ../dist/ && ./pack -release installer
 
+release:
+	cd ../dist/ && ./pack recompile preprocess package installer -p linux -a x64
+
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
 	git clone http://github.com/DavisDevelopment/jsgryf gryffin
