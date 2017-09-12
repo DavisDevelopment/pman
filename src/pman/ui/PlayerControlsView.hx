@@ -227,6 +227,9 @@ class PlayerControlsView extends Ent {
 		calculateGeometry( rect );
 	}
 
+	public function getButton(index : Int):Null<PlayerControlButton> {
+	    return buttons[index];
+	}
 	/**
 	  * prevent the ui from being autoHidden
 	  */
