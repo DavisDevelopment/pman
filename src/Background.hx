@@ -431,6 +431,7 @@ class Background {
         #end
 
 		updateMenu();
+        updateTray();
 
 		openPlayerWindow(function( bw ) {
 			//server.init();
