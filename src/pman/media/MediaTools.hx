@@ -152,7 +152,11 @@ class MediaTools {
       * convert the given URI to a MediaSource
       */
 	public static function uriToMediaSource(uri : String):MediaSource {
-        if (uri.startsWith('/')) {
+        var winPath:RegEx = new RegEx(~/^([A-Z]):\\/i);
+        if (winPath.match( uri )) {
+            return MSLocalPath(new Path( uri ));
+        }
+        else if (uri.startsWith('/')) {
 	        return MSLocalPath(new Path( uri ));
 	    }
         else {
