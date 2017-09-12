@@ -31,6 +31,8 @@ class PlaybackButton extends ImagePlayerControlButton {
 	/* Constructor Function */
 	public function new(c : PlayerControlsView):Void {
 		super( c );
+
+		name = 'toggle-playback';
 	}
 
 /* === Instance Methods === */
