@@ -33,6 +33,7 @@ class PreviousButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = false;
+		name = 'previous';
 	}
 
 /* === Instance Methods === */
