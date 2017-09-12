@@ -82,6 +82,7 @@ class ArgParser {
                     case '-compress':
                         o.concat = true;
                         o.compress = true;
+                        o.app.haxeDefs.push( 'compress' );
 
                     case '-release':
                         o.release = true;
