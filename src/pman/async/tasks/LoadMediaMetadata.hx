@@ -21,6 +21,7 @@ import pman.async.*;
 //import pman.tools.mp4box.MP4Metadata;
 
 import ffmpeg.FFfmpeg;
+import ffmpeg.Fluent;
 
 import js.Browser.window;
 import electron.Tools.defer;
@@ -59,7 +60,7 @@ class LoadMediaMetadata extends Task2<MediaMetadata> {
       * execute [this] task
       */
     override function execute(done : Cb<MediaMetadata>):Void {
-        FFfmpeg.probe(path.toString(), function(?error, ?info) {
+        Fluent.probe(path.toString(), function(?error, ?info) {
             if (error != null) {
                 return done(error, null);
             }
