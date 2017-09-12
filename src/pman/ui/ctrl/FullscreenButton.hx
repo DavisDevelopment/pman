@@ -33,6 +33,7 @@ class FullscreenButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = Right;
+		name = 'toggle-fullscreen';
 	}
 
 /* === Instance Methods === */
