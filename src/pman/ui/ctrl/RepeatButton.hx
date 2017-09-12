@@ -33,6 +33,7 @@ class RepeatButton extends ImagePlayerControlButton {
 		super( c );
 
         btnFloat = false;
+        name = 'cycle-repeat';
 	}
 
 	
