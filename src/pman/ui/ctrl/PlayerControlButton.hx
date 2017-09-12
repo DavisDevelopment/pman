@@ -40,6 +40,7 @@ class PlayerControlButton extends Ent {
 		tt = new CanvasTooltip();
 		//c.addSibling( tt );
 		//tt.hide();
+		name = null;
 		label = null;
 		tooltip = null;
 		enabled = true;
@@ -183,6 +184,7 @@ class PlayerControlButton extends Ent {
 
 	public var controls : PlayerControlsView;
 	public var btnFloat : BtnFloat;
+	public var name : Null<String>;
 	public var label : Null<String>;
 	public var tooltip : Null<String>;
 	public var enabled : Bool;
