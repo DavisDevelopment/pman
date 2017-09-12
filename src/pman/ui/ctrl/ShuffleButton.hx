@@ -32,6 +32,7 @@ class ShuffleButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = Left;
+		name = 'toggle-shuffle';
 	}
 
 /* === Instance Methods === */
