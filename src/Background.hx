@@ -322,6 +322,18 @@ class Background {
 	    return menu;
 	}
 
+    /**
+      * update the Tray
+      */
+    public function updateTray():Void {
+        if (tray == null) {
+            tray = new Tray(ap('assets/icon64.png').toString());
+        }
+
+        tray.setToolTip('PMan');
+        tray.setContextMenu(buildTrayMenu());
+    }
+
 	/**
 	  * Get launch info
 	  */
