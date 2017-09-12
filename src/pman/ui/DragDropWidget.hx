@@ -155,7 +155,10 @@ class DragDropWidget extends Ent {
             var specop:Null<VoidAsync> = null;
             if (pv.controls.containsPoint( dp )) {
                 if (prevBtn.containsPoint( dp )) {
-                    //TODO
+                    specialCaseInvoked = true;
+                    specop = function(done : VoidCb) {
+                        playPreviousBatch(event.tracks, done);
+                    };
                 }
                 else if (nextBtn.containsPoint( dp )) {
                     specialCaseInvoked = true;
@@ -197,6 +200,34 @@ class DragDropWidget extends Ent {
                 tracks.before( current ),
                 [current],
                 list,
+                tracks.after( current )
+            ];
+            var toAdd:Array<Track> = new Array();
+            for (hunk in hunks) {
+                toAdd = toAdd.concat( hunk );
+            }
+            player.session.setPlaylist(new Playlist( toAdd ));
+            player.shuffle = temp;
+            var dl = new pman.async.tasks.TrackListDataLoader();
+            dl.load( list );
+            defer(done.void());
+        });
+    }
+
+    /**
+      * queue up a list of Tracks before the current one
+      */
+    private function playPreviousBatch(list:Array<Track>, done:VoidCb):Void {
+        var tracks = player.session.playlist.toArray();
+        var current = player.session.focusedTrack;
+        var index = player.session.indexOfCurrentMedia();
+        var temp = player.shuffle;
+        player.shuffle = false;
+        defer(function() {
+            var hunks:Array<Array<Track>> = [
+                tracks.before( current ),
+                list,
+                [current],
                 tracks.after( current )
             ];
             var toAdd:Array<Track> = new Array();
