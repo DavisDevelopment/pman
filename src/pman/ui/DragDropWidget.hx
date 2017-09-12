@@ -21,6 +21,7 @@ import pman.ui.hud.*;
 import pman.ui.tabs.*;
 import pman.ui.statusbar.*;
 import pman.media.Track;
+import pman.media.Playlist;
 import pman.events.DragDropEvent;
 import pman.events.PlayerDragDropEvent;
 
@@ -127,6 +128,20 @@ class DragDropWidget extends Ent {
         dragEnter.on(doda(true));
         dragLeave.on(doda(false));
         dragEnd.on(doda(false));
+
+        function ddlui(e : PlayerDragDropEvent) {
+            pv.controls.showUi(function() {
+                pv.controls.lockUiVisibility();
+            });
+        }
+
+        function ddului(e : PlayerDragDropEvent) {
+            pv.controls.unlockUiVisibility();
+        }
+
+        dragEnter.on( ddlui );
+        dragLeave.on( ddului );
+        dragEnd.on( ddului );
 
         inline function gb(n) return pv.controls.getButtonByName( n );
 
