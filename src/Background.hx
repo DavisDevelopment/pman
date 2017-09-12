@@ -317,7 +317,21 @@ class Background {
 	public function buildTrayMenu():Menu {
 	    var menu = new Menu();
 
+        var openFiles = new MenuItem({
+            label: 'Open Files',
+            click: function(i, w) {
+                ic.send(w, 'OpenFile');
+            }
+        });
+        menu.append( openFiles );
 
+        var openDir = new MenuItem({
+            label: 'Open Directory',
+            click: function(i, w) {
+                ic.send(w, 'OpenDirectory');
+            }
+        });
+        menu.append( openDir );
 
 	    return menu;
 	}
