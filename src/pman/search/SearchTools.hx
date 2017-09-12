@@ -33,6 +33,9 @@ class SearchTools {
             case Word( word ):
                 return wfsm(sources, word);
                 //return fiom(sources, word, strictness);
+
+			default:
+				return 0;
         }
     }
 
