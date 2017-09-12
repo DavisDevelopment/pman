@@ -33,6 +33,7 @@ class NextButton extends ImagePlayerControlButton {
 		super( c );
 
 		btnFloat = true;
+		name = 'next';
 	}
 
 /* === Instance Methods === */
