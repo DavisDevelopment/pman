@@ -198,22 +198,7 @@ class MediaTools {
 	  * parse the given URI to a MediaProvider
 	  */
 	public static function uriToMediaProvider(uri : String):MediaProvider {
-	    if (uri.startsWith('/')) {
-	        return cast new LocalFileMediaProvider(new File( uri ));
-	    }
-        else {
-            var protocol:String = uri.before(':');
-            switch ( protocol ) {
-                case 'file':
-                    return cast new LocalFileMediaProvider(new File(new Path(stripSlashSlash(uri.after(':')))));
-
-                case 'http', 'https':
-                    return cast new HttpAddressMediaProvider( uri );
-
-                default:
-                    throw 'Error: Malformed media URI "$uri"';
-            }
-        }
+	    return mediaSourceToMediaProvider(uriToMediaSource( uri ));
 	}
 
     /**
