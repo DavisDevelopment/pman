@@ -28,7 +28,7 @@ class CompressJs extends Task {
         output.extension = 'min.js';
         this.tempOutput = (Sys.tempDir().plusString('temp.js'));
         if (compressors == null) {
-            this.compressors = [Uglify];
+            this.compressors = [Uglify, Closure];
         }
         else
             this.compressors = compressors;
