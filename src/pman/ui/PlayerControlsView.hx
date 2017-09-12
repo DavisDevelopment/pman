@@ -175,7 +175,7 @@ class PlayerControlsView extends Ent {
 	/**
 	  * start 'hide' animation
 	  */
-	public function hideUi():Void {
+	public function hideUi(?done : Void->Void):Void {
 	    playingAnimation = true;
 	    Actuate.tween(this, 0.5, {
             yOffset: h
@@ -184,13 +184,15 @@ class PlayerControlsView extends Ent {
         }).onComplete(function() {
             playingAnimation = false;
             uiEnabled = false;
+            if (done != null)
+                done();
         }).ease( Sine.easeInOut );
 	}
 
     /**
       * show the ui
       */
-	public function showUi():Void {
+	public function showUi(?done : Void->Void):Void {
 	    playingAnimation = true;
 	    uiEnabled = true;
 	    Actuate.tween(this, 0.2, {
@@ -199,6 +201,8 @@ class PlayerControlsView extends Ent {
 	        calculateGeometry( rect );
         }).onComplete(function() {
             playingAnimation = false;
+            if (done != null)
+                done();
         }).ease( Sine.easeInOut );
 	}
 
