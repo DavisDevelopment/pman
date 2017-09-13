@@ -572,27 +572,34 @@ class Player extends EventDispatcher {
 	/**
 	  * add a bookmark to the current time
 	  */
-	public function addBookmark(?done:Void->Void):Void {
+	public function addBookmark(?done : VoidCb):Void {
         var wasPlaying = getStatus().equals( Playing );
 	    pause();
-	    function complete() {
+	    function complete(?error:Dynamic) {
 	        if ( wasPlaying ) {
 	            play();
 	        }
 	        if (done != null) {
-	            done();
+	            done( error );
 	        }
 	    }
 
         if (track != null) {
             prompt('bookmark name', null, function(name : String) {
+				// ignore empty input
+				if (name.trim().empty()) {
+					return complete();
+				}
+
+				// create the Mark itself
                 var mark = new Mark(Named( name ), currentTime);
                 track.addMark(mark, function() {
                     complete();
                 });
             });
         }
-        else complete();
+        else 
+			return complete();
 	}
 
 	/**
