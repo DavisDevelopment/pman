@@ -18,6 +18,7 @@ import pman.events.KeyboardEventDescriptor as Ked;
 import pman.events.KeyboardEventType;
 import pman.events.KeyboardEventType as Ket;
 import pman.sid.Clipboard as Clip;
+import pman.Globals.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
@@ -211,6 +212,26 @@ class KeyboardCommands {
 
                 case LetterX if (event.metaKey || event.ctrlKey):
                     //TODO cut
+
+                // create [x] hotkey
+                case LetterC if ( event.noMods ):
+                    // next key
+                    nextKeyDown(function(event : KeyboardEvent) {
+                        switch ( event.key ) {
+                            // create Mark
+                            case LetterM:
+                                defer(function() {
+                                    p.addBookmark();
+                                });
+                            
+                            // create Tab
+                            case LetterT:
+                                sess.setTab(sess.newTab());
+
+                            default:
+                                handleDefault( event );
+                        }
+                    });
 
                 // jump to a random time in the track
                 case LetterR if ( event.noMods ):
