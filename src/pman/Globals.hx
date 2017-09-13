@@ -3,6 +3,8 @@ package pman;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.graphics.Color;
+import tannus.sys.*;
+import tannus.TSys as Sys;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -38,7 +40,7 @@ class Globals {
         tannus.node.Node.process.nextTick( f );
     }
 
-/* === Variables === */
+/* === Computed Variables === */
 
     public static var bpmain(get, never):BPlayerMain;
     private static inline function get_bpmain() return BPlayerMain.instance;
@@ -57,4 +59,15 @@ class Globals {
 
     public static var preferences(get, never):Preferences;
     private static inline function get_preferences() return database.preferences;
+
+    public static var platform(get, never):String;
+    private static function get_platform():String {
+        if (_platform == null)
+            _platform = Sys.systemName();
+        return _platform;
+    }
+
+/* === Variables === */
+
+    private static var _platform : Null<String> = null;
 }
