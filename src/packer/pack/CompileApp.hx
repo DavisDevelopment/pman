@@ -32,7 +32,8 @@ class CompileApp extends Task {
             args.push( d );
         }
         args.push('build.hxml');
-        var cwd:Path = path().resolve( '../src' );
+        var cwd:Path = path().normalize().resolve( '../src' ).normalize();
+        trace( cwd );
         shell = new ShellSpawnTask('haxe', args, {
             cwd: cwd.toString(),
             stdio: 'inherit'
