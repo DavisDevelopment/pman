@@ -12,7 +12,9 @@ import gryffin.core.*;
 import gryffin.display.*;
 
 import pman.core.*;
-import pman.db.*;
+import pman.db.AppDir;
+import pman.edb.*;
+import pman.edb.PManDatabase;
 import pman.display.ColorScheme;
 
 #end
