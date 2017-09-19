@@ -19,6 +19,7 @@ import pman.LaunchInfo;
 import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
+import pman.edb.*;
 import pman.events.*;
 import pman.media.*;
 import pman.ww.Worker;
@@ -123,15 +124,6 @@ class BPlayerMain extends Application {
 
                 dragManager = new DragDropManager( this );
                 dragManager.init();
-            });
-
-            // test edb system
-            var edbTest = new pman.edb.PManDatabase();
-            edbTest.onready(function() {
-                trace('edb tests completed');
-            });
-            edbTest.init(function(?error) {
-                //
             });
         });
 
