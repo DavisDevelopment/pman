@@ -95,6 +95,7 @@ class Paths {
         }
     }
 
+    public static function documents():Path return library(Documents);
     private static function os():String {
         if (_os == null)
             _os = Sys.systemName();
