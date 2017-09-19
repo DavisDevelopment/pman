@@ -30,6 +30,7 @@ import electron.Shell;
 import electron.Tools.defer;
 import Slambda.fn;
 import tannus.math.TMath.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -343,7 +344,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
             (function() {
                 // utility function for adding a single track (this one) to a saved playlist
                 function add2(n : String) {
-                    main.appDir.editSavedPlaylist(n, function(sl : Playlist) {
+                    main.appDir.playlists.editSavedPlaylist(n, function(sl : Playlist) {
                         sl.push(this);
                     });
                 }
