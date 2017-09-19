@@ -55,6 +55,46 @@ class Paths {
         return _userData;
     }
 
+    public static function library(lib:Library):Path {
+        if (_libs == null)
+            _libs = new Dict();
+        if (_libs.exists( lib )) {
+            return _libs[lib];
+        }
+        else {
+            var path : Path;
+            switch ( lib ) {
+                case Documents:
+                    path = subhome('Documents');
+
+                case Downloads:
+                    path = subhome('Downloads');
+
+                case Pictures:
+                    path = subhome('Pictures');
+
+                case Videos:
+                    path = subhome('Videos');
+
+                case Music:
+                    path = subhome('Music');
+            }
+
+            // cater to Windows xp
+            if (!Fs.exists( path )) {
+                var path2 = path.directory.plusString('My ' + path.basename);
+                if (Fs.exists( path2 )) {
+                    path = path2;
+                }
+                else {
+                    throw 'Error: Library path for $lib is not accurate';
+                }
+            }
+
+            return (_libs[lib] = path);
+        }
+    }
+
     private static function os():String {
         if (_os == null)
             _os = Sys.systemName();
