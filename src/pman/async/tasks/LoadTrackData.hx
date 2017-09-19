@@ -99,7 +99,7 @@ class LoadTrackData extends Task2<TrackData> {
                     else {
                         track.mediaId = row._id;
                         data = new TrackData( track );
-                        data.pullRaw( row.data );
+                        data.pullRaw( row );
                         load_fields(row, done);
                     }
                 }
@@ -156,7 +156,7 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function push_data_to_db(done : VoidCb):Void {
         var raw = data.toRaw();
-        store._insertRow(raw, function(error : Null<Dynamic>) {
+        store._insertRow(raw, function(?error, ?row) {
             if (error != null) {
                 return done( error );
             }
