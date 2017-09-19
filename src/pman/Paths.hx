@@ -120,9 +120,20 @@ class Paths {
 /* === Static Fields === */
 
     private static var _home : Null<Path> = null;
+    private static var _app : Null<Path> = null;
     private static var _appData : Null<Path> = null;
     private static var _userData : Null<Path> = null;
+    private static var _libs : Null<Dict<Library, Path>> = null;
     private static var _os : Null<String> = null;
 
     private static inline var APPNAME:String = 'pman';
+}
+
+enum Library {
+    Documents;
+    Pictures;
+    Music;
+    Videos;
+    Downloads;
+    //Trash;
 }
