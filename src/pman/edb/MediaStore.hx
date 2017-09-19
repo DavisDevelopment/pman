@@ -44,9 +44,15 @@ class MediaStore extends TableWrapper {
         getRowByUri(uri).toAsync( done );
     }
 
+    /**
+      * get a single row by id
+      */
     public function getRowById(id : String):Promise<MediaRow> {
         return getById( id );
     }
+    public function _getRowById(id:String, done:Cb<Maybe<MediaRow>>) getRowById(id).toAsync( done );
+
+    // get all rows
     public function allRows():ArrayPromise<MediaRow> {
         return all();
     }
