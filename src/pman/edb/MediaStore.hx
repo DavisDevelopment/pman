@@ -78,7 +78,11 @@ class MediaStore extends TableWrapper {
     public function _insertRow(row:MediaRow, done:Cb<MediaRow>) insertRow(row).toAsync(done);
 
     public function putRow(row:MediaRow):Promise<MediaRow> {
-        return put(fn(_.eq('_id', row._id)), row);
+        return put(function(q:Query) {
+            if (row._id != null)
+                return q.eq('_id', row._id);
+            else return q.eq('uri', row.uri);
+        }, row);
     }
     public function _putRow(row:MediaRow, done:Cb<MediaRow>) return putRow(row).toAsync(done);
 
