@@ -9,9 +9,8 @@ import tannus.nore.ORegEx;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
-import pman.db.TagsStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
 import pman.media.info.*;
@@ -51,13 +50,17 @@ class TrackData {
     /**
       * pull data from a MediaInfoRow
       */
-    public function pullRaw(row : MediaInfoRow):Void {
+    public function pullRaw(row : MediaRow):Void {
         media_id = row.id;
-        views = row.views;
-        starred = row.starred;
+        var d = row.data;
+        views = d.views;
+        starred = d.starred;
+        rating = d.rating;
+        description = d.description;
+
         if (row.meta != null) {
             meta = new MediaMetadata();
-            meta.pullRaw( row.meta );
+            meta.pullRaw( d.meta );
         }
         marks = row.marks.map( Unserializer.run );
     }
@@ -65,19 +68,24 @@ class TrackData {
     /**
       * convert [this] to a MediaInfoRow
       */
-    public function toRaw():MediaInfoRow {
+    public function toRaw():MediaRow {
         if (media_id == null) {
             throw 'What the fuck?';
         }
 
         return {
-            id: media_id,
-            views: views,
-            starred: starred,
-            marks: marks.map( Serializer.run ),
-            tags: tags.map.fn( _.id ),
-            actors: actors.map.fn( _.id ),
-            meta: (meta != null ? meta.toRaw() : null)
+            _id: media_id,
+            uri: track.uri,
+            data: {
+                views: views,
+                starred: starred,
+                rating: rating,
+                description: description,
+                marks: marks.map( Serializer.run ),
+                tags: [],
+                actors: [],
+                meta: (meta != null ? meta.toRaw() : null)
+            }
         };
     }
 
@@ -93,34 +101,8 @@ class TrackData {
         var db = store.dbr;
 
         var steps:Array<VoidAsync> = [];
-
-        // validate/assert/save tags
-        steps.push(function(done:VoidCb) {
-            var tsteps:Array<Async<TagRow>> = [];
-            var tagmap:Map<String, Tag> = new Map();
-            for (t in tags) {
-                tagmap.set(t.name, t);
-                tsteps.push(db.tagsStore.putTag.bind(t, _));
-            }
-            tsteps.series(function(?err, ?rows) {
-                if (err != null) {
-                    return done( err );
-                }
-                else {
-                    var pulls:Array<VoidAsync> = rows.map.fn(row => tagmap[row.name].pullRow.bind(row, db, _));
-                    pulls.series( done );
-                }
-            });
-        });
-        // validate/assert/save actors
-        steps.push(function(done:VoidCb) {
-            //TODO also push all actors
-            defer(function() {
-                done( null );
-            });
-        });
         steps.push(function(done : VoidCb) {
-            var prom = store.putMediaInfoRow(toRaw());
+            var prom = store.putRow(toRaw());
             prom.then(function( row ) {
                 pullRaw( row );
 
@@ -315,9 +297,11 @@ class TrackData {
 
     public var track : Track;
     
-    public var media_id : Null<Int>;
+    public var media_id : Null<String>;
     public var views : Int;
     public var starred : Bool;
+    public var rating : Null<Float>;
+    public var description : Null<String>;
     public var marks : Array<Mark>;
     public var tags : Array<Tag>;
     public var actors : Array<Actor>;
