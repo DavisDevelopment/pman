@@ -687,7 +687,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
-	public var mediaId:Null<Int> = null;
+	public var mediaId:Null<String> = null;
 	public var data(default, null):Null<TrackData> = null;
 
 	public var media(default, null): Null<Media>;
