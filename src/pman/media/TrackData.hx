@@ -225,22 +225,22 @@ class TrackData {
     /**
       * attach a Tag instance to [this]
       */
-    //public function attachTag(tag : Tag):Tag {
-        //for (t in tags) {
-            //if (t.name == tag.name) {
-                //return t;
-            //}
-        //}
-        //tags.push( tag );
-        //return tag;
-    //}
+    public function attachTag(tag : String):String {
+        for (t in tags) {
+            if (t == tag) {
+                return t;
+            }
+        }
+        tags.push( tag );
+        return tag;
+    }
 
     /**
       * attach a Tag to [this] as a String
       */
-    //public function addTag(tagName : String):Tag {
-        //return attachTag(new Tag( tagName ));
-    //}
+    public function addTag(tagName : String):String {
+        return attachTag( tagName );
+    }
 
     /**
       * attach an Actor instance to [this]
@@ -263,9 +263,10 @@ class TrackData {
     /**
       * select tag by oregex
       */
-    //public function selectTag(pattern : String):Null<Tag> {
-        //return tags.firstMatch(untyped ORegEx.compile( pattern ));
-    //}
+    public function selectTag(pattern : String):Null<String> {
+        var reg:RegEx = new RegEx(new EReg(pattern, 'i'));
+        return tags.firstMatch.fn(reg.match(_));
+    }
 
     /**
       * select actor by oregex
@@ -277,12 +278,12 @@ class TrackData {
     /**
       * checks for attached tag by given name
       */
-    //public function hasTag(name:String):Bool {
-        //for (t in tags)
-            //if (t.name == name)
-                //return true;
-        //return false;
-    //}
+    public function hasTag(name:String):Bool {
+        for (t in tags)
+            if (t == name)
+                return true;
+        return false;
+    }
 
     /**
       * checks for attached actor by given name
@@ -304,7 +305,7 @@ class TrackData {
     public var rating : Null<Float>;
     public var description : Null<String>;
     public var marks : Array<Mark>;
-    public var tags : Array<Dynamic>;
+    public var tags : Array<String>;
     public var actors : Array<Dynamic>;
 
     public var meta : Null<MediaMetadata>;
