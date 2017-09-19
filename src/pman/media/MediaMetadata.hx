@@ -6,8 +6,8 @@ import tannus.sys.*;
 
 import pman.core.*;
 import pman.display.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
 import pman.media.MediaType;
 import pman.media.MediaSource;
 
@@ -36,7 +36,7 @@ class MediaMetadata {
     /**
       * convert [this] to a MediaInfoRowMeta instance
       */
-    public function toRaw():MediaInfoRowMeta {
+    public function toRaw():MediaMetadataRow {
         return {
             duration: duration,
             video: video,
@@ -47,7 +47,7 @@ class MediaMetadata {
     /**
       * pull info from a MediaInfoRowMeta object
       */
-    public function pullRaw(raw : MediaInfoRowMeta):Void {
+    public function pullRaw(raw : MediaMetadataRow):Void {
         duration = raw.duration;
         video = untyped raw.video;
         audio = untyped raw.audio;
@@ -82,6 +82,8 @@ class MediaMetadata {
 class VideoMetadata {
     public var width : Int;
     public var height : Int;
+    @:optional public var frame_rate : String;
+    @:optional public var time_base : String;
 }
 
 @:structInit
