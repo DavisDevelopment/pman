@@ -64,6 +64,7 @@ class MediaStore extends TableWrapper {
     public function insertRow(row : MediaRow):Promise<MediaRow> {
         return insert( row );
     }
+    public function _insertRow(row:MediaRow, done:Cb<MediaRow>) insertRow(row).toAsync(done);
 
     public function _cogRow(uri:String, done:Cb<MediaRow>):Void {
         function newRow():MediaRow {
