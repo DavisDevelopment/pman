@@ -66,7 +66,13 @@ class PManDatabase {
                         lastDirectory: null
                     };
 
-                    preferences = {};
+                    preferences = {
+                        autoPlay: false,
+                        autoRestore: false,
+                        directRender: true,
+                        showAlbumArt: false,
+                        showSnapshot: true
+                    };
 
                     next();
                 });
@@ -163,5 +169,9 @@ typedef ConfigInfo = {
 };
 
 typedef Preferences = {
-
+    autoPlay: Bool,
+    autoRestore: Bool,
+    directRender: Bool,
+    showAlbumArt: Bool,
+    showSnapshot: Bool
 };
