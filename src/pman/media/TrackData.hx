@@ -70,7 +70,8 @@ class TrackData {
       */
     public function toRaw():MediaRow {
         if (media_id == null) {
-            throw 'What the fuck?';
+            //throw 'What the fuck?';
+            //TODO
         }
 
         return {
