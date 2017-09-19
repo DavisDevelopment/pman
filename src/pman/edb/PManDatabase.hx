@@ -87,51 +87,6 @@ class PManDatabase {
     }
 
     /**
-      * run tests
-      */
-    private function testDatastore(store : DataStore):Void {
-        var win = tannus.html.Win.current;
-        
-        var ms = wrap('media.db', MediaStore);
-        ms.init(function(?error) {
-            if (error != null) {
-                report( error );
-            }
-            else {
-                var doc:Dynamic = {
-                    uri: 'file:///home/ryan/Videos/Popcorn/porn/09-12-2017/Marley Brinx/Marley Brinx -- Tight Teen Yoga Pants Fuck --  720p.mp4',
-                    data: {
-                        views: 2,
-                        rating: null,
-                        description: null,
-                        starred: false,
-                        marks: [],
-                        tags: ['tight', 'teen', 'yoga'],
-                        actors: [],
-                        meta: {
-                            duration: 696969.0,
-                            video: {width: 1000, height: 1000, frame_rate: '', time_base: ''},
-                            audio: {}
-                        }
-                    }
-                };
-                ms._mutate(function(q:Query) {
-                    return q.has('tags', ['teen', 'tiny']);
-                },
-                function(m:Modification) {
-                    m.increment({'data.views': 1});
-                    m.addToSet({'data.tags': 'hd'});
-                    m.set({'data.starred': true});
-                },
-                function(?error, ?row) {
-                    trace( error );
-                    trace( row );
-                });
-            }
-        });
-    }
-
-    /**
       * create a TableWrapper
       */
     private function wrap<T:TableWrapper>(name:String, ?type:Class<T>):T {
