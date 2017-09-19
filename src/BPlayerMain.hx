@@ -292,7 +292,10 @@ class BPlayerMain extends Application {
 
         // initialize the database
         db = new PManDatabase();
-        db.init(function() {
+        db.init(function(?error) {
+            if (error != null) {
+                throw error;
+            }
             // declare ready
             _rs.fire();
         });
