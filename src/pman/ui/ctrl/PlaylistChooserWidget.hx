@@ -288,19 +288,27 @@ class PlaylistChooserItem extends Ent {
       * when [this] gets clicked
       */
     public function onClick(event : MouseEvent):Void {
-        appDir.playlists.editSavedPlaylist(name, function(list) {
+        function addTo(list: Playlist):Void {
             if (player.track != null) {
                 if (!list.has( player.track )) {
                     list.push( player.track );
                 }
-
-                status = true;
             }
-        }, function(?error) {
-            trace( 'cheeks' );
-            chooser.dispatch('addedto', name);
-            chooser.hide();
-        });
+            
+            status = true;
+        }
+
+        function complete(?error) {
+            if (error != null) {
+                report( error );
+            }
+            else {
+                chooser.dispatch('addedto', name);
+                chooser.hide();
+            }
+        }
+
+        appDir.playlists.editSavedPlaylist(name, addTo, complete);
     }
 
 /* === Instance Fields === */
