@@ -280,7 +280,7 @@ class PlaylistChooserItem extends Ent {
       * refresh [this]'s data
       */
     public function refresh():Void {
-        var l = appDir.getSavedPlaylist( name );
+        var l = appDir.playlists.readPlaylist( name );
         status = (player.track != null ? l.has( player.track ) : false);
     }
 
@@ -288,7 +288,7 @@ class PlaylistChooserItem extends Ent {
       * when [this] gets clicked
       */
     public function onClick(event : MouseEvent):Void {
-        appDir.editSavedPlaylist(name, function(list) {
+        appDir.playlists.editSavedPlaylist(name, function(list) {
             if (player.track != null) {
                 if (!list.has( player.track )) {
                     list.push( player.track );
@@ -296,7 +296,7 @@ class PlaylistChooserItem extends Ent {
 
                 status = true;
             }
-        }, function() {
+        }, function(?error) {
             trace( 'cheeks' );
             chooser.dispatch('addedto', name);
             chooser.hide();
@@ -326,7 +326,7 @@ class NewPlaylistItem extends PlaylistChooserItem {
             }
             else {
                 var list = new Playlist([player.track]);
-                appDir.writePlaylist(playlistName, list);
+                appDir.playlists.writePlaylist(playlistName, list);
                 chooser.dispatch('addedto', playlistName);
             }
             chooser.hide();
