@@ -91,6 +91,11 @@ class MediaStore extends TableWrapper {
     public function cogRow(uri:String):Promise<MediaRow> {
         return _cogRow.bind(uri, _).toPromise();
     }
+
+    public function hasRowForUri(uri : String):BoolPromise {
+        return getRowByUri( uri ).transform.fn( _.exists ).bool();
+    }
+    public function _hasRowForUri(uri:String, done:Cb<Bool>) return hasRowForUri(uri).toAsync(done);
 }
 
 typedef MediaRow = {
