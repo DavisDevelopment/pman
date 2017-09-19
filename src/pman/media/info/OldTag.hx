@@ -7,10 +7,10 @@ import tannus.sys.*;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
-import pman.db.*;
+import pman.edb.*;
 import pman.media.*;
-import pman.db.MediaStore;
-import pman.db.TagsStore;
+import pman.edb.MediaStore;
+//import pman.db.TagsStore;
 import pman.media.MediaType;
 import pman.async.*;
 
@@ -413,3 +413,5 @@ class Tag implements IComparable<Tag> {
 enum TagType {
     Normal;
 }
+
+typedef TagRow = Dynamic;
