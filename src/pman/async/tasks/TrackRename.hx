@@ -146,7 +146,7 @@ class TrackRename extends Task1 {
         var old_uri:String = uri( name.previous );
 
         store._mutate(fn(_.eq('_id', track.mediaId)), function(m:Modification) {
-            m.set({uri: new_uri});
+            m.set('uri', new_uri);
         }, null, function(?error, ?row) {
             if (error != null)
                 return done( error );
