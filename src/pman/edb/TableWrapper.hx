@@ -27,6 +27,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.async.Asyncs;
 using tannus.async.VoidAsyncs;
+using tannus.html.JSTools;
 
 class TableWrapper {
     /* Constructor Function */
@@ -144,7 +145,7 @@ class TableWrapper {
         });
     }
     public function _update<T>(query:Dynamic, update:Dynamic, ?options:{?multi:Bool, ?insert:Bool}, done:Cb<T>):Void {
-        update(query, update, options).toAsync( done );
+        this.update(query, update, options).toAsync( done );
     }
 
     /**
@@ -169,7 +170,11 @@ class TableWrapper {
       * put an item
       */
     public function put<T>(query:QueryDecl, update:Dynamic):Promise<T> {
-        return update(query.toObject(), update, {
+        if (update.nag('_id') == null) {
+            update.nad('_id');
+        }
+
+        return this.update(query.toObject(), update, {
             multi: false,
             insert: true
         });
@@ -182,6 +187,9 @@ class TableWrapper {
       * insert an item
       */
     public function insert<T>(doc : Dynamic):Promise<T> {
+        if (doc.nag('_id') == null) {
+            doc.nad('_id');
+        }
         return store.insert.bind(doc, _).toPromise();
     }
     public function _insert<T>(doc:Dynamic, done:Cb<T>) insert(doc).toAsync( done );
