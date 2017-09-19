@@ -8,8 +8,8 @@ import electron.Shell;
 
 import pman.core.*;
 import pman.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
 import pman.async.*;
 
 import Std.*;
@@ -72,12 +72,12 @@ class TrackDelete extends Task1 {
         var tp = track.getFsPath();
         if (tp != null)
             trackPaths.push( tp );
-        store.getMediaItemIdByUri(track.uri, function(?error:Dynamic, ?itemId:Int) {
+        store._getRowByUri(track.uri, function(?error:Dynamic, ?row) {
             if (error != null) {
                 done( error );
             }
-            else if (itemId != null) {
-                itemIds.push( itemId );
+            else if (row != null) {
+                itemIds.push( row._id );
             }
             defer( done );
         });
@@ -128,10 +128,11 @@ class TrackDelete extends Task1 {
       * delete database entries associated with the Track
       */
     private function delete_track_rows(done : VoidCb):Void {
-        inline function ift(s:String)
-            return itemIds.map.fn(id => store.deleteFrom.bind(s, id, _));
-        var actions = (ift('media_items').concat(ift('media_info')));
-        actions.series( done );
+        //inline function ift(s:String)
+            //return itemIds.map.fn(id => store.deleteFrom.bind(s, id, _));
+        //var actions = (ift('media_items').concat(ift('media_info')));
+        //actions.series( done );
+        done();
     }
 
     /**
@@ -149,6 +150,6 @@ class TrackDelete extends Task1 {
 
     private var track : Track;
     private var store : MediaStore;
-    private var itemIds : Array<Int>;
+    private var itemIds : Array<String>;
     private var trackPaths : Array<Path>;
 }
