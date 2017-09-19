@@ -81,7 +81,12 @@ class PlaylistClass {
 	  * check whether [this] Playlist contains an instance of [t]
 	  */
 	public function has(t : Track):Bool {
-	    return (indexOf( t ) > -1);
+	    for (track in l) {
+	        if (track.uri == t.uri) {
+	            return true;
+	        }
+	    }
+	    return false;
 	}
 
 	/**
