@@ -104,6 +104,13 @@ class Paths {
         return Paths.library(Library.createByIndex(library));
     }
 
+    public static function appPath():Path {
+        if (_app == null) {
+            _app = electron.ext.App.getAppPath();
+        }
+        return _app;
+    }
+
     private static function os():String {
         if (_os == null)
             _os = Sys.systemName();
