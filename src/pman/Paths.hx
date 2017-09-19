@@ -100,6 +100,10 @@ class Paths {
     public static function pictures():Path return library(Pictures);
     public static function videos():Path return library(Videos);
     public static function music():Path return library(Music);
+    public static function getLibraryPath(library: Int):Path {
+        return Paths.library(Library.createByIndex(library));
+    }
+
     private static function os():String {
         if (_os == null)
             _os = Sys.systemName();
