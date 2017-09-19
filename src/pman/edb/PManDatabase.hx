@@ -63,7 +63,7 @@ class PManDatabase {
             step(function(next) {
                 defer(function() {
                     configInfo = {
-                        lastDirectory: null
+                        lastDirectory: new Path('/home/ryan/Videos/')
                     };
 
                     preferences = {
