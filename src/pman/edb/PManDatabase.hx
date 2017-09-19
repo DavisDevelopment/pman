@@ -22,6 +22,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.VoidAsyncs;
 
 class PManDatabase {
     /* Constructor Function */
@@ -39,19 +40,49 @@ class PManDatabase {
             Fs.createDirectory( path );
         }
 
-        var mds = new DataStore({
-            filename: dsfilename('media.db')
-        });
-        mds.loadDatabase(function(?error) {
-            if (error != null) {
-                throw error;
-            }
-            else {
-                testDatastore( mds );
-            }
+        defer(function() {
+            var tasks:Array<VoidAsync> = new Array();
+            inline function step(a : VoidAsync) tasks.push( a );
+
+            // create TableWrapper properties
+            step(function(next) {
+                try {
+                    mediaStore = wrap('media', MediaStore);
+
+                    var tables = [
+                        mediaStore
+                    ];
+                    VoidAsyncs.series(untyped tables.map.fn(_.init.bind(_)), next);
+                }
+                catch (error : Dynamic) {
+                    next( error );
+                }
+            });
+
+            // create other properties
+            step(function(next) {
+                defer(function() {
+                    configInfo = {
+                        lastDirectory: null
+                    };
+
+                    preferences = {};
+
+                    next();
+                });
+            });
+
+            tasks.series(function(?error) {
+                if (done != null) {
+                    done( error );
+                }
+            });
         });
     }
 
+    /**
+      * run tests
+      */
     private function testDatastore(store : DataStore):Void {
         var win = tannus.html.Win.current;
         
@@ -101,6 +132,9 @@ class PManDatabase {
         if (type == null) {
             type = untyped TableWrapper;
         }
+        if (!name.endsWith('.db')) {
+            name += '.db';
+        }
         var store:DataStore = new DataStore({
             filename: dsfilename( name )
         });
@@ -123,3 +157,11 @@ class PManDatabase {
     
     private var rs : ReadySignal;
 }
+
+typedef ConfigInfo = {
+    lastDirectory: Null<Path>
+};
+
+typedef Preferences = {
+
+};
