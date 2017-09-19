@@ -40,6 +40,10 @@ class MediaStore extends TableWrapper {
     public function getRowByUri(uri : String):Promise<Maybe<MediaRow>> {
         return getBy('uri', uri);
     }
+    public function _getRowByUri(uri:String, done:Cb<Maybe<MediaRow>>) {
+        getRowByUri(uri).toAsync( done );
+    }
+
     public function getRowById(id : String):Promise<MediaRow> {
         return getById( id );
     }
