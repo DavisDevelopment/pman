@@ -106,7 +106,11 @@ class Paths {
 
     public static function appPath():Path {
         if (_app == null) {
-            _app = electron.ext.App.getAppPath();
+            //_app = electron.ext.App.getAppPath();
+            _app = (new Path(untyped __js__('__dirname') + '')).plusString('../').normalize();
+            if (!Fs.exists(_app.plusString('package.json'))) {
+                throw 'Sanity Check Failed: $_app is not the application path';
+            }
         }
         return _app;
     }
