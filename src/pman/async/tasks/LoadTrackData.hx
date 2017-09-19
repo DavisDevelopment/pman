@@ -161,6 +161,7 @@ class LoadTrackData extends Task2<TrackData> {
                 return done( error );
             }
             else {
+                data.pullRaw( row );
                 done();
             }
         });
