@@ -3,6 +3,7 @@ package pman;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.sys.FileSystem as Fs;
 import tannus.TSys as Sys;
 
 import tannus.math.TMath.*;
@@ -22,6 +23,10 @@ class Paths {
             _home = new Path(Sys.getEnv(os() == 'Win32' ? 'USERPROFILE' : 'HOME'));
         }
         return _home;
+    }
+
+    public static function subhome(sub : String):Path {
+        return home().plusString( sub ).normalize();
     }
 
     public static function appData():Path {
