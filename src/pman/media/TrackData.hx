@@ -51,18 +51,18 @@ class TrackData {
       * pull data from a MediaInfoRow
       */
     public function pullRaw(row : MediaRow):Void {
-        media_id = row.id;
+        media_id = row._id;
         var d = row.data;
         views = d.views;
         starred = d.starred;
         rating = d.rating;
         description = d.description;
 
-        if (row.meta != null) {
+        if (d.meta != null) {
             meta = new MediaMetadata();
             meta.pullRaw( d.meta );
         }
-        marks = row.marks.map( Unserializer.run );
+        marks = d.marks.map( Unserializer.run );
     }
 
     /**
@@ -98,7 +98,7 @@ class TrackData {
         if (store == null) {
             store = BPlayerMain.instance.db.mediaStore;
         }
-        var db = store.dbr;
+        var db = store.root;
 
         var steps:Array<VoidAsync> = [];
         steps.push(function(done : VoidCb) {
@@ -224,74 +224,74 @@ class TrackData {
     /**
       * attach a Tag instance to [this]
       */
-    public function attachTag(tag : Tag):Tag {
-        for (t in tags) {
-            if (t.name == tag.name) {
-                return t;
-            }
-        }
-        tags.push( tag );
-        return tag;
-    }
+    //public function attachTag(tag : Tag):Tag {
+        //for (t in tags) {
+            //if (t.name == tag.name) {
+                //return t;
+            //}
+        //}
+        //tags.push( tag );
+        //return tag;
+    //}
 
     /**
       * attach a Tag to [this] as a String
       */
-    public function addTag(tagName : String):Tag {
-        return attachTag(new Tag( tagName ));
-    }
+    //public function addTag(tagName : String):Tag {
+        //return attachTag(new Tag( tagName ));
+    //}
 
     /**
       * attach an Actor instance to [this]
       */
-    public function attachActor(actor : Actor):Actor {
-        for (a in actors)
-            if (a.name == actor.name)
-                return a;
-        actors.push( actor );
-        return actor;
-    }
+    //public function attachActor(actor : Actor):Actor {
+        //for (a in actors)
+            //if (a.name == actor.name)
+                //return a;
+        //actors.push( actor );
+        //return actor;
+    //}
 
     /**
       * add an Actor
       */
-    public function addActor(name : String):Actor {
-        return attachActor(new Actor( name ));
-    }
+    //public function addActor(name : String):Actor {
+        //return attachActor(new Actor( name ));
+    //}
 
     /**
       * select tag by oregex
       */
-    public function selectTag(pattern : String):Null<Tag> {
-        return tags.firstMatch(untyped ORegEx.compile( pattern ));
-    }
+    //public function selectTag(pattern : String):Null<Tag> {
+        //return tags.firstMatch(untyped ORegEx.compile( pattern ));
+    //}
 
     /**
       * select actor by oregex
       */
-    public function selectActor(pattern : String):Null<Actor> {
-        return actors.firstMatch(untyped ORegEx.compile( pattern ));
-    }
+    //public function selectActor(pattern : String):Null<Actor> {
+        //return actors.firstMatch(untyped ORegEx.compile( pattern ));
+    //}
 
     /**
       * checks for attached tag by given name
       */
-    public function hasTag(name:String):Bool {
-        for (t in tags)
-            if (t.name == name)
-                return true;
-        return false;
-    }
+    //public function hasTag(name:String):Bool {
+        //for (t in tags)
+            //if (t.name == name)
+                //return true;
+        //return false;
+    //}
 
     /**
       * checks for attached actor by given name
       */
-    public function hasActor(name:String):Bool {
-        for (a in actors)
-            if (a.name == name)
-                return true;
-        return false;
-    }
+    //public function hasActor(name:String):Bool {
+        //for (a in actors)
+            //if (a.name == name)
+                //return true;
+        //return false;
+    //}
 
 /* === Instance Fields === */
 
@@ -303,8 +303,8 @@ class TrackData {
     public var rating : Null<Float>;
     public var description : Null<String>;
     public var marks : Array<Mark>;
-    public var tags : Array<Tag>;
-    public var actors : Array<Actor>;
+    public var tags : Array<Dynamic>;
+    public var actors : Array<Dynamic>;
 
     public var meta : Null<MediaMetadata>;
 }
