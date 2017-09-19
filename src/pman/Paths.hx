@@ -99,6 +99,7 @@ class Paths {
     public static function downloads():Path return library(Downloads);
     public static function pictures():Path return library(Pictures);
     public static function videos():Path return library(Videos);
+    public static function music():Path return library(Music);
     private static function os():String {
         if (_os == null)
             _os = Sys.systemName();
