@@ -35,15 +35,55 @@ class Modification {
 
 /* === Operators === */
 
-    public function set(data:Dynamic):Modification return op('set', data);
-    public function increment(data:Dynamic):Modification return op('inc', data);
-    public function unset(data:Dynamic):Modification return op('unset', data);
-    public function push(d:Dynamic):Modification return op('push', d);
-    public function pop(d:Dynamic):Modification return op('pop', d);
-    public function addToSet(d:Dynamic):Modification return op('addToSet', d);
-    public function pull(d:Dynamic):Modification return op('pull', d);
-    public function min(d:Dynamic):Modification return op('min', d);
-    public function max(d:Dynamic):Modification return op('max', d);
+    public function set(index:String, value:Dynamic):Modification {
+        return _set(_bokv(index, value));
+    }
+
+    public function inc(index:String, value:Int):Modification {
+        return _increment(_bokv(index, value));
+    }
+
+    public function unset(index:String, value:Dynamic):Modification {
+        return _unset(_bokv(index, value));
+    }
+
+    public function push(index:String, value:Dynamic):Modification {
+        return _push(_bokv(index, value));
+    }
+
+    public function pop(index:String, value:Dynamic):Modification {
+        return _pop(_bokv(index, value));
+    }
+
+    public function addToSet(index:String, value:Dynamic):Modification {
+        return _addToSet(_bokv(index, value));
+    }
+
+    public function pull(index:String, value:Int=1):Modification {
+        if (value < 0)
+            value = -1;
+        else value = 1;
+        return _pull(_bokv(index, value));
+    }
+
+    public function min(index:String, value:Dynamic):Modification {
+        return _min(_bokv(index, value));
+    }
+
+    public function max(index:String, value:Dynamic):Modification {
+        return _max(_bokv(index, value));
+    }
+
+
+    public function _set(data:Dynamic):Modification return op('set', data);
+    public function _increment(data:Dynamic):Modification return op('inc', data);
+    public function _unset(data:Dynamic):Modification return op('unset', data);
+    public function _push(d:Dynamic):Modification return op('push', d);
+    public function _pop(d:Dynamic):Modification return op('pop', d);
+    public function _addToSet(d:Dynamic):Modification return op('addToSet', d);
+    public function _pull(d:Dynamic):Modification return op('pull', d);
+    public function _min(d:Dynamic):Modification return op('min', d);
+    public function _max(d:Dynamic):Modification return op('max', d);
 
 /* === Instance Methods === */
 
@@ -81,6 +121,22 @@ class Modification {
       * compute the key for an operator
       */
     private inline function opname(name:String):String return '$$$name';
+
+    /**
+      * utility method to construct an Object
+      */
+    private function _buildObject(f : Object->Void):Object {
+        var o:Object = {};
+        f( o );
+        return o;
+    }
+    private inline function _bo(f : Object->Void):Object return _buildObject( f );
+    private function _bokv(k:String, v:Dynamic):Object {
+        return _buildObject(function(o) {
+            o[k] = v;
+        });
+    }
+ 
 
 /* === Instance Fields === */
 
