@@ -55,17 +55,20 @@ class AppDirPlaylists {
         return readPlaylistFile(name).ternary(parsePlaylist(_), null);
     }
 
-    public function writePlaylist(name:String, playlist:Playlist):Void {
+    public inline function writePlaylist(name:String, playlist:Playlist):Void {
         Fs.write(appDir.playlistPath(name), printPlaylist(playlist));
     }
 
-    public function editSavedPlaylist(name:String, editor:Playlist->Void, ?done:VoidCb):Void {
+    public function editSavedPlaylist(name:String, edit:Playlist->Void, ?done:VoidCb):Void {
         var playlist = readPlaylist( name );
         if (playlist == null) {
             return ;
         }
-        editor( playlist );
-        writePlaylist(name, playlist);
+        var list = playlist.copy();
+        edit( list );
+        var path = appDir.playlistPath( name );
+        var data = printPlaylist( list );
+        Fs.write(path, data);
         if (done != null) {
             done();
         }
