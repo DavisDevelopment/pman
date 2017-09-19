@@ -6,8 +6,9 @@ import tannus.sys.*;
 
 import pman.core.*;
 import pman.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
+import pman.edb.Modification;
 import pman.async.*;
 
 import Std.*;
@@ -144,47 +145,16 @@ class TrackRename extends Task1 {
         var new_uri:String = uri( name.current );
         var old_uri:String = uri( name.previous );
 
-        // new media item row promise
-        var newmirp = store.cogMediaItemRow( new_uri );
-        // when new row is obtained from the db
-        newmirp.then(function(newMediaItemRow) {
-            // old row promise
-            var orp = store.getMediaItemRowByUri( old_uri );
-            // when old row has been retrieved
-            orp.then(function(oldMediaItemRow) {
-                // queue the old item_row for deletion
-                toDelete.push( oldMediaItemRow.id );
-                // request info_row for old path
-                var oirp = store.getMediaInfoRow( oldMediaItemRow.id );
-                // when/if info_row is retrieved
-                oirp.then(function( infoRow ) {
-                    // queue old info_row for deletion
-                    toDelete.push( infoRow.id );
-                    // reassign its [id] field to match the id of our new media_item row
-                    infoRow.id = newMediaItemRow.id;
-                    // push that shit onto the database
-                    var nirp = store.putMediaInfoRow( infoRow );
-                    // when we get the row object back from the database
-                    nirp.then(function(newInfoRow) {
-                        // print it to the console
-                        trace(newInfoRow);
-                        // update the Track's id field
-                        track.mediaId = newInfoRow.id;
-                        @:privateAccess track.data = null;
-                        // declare this step complete
-                        defer(done.void());
-                    });
-                    // handle errors pushing info_row
-                    nirp.unless( raise );
-                });
-                // handle errors loading info_row
-                oirp.unless( raise );
-            });
-            // handle errors loading old media_item row
-            orp.unless( raise );
+        store._mutate(fn(_.eq('_id', track.mediaId)), function(m:Modification) {
+            m.set({uri: new_uri});
+        }, null, function(?error, ?row) {
+            if (error != null)
+                return done( error );
+            else if (row != null) {
+                //TODO
+                done();
+            }
         });
-        // handle errors pushing new media_item row
-        newmirp.unless( raise );
     }
 
     /**
@@ -241,11 +211,12 @@ class TrackRename extends Task1 {
       * delete all items in the database that have been dereferenced by [this] action
       */
     private function sanitize_db(done : VoidCb):Void {
-        var deletes = [
-            store.deleteFrom.bind('media_items', toDelete[0]),
-            store.deleteFrom.bind('media_info', toDelete[1])
-        ];
-        deletes.callEach( done );
+        //var deletes = [
+            //store.deleteFrom.bind('media_items', toDelete[0]),
+            //store.deleteFrom.bind('media_info', toDelete[1])
+        //];
+        //deletes.callEach( done );
+        done();
     }
 
 /* === Instance Fields === */
