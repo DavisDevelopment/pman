@@ -37,7 +37,7 @@ class MediaStore extends TableWrapper {
     /**
       * get a single MediaRow by [uri]
       */
-    public function getRowByUri(uri : String):Promise<MediaRow> {
+    public function getRowByUri(uri : String):Promise<Maybe<MediaRow>> {
         return getBy('uri', uri);
     }
     public function getRowById(id : String):Promise<MediaRow> {
