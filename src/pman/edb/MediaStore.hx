@@ -34,6 +34,17 @@ class MediaStore extends TableWrapper {
 
 /* === Instance Methods === */
 
+    override function init(done : VoidCb):Void {
+        var tasks = [];
+        tasks.push(createIndex.bind('uri', true, false, _));
+        super.init(function(?error) {
+            if (error != null)
+                return done(error);
+            else
+                tasks.series( done );
+        });
+    }
+
     /**
       * get a single MediaRow by [uri]
       */
