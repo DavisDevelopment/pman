@@ -116,6 +116,10 @@ class PManDatabase {
 
     public var path: Path;
     public var ops : Operators;
+    public var mediaStore : MediaStore;
+
+    public var configInfo : ConfigInfo;
+    public var preferences : Preferences;
     
     private var rs : ReadySignal;
 }
