@@ -16,7 +16,7 @@ import electron.ext.Dialog;
 
 import pman.core.*;
 import pman.media.*;
-import pman.db.*;
+import pman.edb.*;
 
 import Std.*;
 import electron.Tools.*;
@@ -59,7 +59,7 @@ class PreferencesPage extends Page {
                     p.directRender = fields.directRender.prop('checked');
                     p.showAlbumArt = fields.showAlbumArt.prop('checked');
                     p.showSnapshot = fields.showSnapshot.prop('checked');
-                    p.push();
+                    //p.push();
                     back();
                 });
             });
