@@ -14,7 +14,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.ui.VideoUnderlay;
 import pman.display.VideoFilter;
-import pman.edb.PManDatabase;
+import pman.edb.*;
 
 import foundation.Tools.defer;
 import Std.*;
@@ -119,18 +119,19 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
         var vo = player.viewOptions;
         this.filter = vo.videoFilter;
         this.filterRaw = vo.videoFilterRaw;
-        this.directRender = (filterRaw || preferences.directRender);
+        //this.directRender = (filterRaw || preferences.directRender);
+        this.directRender = true;
 
         if ( directRender ) {
-            if (underlay != null) {
-                underlay.destroy();
-                underlay = null;
+            if (underlay == null) {
+                underlay = new VideoUnderlay( v );
+                underlay.appendTo('body');
             }
         }
         else {
-            if (underlay == null) {
-                underlay = new VideoUnderlay( v );
-                underlay.appendTo( 'body' );
+            if (underlay != null) {
+                underlay.detach();
+                underlay = null;
             }
         }
 	}
@@ -216,6 +217,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	private var pv : Null<PlayerView> = null;
 	private var underlay : Null<VideoUnderlay> = null;
 	private var filter : Null<VideoFilter> = null;
-	private var directRender : Bool = false;
+	private var directRender : Bool = true;
 	private var filterRaw : Bool = false;
 }
