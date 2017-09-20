@@ -5,6 +5,7 @@ import tannus.ds.Maybe;
 import tannus.events.*;
 import tannus.events.Key;
 import tannus.math.Random;
+import tannus.media.Duration;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -200,6 +201,20 @@ class KeyboardCommands {
                         p.gotoByOffset( 1 );
                         sess.removeItem( ct );
                     }
+
+                // jump to time
+                case LetterG if (event.metaKey || event.ctrlKey):
+                    var jp = new TimeJumpPrompt();
+                    jp.title = 'Jump to Time';
+                    jp.setTime(Duration.fromFloat( player.currentTime ));
+                    jp.open();
+                    jp.readLine(function(line) {
+                        trace( line );
+                    });
+                    jp.focus();
+                    defer(function() {
+                        jp.hiliteSegment();
+                    });
 
                 // copy
                 case LetterC if (event.metaKey || event.ctrlKey):
