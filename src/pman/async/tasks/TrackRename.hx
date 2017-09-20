@@ -6,6 +6,7 @@ import tannus.sys.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.media.info.Bundles;
 import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.edb.Modification;
@@ -58,6 +59,7 @@ class TrackRename extends Task1 {
                     repoint_track,
                     repoint_db_row,
                     rename_file,
+                    rename_bundle,
                     reattach_track,
                     update_track_views,
                     sanitize_db
@@ -120,8 +122,10 @@ class TrackRename extends Task1 {
         defer(function() {
             // create new MediaProvider that references file's new Path
             var newProvider = new LocalFileMediaProvider(new File( name.current ));
+
             // cache whether the Track is focused
             focused = (track.session.focusedTrack == track);
+
             // defocus the Track if necessary
             if ( focused ) {
                 track.session.blur( track );
@@ -129,6 +133,7 @@ class TrackRename extends Task1 {
 
             // the Track's previous uri
             var oldUri = track.uri;
+
             // reassign track's provider
             track.provider = newProvider;
 
@@ -165,6 +170,21 @@ class TrackRename extends Task1 {
             // actually change file's path
             FileSystem.rename(name.previous, name.current);
             // declare completion
+            defer(done.void());
+        }
+        catch (error : Dynamic) {
+            done( error );
+        }
+    }
+
+    /**
+      * rename the bundle folder
+      */
+    private function rename_bundle(done : VoidCb):Void {
+        var oldBundlePath = Bundles.getBundlePath(new Path(name.previous).name);
+        var newBundlePath = Bundles.getBundlePath(new Path(name.current).name);
+        try {
+            FileSystem.rename(oldBundlePath, newBundlePath);
             defer(done.void());
         }
         catch (error : Dynamic) {
