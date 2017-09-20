@@ -27,6 +27,10 @@ class JsonFileStorage extends Storage {
 
         this.modem = new JsonModem();
         this.port = new TextFilePort( path );
+
+        if (!Fs.exists( path )) {
+            Fs.write(path, '{}');
+        }
     }
 
     public var path : Path;
