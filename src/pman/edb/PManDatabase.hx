@@ -62,17 +62,9 @@ class PManDatabase {
             // create other properties
             step(function(next) {
                 defer(function() {
-                    configInfo = {
-                        lastDirectory: new Path('/home/ryan/Videos/')
-                    };
 
-                    preferences = {
-                        autoPlay: false,
-                        autoRestore: false,
-                        directRender: true,
-                        showAlbumArt: false,
-                        showSnapshot: true
-                    };
+                    configInfo = new ConfigInfo();
+                    preferences = new Preferences();
 
                     next();
                 });
@@ -118,15 +110,3 @@ class PManDatabase {
     
     private var rs : ReadySignal;
 }
-
-typedef ConfigInfo = {
-    lastDirectory: Null<Path>
-};
-
-typedef Preferences = {
-    autoPlay: Bool,
-    autoRestore: Bool,
-    directRender: Bool,
-    showAlbumArt: Bool,
-    showSnapshot: Bool
-};
