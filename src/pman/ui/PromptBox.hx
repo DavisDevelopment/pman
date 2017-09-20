@@ -65,9 +65,12 @@ class PromptBox extends Pane {
 	/**
 	  * set the caret position of [this]
 	  */
-	public function caret(index : Int):Void {
-		focus();
-		selectRange(index, index);
+	public function caret(?index : Int):Int {
+	    if (index != null) {
+            focus();
+            selectRange(index, index);
+        }
+        return i.selectionEnd;
 	}
 
 	/**
@@ -177,6 +180,7 @@ class PromptBox extends Pane {
 	  */
 	private function empty():Void {
 	    dispatch('blank', null);
+	    destroy();
 	}
 
 	/**
