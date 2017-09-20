@@ -9,6 +9,7 @@ import haxe.Constraints.Function;
 import haxe.Serializer;
 import haxe.Unserializer;
 import haxe.Json;
+import haxe.rtti.Meta;
 
 import pman.edb.Modem;
 import pman.edb.Port;
@@ -18,12 +19,15 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.html.JSTools;
 
 class Storage {
     /* Constructor Function */
     public function new():Void {
         modem = new JsonModem();
         state = null;
+
+        __bindMeta();
     }
 
 /* === Instance Methods === */
@@ -43,28 +47,60 @@ class Storage {
     }
 
     public function get<T>(name : String):Maybe<T> {
-        pull();
+        _validate();
         return state[name];
     }
 
     public function set<T>(name:String, value:T):T {
-        pull();
+        _validate();
         return (state[name] = value);
     }
 
     public function remove(name : String):Bool {
-        pull();
+        _validate();
+        var res = state.exists( name );
         state.remove( name );
+        return res;
     }
 
     public function keys():Iterator<String> {
-        pull();
+        _validate();
         return state.keys.iterator();
     }
 
     public function exists(name : String):Bool {
-        pull();
+        _validate();
         return state.exists( name );
+    }
+
+    private function _validate():Void {
+        if (state == null)
+            pull();
+    }
+
+    /**
+      * bind a property
+      */
+    private function fwd(name:String, ?dv:Dynamic):Void {
+        defineGetter(name, get.bind(name));
+        defineSetter(name, set.bind(name, _));
+        if (dv != null && nag(name) == null) {
+            nas(name, dv);
+        }
+    }
+
+    /**
+      * use metadata to bind properties
+      */
+    private function __bindMeta() {
+        var cm = Meta.getType(Type.getClass(this));
+        var bmd:Null<Array<String>> = untyped cm.bind;
+        if (bmd != null) {
+            for (prop in bmd) {
+                //trace('bind $prop to Storage');
+                fwd( prop );
+            }
+        }
     }
 
 /* === Computed Instance Fields === */
