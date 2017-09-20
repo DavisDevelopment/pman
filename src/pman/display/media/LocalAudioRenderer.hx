@@ -17,7 +17,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.tools.mediatags.MediaTagReader;
 import pman.ui.*;
-import pman.edb.PManDatabase;
+import pman.edb.*;
 
 import js.Browser.window;
 import electron.Tools.defer;
