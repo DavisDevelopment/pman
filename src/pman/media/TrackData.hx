@@ -63,6 +63,7 @@ class TrackData {
             meta.pullRaw( d.meta );
         }
         marks = d.marks.map( Unserializer.run );
+        tags = d.tags.map( Unserializer.run );
     }
 
     /**
@@ -83,7 +84,7 @@ class TrackData {
                 rating: rating,
                 description: description,
                 marks: marks.map( Serializer.run ),
-                tags: [],
+                tags: tags.map( Serializer.run ),
                 actors: [],
                 meta: (meta != null ? meta.toRaw() : null)
             }
