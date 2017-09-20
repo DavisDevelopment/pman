@@ -59,7 +59,7 @@ class PreferencesPage extends Page {
                     p.directRender = fields.directRender.prop('checked');
                     p.showAlbumArt = fields.showAlbumArt.prop('checked');
                     p.showSnapshot = fields.showSnapshot.prop('checked');
-                    //p.push();
+                    p.push();
                     back();
                 });
             });
