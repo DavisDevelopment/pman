@@ -14,6 +14,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.ui.VideoUnderlay;
 import pman.display.VideoFilter;
+import pman.edb.PManDatabase;
 
 import foundation.Tools.defer;
 import Std.*;
@@ -204,7 +205,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	private var ovr(get, never):Rectangle;
 	private inline function get_ovr():Rectangle return new Rectangle(0, 0, v.width, v.height);
 
-    public var prefs(get, never):pman.db.Preferences;
+    public var prefs(get, never):Preferences;
     private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */

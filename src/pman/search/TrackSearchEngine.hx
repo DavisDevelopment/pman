@@ -54,10 +54,7 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	        // add tag names
 	        for (t in track.data.tags) {
 	            // add tag name
-	            add( t.name );
-
-	            // add tag aliases
-	            adds( t.aliases );
+	            add( t );
 	        }
 
 	        // add actor names

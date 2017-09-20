@@ -6,12 +6,18 @@ import tannus.graphics.Color;
 import tannus.sys.*;
 import tannus.TSys as Sys;
 
+#if renderer_process
+
 import gryffin.core.*;
 import gryffin.display.*;
 
 import pman.core.*;
-import pman.db.*;
+import pman.db.AppDir;
+import pman.edb.*;
+import pman.edb.PManDatabase;
 import pman.display.ColorScheme;
+
+#end
 
 import tannus.math.TMath.*;
 import foundation.Tools.*;
@@ -40,7 +46,13 @@ class Globals {
         tannus.node.Node.process.nextTick( f );
     }
 
+    public static inline function report(error : Dynamic):Void {
+        (untyped __js__('console.error')( error ));
+    }
+
 /* === Computed Variables === */
+
+#if renderer_process
 
     public static var bpmain(get, never):BPlayerMain;
     private static inline function get_bpmain() return BPlayerMain.instance;
@@ -60,6 +72,8 @@ class Globals {
     public static var preferences(get, never):Preferences;
     private static inline function get_preferences() return database.preferences;
 
+#end
+
     public static var platform(get, never):String;
     private static function get_platform():String {
         if (_platform == null)
@@ -68,6 +82,8 @@ class Globals {
     }
 
 /* === Variables === */
+
+    public static var us:Dynamic = {js.Lib.require('underscore');};
 
     private static var _platform : Null<String> = null;
 }

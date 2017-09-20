@@ -8,8 +8,8 @@ import electron.Shell;
 
 import pman.core.*;
 import pman.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
 import pman.async.*;
 import pman.media.info.*;
 
@@ -78,7 +78,7 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function attempt_load(done : VoidCb):Void {
         if (track.mediaId != null) {
-            store.getMediaInfoRow_(track.mediaId, function(?error, ?irow) {
+            store._getRowById(track.mediaId, function(?error, ?irow) {
                 if (error != null)
                     return done(error);
                 data = new TrackData( track );
@@ -88,7 +88,7 @@ class LoadTrackData extends Task2<TrackData> {
         }
         else {
             var uri:String = track.uri;
-            store.getMediaItemRowByUri_(uri, function(?error:Dynamic, ?row:MediaItemRow) {
+            store._getRowByUri(uri, function(?error:Dynamic, ?row:MediaRow) {
                 if (error != null) {
                     return done( error );
                 }
@@ -97,15 +97,10 @@ class LoadTrackData extends Task2<TrackData> {
                         return create_new( done );
                     }
                     else {
-                        track.mediaId = row.id;
-                        store.getMediaInfoRow_(row.id, function(?error:Dynamic, ?irow:MediaInfoRow) {
-                            if (error != null) {
-                                return done( error );
-                            }
-                            data = new TrackData( track );
-                            data.pullRaw( irow );
-                            load_fields(irow, done);
-                        });
+                        track.mediaId = row._id;
+                        data = new TrackData( track );
+                        data.pullRaw( row );
+                        load_fields(row, done);
                     }
                 }
             });
@@ -115,14 +110,15 @@ class LoadTrackData extends Task2<TrackData> {
     /**
       * load the data for the 'tags' and 'actors' fields
       */
-    private function load_fields(row:MediaInfoRow, done:VoidCb):Void {
+    private function load_fields(row:MediaRow, done:VoidCb):Void {
         [load_tags].map.fn(_.bind(row, _)).series( done );
     }
 
     /**
       * load tags
       */
-    private function load_tags(row:MediaInfoRow, done:VoidCb):Void {
+    private function load_tags(row:MediaRow, done:VoidCb):Void {
+        /*
         var steps:Array<Async<Tag>> = row.tags.map.fn(tagId => db.tagsStore.pullTag.bind(tagId, _));
         steps.series(function(?error, ?tags:Array<Tag>) {
             if (error != null) {
@@ -135,6 +131,8 @@ class LoadTrackData extends Task2<TrackData> {
                 done();
             }
         });
+        */
+        done();
     }
 
     /**
@@ -142,26 +140,13 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function create_new(done : VoidCb):Void {
         data = new TrackData( track );
-        store.newMediaItemRowFor_(track.uri, function(?error:Dynamic, ?row) {
+        loadMediaMetadata(function(?error, ?meta) {
             if (error != null) {
                 return done( error );
             }
             else {
-                data.media_id = row.id;
-                loadMediaMetadata(function(?error:Dynamic, ?md) {
-                    if (error != null) {
-                        if (error.name == 'ConstraintError') {
-                            tryto_load( done );
-                        }
-                        else {
-                            done(error);
-                        }
-                    }
-                    else {
-                        data.meta = md;
-                        return push_data_to_db( done );
-                    }
-                });
+                data.meta = meta;
+                push_data_to_db( done );
             }
         });
     }
@@ -171,11 +156,12 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function push_data_to_db(done : VoidCb):Void {
         var raw = data.toRaw();
-        store.putMediaInfoRow_(raw, function(error : Null<Dynamic>) {
+        store._insertRow(raw, function(?error, ?row) {
             if (error != null) {
                 return done( error );
             }
             else {
+                data.pullRaw( row );
                 done();
             }
         });

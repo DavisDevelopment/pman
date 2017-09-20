@@ -21,13 +21,14 @@
 -D ida
 -D vex
 -D foundation
+-D eval-stack
 
 --each
 
 -main BPlayerMain
--D debug
+-debug
 -D renderer_process
--D js-unflatten
+#-D js-unflatten
 -js ../dist/scripts/content.js
 
 --next 

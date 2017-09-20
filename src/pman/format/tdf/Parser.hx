@@ -328,18 +328,19 @@ class Parser extends LexerBase {
         });
         for (expr in etree) {
             steps.push(function(next) {
-                var tag = toTag( expr );
-                trace('validating tag..');
-                tag.sync(function(?error) {
-                    if (error != null) {
-                        return next( error );
-                    }
-                    trace( tag );
-                    track.data.attachTag( tag );
-                    tag.push(function(?error) {
-                        next( error );
-                    });
-                });
+                return next();
+                //var tag = toTag( expr );
+                //trace('validating tag..');
+                //tag.sync(function(?error) {
+                    //if (error != null) {
+                        //return next( error );
+                    //}
+                    //trace( tag );
+                    //track.data.attachTag( tag );
+                    //tag.push(function(?error) {
+                        //next( error );
+                    //});
+                //});
             });
         }
         steps.series( done );
@@ -348,31 +349,31 @@ class Parser extends LexerBase {
     /**
       * build Tag instance from expression
       */
-    private function toTag(e : Expr):Tag {
-        switch ( e ) {
-            case ETag(_.toLowerCase()=>name, box):
-                var tag = new Tag( name );
-                if (box != null) {
-                    for (be in box) {
-                        switch ( be ) {
-                            case EAlias(_.toLowerCase()=>aname):
-                                tag.aliases.push( aname );
+    //private function toTag(e : Expr):Tag {
+        //switch ( e ) {
+            //case ETag(_.toLowerCase()=>name, box):
+                //var tag = new Tag( name );
+                //if (box != null) {
+                    //for (be in box) {
+                        //switch ( be ) {
+                            //case EAlias(_.toLowerCase()=>aname):
+                                //tag.aliases.push( aname );
 
-                            case ESuper(superName, superBox):
-                                var superTag = toTag(ETag(superName, superBox));
-                                tag.inherits( superTag );
+                            //case ESuper(superName, superBox):
+                                //var superTag = toTag(ETag(superName, superBox));
+                                //tag.inherits( superTag );
 
-                            default:
-                                throw 'SyntaxError: Unexpected $be';
-                        }
-                    }
-                }
-                return tag;
+                            //default:
+                                //throw 'SyntaxError: Unexpected $be';
+                        //}
+                    //}
+                //}
+                //return tag;
 
-            default:
-                throw 'Error: Cannot cast $e to Tag';
-        }
-    }
+            //default:
+                //throw 'Error: Cannot cast $e to Tag';
+        //}
+    //}
 
 /* === Instance Fields === */
 

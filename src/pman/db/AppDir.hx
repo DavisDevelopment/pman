@@ -31,7 +31,9 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class AppDir {
+typedef AppDir = pman.edb.AppDir;
+
+class OAppDir {
 	/* Constructor Function */
 	public function new():Void {
 

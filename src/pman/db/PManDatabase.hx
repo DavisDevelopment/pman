@@ -33,8 +33,8 @@ class PManDatabase {
 
 		configInfo = new ConfigInfo( this );
 		mediaStore = new MediaStore( this );
-		tagsStore = new TagsStore( this );
-		actorsStore = new ActorsStore( this );
+		//tagsStore = new TagsStore( this );
+		//actorsStore = new ActorsStore( this );
 		preferences = Preferences.pull();
 	}
 
@@ -226,8 +226,8 @@ class PManDatabase {
 	public var dbc : DatabaseConnector;
 	public var configInfo : ConfigInfo;
 	public var mediaStore : MediaStore;
-	public var tagsStore : TagsStore;
-	public var actorsStore : ActorsStore;
+	//public var tagsStore : TagsStore;
+	//public var actorsStore : ActorsStore;
 	public var preferences : Preferences;
 
 	private var or : VoidSignal;

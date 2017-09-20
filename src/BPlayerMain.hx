@@ -19,6 +19,7 @@ import pman.LaunchInfo;
 import pman.core.*;
 import pman.ui.*;
 import pman.db.*;
+import pman.edb.*;
 import pman.events.*;
 import pman.media.*;
 import pman.ww.Worker;
@@ -154,16 +155,16 @@ class BPlayerMain extends Application {
 	  * invoke task that tidies up the database
 	  */
 	public function cleanDatabase(?done : VoidCb):Void {
-	    var cleanDb = new pman.async.tasks.CleanDatabase( db );
-	    cleanDb.run( done );
+		//var cleanDb = new pman.async.tasks.CleanDatabase( db );
+		//cleanDb.run( done );
 	}
 
 	/**
 	  * invoke task that converts the entire contents of the database to a JSON object
 	  */
 	public function exportDatabase(?done : VoidCb):Void {
-	    var exportDb = new pman.async.tasks.ExportDatabase( db );
-	    exportDb.run( done );
+		//var exportDb = new pman.async.tasks.ExportDatabase( db );
+		//exportDb.run( done );
 	}
 
 	/**
@@ -291,7 +292,10 @@ class BPlayerMain extends Application {
 
         // initialize the database
         db = new PManDatabase();
-        db.init(function() {
+        db.init(function(?error) {
+            if (error != null) {
+                throw error;
+            }
             // declare ready
             _rs.fire();
         });

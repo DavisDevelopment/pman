@@ -17,6 +17,7 @@ import pman.core.*;
 import pman.media.*;
 import pman.tools.mediatags.MediaTagReader;
 import pman.ui.*;
+import pman.edb.PManDatabase;
 
 import js.Browser.window;
 import electron.Tools.defer;
@@ -132,7 +133,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
         window.setTimeout(_load_albumart, 2000);
     }
 
-    public var prefs(get, never):pman.db.Preferences;
+    public var prefs(get, never):Preferences;
     private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */

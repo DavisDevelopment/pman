@@ -41,7 +41,7 @@ class QuickOpenItems {
         });
 
         d(function(next) {
-            ad.getMediaSources(function(mspaths) {
+            ad.getMediaSources(function(?error, ?mspaths) {
                 var msdirs = mspaths.map.fn(new Directory( _ ));
                 msdirs.igetAllOpenableFiles(function( files ) {
                     for (file in files) {

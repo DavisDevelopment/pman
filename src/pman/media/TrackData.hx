@@ -9,9 +9,8 @@ import tannus.nore.ORegEx;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
-import pman.db.*;
-import pman.db.MediaStore;
-import pman.db.TagsStore;
+import pman.edb.*;
+import pman.edb.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
 import pman.media.info.*;
@@ -51,33 +50,43 @@ class TrackData {
     /**
       * pull data from a MediaInfoRow
       */
-    public function pullRaw(row : MediaInfoRow):Void {
-        media_id = row.id;
-        views = row.views;
-        starred = row.starred;
-        if (row.meta != null) {
+    public function pullRaw(row : MediaRow):Void {
+        media_id = row._id;
+        var d = row.data;
+        views = d.views;
+        starred = d.starred;
+        rating = d.rating;
+        description = d.description;
+
+        if (d.meta != null) {
             meta = new MediaMetadata();
-            meta.pullRaw( row.meta );
+            meta.pullRaw( d.meta );
         }
-        marks = row.marks.map( Unserializer.run );
+        marks = d.marks.map( Unserializer.run );
     }
 
     /**
       * convert [this] to a MediaInfoRow
       */
-    public function toRaw():MediaInfoRow {
+    public function toRaw():MediaRow {
         if (media_id == null) {
-            throw 'What the fuck?';
+            //throw 'What the fuck?';
+            //TODO
         }
 
         return {
-            id: media_id,
-            views: views,
-            starred: starred,
-            marks: marks.map( Serializer.run ),
-            tags: tags.map.fn( _.id ),
-            actors: actors.map.fn( _.id ),
-            meta: (meta != null ? meta.toRaw() : null)
+            _id: media_id,
+            uri: track.uri,
+            data: {
+                views: views,
+                starred: starred,
+                rating: rating,
+                description: description,
+                marks: marks.map( Serializer.run ),
+                tags: [],
+                actors: [],
+                meta: (meta != null ? meta.toRaw() : null)
+            }
         };
     }
 
@@ -90,37 +99,11 @@ class TrackData {
         if (store == null) {
             store = BPlayerMain.instance.db.mediaStore;
         }
-        var db = store.dbr;
+        var db = store.root;
 
         var steps:Array<VoidAsync> = [];
-
-        // validate/assert/save tags
-        steps.push(function(done:VoidCb) {
-            var tsteps:Array<Async<TagRow>> = [];
-            var tagmap:Map<String, Tag> = new Map();
-            for (t in tags) {
-                tagmap.set(t.name, t);
-                tsteps.push(db.tagsStore.putTag.bind(t, _));
-            }
-            tsteps.series(function(?err, ?rows) {
-                if (err != null) {
-                    return done( err );
-                }
-                else {
-                    var pulls:Array<VoidAsync> = rows.map.fn(row => tagmap[row.name].pullRow.bind(row, db, _));
-                    pulls.series( done );
-                }
-            });
-        });
-        // validate/assert/save actors
-        steps.push(function(done:VoidCb) {
-            //TODO also push all actors
-            defer(function() {
-                done( null );
-            });
-        });
         steps.push(function(done : VoidCb) {
-            var prom = store.putMediaInfoRow(toRaw());
+            var prom = store.putRow(toRaw());
             prom.then(function( row ) {
                 pullRaw( row );
 
@@ -242,9 +225,9 @@ class TrackData {
     /**
       * attach a Tag instance to [this]
       */
-    public function attachTag(tag : Tag):Tag {
+    public function attachTag(tag : String):String {
         for (t in tags) {
-            if (t.name == tag.name) {
+            if (t == tag) {
                 return t;
             }
         }
@@ -255,48 +238,49 @@ class TrackData {
     /**
       * attach a Tag to [this] as a String
       */
-    public function addTag(tagName : String):Tag {
-        return attachTag(new Tag( tagName ));
+    public function addTag(tagName : String):String {
+        return attachTag( tagName );
     }
 
     /**
       * attach an Actor instance to [this]
       */
-    public function attachActor(actor : Actor):Actor {
-        for (a in actors)
-            if (a.name == actor.name)
-                return a;
-        actors.push( actor );
-        return actor;
-    }
+    //public function attachActor(actor : Actor):Actor {
+        //for (a in actors)
+            //if (a.name == actor.name)
+                //return a;
+        //actors.push( actor );
+        //return actor;
+    //}
 
     /**
       * add an Actor
       */
-    public function addActor(name : String):Actor {
-        return attachActor(new Actor( name ));
-    }
+    //public function addActor(name : String):Actor {
+        //return attachActor(new Actor( name ));
+    //}
 
     /**
       * select tag by oregex
       */
-    public function selectTag(pattern : String):Null<Tag> {
-        return tags.firstMatch(untyped ORegEx.compile( pattern ));
+    public function selectTag(pattern : String):Null<String> {
+        var reg:RegEx = new RegEx(new EReg(pattern, 'i'));
+        return tags.firstMatch.fn(reg.match(_));
     }
 
     /**
       * select actor by oregex
       */
-    public function selectActor(pattern : String):Null<Actor> {
-        return actors.firstMatch(untyped ORegEx.compile( pattern ));
-    }
+    //public function selectActor(pattern : String):Null<Actor> {
+        //return actors.firstMatch(untyped ORegEx.compile( pattern ));
+    //}
 
     /**
       * checks for attached tag by given name
       */
     public function hasTag(name:String):Bool {
         for (t in tags)
-            if (t.name == name)
+            if (t == name)
                 return true;
         return false;
     }
@@ -304,23 +288,25 @@ class TrackData {
     /**
       * checks for attached actor by given name
       */
-    public function hasActor(name:String):Bool {
-        for (a in actors)
-            if (a.name == name)
-                return true;
-        return false;
-    }
+    //public function hasActor(name:String):Bool {
+        //for (a in actors)
+            //if (a.name == name)
+                //return true;
+        //return false;
+    //}
 
 /* === Instance Fields === */
 
     public var track : Track;
     
-    public var media_id : Null<Int>;
+    public var media_id : Null<String>;
     public var views : Int;
     public var starred : Bool;
+    public var rating : Null<Float>;
+    public var description : Null<String>;
     public var marks : Array<Mark>;
-    public var tags : Array<Tag>;
-    public var actors : Array<Actor>;
+    public var tags : Array<String>;
+    public var actors : Array<Dynamic>;
 
     public var meta : Null<MediaMetadata>;
 }
