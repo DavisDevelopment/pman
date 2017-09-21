@@ -200,6 +200,7 @@ typedef ScreenshotOptions = {
 };
 
 typedef Time = EitherType<Float, String>;
+
 typedef FfmpegProgressEvent = {
     frames: Int,
     currentFps: Float,
