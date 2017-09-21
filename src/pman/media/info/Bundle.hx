@@ -573,6 +573,24 @@ class Bundle {
     }
 
     /**
+      * get/set the 'thumb_times' property
+      */
+    public function thumb_times(?value:Array<Float>, sort:Bool=true):Array<Float> {
+        if (value == null) {
+            return info()['thumb_times'];
+        }
+        else {
+            edit_info(function(i) {
+                if ( sort ) {
+                    value.sort( Reflect.compare );
+                }
+
+                i['thumb_times'] = value;
+            });
+            return value;
+        }
+    }
+
       * calculate default thumb_times value
       */
     private function _defaultThumbTimes():Array<Float> {
