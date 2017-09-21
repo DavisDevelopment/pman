@@ -205,16 +205,7 @@ class KeyboardCommands {
                 // jump to time
                 case LetterG if (event.metaKey || event.ctrlKey):
                     var jp = new TimeJumpPrompt();
-                    jp.title = 'Jump to Time';
-                    jp.setTime(Duration.fromFloat( player.currentTime ));
-                    jp.open();
-                    jp.readLine(function(line) {
-                        trace( line );
-                    });
-                    jp.focus();
-                    defer(function() {
-                        jp.hiliteSegment();
-                    });
+                    jp.readTime( p );
 
                 // copy
                 case LetterC if (event.metaKey || event.ctrlKey):
