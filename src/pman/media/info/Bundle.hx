@@ -481,6 +481,14 @@ class Bundle {
     }
 
     /**
+      * set the 'default_thumb_time' property
+      */
+    public function setThumbTime(time : Float):Void {
+        edit_info(function(i) {
+            i['default_thumb_time'] = time;
+        });
+    }
+
     /**
       * calculate default thumb_times value
       */
