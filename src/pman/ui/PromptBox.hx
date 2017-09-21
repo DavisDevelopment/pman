@@ -142,6 +142,9 @@ class PromptBox extends Pane {
 	private function __listen():Void {
 		input.on('keydown', function(event : KeyboardEvent) {
 			event.stopPropogation();
+			keydown( event );
+		});
+
 			keyup( event );
 		});
 
@@ -151,7 +154,7 @@ class PromptBox extends Pane {
 	/**
 	  * Handle a key
 	  */
-	private function keyup(event : KeyboardEvent):Void {
+	private function keydown(event : KeyboardEvent):Void {
 		switch ( event.key ) {
 			case Enter:
 				if (!value.trim().empty()) {
@@ -168,6 +171,15 @@ class PromptBox extends Pane {
 		}
 	}
 
+    /**
+      *
+      */
+	private function keyup(event : KeyboardEvent):Void {
+	    if (cnu != null && event.key == cnu) {
+	        event.cancel();
+	        cnu = null;
+	    }
+	}
 	/**
 	  * Handle the entering of a line
 	  */
