@@ -98,10 +98,13 @@ class Bundle {
         tgee.on('change', handler);
 
         if (_watcher == null) {
-            _watcher = tannus.node.Fs.watch(path, function(type,filename) {
-                var item:BundleItem = new BundleItem(this, subpath( filename ).name);
+            _watcher = tannus.node.Fs.watch(path, function(type, filename) {
+                trace( filename );
+                if (isBundleItemName( filename )) {
+                    var item:BundleItem = new BundleItem(this, subpath( filename ).name);
 
-                tgee.dispatch('change', item);
+                    tgee.dispatch('change', item);
+                }
             });
         }
     }
