@@ -46,6 +46,18 @@ class MediaStore extends TableWrapper {
     }
 
     /**
+      * get all rows whose uri was in the [uris] list
+      */
+    public function getRowsByUris(uris : Array<String>):ArrayPromise<Maybe<MediaRow>> {
+        var queryDef:Query = new Query({
+            uri: {
+                "$in": uris
+            }
+        });
+        return query( queryDef );
+    }
+
+    /**
       * get a single MediaRow by [uri]
       */
     public function getRowByUri(uri : String):Promise<Maybe<MediaRow>> {
