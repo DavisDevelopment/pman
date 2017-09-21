@@ -1,6 +1,6 @@
 {
   "name": "pman",
-  "version": "0.7.0",
+  "version": "0.8.2",
   "description": "Cross-Platform Media Player/Manager",
   "repository": "http://github.com/DavisDevelopment/pman",
   "homepage": "http://github.com/DavisDevelopment/pman",
@@ -30,7 +30,9 @@
     "local-ip": "^1.0.1",
     "mp3-duration": "^1.0.10",
     "mp4box": "0.3.15",
-    "send-seekable": "^1.0.4"
+    "nedb": "^1.8.0",
+    "send-seekable": "^1.0.4",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "async": "^2.1.5",
@@ -46,7 +48,6 @@
     "electron-winstaller": "^2.5.2",
     "less": "^2.7.2",
     "prompt": "^1.0.0",
-    "uglify-js": "^2.8.22",
-    "underscore": "^1.8.3"
+    "uglify-js": "^2.8.22"
   }
 }
