@@ -2,6 +2,7 @@ package pman.media.info;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.ds.promises.*;
 import tannus.geom.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
@@ -12,6 +13,8 @@ import gryffin.display.Image;
 import pman.async.*;
 import pman.async.tasks.*;
 import pman.media.info.BundleItemType;
+
+import haxe.Json;
 
 import tannus.math.TMath.*;
 import electron.Tools.*;
@@ -502,10 +505,12 @@ class Bundle {
     }
 
     /**
-      * announce to anything listening that a thumbnail set has just been generated
+      * get the Path to the bundle_info.json file
       */
     private function _announceThumbsGenerated(count:Int, size:String, paths:Array<Path>):Void {
         tgee.dispatch('${strDimension(sizeDimensions(size))}:$count', paths);
+    public function info_path():Path {
+        return subpath( 'bundle_info.json' );
     }
 
     /**
