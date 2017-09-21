@@ -121,45 +121,6 @@ class Bundle {
     }
 
     /**
-      * get the thumbnail for [this] track
-      */
-    public function getThumbnail(size : String):Promise<Image> {
-        return Promise.create({
-            var dim:Dimensions = sizeDimensions( size );
-            var res:Array<BundleItem> = getThumbnailsBySize( size );
-            if (res.length == 0) {
-                var task = new GenerateThumbnail(track, size);
-                task.run(function(?error, ?path) {
-                    if (error != null)
-                        throw error;
-                    else if (path != null) {
-                        return Image.load('file://' + path);
-                    }
-                });
-            }
-            else {
-                defer(function() {
-                    return get(res[0]);
-                });
-            }
-        });
-    }
-
-    /**
-      * get list of thumbnail files
-      */
-    public function getThumbnails(?f : BundleItem->Bool):Array<BundleItem> {
-        return filter(function(item) {
-            return (item.isThumbnail() && (f != null ? f( item ) : true));
-        });
-    }
-    public inline function getAllThumbnails() return getThumbnails();
-    public function getThumbnailsBySize(size:String) {
-        var dim = sizeDimensions( size );
-        return getThumbnails.fn(_.getDimensions().equals( dim ));
-    }
-
-    /**
       * get list of snapshot files
       */
     public function getSnapshots(?f : BundleItem->Bool):Array<BundleItem> {
@@ -167,14 +128,30 @@ class Bundle {
             return (item.isSnapshot() && (f != null ? f( item ) : true));
         });
     }
+
+    /**
+      * get all snapshot files
+      */
     public inline function getAllSnapshots():Array<BundleItem> return getSnapshots();
+
+    /**
+      * get snapshots by size
+      */
     public function getSnapshotsBySize(size : String):Array<BundleItem> {
         var dim = sizeDimensions( size );
         return getSnapshots.fn(_.getDimensions().equals(dim));
     }
+
+    /**
+      * get snapshots by time
+      */
     public function getSnapshotsByTime(time:Float, ?threshold:Float):Array<BundleItem> {
         return getSnapshots.fn(i=>i.getTime().ternary(threshold!=null?_.almostEquals(time, threshold):_==time, false));
     }
+
+    /**
+      * get snapshots by time-range
+      */
     public function getSnapshotsByTimeRange(time_min:Float, time_max:Float) {
         return getSnapshots.fn(i=>i.getTime().ternary(_.inRange(time_min, time_max), false));
     }
