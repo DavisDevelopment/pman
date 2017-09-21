@@ -198,28 +198,6 @@ class Bundle {
     }
 
     /**
-      * get a thumbnail list
-      */
-    public function getThumbs(n:Int, size:String):Null<Thumbs> {
-        if (hasThumbnails(n, size)) {
-            return new Thumbs(this, n, size);
-        }
-        else return null;
-    }
-
-    /**
-      * await a thumbnail set becoming available, should it be unavailable upon request
-      */
-    public function awaitThumbs(count:Int, size:String, handler:Thumbs->Void):Void {
-        onThumbsGenerated(count, size, function(_) {
-            defer(function() {
-                var thumbs = getThumbs(count, size);
-                defer(handler.bind(thumbs));
-            });
-        });
-    }
-
-    /**
       * remove an item from [this] Bundle
       */
     public function remove(id : BundleItem):Void {
@@ -312,7 +290,9 @@ class Bundle {
       * get list of file names
       */
     public function fnames():Array<String> {
-        return Fs.readDirectory( path );
+        return (Fs.readDirectory( path ).filter.fn(isBundleItemName( _ )));
+    }
+
     /**
       * check that the given filename appears to be that of a bundle-item
       */
@@ -334,54 +314,6 @@ class Bundle {
       */
     public function fexists(n : String):Bool {
         return Fs.exists(subpath( n ));
-    }
-
-    /**
-      * generate and retrieve a thumbnail set 
-      */
-    public function genThumbs(n:Int, size:String, ?done:Cb<Array<Path>>):Void {
-        if (done == null) {
-            done = untyped fn([e,v]=>null);
-        }
-        track.getData(function(?e, ?v) {
-            if (hasThumbnails(n, size)) {
-                defer(function() {
-                    done(null, []);
-                });
-            }
-            else {
-                var task = new pman.async.tasks.GenerateThumbnails(track, n, size);
-                task.run(function(?error, ?paths) {
-                    if (error != null) {
-                        done(error, null);
-                    }
-                    else if (paths != null) {
-                        trace(paths.map.fn(_.name));
-                        _announceThumbsGenerated(n, size, paths);
-                    }
-                    else {
-                        trace('no paths were obtained. this be some wonky shit');
-                    }
-                });
-                defer(function() {
-                    done(null, null);
-                });
-            }
-        });
-    }
-
-    /**
-      * check for existing thumbnails
-      */
-    public function hasThumbnails(count:Int, size:String):Bool {
-        var npl = thumbnailFileNames(count, size).map.fn(_[1]);
-        trace( npl );
-        for (name in npl) {
-            if (!fexists( name )) {
-                return false;
-            }
-        }
-        return true;
     }
 
     /**
@@ -494,18 +426,13 @@ class Bundle {
     /**
       * get the Path to the bundle_info.json file
       */
-    private function _announceThumbsGenerated(count:Int, size:String, paths:Array<Path>):Void {
-        tgee.dispatch('${strDimension(sizeDimensions(size))}:$count', paths);
     public function info_path():Path {
         return subpath( 'bundle_info.json' );
     }
 
     /**
-      * wait for a thumbnail set to be generated and ready, without initiating the generation of said thumbnail set
       * parse and return the data from bundle_info.json
       */
-    public function onThumbsGenerated(count:Int, size:String, handler:Array<Path>->Void):Void {
-        tgee.on('${strDimension(sizeDimensions(size))}:$count', handler);
     public function get_info():Obj {
         var path = info_path();
         if (Fs.exists( path )) {
