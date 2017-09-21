@@ -333,6 +333,13 @@ class Bundle {
       */
     public function fnames():Array<String> {
         return Fs.readDirectory( path );
+    /**
+      * check that the given filename appears to be that of a bundle-item
+      */
+    public inline function isBundleItemName(filename: String):Bool {
+        return !(
+            (filename.endsWith('.json'))
+        );
     }
 
     /**
