@@ -515,11 +515,27 @@ class Bundle {
 
     /**
       * wait for a thumbnail set to be generated and ready, without initiating the generation of said thumbnail set
+      * parse and return the data from bundle_info.json
       */
     public function onThumbsGenerated(count:Int, size:String, handler:Array<Path>->Void):Void {
         tgee.on('${strDimension(sizeDimensions(size))}:$count', handler);
+    public function get_info():Obj {
+        var path = info_path();
+        if (Fs.exists( path )) {
+            return Json.parse(Fs.read( path ).toString());
+        }
+        else {
+            var data = {
+                default_thumb_time: 0.0,
+                thumb_times: []
+            };
+            data.default_thumb_time = _defaultThumbTime();
+            data.thumb_times = _defaultThumbTimes();
+            return Obj.fromDynamic( data );
+        }
     }
 
+    /**
 /* === Static Methods === */
 
     /**
