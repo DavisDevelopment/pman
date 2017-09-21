@@ -656,6 +656,28 @@ class Bundle {
     }
 
     /**
+      * get list of thumbnails as defined in bundle_info.json
+      */
+    public function getThumbnails(size:String='15%', ?slice:{pos:Int, ?end:Int}):ArrayPromise<BundleItem> {
+        return Promise.create({
+            track.getData(function(?error, ?dat) {
+                if (error != null) {
+                    throw error;
+                }
+                else if (dat != null) {
+                    var times = thumb_times();
+                    if (slice != null)
+                        times = times.slice(slice.pos, slice.end);
+                    var snaps = getMultipleSnapshots(times, size);
+                    @forward snaps;
+                }
+                else {
+                    throw 'Error: No data fetched';
+                }
+            });
+        }).array();
+    }
+
 /* === Static Methods === */
 
     /**
