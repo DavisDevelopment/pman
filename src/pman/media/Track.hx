@@ -207,27 +207,35 @@ class Track extends EventDispatcher implements IComparable<Track> {
       */
     public function getData(done : Cb<TrackData>):Void {
         if (data == null) {
-            var loader = new LoadTrackData(this, BPlayerMain.instance.db);
-            loader.run(function(?error, ?td) {
-                if (error != null) {
-                    throw error;
-                    done( error );
-                }
-                else {
-                    if (td != null) {
-                        this.data = td;
-                        var tv = getView();
-                        if (tv != null) {
-                            tv.update();
-                        }
+            if ( !_loadingData ) {
+                var loader = new LoadTrackData(this, BPlayerMain.instance.db);
+                loader.run(function(?error, ?td) {
+                    if (error != null) {
+                        throw error;
+                        done( error );
                     }
                     else {
-                        throw 'Error: Loaded TrackData is null';
-                    }
+                        if (td != null) {
+                            this.data = td;
+                            var tv = getView();
+                            if (tv != null) {
+                                tv.update();
+                            }
+                        }
+                        else {
+                            throw 'Error: Loaded TrackData is null';
+                        }
 
-                    done(null, td);
-                }
-            });
+                        done(null, td);
+                    }
+                });
+            }
+            else {
+                _dataLoaded.once(function( data ) {
+                    _loadingData = false;
+                    done(null, data);
+                });
+            }
         }
         else {
             defer(function() {
