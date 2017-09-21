@@ -43,6 +43,7 @@ import pman.async.ReadStream;
 import pman.async.tasks.*;
 import pman.pmbash.Interp as PMBashInterp;
 
+import pman.Globals.*;
 import Slambda.fn;
 import tannus.math.TMath.*;
 import electron.Tools.*;
@@ -778,6 +779,21 @@ class Player extends EventDispatcher {
 	        });
 	    }
 
+	    function completeEfficient():Void {
+	        defer(function() {
+	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
+	            if (done != null) {
+	                done();
+	            }
+	            var edl = new EfficientTrackListDataLoader(items, app.db.mediaStore);
+	            edl.run(function(?error) {
+	                if (error != null) {
+	                    report( error );
+	                }
+	            });
+	        });
+	    }
+
 	    // initialize these items
 	    var initStart = now;
 	    items.initAll(function() {
@@ -807,13 +823,13 @@ class Player extends EventDispatcher {
                     attached: function() {
                         //trace('Media linked to player by auto-load');
                         trace('took ${now - initStart} to append ${items.length} tracks to queue');
-                        complete();
+                        completeEfficient();
                     }
                 });
             }
             else {
                 trace('took ${now - initStart} to append ${items.length} tracks to queue');
-                complete();
+                completeEfficient();
             }
         });
 	}
