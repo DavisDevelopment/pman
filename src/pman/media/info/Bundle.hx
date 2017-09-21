@@ -73,6 +73,89 @@ class Bundle {
     }
 
     /**
+      * get an Array of snapshots
+      */
+    public function getMultipleSnapshots(times:Array<Float>, ?size:String):ArrayPromise<BundleItem> {
+        if (size == null) {
+            size = '10%';
+        }
+
+        return Promise.create({
+            // parse actual dimensions from [size]
+            var dim = sizeDimensions( size );
+            // create variable to hold BundleItem results
+            var items:Array<BundleItem> = new Array();
+            // create variable to hold timemarks for which no BundleItem was found
+            var missing_times = new Array();
+            // iterate over given times
+            for (time in times) {
+                // check for pre-existing snapshot at [time]
+                var pess = findSnapshot(time, size);
+                // if one is found
+                if (pess != null) {
+                    // add it to the results
+                    items.push( pess );
+                }
+                // if it is missing
+                else {
+                    // mark it as such
+                    missing_times.push( time );
+                }
+            }
+
+            // create list of steps
+            var tasks:Array<VoidAsync> = new Array();
+
+            // queue generation of missing snapshots
+            tasks.push(function(next : VoidCb) {
+                // create Task instance
+                var gen = new GenerateBundleSnapshots(track, missing_times, size);
+                
+                // run the task
+                gen.run(function(?error, ?paths) {
+                    if (error != null) {
+                        @ignore return next( error );
+                    }
+                    // if [paths] were obtained
+                    else if (paths != null) {
+                        // convert [paths] to BundleItems
+                        for (path in paths) {
+                            items.push(new BundleItem(this, path.name));
+                        }
+                        // asynchronously continue
+                        defer(next.void());
+                    }
+                    else {
+                        @ignore return next('Error: No data returned by GenerateBundleSnapshots');
+                    }
+                });
+            });
+
+            // queue sort operation
+            tasks.push(function(next) {
+                // reorder [items]
+                items.sort(function(a, b) {
+                    @ignore return Reflect.compare(a.getTime(), b.getTime());
+                });
+                // ensure asynchronicity
+                defer(function() {
+                    next();
+                });
+            });
+
+            // execute each [tasks] in order
+            VoidAsyncs.series(tasks, function(?error) {
+                if (error != null) {
+                    throw error;
+                }
+                else {
+                    return items;
+                }
+            });
+        }).array();
+    }
+
+    /**
       * get a snapshot path
       */
     public function getSnapshotPath(time:Float, ?size:String):Promise<Path> {
