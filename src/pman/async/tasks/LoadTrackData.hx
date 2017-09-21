@@ -28,6 +28,7 @@ using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
 
+@:access( pman.media.Track )
 class LoadTrackData extends Task2<TrackData> {
     /* Constructor Function */
     public function new(track:Track, db:PManDatabase):Void {
@@ -45,12 +46,15 @@ class LoadTrackData extends Task2<TrackData> {
       * execute [this] Task
       */
     override function execute(done : Cb<TrackData>):Void {
+        track._loadingData = true;
         [tryto_load, fill_missing_info].series(function(?error:Dynamic) {
+            track._loadingData = false;
             if (error != null) {
                 done(error, null);
             }
             else {
                 done(null, data);
+                track._dataLoaded.call( data );
             }
         });
     }
