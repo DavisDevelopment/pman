@@ -57,6 +57,8 @@ class Track extends EventDispatcher implements IComparable<Track> {
 		driver = null;
 		renderer = null;
 
+		_dataLoaded = new Signal();
+
 		__checkEvents = false;
 	}
 
@@ -696,6 +698,8 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	public var renderer(default, null): Null<MediaRenderer>;
 
 	private var _ready : Bool = false;
+	private var _loadingData : Bool = false;
+	private var _dataLoaded : Signal<TrackData>;
 
 /* === Class Methods === */
 
