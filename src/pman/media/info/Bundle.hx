@@ -536,6 +536,14 @@ class Bundle {
     }
 
     /**
+      * encode [info] and write it to bundle_info.json
+      */
+    public function set_info(info : Obj):Void {
+        var path = info_path();
+        var data = Json.stringify(info.toDyn(), null, '  ');
+        Fs.write(path, data);
+    }
+
 /* === Static Methods === */
 
     /**
