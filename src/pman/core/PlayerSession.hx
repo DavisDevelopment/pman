@@ -286,9 +286,11 @@ class PlayerSession {
                 for (t in tabs) {
                     utracks.pushMany( t.playlist );
                 }
-                var loader = new pman.async.tasks.TrackListDataLoader();
-                loader.load(utracks.toArray(), function(?error, ?result) {
-                    trace( result );
+                var loader = new pman.async.tasks.EfficientTrackListDataLoader(utracks.toArray(), player.app.db.mediaStore);
+                loader.run(function(?error) {
+                    if (error != null) {
+                        report( error );
+                    }
                 });
                 defer(next.void());
             }),
