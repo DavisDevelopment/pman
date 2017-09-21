@@ -544,6 +544,28 @@ class Bundle {
         Fs.write(path, data);
     }
 
+    /**
+      * get/set [info]
+      */
+    public function info(?newinfo : Obj):Obj {
+        if (newinfo == null) {
+            return get_info();
+        }
+        else {
+            set_info( newinfo );
+            return newinfo;
+        }
+    }
+
+    /**
+      * read, manipulate, write [info]
+      */
+    public function edit_info(edit:Obj->Void):Void {
+        var data = info();
+        edit( data );
+        info( data );
+    }
+
 /* === Static Methods === */
 
     /**
