@@ -591,6 +591,33 @@ class Bundle {
         }
     }
 
+    /**
+      * calculate the default thumb time
+      */
+    private function _defaultThumbTime():Float {
+        var allsnaps = getAllSnapshots();
+        if (allsnaps.length > 0) {
+            var snap : BundleItem;
+            if (allsnaps.length == 1) {
+                snap = allsnaps[0];
+            }
+            else {
+                snap = RandomTools.choice( allsnaps );
+            }
+            var time = snap.getTime();
+            if (time != null) {
+                return time;
+            }
+        }
+        if (track.data != null && track.data.meta != null && track.data.meta.duration != null) {
+            return (new Random().randfloat(0.0, track.data.meta.duration));
+        }
+        else {
+            return 0.0;
+        }
+    }
+
+    /**
       * calculate default thumb_times value
       */
     private function _defaultThumbTimes():Array<Float> {
