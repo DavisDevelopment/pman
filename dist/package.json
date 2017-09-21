@@ -20,6 +20,10 @@
     "music",
     "player",
     "manager",
+    "playlist",
+    "pls", "xspf", "m3u",
+    "mp4", "mp3",
+    "bplayer",
     "cross-platform"
   ],
   "dependencies": {
