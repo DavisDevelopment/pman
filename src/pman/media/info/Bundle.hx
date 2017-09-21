@@ -634,6 +634,27 @@ class Bundle {
     }
 
     /**
+      * get the default single-thumbnail in the given size
+      */
+    public function getSingleThumbnail(size:String='100%'):Promise<BundleItem> {
+        return Promise.create({
+            track.getData(function(?error, ?dat) {
+                if (error != null) {
+                    throw error;
+                }
+                else if (dat != null) {
+                    var bundleInfo = info();
+                    var thumbTime:Float = bundleInfo.mget('default_thumb_time').or( 0 );
+                    var snapp = getSnapshot(thumbTime, size);
+                    @forward snapp;
+                }
+                else {
+                    throw 'Error: No data fetched';
+                }
+            });
+        });
+    }
+
     /**
 /* === Static Methods === */
 
