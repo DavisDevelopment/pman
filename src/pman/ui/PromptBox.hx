@@ -145,6 +145,8 @@ class PromptBox extends Pane {
 			keydown( event );
 		});
 
+		input.on('keyup', function(event : KeyboardEvent) {
+			event.stopPropogation();
 			keyup( event );
 		});
 
@@ -166,6 +168,10 @@ class PromptBox extends Pane {
                 }
 				close();
 
+			case Esc:
+			    event.preventDefault();
+			    close();
+
 			default:
 				null;
 		}
@@ -180,6 +186,11 @@ class PromptBox extends Pane {
 	        cnu = null;
 	    }
 	}
+
+	private inline function cancelNextKeyUp(key : Key):Void {
+	    cnu = key;
+	}
+
 	/**
 	  * Handle the entering of a line
 	  */
@@ -234,4 +245,7 @@ class PromptBox extends Pane {
 	public var titl : LabelSpan;
 
 	public var modal : Modal;
+
+    // cancel next 'keyup' event?
+	private var cnu:Null<Key> = null;
 }
