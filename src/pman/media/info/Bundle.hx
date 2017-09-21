@@ -573,6 +573,25 @@ class Bundle {
         info( data );
     }
 
+    /**
+    /**
+      * calculate default thumb_times value
+      */
+    private function _defaultThumbTimes():Array<Float> {
+        if (track.data != null && track.data.meta != null && track.data.meta.duration != null) {
+            var duration:Float = track.data.meta.duration;
+            var count:Int = 20;
+            var increment:Float = (duration / (count + 0.0));
+            var times:Array<Float> = [for (i in 0...count) (increment * i)];
+            return times;
+        }
+        else {
+            return new Array();
+        }
+    }
+
+    /**
+    /**
 /* === Static Methods === */
 
     /**
