@@ -27,6 +27,7 @@ class Executor {
         queue = new Stack();
         taskRunning = false;
         paused = false;
+        batches = new Array();
     }
 
 /* === Instance Methods === */
@@ -127,9 +128,6 @@ class Executor {
 
         // start [task]'s execution
         task.execute(function(?error) {
-            // delete [task]
-            task.dispose();
-            task = null;
             // disable [taskRunning] flag
             taskRunning = false;
 
@@ -139,15 +137,42 @@ class Executor {
             else {
                 // calculate time taken for [task] to complete
                 var execTime:Float = (now() - startTime);
-                // if it took too long, defer the next task to the next call stack
-                if (execTime > DEFERRENCE_THRESHOLD) {
-                    defer( _go );
-                }
-                else {
-                    _go();
-                }
+                
+                // schedule next action
+                _next(execTime, task);
             }
         });
+    }
+
+    /**
+      * method used to schedule whatever 'next step' is appropriate
+      * upon completion of the execution of a MicroTask
+      */
+    @:access( pman.core.exec.MicroTask )
+    private function _next(execTime:Float, task:MicroTask):Void {
+        // inform the Batch of the completion of one of it's Tasks
+        //if ((task.executor is BatchExecutor)) {
+            //var bex:BatchExecutor = cast task.executor;
+            //bex._taskCompleted(execTime, task);
+        //}
+
+        // schedule next cycle
+        if (execTime > DEFERRENCE_THRESHOLD) {
+            defer( _go );
+        }
+        else {
+            _go();
+        }
+    }
+
+    public inline function isPaused():Bool return paused;
+    public inline function isTaskRunning():Bool return taskRunning;
+
+    /**
+      * create and return a batch executor
+      */
+    public inline function createBatch():BatchExecutor {
+        return new BatchExecutor( this );
     }
 
 /* === Computed Instance Fields === */
@@ -163,6 +188,7 @@ class Executor {
     private var queue : Stack<MicroTask>;
     private var taskRunning : Bool;
     private var paused : Bool;
+    private var batches : Array<BatchExecutor>;
 
 /* === Statics === */
 
