@@ -62,7 +62,7 @@ class PlaylistView extends Pane {
         unbind();
         bind();
 	    var kc = player.app.keyboardCommands;
-	    kc.mode = 'playlist:sidebar';
+		//kc.mode = 'playlist:sidebar';
 
 		defer(function() {
             //searchWidget.searchInput.focus();
@@ -78,7 +78,7 @@ class PlaylistView extends Pane {
 		dispatch('close', null);
 		unbind();
 		var kc = player.app.keyboardCommands;
-	    kc.mode = 'default';
+		//kc.mode = 'default';
 	    deselectAll();
 		detach();
 	}
