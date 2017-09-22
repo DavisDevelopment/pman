@@ -20,6 +20,7 @@ import electron.ext.Dialog;
 import pman.core.*;
 import pman.media.*;
 import pman.display.*;
+import pman.Globals.*;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -29,6 +30,7 @@ using Lambda;
 using Slambda;
 using tannus.math.TMath;
 using pman.Tools;
+using pman.core.ExecutorTools;
 
 class TrackView extends Pane {
 	/* Constructor Function */
@@ -78,12 +80,6 @@ class TrackView extends Pane {
 		progress.addClass( 'progress' );
 		progressTrack.append( progress );
 		progress.css.set('width', '25%');
-
-		/*
-		buttons = new Pane();
-		buttons.addClass('actions');
-		info.append( buttons );
-		*/
 
 		if ( !eventInitted ) {
 		    __events();
