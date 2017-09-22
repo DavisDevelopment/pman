@@ -9,6 +9,7 @@
 -cp hscript/
 
 -lib slambda
+#-lib yield
 -lib actuate
 -lib format
 -lib electron
@@ -26,7 +27,7 @@
 --each
 
 -main BPlayerMain
--debug
+-D debug
 -D renderer_process
 #-D js-unflatten
 -js ../dist/scripts/content.js
