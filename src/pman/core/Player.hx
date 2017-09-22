@@ -57,6 +57,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.math.RandomTools;
+using pman.core.ExecutorTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
 using pman.async.Asyncs;
@@ -765,13 +766,24 @@ class Player extends EventDispatcher {
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter.fn(_.isRealFile());
 	    var start = now;
+	    var plv = this.getPlaylistView();
+	    if (plv != null) {
+	        plv.lock();
 	    }
 
 	    function completeEfficient():Void {
+	        engine.executor.syncTask(function() {
+	            #if debug
 	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
+	            #end
+
+                if (plv != null) {
+                    plv.unlock();
+                }
 	            if (done != null) {
 	                done();
 	            }
+
 	            var edl = new EfficientTrackListDataLoader(items, app.db.mediaStore);
 	            edl.run(function(?error) {
 	                if (error != null) {
