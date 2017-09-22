@@ -208,6 +208,7 @@ class BPlayerMain extends Application {
 			if (mr != null) {
 			    trace('lastDirectory: $mr');
 			    db.configInfo.lastDirectory = mr;
+			    db.configInfo.push();
 			}
 
 			callback( paths );
