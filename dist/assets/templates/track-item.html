@@ -1,0 +1,20 @@
+
+<div class="row" style="max-width: 100%;">
+    <div class="columns title large-9">
+        ::if data::
+            ::if (data.views == 0)::
+            <span class="unwatched"><sup>(U)</sup>&nbsp;</span>
+            ::elseif (data.starred)::
+            <span class="starred">*</span>
+            ::end::
+        ::end::
+        ::title::
+    </div>
+    <div class="columns info large-3 hide-for-small-only hide-for-medium-only">
+        <div class="size">::if data::<span class="resolution">(::(data.meta.video.height)::p)</span>$$duration()::end::</div>
+    </div>
+</div>
+<div class="progress-track">
+    <div class="progress" style="width: $$progress();"></div>
+</div>
+
