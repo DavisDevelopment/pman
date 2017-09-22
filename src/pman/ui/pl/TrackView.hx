@@ -5,6 +5,7 @@ import tannus.html.Element;
 import tannus.geom.*;
 import tannus.events.*;
 import tannus.sys.*;
+import tannus.sys.FileSystem as Fs;
 import tannus.media.Duration;
 
 import crayon.*;
@@ -21,6 +22,8 @@ import pman.core.*;
 import pman.media.*;
 import pman.display.*;
 import pman.Globals.*;
+
+import haxe.Template;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -51,7 +54,46 @@ class TrackView extends Pane {
 	  * Build [this] 
 	  */
 	override function populate():Void {
+	    if (template == null) {
+	        template = Templates.get( 'track-item' );
+        }
 
+	    tmacros = {
+            duration: function(resolve:Dynamic):String {
+                if (track.data != null) {
+                    return Duration.fromFloat( track.data.meta.duration ).toString();
+                }
+                else {
+                    var path = track.getFsPath();
+                    if (path != null) {
+                        var stat = Fs.stat( path );
+                        return stat.size.formatSize();
+                    }
+                    else {
+                        return '?';
+                    }
+                }
+            },
+            progress: function(resolve:Dynamic):String {
+                if (track.data != null) {
+                    var lt = track.data.getLastTime();
+                    if (lt != null) {
+                        var perc = tannus.math.Percent.percent(lt, track.data.meta.duration);
+                        return perc.toString();
+                    }
+                    else {
+                        return '0%';
+                    }
+                }
+                else return '0%';
+            }
+	    };
+
+		//var markup = template.execute(track, tmacros);
+		//var tel:Element = new Element( markup );
+		//this.el = tel;
+
+        /*
         flex = new FlexRow([12, 0]);
         append( flex );
 
@@ -80,6 +122,7 @@ class TrackView extends Pane {
 		progress.addClass( 'progress' );
 		progressTrack.append( progress );
 		progress.css.set('width', '25%');
+		*/
 
 		if ( !eventInitted ) {
 		    __events();
@@ -92,9 +135,9 @@ class TrackView extends Pane {
 		var data = this.el.edata;
 		data['view'] = this;
 
-		needsRebuild = false;
+		update();
 
-	    update();
+		needsRebuild = false;
 	}
 
 	/**
@@ -103,6 +146,17 @@ class TrackView extends Pane {
 	public function update():Void {
 	    var td = track.data;
 
+        // generate the markup
+        var markup = template.execute(track, tmacros);
+        el.html('');
+        append( markup );
+
+        // replace [el]
+        //var tmp = this.el;
+        //el = new Element( markup );
+        //tmp.replaceWith( el );
+
+        /*
         title.text = track.title;
         // view counter
         if (td != null) {
@@ -152,6 +206,7 @@ class TrackView extends Pane {
                 progress.css.set('width', perc.toString());
             }
         }
+        */
 	}
 
 	/**
@@ -306,8 +361,12 @@ class TrackView extends Pane {
 	public var progressTrack : Pane;
 	public var progress : Pane;
 
+	public var tmacros : Dynamic;
+
 	private var menuOpen : Bool = false;
 	private var eventInitted : Bool = false;
 	@:allow( pman.ui.PlaylistView )
 	private var dragging : Bool = false;
+
+	private static var template : Null<Template> = null;
 }
