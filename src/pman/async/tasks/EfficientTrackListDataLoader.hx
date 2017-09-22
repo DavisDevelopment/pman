@@ -5,6 +5,7 @@ import tannus.ds.*;
 import tannus.sys.*;
 
 import pman.core.*;
+import pman.core.exec.BatchExecutor;
 import pman.media.*;
 import pman.edb.*;
 import pman.edb.MediaStore;
@@ -21,6 +22,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.core.ExecutorTools;
 using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
@@ -35,7 +37,7 @@ class EfficientTrackListDataLoader extends Task1 {
         this.ms = ms;
         this.missingData = new Array();
         this.treg = new Dict();
-        this.writes = new Array();
+        this.writes = exec.createBatch();
     }
 
 /* === Instance Methods === */
@@ -70,25 +72,47 @@ class EfficientTrackListDataLoader extends Task1 {
       * process and handle the rows loaded for the Tracks who already have data in the database
       */
     private function process_existing_rows(rows:Array<MediaRow>, done:VoidCb):Void {
-        var subs = new Array();
+        var subs:Array<VoidAsync> = new Array();
         var stupidTracks = new List();
         for (track in tracks) {
             stupidTracks.add( track );
         }
+
         for (row in rows) {
-            var track = treg[row.uri];
-            var data = new TrackData( track );
-            subs.push(process_existing_row.bind(track, data, row, _));
+            var track:Track = treg[row.uri];
+            var data:TrackData = new TrackData( track );
+            //subs.push(process_existing_row.bind(track, data, row, _));
+            subs.push(function(next : VoidCb) {
+                process_existing_row(track, data, row, function(?error) {
+                    if (error != null)
+                        report( error );
+                    next( error );
+                });
+            });
             stupidTracks.remove( track );
         }
+
         subs.series(function(?error) {
             if (error != null) {
                 return done( error );
             }
             else {
                 missingData = stupidTracks.array();
-                [writes.series, create_missing_track_data, update_views].series( done );
+                [
+                    perform_writes,
+                    create_missing_track_data,
+                    update_views
+                ].series( done );
             }
+        });
+    }
+
+    /**
+      * perform database-writes
+      */
+    private function perform_writes(done : VoidCb):Void {
+        writes.start(function() {
+            done();
         });
     }
 
@@ -96,13 +120,16 @@ class EfficientTrackListDataLoader extends Task1 {
       * update the views for all Tracks
       */
     private function update_views(done : VoidCb):Void {
+        var updates = exec.createBatch();
         for (track in tracks) {
-            var view = track.getView();
-            if (view != null) {
-                view.update();
-            }
+            updates.task({
+                var view = track.getView();
+                if (view != null) {
+                    view.update();
+                }
+            });
         }
-        done();
+        updates.start(done.void());
     }
 
     /**
@@ -131,7 +158,17 @@ class EfficientTrackListDataLoader extends Task1 {
             }
         }
 
-        [creates.series, pushes.series].series( done );
+        var cpb = exec.createBatch();
+        for (create in creates)
+            cpb.asyncTask(cast create);
+
+        for (push in pushes)
+            cpb.asyncTask(cast push);
+
+        cpb.start(function() {
+            done();
+        });
+        //[creates.series, pushes.series].series( done );
     }
 
     /**
@@ -173,7 +210,6 @@ class EfficientTrackListDataLoader extends Task1 {
 
         // function to handle errors in the push operation
         function handle_error(error : Dynamic):Void {
-            trace([error]);
             done( error );
         }
 
@@ -200,7 +236,7 @@ class EfficientTrackListDataLoader extends Task1 {
     private function process_existing_row(track:Track, data:TrackData, row:MediaRow, next:VoidCb):Void {
         track._loadingData = true;
         track.data = data;
-        defer(function() {
+        animFrame(function() {
             data.pullRaw( row );
             ensure_track_data_completeness(data, function(?error) {
                 track._loadingData = false;
@@ -244,8 +280,10 @@ class EfficientTrackListDataLoader extends Task1 {
     /**
       * queue up the saving of the given TrackData
       */
-    private inline function schedule_data_write(data:TrackData):Void {
-        writes.push(untyped data.save.bind(_, ms));
+    private function schedule_data_write(data : TrackData):Void {
+        writes.task(@async {
+            data.save(next, ms);
+        });
     }
 
 /* === Instance Fields === */
@@ -254,5 +292,5 @@ class EfficientTrackListDataLoader extends Task1 {
     private var ms : MediaStore;
     private var missingData : Array<Track>;
     private var treg : Dict<String, Track>;
-    private var writes : Array<VoidAsync>;
+    private var writes : BatchExecutor;
 }
