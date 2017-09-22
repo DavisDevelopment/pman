@@ -28,6 +28,9 @@ class Executor {
         taskRunning = false;
         paused = false;
         batches = new Array();
+
+        maxStackTime = 50.0;
+        totalStackTime = 0.0;
     }
 
 /* === Instance Methods === */
@@ -137,6 +140,9 @@ class Executor {
             else {
                 // calculate time taken for [task] to complete
                 var execTime:Float = (now() - startTime);
+
+                // update [totalStackTime]
+                totalStackTime += execTime;
                 
                 // schedule next action
                 _next(execTime, task);
@@ -150,22 +156,23 @@ class Executor {
       */
     @:access( pman.core.exec.MicroTask )
     private function _next(execTime:Float, task:MicroTask):Void {
-        // inform the Batch of the completion of one of it's Tasks
-        //if ((task.executor is BatchExecutor)) {
-            //var bex:BatchExecutor = cast task.executor;
-            //bex._taskCompleted(execTime, task);
-        //}
-
         // schedule next cycle
-        if (execTime > DEFERRENCE_THRESHOLD) {
-            defer( _go );
+        if (totalStackTime > maxStackTime) {
+            animFrame( _go );
         }
         else {
             _go();
         }
     }
 
+    /**
+      * check whether [this] Executor is paused
+      */
     public inline function isPaused():Bool return paused;
+
+    /**
+      * check whether [this] Executor currently has a Task running
+      */
     public inline function isTaskRunning():Bool return taskRunning;
 
     /**
@@ -190,8 +197,6 @@ class Executor {
     private var paused : Bool;
     private var batches : Array<BatchExecutor>;
 
-/* === Statics === */
-
-    // longest a microtask can run before the next microtask is deferred to the next call stack
-    private static inline var DEFERRENCE_THRESHOLD:Int = 850;
+    private var totalStackTime:Float;
+    private var maxStackTime:Float;
 }
