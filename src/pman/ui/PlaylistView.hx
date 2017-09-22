@@ -30,6 +30,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using Slambda;
 using tannus.ds.ArrayTools;
+using pman.core.ExecutorTools;
 
 class PlaylistView extends Pane {
 	/* Constructor Function */
@@ -98,7 +99,11 @@ class PlaylistView extends Pane {
 		*/
 
 		buildSearchWidget();
-		buildTrackList();
+		
+		var start = now();
+		buildTrackList(function() {
+		    trace('took ${now() - start}ms to build the track-list view, containing ${playlist.length} tracks');
+		});
 
 		forwardEvents(['click', 'mousedown', 'mouseup', 'mousemove', 'mouseleave'], null, MouseEvent.fromJqEvent);
 
@@ -145,11 +150,15 @@ class PlaylistView extends Pane {
 	  */
 	public function refresh(preserveScrollPos:Bool=false):Void {
 	    // save the current scroll pos
-        var scrollY:Float = listRow.el.prop('scrollTop');
-        if (preserveScrollPos)
+        var scrollY:Float = (listRow.el.prop( 'scrollTop' ));
+        if ( preserveScrollPos )
             listRow.el.data('scrollTop', scrollY);
+
 	    // rebuild track list
-		rebuildTracks();
+	    var start = now();
+		rebuildTracks(function() {
+		    trace('took ${now() - start}ms to build the track-list view, containing ${playlist.length} tracks');
+		});
 	}
 
 	/**
@@ -169,53 +178,80 @@ class PlaylistView extends Pane {
 	/**
 	  * build out the track list
 	  */
-	private function buildTrackList():Void {
-		list = new List();
-		listRow.append( list );
-		list.el.plugin( 'disableSelection' );
-		bindList();
+	private function buildTrackList(?done:Void->Void):Void {
+	    if (list == null) {
+            list = new List();
+            listRow.append( list );
+            list.el.plugin( 'disableSelection' );
+            bindList();
+        }
+
+        // create a batch of microtasks
+        var batch = exec.createBatch();
 		for (track in playlist) {
-			var trackView:TrackView = tview( track ); 
-			if (player.track == track) {
-				trackView.focused( true );
-			}
-			if ( trackView.needsRebuild ) {
-			    trackView.build();
-			}
-			addTrack( trackView );
+		    // get the Track's view
+		    var trackView : Null<TrackView> = null;
+		    batch.task({
+		        trackView = tview( track );
+		    });
+		    batch.task({
+		        if (player.track == track) {
+		            trackView.focused( true );
+		        }
+		    });
+		    batch.task({
+		        if (trackView.needsRebuild) {
+		            trackView.build();
+		        }
+		    });
+		    batch.task({addTrack(trackView);});
 		}
+
+		// execute the batch
+		batch.start(function() {
+		    exec.task(@async {
+		        animFrame(function() {
+		            scrollToActive();
+		            continue;
+		        });
+		    });
+		    exec.task(@async {
+		        if (done != null)
+		            done();
+		        continue;
+		    });
+		});
+
+		// remove scrollbar from view if there is nothing in the view
 		if (playlist.length == 0) {
 		    listRow.css.set('overflow-y', 'hidden');
 		}
+		// and add it back if there is
         else {
 		    listRow.css.set('overflow-y', 'scroll');
         }
-		defer(function() {
-		    scrollToActive();
-		});
 	}
 
 	/**
 	  * tear down the track list
 	  */
-	private function undoTrackList():Void {
+	private function undoTrackList(?done : Void->Void):Void {
+	    var batch = exec.createBatch();
 		for (track in tracks) {
-			detachTrack( track );
+			batch.task(detachTrack( track ));
 		}
-		tracks = new Array();
-		if (list != null) {
-			list.destroy();
-        }
-		list = null;
+		batch.task({ tracks = new Array(); });
+		batch.start( done );
 	}
 
 	/**
 	  * rebuild the TrackList
 	  */
-	public function rebuildTracks():Void {
+	public function rebuildTracks(?done : Void->Void):Void {
 		searchResultsMode = false;
-		undoTrackList();
-		buildTrackList();
+		undoTrackList(function() {
+		    buildTrackList( done );
+		});
 	}
 
 	/**
@@ -263,9 +299,14 @@ class PlaylistView extends Pane {
 	/**
 	  * detach a TrackView from [this]
 	  */
-	public inline function detachTrack(view : TrackView):Void {
+	public function detachTrack(view : TrackView):Void {
 	    tracks.remove( view );
-	    list.removeItemFor( view );
+		if (view.parentWidget != null && (view.parentWidget is ListItem)) {
+		    list.removeItem(cast view.parentWidget);
+		}
+        else {
+            list.removeItemFor( view );
+        }
 	}
 
 	/**
