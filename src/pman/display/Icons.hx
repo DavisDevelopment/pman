@@ -170,6 +170,9 @@ class Icons {
 	public static function editPlusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'edit.plus', f);
 	public static function editMinusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'edit.minus', f);
 	public static function minusIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'minus', f);
+	public static function imageIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'image', f);
+	public static function imageGalleryIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'image.gallery', f);
+	public static function imageMultipleIcon(w:Int, h:Int, ?f:Path->Void):Document return namedPath(w, h, 'image.multiple', f);
 
 	/**
 	  * Utility method for creating a <path> from a command string stored in [icon_data]
@@ -185,11 +188,8 @@ class Icons {
 		return path(w, h, function(p) {
 			p.d = d;
 			p.style.fill = '#E6E6E6';
-			/*
-			p.style.stroke = '#E6E6E6';
-			p.style.strokeWidth = 2;
-			*/
-			if (f != null) f( p );
+			if (f != null)
+			    f( p );
 		});
 	}
 
@@ -230,13 +230,6 @@ class Icons {
 	  */
 	public static function __init__():Void {
 		icon_data = Ct.readJSON( 'assets/icons/icon_data.json' );
-		/*
-		var rd:Object = new Object( raw_icon_data );
-		icon_data = new Dict();
-		for (key in rd.keys) {
-			icon_data.set(key, rd.get( key ));
-		}
-		*/
 	}
 
 /* === Static Fields === */
