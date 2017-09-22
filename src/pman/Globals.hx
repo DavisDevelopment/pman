@@ -72,6 +72,19 @@ class Globals {
         return (now() - start);
     }
 
+    /**
+      * measure the amount of time taken to execute [action] asynchronously
+      */
+    public static function measureTimeCostAsync(action:VoidAsync, done:Cb<Float>):Void {
+        var start = now();
+        action(function(?error) {
+            done(error, (now() - start));
+        });
+    }
+
+    /**
+      * output an error to the console
+      */
     public static inline function report(error : Dynamic):Void {
         (untyped __js__('console.error')( error ));
     }
