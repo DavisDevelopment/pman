@@ -13,11 +13,13 @@ using tannus.ds.ArrayTools;
 class Engine {
     /* Constructor Function */
     public function new():Void {
-        //
+        executor = new Executor();
     }
 
 /* === Instance Methods === */
 
 /* === Instance Fields === */
 
+    // a micro-task manager and executor
+    public var executor : Executor;
 }
