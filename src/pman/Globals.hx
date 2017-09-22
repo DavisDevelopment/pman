@@ -42,11 +42,17 @@ class Globals {
         return window.performance.now();
     }
 
+    /**
+      * invoke [f] after waiting [ms] milliseconds
+      */
     public static inline function wait(ms:Int, f:Void->Void) {
         return js.Browser.window.setTimeout(f, ms);
     }
 
-    public static inline function defer(f : Void->Void):Void {
+    /**
+      * defer [f] to the next call stack
+      */
+    public static function defer(f : Void->Void):Void {
         tannus.node.Node.process.nextTick( f );
     }
 
