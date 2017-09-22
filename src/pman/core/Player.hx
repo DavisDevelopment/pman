@@ -765,22 +765,9 @@ class Player extends EventDispatcher {
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter.fn(_.isRealFile());
 	    var start = now;
-	    function complete():Void {
-	        defer(function() {
-	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
-	            if (done != null) {
-	                done();
-	            }
-	            var dl = new TrackListDataLoader();
-	            start = now;
-	            dl.load(items, function(?error, ?result) {
-                    trace('took ${now - start}ms for Player to load TrackData for ${items.length} tracks');
-	            });
-	        });
 	    }
 
 	    function completeEfficient():Void {
-	        defer(function() {
 	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
 	            if (done != null) {
 	                done();
