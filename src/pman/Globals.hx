@@ -63,6 +63,15 @@ class Globals {
         window.requestAnimationFrame(untyped frame);
     }
 
+    /**
+      * measure the amount of time it took to execute [action]
+      */
+    public static function measureTimeCost(action : Void->Void):Float {
+        var start = now();
+        action();
+        return (now() - start);
+    }
+
     public static inline function report(error : Dynamic):Void {
         (untyped __js__('console.error')( error ));
     }
