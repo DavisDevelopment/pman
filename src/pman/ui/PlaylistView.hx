@@ -333,7 +333,9 @@ class PlaylistView extends Pane {
 	  * react to playlist-changes
 	  */
 	private function on_playlist_change(change : PlaylistChange):Void {
-        refresh( true );
+        if (!isLocked()) {
+            exec.task(refresh( true ));
+        }
 	}
 
 	/**
