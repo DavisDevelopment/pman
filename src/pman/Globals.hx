@@ -5,6 +5,8 @@ import tannus.ds.*;
 import tannus.graphics.Color;
 import tannus.sys.*;
 import tannus.TSys as Sys;
+import tannus.async.*;
+import tannus.html.Win;
 
 #if renderer_process
 
@@ -22,6 +24,8 @@ import pman.display.ColorScheme;
 import tannus.math.TMath.*;
 import foundation.Tools.*;
 
+import haxe.extern.EitherType;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
@@ -35,7 +39,7 @@ class Globals {
       * get the current timestamp
       */
     public static inline function now():Float {
-        return Date.now().getTime();
+        return window.performance.now();
     }
 
     public static inline function wait(ms:Int, f:Void->Void) {
