@@ -39,6 +39,8 @@ class BatchExecutor extends Executor {
     public function start(?complete : Void->Void):Void {
         if (complete != null)
             onComplete( complete );
+        if ( queueEmpty )
+            return defer(_complete.fire);
         resume();
     }
 
