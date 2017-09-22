@@ -117,6 +117,9 @@ class Globals {
     public static var preferences(get, never):Preferences;
     private static inline function get_preferences() return database.preferences;
 
+    public static var window(get, never):Win;
+    private static inline function get_window() return Win.current;
+
 #end
 
     public static var platform(get, never):String;
