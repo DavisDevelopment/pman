@@ -494,6 +494,21 @@ class PlaylistView extends Pane {
 	    return ret;
 	}
 
+	/**
+	  * 'lock'ing [this] view prevents it from rebuilding itself in response to every change made to the playlist
+	  * mainly designed to be used prior to actions that will trigger many changes to the playlist in rapid succession
+	  */
+	public function lock():Void {
+	    _locked = true;
+	}
+
+	public function unlock():Void {
+	    _locked = false;
+	    exec.task( refresh );
+	}
+
+	public function isLocked():Bool return _locked;
+
     /**
       * handle incoming keyboard input when playlistview is open
       */
@@ -602,4 +617,5 @@ class PlaylistView extends Pane {
 	public var focused(default, null): Bool = false;
 
 	private var _tc : Map<String, TrackView>;
+	private var _locked : Bool = false;
 }
