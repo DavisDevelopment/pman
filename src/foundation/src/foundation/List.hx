@@ -77,11 +77,11 @@ class List extends Widget {
 	}
 
 	/**
-	  * Remove an item from [this] List
+	  * get a listitem by index
 	  */
-	//public inline function item<T:Widget>(index : Int):Null<T> {
-		//return untyped items[ index ];
-	//}
+	public inline function item(index : Int):Null<ListItem> {
+		return listItems[ index ];
+	}
 
     /**
       * get the item for the given 'thing'
