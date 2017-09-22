@@ -66,6 +66,12 @@ class Globals {
     public static var database(get, never):PManDatabase;
     private static inline function get_database() return bpmain.db;
 
+    public static var engine(get, never):Engine;
+    private static inline function get_engine() return bpmain.engine;
+
+    public static var exec(get, never):Executor;
+    private static inline function get_exec() return engine.executor;
+
     public static var appDir(get, never):AppDir;
     private static inline function get_appDir() return bpmain.appDir;
 
