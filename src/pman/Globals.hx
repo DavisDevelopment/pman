@@ -56,6 +56,13 @@ class Globals {
         tannus.node.Node.process.nextTick( f );
     }
 
+    /**
+      * defer [f] using Window.requestAnimationFrame
+      */
+    public static function animFrame(frame : EitherType<Void->Void, Float->Void>):Void {
+        window.requestAnimationFrame(untyped frame);
+    }
+
     public static inline function report(error : Dynamic):Void {
         (untyped __js__('console.error')( error ));
     }
