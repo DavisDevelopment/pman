@@ -280,24 +280,24 @@ class TrackView extends Pane {
 	/**
 	  * Whether [this] Track is focused
 	  */
-	public inline function focused(?value : Bool):Bool return c('focused', value);
+	public function focused(?value : Bool):Bool return c('focused', value);
 
 	/**
 	  * Whether [this] Track is hovered
 	  */
-	public inline function hovered(?value : Bool):Bool return c('hovered', value);
+	public function hovered(?value : Bool):Bool return c('hovered', value);
 
 	/**
 	  * get the status of a flag
 	  */
-	private inline function cg(name : String):Bool {
+	private function cg(name : String):Bool {
 		return el.hasClass( name );
 	}
 
 	/**
 	  * set the status of a flag
 	  */
-	private inline function cs(name:String, value:Bool):Void {
+	private function cs(name:String, value:Bool):Void {
 		(value ? addClass : removeClass)( name );
 	}
 
@@ -305,23 +305,34 @@ class TrackView extends Pane {
 	  * (if provided) assign the status of the [name] flag
 	  * and return the status of the [name] flag
 	  */
-	private inline function c(name:String, ?value:Bool):Bool {
+	private function c(name:String, ?value:Bool):Bool {
 		if (value != null) {
 			cs(name, value);
 		}
 		return cg( name );
 	}
 
-    private inline function _ag(name : String):Bool {
+    /**
+      * get the boolean value of an attribute
+      */
+    private function _ag(name : String):Bool {
         return !(untyped [null, 'false', 'f'].has(el.attr(name)));
     }
-    private inline function _as(name:String, value:Bool):Void {
+
+    /**
+      * set the boolean value of an attribute
+      */
+    private function _as(name:String, value:Bool):Void {
         if (!value)
             el.removeAttr( name );
         else
             el.attr(name, 'true');
     }
-    private inline function a(name:String, ?value:Bool):Bool {
+
+    /**
+      * get or set the Boolean value of an attribute
+      */
+    private function a(name:String, ?value:Bool):Bool {
         if (value != null) {
             _as(name, value);
         }
