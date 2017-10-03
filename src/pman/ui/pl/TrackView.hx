@@ -89,45 +89,12 @@ class TrackView extends Pane {
             }
 	    };
 
-		//var markup = template.execute(track, tmacros);
-		//var tel:Element = new Element( markup );
-		//this.el = tel;
-
-        /*
-        flex = new FlexRow([12, 0]);
-        append( flex );
-
-		title = flex.pane( 0 );
-		title.addClass( 'title' );
-		title.columns.on('small').is( 12 );
-		title.columns.on('small').expand = true;
-		title.columns.on('large').is( 9 );
-
-        info = flex.pane( 1 );
-        info.addClass('info');
-        info.columns.on('small').remove();
-        info.columns.on('large').is( 3 );
-        info.addClass( 'hide-for-small-only' );
-        info.addClass( 'hide-for-medium-only' );
-
-		size = new Pane();
-		size.addClass( 'size' );
-		info.append( size );
-
-		progressTrack = new Pane();
-		progressTrack.addClass( 'progress-track' );
-		append( progressTrack );
-
-		progress = new Pane();
-		progress.addClass( 'progress' );
-		progressTrack.append( progress );
-		progress.css.set('width', '25%');
-		*/
-
+        // initialize events
 		if ( !eventInitted ) {
 		    __events();
 		}
 
+        // set some attributes
 		var a = this.el.attributes;
 		a['title'] = track.title;
 		a['data-uri'] = track.uri;
@@ -148,65 +115,12 @@ class TrackView extends Pane {
 
         // generate the markup
         var markup = template.execute(track, tmacros);
+
+        // clear [el] of its content
         el.html('');
+
+        // append the markup
         append( markup );
-
-        // replace [el]
-        //var tmp = this.el;
-        //el = new Element( markup );
-        //tmp.replaceWith( el );
-
-        /*
-        title.text = track.title;
-        // view counter
-        if (td != null) {
-            var uw:Element = '<span class="unwatched"><sup>(U)</sup>&nbsp;</span>';
-            if (td.views == 0)
-                title.el.prepend( uw );
-            if ( td.starred ) {
-                title.el.prepend('<span class="starred">*</span>');
-            }
-            else {
-                title.el.remove('span.starred');
-            }
-        }
-
-        // Track Size
-        if (td != null && td.meta != null) {
-            var tdm = td.meta;
-            var dur = Duration.fromFloat( tdm.duration );
-            size.text = dur.toString();
-
-            if (tdm.video != null) {
-                var res = (tdm.video.height + 'p');
-                size.el.prepend('<span class="resolution">($res)</span>');
-            }
-            else {
-                size.el.remove('span.resolution');
-            }
-        }
-        else {
-            var trackPath = track.getFsPath();
-            if (trackPath == null || !FileSystem.exists( trackPath )) {
-                size.text = '';
-            }
-            else {
-                var stats = FileSystem.stat( trackPath );
-                size.text = stats.size.formatSize();
-            }
-        }
-
-        if (td != null && td.meta != null) {
-            var lt = td.getLastTime();
-            if (lt == null) {
-                progress.css.set('width', '0%');
-            }
-            else {
-                var perc = tannus.math.Percent.percent(lt, td.meta.duration);
-                progress.css.set('width', perc.toString());
-            }
-        }
-        */
 	}
 
 	/**
@@ -218,8 +132,6 @@ class TrackView extends Pane {
 		on('contextmenu', onRightClick);
 
 		el.plugin( 'disableSelection' );
-
-		//configureDragAndDropRearrangement();
 
 		eventInitted = true;
 	}
