@@ -255,15 +255,6 @@ class PlaylistView extends Pane {
 	}
 
 	/**
-	  * rebuild the TrackList to show search results
-	  */
-	public function showSearchResults(matches : Array<SearchMatch<Track>>):Void {
-		searchResultsMode = true;
-		undoTrackList();
-		buildMatchList( matches );
-	}
-
-	/**
 	  * build the track list for the search-results view
 	  */
 	private function buildMatchList(matches : Array<SearchMatch<Track>>):Void {
