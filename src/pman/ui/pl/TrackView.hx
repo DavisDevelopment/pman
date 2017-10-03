@@ -54,10 +54,12 @@ class TrackView extends Pane {
 	  * Build [this] 
 	  */
 	override function populate():Void {
+	    // ensure that [template] exists
 	    if (template == null) {
 	        template = Templates.get( 'track-item' );
         }
 
+        // create the track macros
 	    tmacros = {
             duration: function(resolve:Dynamic):String {
                 if (track.data != null) {
