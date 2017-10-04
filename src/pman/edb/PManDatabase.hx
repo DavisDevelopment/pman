@@ -48,9 +48,11 @@ class PManDatabase {
             step(function(next) {
                 try {
                     mediaStore = wrap('media', MediaStore);
+                    actorStore = wrap('actors', ActorStore);
 
                     var tables = [
-                        mediaStore
+                        mediaStore,
+                        actorStore
                     ];
                     VoidAsyncs.series(untyped tables.map.fn(_.init.bind(_)), next);
                 }
@@ -89,14 +91,37 @@ class PManDatabase {
             name += '.db';
         }
         var store:DataStore = new DataStore({
-            filename: dsfilename( name )
+            filename: dsfilename( name ),
+            afterSerialization: afterSerialization,
+            beforeDeserialization: beforeDeserialization
         });
         return Type.createInstance(type, untyped [this, store]);
     }
 
-    public inline function onready(action : Void->Void):Void rs.await( action );
-    public inline function dsfilename(name : String):String {
-        return Std.string(path.plusString(name).normalize());
+    /**
+      * alter the serialization of documents
+      */
+    private function afterSerialization(data : String):String {
+        return data;
+    }
+
+    /**
+      * alter the deserialization of a document
+      */
+    private function beforeDeserialization(data : String):String {
+        return data;
+    }
+
+    /**
+      * queue [action] for when [this] database has been declared 'ready'
+      */
+    public function onready(action : Void->Void):Void rs.await( action );
+
+    /**
+      * get the full path to the DataStore file
+      */
+    public function dsfilename(name : String):String {
+        return Std.string(path.plusString( name ).normalize());
     }
 
 /* === Instance Fields === */
@@ -104,6 +129,7 @@ class PManDatabase {
     public var path: Path;
     public var ops : Operators;
     public var mediaStore : MediaStore;
+    public var actorStore : ActorStore;
 
     public var configInfo : ConfigInfo;
     public var preferences : Preferences;
