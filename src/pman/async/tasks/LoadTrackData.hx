@@ -86,8 +86,7 @@ class LoadTrackData extends Task2<TrackData> {
                 if (error != null)
                     return done(error);
                 data = new TrackData( track );
-                data.pullRaw( irow );
-                load_fields(irow, done);
+                data.pullRaw(irow, done);
             });
         }
         else {
@@ -103,40 +102,11 @@ class LoadTrackData extends Task2<TrackData> {
                     else {
                         track.mediaId = row._id;
                         data = new TrackData( track );
-                        data.pullRaw( row );
-                        load_fields(row, done);
+                        data.pullRaw(row, done);
                     }
                 }
             });
         }
-    }
-
-    /**
-      * load the data for the 'tags' and 'actors' fields
-      */
-    private function load_fields(row:MediaRow, done:VoidCb):Void {
-        [load_tags].map.fn(_.bind(row, _)).series( done );
-    }
-
-    /**
-      * load tags
-      */
-    private function load_tags(row:MediaRow, done:VoidCb):Void {
-        /*
-        var steps:Array<Async<Tag>> = row.tags.map.fn(tagId => db.tagsStore.pullTag.bind(tagId, _));
-        steps.series(function(?error, ?tags:Array<Tag>) {
-            if (error != null) {
-                done( error );
-            }
-            else {
-                for (tag in tags) {
-                    data.attachTag( tag );
-                }
-                done();
-            }
-        });
-        */
-        done();
     }
 
     /**
@@ -165,8 +135,7 @@ class LoadTrackData extends Task2<TrackData> {
                 return done( error );
             }
             else {
-                data.pullRaw( row );
-                done();
+                data.pullRaw(row, done);
             }
         });
     }
