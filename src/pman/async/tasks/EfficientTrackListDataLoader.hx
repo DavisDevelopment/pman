@@ -201,9 +201,15 @@ class EfficientTrackListDataLoader extends Task1 {
                     return done( error );
                 }
                 else {
-                    data.pullRaw( row );
-                    data.track.mediaId = data.media_id;
-                    return done();
+                    return data.pullRaw(row, function(?error) {
+                        if (error != null) {
+                            done( error );
+                        }
+                        else {
+                            data.track.mediaId = data.media_id;
+                            done();
+                        }
+                    });
                 }
             });
         }
@@ -237,15 +243,21 @@ class EfficientTrackListDataLoader extends Task1 {
         track._loadingData = true;
         track.data = data;
         animFrame(function() {
-            data.pullRaw( row );
-            ensure_track_data_completeness(data, function(?error) {
-                track._loadingData = false;
+            data.pullRaw(row, function(?error) {
                 if (error != null) {
-                    return next( error );
+                    next( error );
                 }
                 else {
-                    next();
-                    track._dataLoaded.call( data );
+                    ensure_track_data_completeness(data, function(?error) {
+                        track._loadingData = false;
+                        if (error != null) {
+                            return next( error );
+                        }
+                        else {
+                            next();
+                            track._dataLoaded.call( data );
+                        }
+                    });
                 }
             });
         });
