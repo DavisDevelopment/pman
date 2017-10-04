@@ -595,8 +595,8 @@ class Player extends EventDispatcher {
 
 				// create the Mark itself
                 var mark = new Mark(Named( name ), currentTime);
-                track.addMark(mark, function() {
-                    complete();
+                track.addMark(mark, function(?error) {
+                    complete( error );
                 });
             });
         }
@@ -904,7 +904,7 @@ class Player extends EventDispatcher {
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
-			newTrack.editData(function( data ) {
+			newTrack.editData(function(data, done) {
 			    // increment the 'views'
 			    if (getStatus().match(Playing)) {
 			        data.views++;
@@ -923,13 +923,17 @@ class Player extends EventDispatcher {
                         session.trackReady.call( newTrack );
                     });
                 }
+
+                // declare complete
+                done();
 			});
 
 			if (!getStatus().match(Playing)) {
 			    once('play', untyped function() {
 			        if (track == newTrack) {
-			            newTrack.editData(function(data) {
+			            newTrack.editData(function(data, done) {
 			                data.views++;
+			                defer(done.void());
 			            });
 			        }
 			    });
@@ -954,13 +958,14 @@ class Player extends EventDispatcher {
             var track:Track = delta.previous;
             var isended:Bool = ended;
             var time:Float = currentTime;
-            track.editData(function( data ) {
+            track.editData(function(data, done) {
                 if ( isended ) {
                     data.removeLastTimeMark();
                 }
                 else if (time > 0.0) {
                     data.addMark(new Mark(LastTime, time));
                 }
+                done();
             });
 		}
 
@@ -1160,10 +1165,11 @@ class Player extends EventDispatcher {
 	        done();
 	    }
         else {
-            function erase(i : TrackData) {
+            function erase(i:TrackData, next) {
                 i.removeLastTimeMark();
+                next();
             }
-            track.editData(erase, function() {
+            track.editData(untyped erase, function(?error) {
                 currentTime = 0.0;
                 done();
             });
