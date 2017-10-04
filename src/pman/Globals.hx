@@ -5,8 +5,7 @@ import tannus.ds.*;
 import tannus.graphics.Color;
 import tannus.sys.*;
 import tannus.TSys as Sys;
-import tannus.async.*;
-import tannus.html.Win;
+import tannus.async.*; import tannus.html.Win;
 
 #if renderer_process
 
@@ -14,6 +13,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 
 import pman.core.*;
+import pman.core.engine.*;
 import pman.db.AppDir;
 import pman.edb.*;
 import pman.edb.PManDatabase;
@@ -110,6 +110,9 @@ class Globals {
 
     public static var exec(get, never):Executor;
     private static inline function get_exec() return engine.executor;
+
+    public static var dialogs(get, never):Dialogs;
+    private static inline function get_dialogs() return engine.dialogs;
 
     public static var appDir(get, never):AppDir;
     private static inline function get_appDir() return bpmain.appDir;
