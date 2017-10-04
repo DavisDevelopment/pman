@@ -585,9 +585,18 @@ class PlayerSession {
 	                defer( next );
 	            }
                 else {
-                    player.track.editData(function( i ) {
+                    player.track.editData(function(i, nxt) {
                         i.setLastTime( player.currentTime );
-                    }, next);
+
+                        nxt();
+                    }, function(?error) {
+                        if (error != null) {
+                            throw error;
+                        }
+                        else {
+                            next();
+                        }
+                    });
                 }
 	        });
 	        stack.push(function(next) {
