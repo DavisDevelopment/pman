@@ -503,24 +503,24 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * shorthand method to edit the TrackData for [this] Track
       */
-    public function editData(action:TrackData->Void, ?complete:Void->Void):Void {
-        getData(function(?error, ?data:TrackData) {
-            if (data == null) {
-                throw 'Error: TrackData is null';
-            }
-            action( data );
-            data.save(function(?error) {
+    public function editData(action:TrackData->VoidCb->Void, ?complete:VoidCb, ?save:Bool):Void {
+        if (complete == null) {
+            complete = (function(?error) {
                 if (error != null)
-                    throw error;
-
-                var v = getView();
-                if (v != null) {
-                    v.update();
-                }
-                if (complete != null) {
-                    complete();
-                }
+                    report( error );
             });
+        }
+
+        getData(function(?error, ?data:TrackData) {
+            if (error != null) {
+                return complete( error );
+            }
+            else if (data != null) {
+                data.edit(action, complete, save);
+            }
+            else {
+                complete('Error: No TrackData loaded');
+            }
         });
     }
 
@@ -548,34 +548,58 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * set whether [this] Track is starred
       */
-    public function setStarred(value:Bool, ?done:Void->Void):Void {
-        editData(function(i) {
+    public function setStarred(value:Bool, ?done:VoidCb):Void {
+        editData(function(i, next) {
             i.starred = value;
+
+            next();
         }, done);
     }
 
-    public function toggleStarred(?done : Bool->Void):Void {
+    public function toggleStarred(?done : Cb<Bool>):Void {
         var val:Bool = false;
-        editData(function(i) {
+        editData(function(i, next) {
             val = (i.starred = !i.starred);
-        }, function() {
-            if (done != null) {
-                done( val );
+
+            next();
+        }, 
+        function(?error) {
+            if (error != null) {
+                if (done != null)
+                    return done(error, null);
+                else
+                    return report( error );
+            }
+            else {
+                if (done != null) {
+                    done(null, val);
+                }
             }
         });
     }
 
-    public inline function star(?done : Void->Void):Void {
+    /**
+      * set [starred] to `true`
+      */
+    public inline function star(?done : VoidCb):Void {
         setStarred(true, done);
     }
 
-    public inline function unstar(?done : Void->Void):Void {
+    /**
+      * set [starred] to `false`
+      */
+    public inline function unstar(?done : VoidCb):Void {
         setStarred(false, done);
     }
 
-    public function addMark(mark:Mark, ?done:Void->Void):Void {
-        editData(function(i) {
+    /**
+      * add a Mark to [this] Track
+      */
+    public function addMark(mark:Mark, ?done:VoidCb):Void {
+        editData(function(i, next) {
             i.addMark( mark );
+
+            next();
         }, done);
     }
 
