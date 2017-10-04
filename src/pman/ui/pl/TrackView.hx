@@ -1,6 +1,7 @@
 package pman.ui.pl;
 
 import tannus.io.*;
+import tannus.ds.*;
 import tannus.html.Element;
 import tannus.geom.*;
 import tannus.events.*;
@@ -54,6 +55,8 @@ class TrackView extends Pane {
 	  * Build [this] 
 	  */
 	override function populate():Void {
+	    super.populate();
+
 	    // ensure that [template] exists
 	    if (template == null) {
 	        template = Templates.get( 'track-item' );
@@ -118,18 +121,19 @@ class TrackView extends Pane {
         // generate the markup
         var markup = template.execute(track, tmacros);
 
-        // clear [el] of its content
-        el.html('');
-
-        // append the markup
-        append( markup );
+        // append new markup
+        el.html( markup );
 	}
 
 	/**
 	  * configure events and such
 	  */
 	private function __events():Void {
-        forwardEvents(['click', 'contextmenu', 'mousedown', 'mouseup', 'mousemove'], null, MouseEvent.fromJqEvent);
+        forwardEvents([
+            'click', 'contextmenu',
+            'mousedown', 'mouseup',
+            'mousemove'
+        ], null, MouseEvent.fromJqEvent);
         on('click', onLeftClick);
 		on('contextmenu', onRightClick);
 
@@ -180,7 +184,6 @@ class TrackView extends Pane {
       */
 	override function destroy():Void {
         super.detach();
-        //needsRebuild = true;
 	}
 	
 	/**
@@ -188,7 +191,6 @@ class TrackView extends Pane {
 	  */
 	override function detach():Void {
         super.detach();
-		//needsRebuild = true;
 	}
 
 	/**
@@ -264,8 +266,16 @@ class TrackView extends Pane {
 	public var playlist(get, never):Playlist;
 	private inline function get_playlist():Playlist return list.playlist;
 	
-	public var li(get, never):ListItem;
-	private inline function get_li():ListItem return cast this.parentWidget;
+	public var li(get, never):Maybe<ListItem>;
+	private function get_li() {
+	    if (parentWidget != null && (parentWidget is ListItem)) {
+	        return cast parentWidget;
+	    }
+        else {
+            trace( parentWidget );
+            return null;
+        }
+    }
 
     // whether [this] widget is highlighted
 	public var selected(get, set):Bool;
