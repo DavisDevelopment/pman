@@ -137,15 +137,21 @@ div.track-info-dialog {
     div.data-wrap {
         div.data {
             width: 90%;
+
             .block-center;
 
             input, textarea {
-                border: solid @primary 0.5px;
+                border: solid lighten(@primary, 10%) 0.5px;
                 border-radius: 3px;
                 max-width: 98%;
                 background-color: lighten(@primary, 25%);
                 color: white;
+                font-size: 10pt;
+                font-family: "Ubuntu";
+            }
 
+            label {
+                color: white;
             }
         }
     }
