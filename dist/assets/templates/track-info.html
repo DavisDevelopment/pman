@@ -7,6 +7,11 @@
         <div class="row data title">
             <label>Title:<input type="text" class="input-title" name="title" value="::title::"/></label>
         </div>
+        <div class="row data description">
+            <label>Summary: 
+                <textarea class="input-description" name="description">::if (data.description)::::(data.description)::::end::</textarea>
+            </label>
+        </div>
         <div class="row data tags">
             <label>Tags:<input type="text" class="input-tags" name="tags" value="$$tags()"/></label>
         </div>
