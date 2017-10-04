@@ -29,13 +29,13 @@ using pman.async.VoidAsyncs;
 
 class TrackRename extends Task1 {
     /* Constructor Function */
-    public function new(t:Track, ms:MediaStore):Void {
+    public function new(t:Track, ms:MediaStore, ?newPath:Path):Void {
         super();
 
         track = t;
         store = ms;
         toDelete = new Array();
-        renamed = null;
+        renamed = newPath;
     }
 
 /* === Instance Methods === */
@@ -44,28 +44,37 @@ class TrackRename extends Task1 {
       * execute [this] Task
       */
     override function execute(done : VoidCb):Void {
-        get_newpath(function(?error : Dynamic) {
-            if (error != null) {
-                if ((error is CancelTrackRename)) {
-                    renamed = null;
-                    return done();
-                } 
-                else {
-                    return done( error );
+        function doRest():Void {
+            ([
+                 repoint_track,
+                 repoint_db_row,
+                 rename_file,
+                 rename_bundle,
+                 reattach_track,
+                 update_track_views,
+                 sanitize_db
+            ].series( done ));
+        }
+
+        if (renamed == null) {
+            get_newpath(function(?error : Dynamic) {
+                if (error != null) {
+                    if ((error is CancelTrackRename)) {
+                        renamed = null;
+                        return done();
+                    } 
+                    else {
+                        return done( error );
+                    }
                 }
-            }
-            else {
-                ([
-                    repoint_track,
-                    repoint_db_row,
-                    rename_file,
-                    rename_bundle,
-                    reattach_track,
-                    update_track_views,
-                    sanitize_db
-                ].series( done ));
-            }
-        });
+                else {
+                    doRest();
+                }
+            });
+        }
+        else {
+            doRest();
+        }
     }
 
     /**
