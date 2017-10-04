@@ -1,0 +1,25 @@
+
+<div class="row">
+    <div class="row dialog-header">
+        <h4>metadata: ::title::</h4>
+    </div>
+    <div class="row data-wrap dialog-content">
+        <div class="row data title">
+            <label>Title:<input type="text" class="input-title" name="title" value="::title::"/></label>
+        </div>
+        <div class="row data tags">
+            <label>Tags:<input type="text" class="input-tags" name="tags" value="$$tags()"/></label>
+        </div>
+        <div class="row data stars">
+            <label>Actors:<input type="text" class="input-stars" name="stars" value="$$stars()"/></label>
+        </div>
+        <div class="row data rating">
+            <label>Rating<input type="number" class="input-rating" name="rating" value="::if (data.rating)::::(data.rating)::::end::"/></label>
+        </div>
+    </div>
+    <div class="row dialog-footer">
+        <button class="button cancel">Cancel</button>
+        <button class="button save">Save</button>
+    </div>
+</div>
+
