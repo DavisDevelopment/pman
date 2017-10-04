@@ -609,12 +609,12 @@ class Player extends EventDispatcher {
 	  */
 	public function selectFiles(callback : Array<File> -> Void):Void {
 		// middle-man callback to map the paths to File objects
-		function _callback(paths : Array<String>):Void {
+		function _callback(?error, ?paths:Array<Path>):Void {
 			// ... why did I do this?
 			//callback(paths.filter( Fs.exists ).map.fn([path] => new File(new Path( path ))));
-			callback(paths.map.fn([path] => new File(new Path( path ))));
+			callback(paths.map.fn([path] => new File(path)));
 		}
-		app.fileSystemPrompt({
+		dialogs.selectFiles({
 			title: 'Select one or more files to open',
 			buttonLabel: 'Open That Shit',
 			filters: [FileFilter.ALL, FileFilter.VIDEO, FileFilter.AUDIO, FileFilter.PLAYLIST]
@@ -625,16 +625,16 @@ class Player extends EventDispatcher {
 	  * prompt the user to select a directory
 	  */
 	public function selectDirectory(callback : Array<Directory> -> Void):Void {
-		function _callback(paths : Array<String>):Void {
+		function _callback(?error, ?paths:Array<Path>):Void {
 			var dirs = [];
 			for (path in paths) {
 				if (Fs.exists( path ) && Fs.isDirectory( path )) {
-					dirs.push(new Directory(new Path( path )));
+					dirs.push(new Directory( path ));
 				}
 			}
 			callback( dirs );
 		}
-		app.fileSystemPrompt({
+	    dialogs.open({
 			title: 'Select a Directory to open',
 			buttonLabel: 'Open That Shit',
 			directory: true
@@ -837,11 +837,19 @@ class Player extends EventDispatcher {
 	  * clear the playlist
 	  */
 	public function clearPlaylist():Void {
-		session.playlist.clear();
-		session.name = null;
 		if (session.hasMedia()) {
 			session.blur();
 		}
+		var tab = session.activeTab;
+		if (tab == null) {
+		    return ;
+		}
+        else {
+            tab.focusedTrack = null;
+            tab.blurredTrack = null;
+            tab.playlist.clear();
+            session.name = null;
+        }
 	}
 
 	/**
