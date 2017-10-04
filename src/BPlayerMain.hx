@@ -196,26 +196,6 @@ class BPlayerMain extends Application {
 	}
 
 	/**
-	  * create and display FileSystem prompt
-	  */
-	public inline function fileSystemPrompt(options:FSPromptOptions, callback:Array<String>->Void):Void {
-		Dialog.showOpenDialog(_convertFSPromptOptions(_fillFSPromptOptions( options )), function(paths : Null<Array<String>>):Void {
-		    if (paths == null) {
-		        paths = [];
-		    }
-
-			var mr:Null<String> = paths.last();
-			if (mr != null) {
-			    trace('lastDirectory: $mr');
-			    db.configInfo.lastDirectory = mr;
-			    db.configInfo.push();
-			}
-
-			callback( paths );
-		});
-	}
-
-	/**
 	  * create and display a FileSystem 'save' dialog
 	  */
 	public function fileSystemSavePrompt(?options:FSSPromptOptions, ?callback:Null<Path>->Void):Void {
