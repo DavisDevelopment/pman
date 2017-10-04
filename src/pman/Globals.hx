@@ -5,7 +5,9 @@ import tannus.ds.*;
 import tannus.graphics.Color;
 import tannus.sys.*;
 import tannus.TSys as Sys;
-import tannus.async.*; import tannus.html.Win;
+import tannus.async.*; 
+import tannus.html.Win;
+import tannus.html.Element;
 
 #if renderer_process
 
@@ -88,6 +90,8 @@ class Globals {
     public static inline function report(error : Dynamic):Void {
         (untyped __js__('console.error')( error ));
     }
+
+    public static inline function e(x : Dynamic):Element return new Element( x );
 
 /* === Computed Variables === */
 
