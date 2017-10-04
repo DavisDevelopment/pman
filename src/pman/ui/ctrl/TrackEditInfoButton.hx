@@ -54,6 +54,7 @@ class TrackEditInfoButton extends TrackControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-	    //TODO
+	    var popup = new TrackInfoPopup( track );
+	    popup.open();
 	}
 }
