@@ -16,6 +16,9 @@ class List extends Widget {
 
 /* === Instance Methods === */
 
+    /**
+      * attach an arbitrary item to [this] List
+      */
     private function attachItem(thing:Dynamic, f:ListItem->Void):Void {
         var item : ListItem;
 	    if (Std.is(thing, ListItem)) {
@@ -29,6 +32,7 @@ class List extends Widget {
 		f( item );
 		//attach( item );
     }
+
 	/**
 	  * Add a new List-Item to [this] List
 	  */
@@ -38,6 +42,9 @@ class List extends Widget {
 	    });
 	}
 
+    /**
+      * insert an item after another item
+      */
 	public function insertItemAfter(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):Void {
 	    attachItem(thing, function(item : ListItem) {
 	        var ci:Null<ListItem> = getItemFor( child );
@@ -50,6 +57,9 @@ class List extends Widget {
 	    });
 	}
 
+    /**
+      * insert an item before another item
+      */
 	public function insertItemBefore(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):Void {
 	    attachItem(thing, function(item : ListItem) {
 	        var ci:Null<ListItem> = getItemFor( child );
@@ -62,6 +72,9 @@ class List extends Widget {
 	    });
 	}
 
+    /**
+      * create an item for [thing]
+      */
 	public function createItemFor(thing : Dynamic):ListItem {
 		var item = new ListItem( this );
 		if (Std.is(thing, Widget)) {
@@ -94,6 +107,9 @@ class List extends Widget {
             else if (item.content == thing) {
 	            return item;
 	        }
+            else if (item == thing) {
+                return item;
+            }
 	    }
 	    return null;
 	}
@@ -101,19 +117,49 @@ class List extends Widget {
 	/**
 	  * remove the given item
 	  */
-	public function removeItem(item : ListItem):Void {
-	    item.detach();
+	public function removeItem(item:ListItem, detach:Bool=false):Void {
+	    // remove [item] from [this] list
 	    listItems.remove( item );
+	    
+	    // detach [item]'s content from it in the DOM
+	    if ( detach ) {
+	        if (Std.is(item.content, Widget)) {
+	            cast(item.content, Widget).detach();
+	        }
+            else {
+                (new Element( item.content )).detach();
+            }
+	    }
+
+	    // detach [item]'s content from it on the object model
+	    item.content = null;
+
+	    // delete [item]
+	    item.destroy();
 	}
 
 	/**
 	  * remove the item for the given thing
 	  */
-	public function removeItemFor(thing:Dynamic, ?test:Dynamic->Dynamic->Bool):Void {
+	public function removeItemFor(thing:Dynamic, ?detach:Bool, ?test:Dynamic->Dynamic->Bool):Void {
 	    var item = getItemFor(thing, test);
 	    if (item != null) {
-	        removeItem( item );
+	        removeItem(item, detach);
 	    }
+        else {
+            throw new tannus.utils.Error('Cannot remove non-existant item');
+        }
+	}
+
+	/**
+	  * empty [this] List out
+	  */
+	public function empty():Void {
+	    var chel = new Element(el.children()).toArray();
+	    for (child in chel) {
+	        child.detach();
+	    }
+	    listItems = new Array();
 	}
 
 /* === Instance Fields === */
