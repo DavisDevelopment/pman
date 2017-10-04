@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -22,17 +23,14 @@ class BuildInstallers extends BatchTask {
     public function new(o : TaskOptions):Void {
         super();
 
-        inline function q(t:Task)
-            children.push( t );
-
         for (platform in o.platforms) {
             for (arch in o.arches) {
                 switch ( platform ) {
                     case 'linux':
-                        q(new DebianInstaller( arch ));
+                        addChild(new DebianInstaller( arch ));
 
                     case 'win32', 'windows':
-                        q(new WindowsInstaller( arch ));
+                        addChild(new WindowsInstaller( arch ));
 
                     default:
                         throw 'Error: $platform platform not yet supported';

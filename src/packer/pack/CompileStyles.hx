@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -40,7 +41,7 @@ class CompileStyles extends Task {
     /**
       * execute [this] task
       */
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         trace('preparing to compile stylesheets');
         if (shouldCompile()) {
             trace('compiling stylesheets');

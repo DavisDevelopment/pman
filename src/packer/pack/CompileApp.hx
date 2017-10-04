@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -25,7 +26,7 @@ class CompileApp extends Task {
         defines = o.app.haxeDefs;
     }
 
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         var args:Array<String> = [];
         for (d in defines) {
             args.push('-D');

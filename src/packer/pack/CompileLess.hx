@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -37,7 +38,7 @@ class CompileLess extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         var lessCode:String = FileSystem.read( input );
         var options:Object = {
             filename: input.toString()

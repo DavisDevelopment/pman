@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.TSys as Sys;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -32,7 +33,7 @@ class ClosureCompile extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(done : ?Dynamic->Void):Void {
+    override function execute(done : VoidCb):Void {
         // the callback provided to closurecompiler
         function cccb(error:Null<Dynamic>, result:Null<Dynamic>):Void {
             if (error != null) {

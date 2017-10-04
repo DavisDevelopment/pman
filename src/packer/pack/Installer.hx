@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -33,7 +34,7 @@ class Installer extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         trace('building installer for $platform $arch..');
         runBuild(function(?error : Dynamic) {
             callback( error );

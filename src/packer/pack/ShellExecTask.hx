@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 import tannus.node.ChildProcess;
 import tannus.TSys as Sys;
 
@@ -33,14 +34,14 @@ class ShellExecTask extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(done : ?Dynamic->Void):Void {
+    override function execute(done : VoidCb):Void {
         exec( done );
     }
 
     /**
       * run the shell command and get the result
       */
-    private function exec(done : ?Dynamic->Void):Void {
+    private function exec(done : VoidCb):Void {
         ChildProcess.exec(command, options, function(error:Null<Dynamic>, stdout, stderr) {
             if (error != null) {
                 done( error );

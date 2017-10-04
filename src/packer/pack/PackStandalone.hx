@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -35,7 +36,7 @@ class PackStandalone extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(done : ?Dynamic->Void):Void {
+    override function execute(done : VoidCb):Void {
         var rawOptions = toRaw( options );
         function packCb(error:Null<Dynamic>, appPaths:Array<String>):Void {
             if (error != null) {

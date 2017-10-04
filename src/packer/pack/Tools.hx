@@ -6,6 +6,7 @@ import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
 import tannus.node.*;
 import tannus.node.Process;
+import tannus.async.*;
 
 import pack.*;
 
@@ -14,6 +15,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.VoidAsyncs;
 
 class Tools {
     /**
@@ -37,23 +39,9 @@ class Tools {
     /**
       * perform a batch of Tasks
       */
-    public static function batch<T:Task>(tasks:Array<T>, callback:?Dynamic->Void):Void {
-        var stack = new AsyncStack();
-        for (t in tasks) {
-            stack.push(function(next) {
-                t.run(function(?error : Dynamic) {
-                    if (error != null) {
-                        callback( error );
-                    }
-                    else {
-                        next();
-                    }
-                });
-            });
-        }
-        stack.run(function() {
-            callback();
-        });
+    public static function batch<T:Task>(tasks:Array<T>, callback:VoidCb):Void {
+        var functions = tasks.map.fn( _.run );
+        VoidAsyncs.series(functions, callback);
     }
 
     /**

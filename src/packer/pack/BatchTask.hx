@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import pack.*;
 
@@ -14,17 +15,17 @@ using Slambda;
 using pack.Tools;
 
 class BatchTask extends Task {
-    private var children:Array<Task>;
-    public function new(?tasks:Array<Task>):Void {
+    public function new(?kids : Iterable<Task>):Void {
         super();
 
-        children = (tasks != null ? tasks : []);
+        if (kids != null) {
+            for (t in kids) {
+                addChild( t );
+            }
+        }
     }
 
-    /**
-      * execute [this] Task
-      */
-    override function execute(callback : ?Dynamic->Void):Void {
-        children.batch( callback );
+    override function execute(done : VoidCb):Void {
+        done();
     }
 }

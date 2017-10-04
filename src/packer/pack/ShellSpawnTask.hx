@@ -6,6 +6,7 @@ import tannus.sys.*;
 import tannus.node.ReadableStream;
 import tannus.node.ChildProcess;
 import tannus.TSys as Sys;
+import tannus.async.*;
 
 import pack.*;
 import pack.Tools.*;
@@ -35,8 +36,8 @@ class ShellSpawnTask extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(done : ?Dynamic->Void):Void {
-        exec( done );
+    override function execute(done : VoidCb):Void {
+        exec(untyped done);
     }
 
     /**

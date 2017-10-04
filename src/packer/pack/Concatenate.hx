@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.node.*;
+import tannus.async.*;
 import tannus.node.Fs;
 
 import haxe.Json;
@@ -39,7 +40,7 @@ class Concatenate extends Task {
     /**
       * execute [this] task
       */
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         var stack = new AsyncStack();
         for (src in sources) {
             stack.push(function( next ) {
@@ -79,7 +80,7 @@ class Concatenate extends Task {
       ---
       * default action is to write it to [dest]
       */
-    private function putResult(data:ByteArray, callback:?Dynamic->Void):Void {
+    private function putResult(data:ByteArray, callback:VoidCb):Void {
         FileSystem.write(dest, data);
         callback();
     }

@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import pack.Tools.*;
 
@@ -36,7 +37,7 @@ class PromptedTask extends pack.Task {
             if (cb == null) {
                 cb = (function(?error : Dynamic) null);
             }
-            execute( cb );
+            super.run( cb );
         });
     }
 

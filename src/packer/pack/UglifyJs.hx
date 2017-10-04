@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -34,7 +35,7 @@ class UglifyJs extends Task {
     /**
       * execute [this] Task
       */
-    override function execute(callback : ?Dynamic->Void):Void {
+    override function execute(callback : VoidCb):Void {
         // get uncompressed source
         var code:String = FileSystem.read( input );
         // transform source code

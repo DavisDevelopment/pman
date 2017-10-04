@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.node.Fs;
+import tannus.async.*;
 
 import haxe.Json;
 import js.Lib.require;
@@ -34,7 +35,7 @@ class CatJsLibs extends Concatenate {
     /**
       * execute [this] Task
       */
-    override function execute(done : ?Dynamic->Void):Void {
+    override function execute(done : VoidCb):Void {
         if (shouldRun()) {
             super.execute( done );
         }
@@ -46,7 +47,7 @@ class CatJsLibs extends Concatenate {
     /**
       * place results in file
       */
-    override function putResult(data:ByteArray, callback:?Dynamic->Void):Void {
+    override function putResult(data:ByteArray, callback:VoidCb):Void {
         var code:String = data.toString();
         var header:String = "if (typeof module === 'object') {\nwindow.module = module;\nmodule=undefined;\n}\n(function(){\n";
         var footer:String = "\n}());\nif(window.module){\nmodule=window.module;\n}";

@@ -3,6 +3,7 @@ package pack;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import haxe.Json;
 
@@ -33,7 +34,7 @@ class RevisePackageJson extends Task {
     /**
       * run [this] Task
       */
-    override function execute(callback : ?Dynamic->Void) {
+    override function execute(callback : VoidCb) {
         revise(function(?error : Dynamic) {
             if (error != null) {
                 callback( error );
@@ -50,7 +51,7 @@ class RevisePackageJson extends Task {
     /**
       * alter newData
       */
-    private function revise(callback : ?Dynamic->Void):Void {
+    private function revise(callback : VoidCb):Void {
         newData['main'] = ((o.compress || o.release)?'scripts/background.min.js':'scripts/background.js');
 
         callback();
