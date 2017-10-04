@@ -7,11 +7,10 @@ import tannus.sys.*;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
-import pman.db.*;
 import pman.media.*;
-import pman.db.MediaStore;
-import pman.db.ActorsStore;
 import pman.media.MediaType;
+import pman.edb.*;
+import pman.edb.ActorStore;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -26,36 +25,46 @@ using Slambda;
 using pman.media.MediaTools;
 
 class Actor {
-    public function new(name:String, ?id:Int, ?gender:ActorGender):Void {
+    public function new(name:String, ?id:String):Void {
         this.name = name;
         this.id = id;
-        this.gender = gender;
+        //this.gender = gender;
     }
 
 /* === Instance Methods === */
 
+    /**
+      * create and return a copy of [this] Actor object
+      */
     public function clone():Actor {
-        return new Actor(name, id, gender);
+        return new Actor(name, id);
     }
 
+    /**
+      * convert [this] Actor object to an ActorRow object
+      */
     public function toRow():ActorRow {
         return {
-            id: id,
-            name: name,
-            gender: (gender!=null?gender.getIndex():null)
+            _id: id,
+            name: name
         };
     }
 
 /* === Instance Fields === */
 
-    public var id : Null<Int>;
+    public var id : Null<String>;
     public var name : String;
-    public var gender : Null<ActorGender>;
 
 /* === Static Methods === */
 
+    /**
+      * convert an ActorRow to an Actor object
+      */
     public static function fromRow(row : ActorRow):Actor {
-        return new Actor(row.name, row.id, (row.gender != null?ActorGender.createByIndex( row.gender ):null));
+        return new Actor(
+            row.name,
+            row._id
+        );
     }
 }
 
