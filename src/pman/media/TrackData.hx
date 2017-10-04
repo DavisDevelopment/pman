@@ -19,8 +19,9 @@ import pman.media.info.Mark;
 import haxe.Serializer;
 import haxe.Unserializer;
 
+import pman.Globals.*;
+
 import Slambda.fn;
-import electron.Tools.defer;
 import tannus.node.Buffer;
 
 using StringTools;
@@ -68,6 +69,26 @@ class TrackData {
         }
         marks = d.marks.map( Unserializer.run );
         tags = d.tags.map( Unserializer.run );
+
+        var steps:Array<VoidAsync> = new Array();
+
+        // pull [actors]
+        steps.push(function(next : VoidCb) {
+            actors = new Array();
+            if (d.actors == null || d.actors.length == 0) {
+                next();
+            }
+            else {
+                writeActors(d.actors, function(?error, ?al) {
+                    next( error );
+                });
+            }
+        });
+
+        // execute [steps]
+        steps.series(function(?error) {
+            done( error );
+        });
     }
 
     /**
@@ -244,37 +265,12 @@ class TrackData {
     }
 
     /**
-      * attach an Actor instance to [this]
-      */
-    //public function attachActor(actor : Actor):Actor {
-        //for (a in actors)
-            //if (a.name == actor.name)
-                //return a;
-        //actors.push( actor );
-        //return actor;
-    //}
-
-    /**
-      * add an Actor
-      */
-    //public function addActor(name : String):Actor {
-        //return attachActor(new Actor( name ));
-    //}
-
-    /**
       * select tag by oregex
       */
     public function selectTag(pattern : String):Null<String> {
         var reg:RegEx = new RegEx(new EReg(pattern, 'i'));
         return tags.firstMatch.fn(reg.match(_));
     }
-
-    /**
-      * select actor by oregex
-      */
-    //public function selectActor(pattern : String):Null<Actor> {
-        //return actors.firstMatch(untyped ORegEx.compile( pattern ));
-    //}
 
     /**
       * checks for attached tag by given name
@@ -287,15 +283,116 @@ class TrackData {
     }
 
     /**
-      * checks for attached actor by given name
+      * attach an Actor object to [this]
       */
-    //public function hasActor(name:String):Bool {
-        //for (a in actors)
-            //if (a.name == name)
-                //return true;
-        //return false;
-    //}
+    public function attachActor(actor : Actor):Void {
+        if (!hasActor( actor.name )) {
+            actors.push( actor );
+        }
+    }
+
     /**
+      * add an Actor to [this] by name
+      */
+    public function addActor(name : String):Void {
+        attachActor(new Actor(name, null));
+    }
+
+    /**
+      * check whether the given Actor is attached to [this]
+      */
+    public function hasActor(name : String):Bool {
+        for (actor in actors) {
+            if (actor.name == name) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+      * select a single Actor by predicate function
+      */
+    public function selectActor(predicate : Actor -> Bool):Maybe<Actor> {
+        return actors.firstMatch( predicate );
+    }
+
+    /**
+      * select a single Actor by ORegEx
+      */
+    public function oreselectActor(ore : String):Maybe<Actor> {
+        return selectActor(untyped ORegEx.compile( ore ));
+    }
+
+    /**
+      * detach an Actor from [this]
+      */
+    public function detachActor(actor : Actor):Void {
+        var todel = [];
+        for (a in actors) {
+            if (a.equals( actor )) {
+                todel.push( a );
+            }
+        }
+        for (a in todel) {
+            actors.remove( a );
+        }
+    }
+
+    /**
+      * remove an Actor from [this]
+      */
+    public function removeActor(name : String):Void {
+        var actor = oreselectActor('[name="$name"]');
+        if (actor == null) {
+            return ;
+        }
+        else {
+            detachActor( actor );
+        }
+    }
+
+    /**
+      * push an Actor onto [this]
+      */
+    public function pushActor(name:String, done:Cb<Actor>):Void {
+        database.actorStore._cogActor(name, function(?error, ?actor) {
+            if (error != null) {
+                done(error, null);
+            }
+            else if (actor != null) {
+                attachActor( actor );
+                done(null, actor);
+            }
+        });
+    }
+
+    /**
+      * push several Actors onto [this]
+      */
+    public function pushActors(names:Array<String>, done:Cb<Array<Actor>>):Void {
+        database.actorStore._cogActorsFromNames(names, function(?error, ?al) {
+            if (error != null) {
+                return done(error, null);
+            }
+            else if (al != null) {
+                for (a in al) {
+                    attachActor( a );
+                }
+                done(null, al);
+            }
+        });
+    }
+
+    /**
+      * set [this]'s 'actors' field
+      */
+    public function writeActors(names:Array<String>, done:Cb<Array<Actor>>):Void {
+        var prevActors = actors.copy();
+        actors = new Array();
+        pushActors(names, done);
+    }
+
     /**
       * edit [this] TrackData object
       */
@@ -318,7 +415,7 @@ class TrackData {
     public var description : Null<String>;
     public var marks : Array<Mark>;
     public var tags : Array<String>;
-    public var actors : Array<Dynamic>;
+    public var actors : Array<Actor>;
 
     public var meta : Null<MediaMetadata>;
 }
