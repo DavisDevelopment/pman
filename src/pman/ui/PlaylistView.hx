@@ -135,14 +135,8 @@ class PlaylistView extends Pane {
 	  * bind events to the Player
 	  */
 	private function __bind():Void {
-	    player.on('tabswitching', untyped function() {
-	        unbind();
-	    });
-
-	    player.on('tabswitched', untyped function() {
-	        bind();
-	        refresh( true );
-	    });
+	    player.on('tabswitching', on_tab_changing);
+	    player.on('tabswitched', on_tab_changed);
 	}
 
 	/**
@@ -186,6 +180,22 @@ class PlaylistView extends Pane {
             bindList();
         }
 
+        // build the Track list out, poo sha
+        for (track in playlist) {
+            var trackView:Null<TrackView> = tview( track );
+            if (player.track == track) {
+                trackView.focused( true );
+            }
+            if ( trackView.needsRebuild ) {
+                trackView.build();
+            }
+            addTrack( trackView );
+        }
+
+        if (done != null)
+            done();
+
+        /*
         // create a batch of microtasks
         var batch = exec.createBatch();
 		for (track in playlist) {
@@ -221,6 +231,7 @@ class PlaylistView extends Pane {
 		        continue;
 		    });
 		});
+		*/
 
 		// remove scrollbar from view if there is nothing in the view
 		if (playlist.length == 0) {
@@ -236,12 +247,12 @@ class PlaylistView extends Pane {
 	  * tear down the track list
 	  */
 	private function undoTrackList(?done : Void->Void):Void {
-	    var batch = exec.createBatch();
-		for (track in tracks) {
-			batch.task(detachTrack( track ));
+	    list.empty();
+	    tracks = new Array();
+
+		if (done != null) {
+		    defer( done );
 		}
-		batch.task({ tracks = new Array(); });
-		batch.start( done );
 	}
 
 	/**
@@ -255,23 +266,6 @@ class PlaylistView extends Pane {
 	}
 
 	/**
-	  * build the track list for the search-results view
-	  */
-	private function buildMatchList(matches : Array<SearchMatch<Track>>):Void {
-		list = new List();
-		listRow.append( list );
-		list.el.plugin('disableSelection');
-		bindList();
-		for (match in matches) {
-		    var view = tview( match.item );
-			if (player.track == match.item) {
-				view.focused( true );
-			}
-			addTrack( view );
-		}
-	}
-
-	/**
 	  * build out the search widget
 	  */
 	private function buildSearchWidget():Void {
@@ -282,7 +276,7 @@ class PlaylistView extends Pane {
 	/**
 	  * add a Track to [this]
 	  */
-	public inline function addTrack(tv : TrackView):Void {
+	public function addTrack(tv : TrackView):Void {
 		tracks.push( tv );
 		list.addItem( tv );
 	}
@@ -292,12 +286,7 @@ class PlaylistView extends Pane {
 	  */
 	public function detachTrack(view : TrackView):Void {
 	    tracks.remove( view );
-		if (view.parentWidget != null && (view.parentWidget is ListItem)) {
-		    list.removeItem(cast view.parentWidget);
-		}
-        else {
-            list.removeItemFor( view );
-        }
+        list.removeItemFor( view );
 	}
 
 	/**
@@ -358,7 +347,7 @@ class PlaylistView extends Pane {
 				cv.focused( true );
 			}
 		}
-		defer( scrollToActive );
+		exec.task( scrollToActive );
 	}
 
 	/**
@@ -371,12 +360,33 @@ class PlaylistView extends Pane {
 	}
 
 	/**
+	  * react to an impending tab-change
+	  */
+	private function on_tab_changing(change : Delta<PlayerTab>):Void {
+	    unbind();
+	}
+
+	/**
+	  * a tab-change has just occurred
+	  */
+	private function on_tab_changed(change : Delta<PlayerTab>):Void {
+	    undoTrackList(function() {
+	        defer(function() {
+	            refresh();
+	        });
+	    });
+	}
+
+	/**
 	  * delete [this]
 	  */
 	override function destroy():Void {
 		super.destroy();
 	}
 
+    /**
+      * get a TrackView by Point
+      */
 	@:allow( pman.ui.pl.TrackView )
 	private function findTrackViewByPoint(p : Point):Null<TrackView> {
 		var lastPassed:Null<{t:TrackView, r:Rectangle}> = null;
@@ -416,7 +426,7 @@ class PlaylistView extends Pane {
     /**
       * get the TrackView associated with the given Track
       */
-    public inline function viewFor(track : Track):Null<TrackView> {
+    public function viewFor(track : Track):Null<TrackView> {
         return _tc[track.uri];
     }
 
@@ -507,14 +517,14 @@ class PlaylistView extends Pane {
 	}
 
     /**
-      *
+      * get the first Track in the list of selected Tracks
       */
 	public function getFirstSelectedTrack():Null<Track> {
 	    return getTrackSelection().ternary(_.get( 0 ), null);
 	}
 
     /**
-      *
+      * get the last Track in the list of selected tracks
       */
 	public function getLastSelectedTrack():Null<Track> {
 	    return getTrackSelection().ternary(_.get(_.length - 1), null);
@@ -536,11 +546,17 @@ class PlaylistView extends Pane {
 	    _locked = true;
 	}
 
+    /**
+      * unlock [this] view
+      */
 	public function unlock():Void {
 	    _locked = false;
 	    exec.task( refresh );
 	}
 
+    /**
+      * check whether [this] view is locked
+      */
 	public function isLocked():Bool return _locked;
 
     /**
@@ -629,8 +645,11 @@ class PlaylistView extends Pane {
 	public var session(get, never):PlayerSession;
 	private inline function get_session():PlayerSession return player.session;
 
-	public var playlist(get, never):Playlist;
-	private inline function get_playlist():Playlist return session.playlist;
+	public var tab(get, never):Maybe<PlayerTab>;
+	private inline function get_tab() return session.activeTab;
+
+	public var playlist(get, never):Null<Playlist>;
+	private function get_playlist():Null<Playlist> return tab.ternary(_.playlist, null);
 
 	public var isOpen(get, never):Bool;
 	private inline function get_isOpen():Bool {
