@@ -9,11 +9,9 @@
 -cp hscript/
 
 -lib slambda
-#-lib yield
 -lib actuate
 -lib format
 -lib electron
-#-lib closure
 
 -D tannus
 -D node
@@ -29,7 +27,6 @@
 -main BPlayerMain
 -D debug
 -D renderer_process
-#-D js-unflatten
 -js ../dist/scripts/content.js
 
 --next 
