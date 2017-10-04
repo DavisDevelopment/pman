@@ -72,4 +72,6 @@ class Reader {
 /* === Instance Fields === */
 
 /* === Static Methods === */
+
+    public static inline function run(s : String):Playlist return (new Reader().readString( s ));
 }
