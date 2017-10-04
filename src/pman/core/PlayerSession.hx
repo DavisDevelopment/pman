@@ -462,7 +462,8 @@ class PlayerSession {
 	    if (tabs[tabIndex] == null)
 	        return activeTab;
 	    if (tabIndex != activeTabIndex) {
-	        player.dispatch('tabswitching', null);
+	        var delta:Delta<PlayerTab> = new Delta(tabs[activeTabIndex], tabs[tabIndex]);
+	        player.dispatch('tabswitching', delta);
 	        blur();
 	        activeTabIndex = tabIndex;
 	        if (activeTab.blurredTrack != null) {
@@ -472,7 +473,7 @@ class PlayerSession {
             else if (activeTab.playlist.length > 0) {
                 focus(activeTab.playlist[0]);
             }
-	        player.dispatch('tabswitched', null);
+	        player.dispatch('tabswitched', delta.reverse());
 	    }
         else if (activeTab.blurredTrack != null) {
             focus( activeTab.blurredTrack );
