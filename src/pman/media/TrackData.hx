@@ -295,6 +295,17 @@ class TrackData {
                 //return true;
         //return false;
     //}
+    /**
+    /**
+      * edit [this] TrackData object
+      */
+    public function edit(action:TrackData->VoidCb->Void, done:VoidCb, _save:Bool=true):Void {
+        var steps:Array<VoidAsync> = [action.bind(this, _)];
+        if ( _save ) {
+            steps.push(untyped save.bind(_, database.mediaStore));
+        }
+        steps.series( done );
+    }
 
 /* === Instance Fields === */
 
