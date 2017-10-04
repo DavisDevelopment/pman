@@ -50,7 +50,11 @@ class TrackData {
     /**
       * pull data from a MediaInfoRow
       */
-    public function pullRaw(row : MediaRow):Void {
+    public function pullRaw(row:MediaRow, done:VoidCb, ?store:ActorStore):Void {
+        if (store == null) {
+            store = database.actorStore;
+        }
+
         media_id = row._id;
         var d = row.data;
         views = d.views;
@@ -85,7 +89,7 @@ class TrackData {
                 description: description,
                 marks: marks.map( Serializer.run ),
                 tags: tags.map( Serializer.run ),
-                actors: [],
+                actors: actors.map.fn( _.name ),
                 meta: (meta != null ? meta.toRaw() : null)
             }
         };
@@ -106,11 +110,7 @@ class TrackData {
         steps.push(function(done : VoidCb) {
             var prom = store.putRow(toRaw());
             prom.then(function( row ) {
-                pullRaw( row );
-
-                if (done != null) {
-                    done();
-                }
+                pullRaw(row, done);
             });
             prom.unless(function( error ) {
                 done( error );
