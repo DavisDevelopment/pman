@@ -218,6 +218,7 @@ class TrackInfoPopup extends Dialog {
       */
     private function getRating():Maybe<Float> return ivn('rating');
     private function getContentRating():Maybe<String> return ivs('content-rating');
+    private function getChannel():Maybe<String> return ivs('channel');
 
     /**
       * get an input's value as a String
