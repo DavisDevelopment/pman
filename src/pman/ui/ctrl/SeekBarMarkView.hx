@@ -30,6 +30,7 @@ import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
 import tannus.math.TMath.*;
 import gryffin.Tools.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -118,17 +119,25 @@ class SeekBarMarkView {
 
     public var name(get, never):String;
     private function get_name() {
-        switch ( type ) {
-            case MTReal( mark ):
-                switch ( mark.type ) {
-                    case Named( n ):
-                        return n;
-                    default:
-                        throw 'Error: MarkView can only be attached to Marks of the Named(_) type, not ${mark.type}';
-                }
+        if (_name == null) {
+            switch ( type ) {
+                case MTReal( mark ):
+                    switch ( mark.type ) {
+                        case Named( tname ):
+                            var allMarks = player.track.data.marks;
+                            _name = mark.format(allMarks, tname);
+                            return _name;
 
-            default:
-                throw 'Error: snapshot-implied moments of interest do not have names';
+                        default:
+                            throw 'Error: MarkView can only be attached to Marks of the Named(_) type, not ${mark.type}';
+                    }
+
+                default:
+                    throw 'Error: snapshot-implied moments of interest do not have names';
+            }
+        }
+        else {
+            return _name;
         }
     }
 
@@ -155,6 +164,7 @@ class SeekBarMarkView {
     public var type : MarkViewType;
     public var tooltip : SeekBarMarkViewTooltip;
 
+    private var _name : Null<String> = null;
     private var color : Null<Color> = null;
 }
 
