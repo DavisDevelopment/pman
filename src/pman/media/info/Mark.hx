@@ -150,6 +150,18 @@ class Mark {
 
     /**
     /**
+      * get the 'first word' of [this] bookmark's name
+      */
+    public function fw():Maybe<String> {
+        switch ( type ) {
+            case Named( text ):
+                return firstWord( text );
+
+            default:
+                return null;
+        }
+    }
+
     /**
 /* === Instance Fields === */
 
