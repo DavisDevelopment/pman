@@ -270,7 +270,24 @@ class EfficientTrackListDataLoader extends Task1 {
         if (!data_is_complete( data )) {
             patch_data( data );
         }
-        next();
+
+        if (data.meta.isIncomplete()) {
+            load_media_metadata(data.track, function(?error, ?meta) {
+                if (error != null)
+                    return next( error );
+                else if (meta != null) {
+                    data.meta = meta;
+                    
+                    next();
+                }
+                else {
+                    next('Error: Failed to load MediaMetadata');
+                }
+            });
+        }
+        else {
+            next();
+        }
     }
 
 /* === Utility Methods === */
@@ -278,7 +295,7 @@ class EfficientTrackListDataLoader extends Task1 {
     /**
       * check that the given TrackData is complete
       */
-    private inline function data_is_complete(data : TrackData):Bool {
+    private function data_is_complete(data : TrackData):Bool {
         return true;
     }
 
