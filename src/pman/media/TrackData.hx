@@ -170,9 +170,9 @@ class TrackData {
     public function removeMarksOfType(mt : MarkType):Void {
         filterMarks.fn(!_.type.equals( mt ));
     }
-    public inline function removeBeginMark():Void removeMarksOfType( Begin );
-    public inline function removeEndMark():Void removeMarksOfType( End );
-    public inline function removeLastTimeMark():Void removeMarksOfType( LastTime );
+    public function removeBeginMark():Void removeMarksOfType( Begin );
+    public function removeEndMark():Void removeMarksOfType( End );
+    public function removeLastTimeMark():Void removeMarksOfType( LastTime );
 
     /**
       * remove a specific Mark
@@ -198,14 +198,14 @@ class TrackData {
     /**
       * get [this] Track's last time
       */
-    public inline function getLastTime():Null<Float> {
+    public function getLastTime():Null<Float> {
         return _getTime( LastTime );
     }
 
     /**
       * get [this] Track's begin time
       */
-    public inline function getBeginTime():Null<Float> {
+    public function getBeginTime():Null<Float> {
         return _getTime( Begin );
     }
 
