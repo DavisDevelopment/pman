@@ -500,7 +500,7 @@ class KeyboardCommands {
 		// frame-by-frame mode
 		if ( event.altKey ) {
 		    var bn:Float = (1.0 / 30);
-		    n = (1.0 / 30);
+		    n = frameTimeDelta();
 		    
 			if ( event.shiftKey ) {
 			    n *= 5.0;
