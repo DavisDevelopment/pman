@@ -26,7 +26,6 @@ using Slambda;
 using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
-using tannus.html.JSTools;
 
 class TrackRename extends Task1 {
     /* Constructor Function */
@@ -36,9 +35,7 @@ class TrackRename extends Task1 {
         track = t;
         store = ms;
         toDelete = new Array();
-        renamed = null;
-        if (newPath != null)
-            name = new Delta(newPath, track.getFsPath());
+        renamed = newPath;
     }
 
 /* === Instance Methods === */
@@ -59,7 +56,7 @@ class TrackRename extends Task1 {
             ].series( done ));
         }
 
-        if (name == null) {
+        if (renamed == null) {
             get_newpath(function(?error : Dynamic) {
                 if (error != null) {
                     if ((error is CancelTrackRename)) {
@@ -162,30 +159,14 @@ class TrackRename extends Task1 {
         var new_uri:String = uri( name.current );
         var old_uri:String = uri( name.previous );
 
-        store._getRowByUri(old_uri, function(?error, ?row) {
-            if (error != null) {
+        store._mutate(fn(_.eq('_id', track.mediaId)), function(m:Modification) {
+            m.set('uri', new_uri);
+        }, null, function(?error, ?row) {
+            if (error != null)
                 return done( error );
-            }
             else if (row != null) {
-                // modify the row before reinsertion
-                function modThatHoe(row:MediaRow, next:VoidCb) {
-                    // reassign the 'uri' property
-                    row.uri = new_uri;
-
-                    // declare completion
-                    next();
-                }
-
-                // initiate refactoring of the row
-                store.refactorRow(row, modThatHoe, function(?error, ?newRow:MediaRow) {
-                    if (error != null) {
-                        return done( error );
-                    }
-                    else {
-                        trace( newRow );
-                        done();
-                    }
-                });
+                //TODO
+                done();
             }
         });
     }
