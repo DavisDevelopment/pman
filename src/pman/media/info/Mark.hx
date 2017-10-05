@@ -149,6 +149,26 @@ class Mark {
     }
 
     /**
+      * get an Array of all first words
+      */
+    private function firstWords(all : Array<Mark>):Array<String> {
+        var fwl = [];
+        for (m in all) {
+            if (m == this)
+                continue;
+            else {
+                switch ( m.type ) {
+                    case Named(firstWord(_) => fw):
+                        if (!(fw == null || fw.empty()))
+                            fwl.push( fw );
+                    default:
+                        //
+                }
+            }
+        }
+        return fwl;
+    }
+
     /**
       * get the 'first word' of [this] bookmark's name
       */
