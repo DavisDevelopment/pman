@@ -172,6 +172,16 @@ class KeyboardCommands {
                 case Space:
                     p.togglePlayback();
 
+                // advance by one frame
+                case LetterE:
+                    var time = (frameTimeDelta() * fncc());
+                    if ( event.altKey ) {
+                        p.currentTime -= time;
+                    }
+                    else {
+                        p.currentTime += time;
+                    }
+
                 // N
                 case LetterN, Key.NumpadPlus:
                     //p.gotoNext();
