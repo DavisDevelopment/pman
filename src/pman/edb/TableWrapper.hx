@@ -240,6 +240,15 @@ class TableWrapper {
         return _cog.bind(query, fresh, test, _).toPromise();
     }
 
+    /**
+      * delete one or more documents
+      */
+    public function remove<T>(query:QueryDecl, done:EitherType<VoidCb, Cb<Int>>, multiple:Bool=false):Void {
+        store.remove(query.toDynamic(), {multi:multiple}, function(?error, ?numRemoved) {
+            untyped done(error, numRemoved);
+        });
+    }
+
 /* === Utility Methods === */
 
     public inline function createModification():Modification return new Modification();
