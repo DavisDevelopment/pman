@@ -3,6 +3,7 @@ package pman.media;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.ds.tuples.*;
 
 import pman.core.*;
 import pman.display.media.*;
@@ -74,6 +75,15 @@ class MediaMetadata {
             )) || 
             (audio == null)
         );
+    }
+
+    public function getVideoFrameRateInfo():Maybe<Tup2<Float, Float>> {
+        if (video.frame_rate != null) {
+            return video.frame_rate.split( '/' ).map( Std.parseFloat );
+        }
+        else {
+            return null;
+        }
     }
 
 /* === Instance Fields === */
