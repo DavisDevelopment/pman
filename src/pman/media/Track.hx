@@ -668,26 +668,17 @@ class Track extends EventDispatcher implements IComparable<Track> {
     }
 
     /**
-      * 
+      * generate/load thumbnail of given size
       */
-    public function getThumbs():Void {
+    public function getThumb(?size:String, ?slice:{pos:Int,?end:Int}):Void {
         var b = getBundle();
-        var count:Int = 6;
-        var size = '35%';
-        var thumbs = b.getThumbs(count, size);
-        if (thumbs != null) {
-            trace( thumbs );
-        }
-        else {
-            // listen for when the described thumbnail set exists
-            b.awaitThumbs(count, size, function(ts:Thumbs) {
-                thumbs = ts;
-                trace( thumbs );
-            });
-
-            // kick off the generation of those thumbnails
-            b.genThumbs(count, size);
-        }
+        var tnp = b.getThumbnails(size, slice);
+        tnp.then(function(items) {
+            trace( items );
+        });
+        tnp.unless(function(error) {
+            report( error );
+        });
     }
 
 /* === Computed Instance Fields === */
