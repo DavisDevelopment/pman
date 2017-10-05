@@ -535,6 +535,16 @@ class KeyboardCommands {
 	    return (n / 100);
 	}
 
+	private function frameTimeDelta():Float {
+	    if (p.track != null && p.track.data != null && p.track.data.meta != null) {
+	        var tuple = p.track.data.meta.getVideoFrameRateInfo();
+	        if (tuple != null) {
+	            return (tuple._1 / tuple._0);
+	        }
+	    }
+	    return (1.0 / 30.0);
+	}
+
 	/**
 	  * get the nextCommandCount
 	  */
