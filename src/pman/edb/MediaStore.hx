@@ -132,6 +132,35 @@ class MediaStore extends TableWrapper {
         }, done);
     }
 
+    /**
+      * delete, modify, and reinsert a row
+      */
+    public function refactorRow(row:MediaRow, mod:MediaRow->VoidCb->Void, done:Cb<MediaRow>):Void {
+        var _row:MediaRow = row;
+        var steps = [deleteRow.bind(row, _)];
+        steps.push(function(next) {
+            mod(_row, next);
+        });
+        steps.push(function(next) {
+            _putRow(_row, function(?error, ?savedRow:MediaRow) {
+                if (error != null) {
+                    next( error );
+                }
+                else if (savedRow != null) {
+                    _row = savedRow;
+                    next();
+                }
+            });
+        });
+        steps.series(function(?error) {
+            if (error != null) {
+                done(error, null);
+            }
+            else {
+                done(null, _row);
+            }
+        });
+    }
 }
 
 typedef MediaRow = {
