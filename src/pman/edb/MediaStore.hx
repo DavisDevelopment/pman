@@ -123,6 +123,15 @@ class MediaStore extends TableWrapper {
         return getRowByUri( uri ).transform.fn( _.exists ).bool();
     }
     public function _hasRowForUri(uri:String, done:Cb<Bool>) return hasRowForUri(uri).toAsync(done);
+
+    public function deleteRow(row:MediaRow, done:VoidCb):Void {
+        remove(function(q : Query) {
+            if (row._id != null)
+                return q.eq('_id', row._id);
+            else return q.eq('uri', row.uri);
+        }, done);
+    }
+
 }
 
 typedef MediaRow = {
