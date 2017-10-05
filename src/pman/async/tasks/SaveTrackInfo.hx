@@ -52,9 +52,7 @@ class SaveTrackInfo extends Task1 {
       */
     private function rename_track(done : VoidCb):Void {
         if (delta.title != null) {
-            var newPath:Path = track.getFsPath();
-            newPath.name = delta.title.current;
-            newPath = newPath.normalize();
+            var newPath:Path = (track.getFsPath().directory.plusString( delta.title.current )).normalize();
             var renamer = new TrackRename(track, database.mediaStore, newPath);
             renamer.run( done );
         }
