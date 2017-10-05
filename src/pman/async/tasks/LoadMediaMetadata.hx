@@ -66,22 +66,17 @@ class LoadMediaMetadata extends Task2<MediaMetadata> {
             }
             else {
                 meta.duration = info.format.duration;
+
                 if (info.hasVideo()) {
                     var vs = info.videoStreams[0];
                     meta.video = {
                         width: vs.width,
                         height: vs.height
                     };
+                    meta.video.frame_rate = vs.avg_frame_rate;
+                    meta.video.time_base = vs.time_base;
                 }
-                /*
-                if (info.hasAudio()) {
-                    var as = info.audioStreams[0];
-                    meta.audio = {
-                        channels: as.channels,
-                        channel_layout: as.channel_layout
-                    };
-                }
-                */
+                
                 info = null;
                 done(null, meta);
             }
