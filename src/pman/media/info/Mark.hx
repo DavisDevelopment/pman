@@ -3,6 +3,7 @@ package pman.media.info;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.media.Duration;
 
 import gryffin.display.Image;
 
@@ -134,6 +135,22 @@ class Mark {
         time = v();
     }
 
+    /**
+    /**
+      * get the 'first' word in a piece of text
+      */
+    private function firstWord(text : String):Null<String> {
+        text = text.trim();
+        if (text.empty())
+            return null;
+        else {
+            return text.before(' ');
+        }
+    }
+
+    /**
+    /**
+    /**
 /* === Instance Fields === */
 
     public var type : MarkType;
