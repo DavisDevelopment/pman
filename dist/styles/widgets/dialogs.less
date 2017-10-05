@@ -136,9 +136,12 @@ div.track-info-dialog {
 
     div.data-wrap {
         div.data {
-            width: 90%;
+            // don't set width on .data <div/>s that are in grid layouts
+            &:not(.columns) {
+                width: 90%;
 
-            .block-center;
+                .block-center;
+            }
 
             input, textarea {
                 border: solid lighten(@primary, 10%) 0.5px;
@@ -153,6 +156,12 @@ div.track-info-dialog {
             label {
                 color: white;
             }
+        }
+
+        div.data-group {
+            width: 90%;
+
+            .block-center;
         }
     }
 }

@@ -9,7 +9,7 @@
         </div>
         <div class="row data description">
             <label>Summary: 
-                <textarea class="input-description" name="description">::if (data.description)::::(data.description)::::end::</textarea>
+                <textarea rows="6" class="input-description" name="description">::if (data.description)::::(data.description)::::end::</textarea>
             </label>
         </div>
         <div class="row data tags">
@@ -18,13 +18,32 @@
         <div class="row data stars">
             <label>Actors:<input type="text" class="input-stars" name="stars" value="$$stars()"/></label>
         </div>
-        <div class="row data rating">
-            <label>Rating<input type="number" class="input-rating" name="rating" value="::if (data.rating)::::(data.rating)::::end::"/></label>
+        <!--<div class="row data rating">-->
+            <!--<label>Rating<input type="number" class="input-rating" name="rating" value="::if (data.rating)::::(data.rating)::::end::"/></label>-->
+        <!--</div>-->
+        <div class="row data-group">
+            <div class="data columns large-4">
+                <label>Studio/Channel:
+                    <input type="text" class="input-channel" name="channel" value=""/>
+                </label>
+            </div>
+            <div class="data columns large-4">
+                <label>Rating:
+                    <input type="number" class="input-rating" name="rating" value="::if (data.rating)::::(data.rating)::::end::"/>
+                </label>
+            </div>
+            <div class="data columns large-4">
+                <label>Content Rating:
+                    <input type="text" class="input-content-rating" name="content-rating" value="::if (data.contentRating)::::(data.contentRating)::::end::"/>
+                </label>
+            </div>
         </div>
     </div>
     <div class="row dialog-footer">
-        <button class="button cancel">Cancel</button>
-        <button class="button save">Save</button>
+        <div class="expanded button-group">
+            <button class="button cancel secondary">Cancel</button>
+            <button class="button save primary">Apply Changes</button>
+        </div>
     </div>
 </div>
 
