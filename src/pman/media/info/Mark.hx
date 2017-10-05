@@ -170,6 +170,26 @@ class Mark {
     }
 
     /**
+      * get a Dict of all first-words and the number of Marks whose names start with that word
+      */
+    private function nfirstWords(all:Array<Mark>, ?wmf:String->String):Dict<String, Int> {
+        var fwl = firstWords( all );
+        if (wmf != null)
+            fwl = fwl.map( wmf );
+        var counts = new Dict();
+        inline function add(w:String,n:Int=1) {
+            if (counts.exists( w ))
+                counts[w] += n;
+            else 
+                counts[w] = n;
+        }
+        for (w in fwl) {
+            add( w );
+        }
+        return counts;
+    }
+
+    /**
       * get the 'first word' of [this] bookmark's name
       */
     public function fw():Maybe<String> {
@@ -183,6 +203,27 @@ class Mark {
     }
 
     /**
+      *
+      */
+    private function _fwIndexOf(all:Array<Mark>, text:String, ?wmf:String->String):Int {
+        var fwi:Int = 0;
+        function word(s : Maybe<String>):Maybe<String> {
+            return (wmf != null ? wmf( s ) : s);
+        };
+        for (mark in all) {
+            var mfw:Maybe<String> = mark.fw();
+            if (mfw != null) {
+                if (mark == this) {
+                    return ++fwi;
+                }
+                else if (word( mfw ) == word(firstWord( text ))) {
+                    ++fwi;
+                }
+            }
+        }
+        return -1;
+    }
+
 /* === Instance Fields === */
 
     public var type : MarkType;
