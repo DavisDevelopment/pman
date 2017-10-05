@@ -136,6 +136,33 @@ class Mark {
     }
 
     /**
+      * get the 'title' of [this] Mark
+      */
+    public function format(all:Array<Mark>, text:String):String {
+        var result:String = text;
+        var index:Int = all.indexOf( this );
+        inline function set(x:String, y:Dynamic) {
+            result = result.replace('%$x', Std.string( y ));
+        }
+        set('i', index);
+        var fw:Null<String> = firstWord( text );
+        if (fw != null && !fw.empty()) {
+            var wordWarper = (function(word : String) {
+                return word.toLowerCase();
+            });
+
+            var nfw = nfirstWords(all, wordWarper);
+            var wordIndex = _fwIndexOf(all, text, wordWarper);
+            
+            set('w', (wordIndex > 1 ? '$wordIndex' : ''));
+            set('W', (wordIndex + 1));
+        }
+        set('t', Duration.fromFloat( time ));
+        set('urinal', '-------\n BETTY \n-------'.times( 5 ));
+        
+        return result;
+    }
+
     /**
       * get the 'first' word in a piece of text
       */
