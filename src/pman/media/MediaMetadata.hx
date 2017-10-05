@@ -66,7 +66,12 @@ class MediaMetadata {
     public function isIncomplete():Bool {
         return (
             (duration == null) ||
-            (video == null) || 
+            (video == null || (
+                (video.width == null) ||
+                (video.height == null) ||
+                (video.frame_rate == null) ||
+                (video.time_base == null)
+            )) || 
             (audio == null)
         );
     }
