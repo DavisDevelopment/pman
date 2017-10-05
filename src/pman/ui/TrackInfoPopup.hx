@@ -168,37 +168,34 @@ class TrackInfoPopup extends Dialog {
         }
         else {
             // create array to hold the ByteArrays
-            var ba:Array<ByteArray> = new Array();
+            var ba:Array<String> = new Array();
             // create buffer to hold current segment
-            var b:ByteArrayBuffer = new ByteArrayBuffer();
+            var b:String = '';
             // iterate over each Byte in the String
             for (index in 0...s.length) {
                 var c = s.byteAt( index );
                 // commas are delimiters
                 if (c.equalsChar(',')) {
+                    b = b.trim();
                     // if the buffer isn't empty
                     if (b.length > 0) {
                         // add the buffer to the list
-                        ba.push(b.getByteArray());
+                        ba.push( b );
                         // reset the buffer
-                        b = new ByteArrayBuffer();
+                        b = '';
                     }
                 }
                 // add any other Byte to the buffer
                 else {
-                    b.addByte( c );
+                    b += c;
                 }
             }
+            b = b.trim();
             // flush the buffer once iteration has stopped
             if (b.length > 0) {
-                ba.push(b.getByteArray());
+                ba.push( b );
             }
-            // convert ByteArrays to trimmed Strings
-            var sa:Array<String> = [for (bin in ba) bin.toString().trim()];
-            // remove empty Strings
-            sa = sa.filter.fn(!_.empty());
-            // return remaining Strings
-            return sa;
+            return ba;
         }
     }
 
