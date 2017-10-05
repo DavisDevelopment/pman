@@ -141,6 +141,14 @@ class TrackData {
     }
 
     /**
+      *
+      */
+    public function sortMarks():Void {
+        //marks.sort([x, y] => Reflect.compare(x.time, y.time));
+        marks.sort((x, y) -> Reflect.compare(x.time, y.time));
+    }
+
+    /**
       * add a new Mark to [this]
       */
     public function addMark(mark : Mark):Void {
@@ -153,6 +161,7 @@ class TrackData {
             case Named( name ):
                 marks.push( mark );
         }
+        sortMarks();
     }
 
     /**
