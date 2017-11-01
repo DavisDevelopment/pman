@@ -125,7 +125,7 @@ class TrackData {
         if (store == null) {
             store = BPlayerMain.instance.db.mediaStore;
         }
-        var db = store.root;
+        var db = BPlayerMain.instance.db;
 
         var steps:Array<VoidAsync> = [];
         steps.push(function(done : VoidCb) {
