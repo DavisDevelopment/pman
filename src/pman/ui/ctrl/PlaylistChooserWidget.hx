@@ -282,6 +282,7 @@ class PlaylistChooserItem extends Ent {
     public function refresh():Void {
         var l = appDir.playlists.readPlaylist( name );
         status = (player.track != null ? l.has( player.track ) : false);
+        t.color = (status ? player.theme.secondary : new Color(255, 255, 255));
     }
 
     /**
