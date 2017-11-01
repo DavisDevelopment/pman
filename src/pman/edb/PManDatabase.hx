@@ -11,7 +11,7 @@ import pman.Paths;
 import pman.ds.OnceSignal as ReadySignal;
 import pman.Globals.*;
 
-import nedb.DataStore;
+import edis.libs.nedb.DataStore;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -95,7 +95,7 @@ class PManDatabase {
             afterSerialization: afterSerialization,
             beforeDeserialization: beforeDeserialization
         });
-        return Type.createInstance(type, untyped [this, store]);
+        return Type.createInstance(type, untyped [store]);
     }
 
     /**

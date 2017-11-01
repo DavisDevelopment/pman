@@ -11,7 +11,8 @@ import pman.Paths;
 import pman.ds.OnceSignal as ReadySignal;
 import pman.media.info.Actor;
 
-import nedb.DataStore;
+import edis.libs.nedb.DataStore;
+import edis.storage.db.Query;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -29,8 +30,8 @@ using pman.edb.MediaRowTools;
 
 class ActorStore extends TableWrapper {
     /* Constructor Function */
-    public function new(db:PManDatabase, store:DataStore):Void {
-        super(db, store);
+    public function new(store:DataStore):Void {
+        super(store);
     }
 
 /* === Instance Methods === */

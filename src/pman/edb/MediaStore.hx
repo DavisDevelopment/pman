@@ -10,7 +10,8 @@ import tannus.sys.FileSystem as Fs;
 import pman.Paths;
 import pman.ds.OnceSignal as ReadySignal;
 
-import nedb.DataStore;
+import edis.libs.nedb.DataStore;
+import edis.storage.db.Query;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -28,8 +29,8 @@ using pman.edb.MediaRowTools;
 
 class MediaStore extends TableWrapper {
     /* Constructor Function */
-    public function new(db:PManDatabase, store:DataStore):Void {
-        super(db, store);
+    public function new(store:DataStore):Void {
+        super(store);
     }
 
 /* === Instance Methods === */

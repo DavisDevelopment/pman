@@ -29,7 +29,9 @@ using tannus.async.Asyncs;
 using tannus.async.VoidAsyncs;
 using tannus.html.JSTools;
 
-class TableWrapper {
+typedef TableWrapper = edis.storage.db.TableWrapper;
+
+class TableWrapper_ {
     /* Constructor Function */
     public function new(root:PManDatabase, store:DataStore):Void {
         this.root = root;
