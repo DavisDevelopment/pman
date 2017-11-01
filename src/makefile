@@ -21,8 +21,9 @@ pack:
 build-installers:
 	cd ../dist/ && ./pack -release installer
 
-release:
-	cd ../dist/ && ./pack recompile preprocess package installer -release -p linux -a x64
+release: compile-release
+	#cd ../dist/ && ./pack recompile preprocess package installer -release -p linux -a x64
+	cd ../dist/ && ./pack -p linux -a x64 -compress -release package installer
 
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
