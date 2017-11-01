@@ -47,7 +47,7 @@ class DefaultStatusBarItem extends StatusBarItem {
       */
     override function render(stage:Stage, c:Ctx):Void {
         var tbr = new Rectangle(0, 0, tb.width, tb.height);
-        tbr.centerY = centerY;
+        tbr.centerY = floor( centerY );
         tbr.x = 0;
 
         c.drawComponent(tb, 0, 0, tb.width, tb.height, tbr.x, tbr.y, tbr.w, tbr.h);
