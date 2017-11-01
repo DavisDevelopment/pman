@@ -7,6 +7,7 @@
 -cp vex/
 -cp hxpress/src/
 -cp hscript/
+-cp edis/
 
 -lib slambda
 -lib actuate
@@ -21,6 +22,7 @@
 -D vex
 -D foundation
 -D eval-stack
+-D underscore
 
 --each
 
