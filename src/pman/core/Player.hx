@@ -587,18 +587,19 @@ class Player extends EventDispatcher {
 	    }
 
         if (track != null) {
-            prompt('bookmark name', null, function(name : String) {
-				// ignore empty input
-				if (name.trim().empty()) {
-					return complete();
-				}
+            var box = new BookmarkPrompt();
+            box.open();
+            box.readLine(function(name : Null<String>) {
+                if (name.trim().empty()) {
+                    return complete();
+                }
 
-				// create the Mark itself
-                var mark = new Mark(Named( name ), currentTime);
+                var mark = new Mark(Named(name), currentTime);
                 track.addMark(mark, function(?error) {
                     complete( error );
                 });
             });
+            box.focus();
         }
         else 
 			return complete();
