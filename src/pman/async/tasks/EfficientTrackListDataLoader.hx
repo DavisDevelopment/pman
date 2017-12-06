@@ -243,23 +243,28 @@ class EfficientTrackListDataLoader extends Task1 {
         track._loadingData = true;
         track.data = data;
         animFrame(function() {
-            data.pullRaw(row, function(?error) {
-                if (error != null) {
-                    next( error );
-                }
-                else {
-                    ensure_track_data_completeness(data, function(?error) {
-                        track._loadingData = false;
-                        if (error != null) {
-                            return next( error );
-                        }
-                        else {
-                            next();
-                            track._dataLoaded.call( data );
-                        }
-                    });
-                }
+            var steps = new Array();
+            steps.push(function(nxt:VoidCb) {
+                data.pullRaw(row, function(?error) {
+                    if (error != null) {
+                        nxt( error );
+                    }
+                    else {
+                        ensure_track_data_completeness(data, function(?error) {
+                            track._loadingData = false;
+                            if (error != null) {
+                                return nxt( error );
+                            }
+                            else {
+                                nxt();
+                                track._dataLoaded.call( data );
+                            }
+                        });
+                    }
+                });
             });
+            steps.push(data.initialize.bind(bpmain.db, _));
+            VoidAsyncs.series(steps, next);
         });
     }
 

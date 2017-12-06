@@ -63,7 +63,7 @@ class LoadTrackData extends Task2<TrackData> {
       * just initialize the TrackData
       */
     private function init_data(done: VoidCb):Void {
-        data.initialize( done );
+        data.initialize(db, done);
     }
 
     /**
