@@ -678,6 +678,11 @@ class Bundle {
         }).array();
     }
 
+    @:keep
+    public function betty() {
+        //
+    }
+
 /* === Static Methods === */
 
     /**

@@ -162,7 +162,7 @@ class TrackRename extends Task1 {
         var new_uri:String = uri( name.current );
         var old_uri:String = uri( name.previous );
 
-        store._getRowByUri(old_uri, function(?error, ?row) {
+        store.getRowByUri(old_uri, function(?error, ?row) {
             if (error != null) {
                 return done( error );
             }

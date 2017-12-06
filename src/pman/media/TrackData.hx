@@ -365,7 +365,7 @@ class TrackData {
       * push an Actor onto [this]
       */
     public function pushActor(name:String, done:Cb<Actor>):Void {
-        database.actorStore._cogActor(name, function(?error, ?actor) {
+        database.actorStore.cogActor(name, function(?error, ?actor) {
             if (error != null) {
                 done(error, null);
             }
@@ -380,7 +380,7 @@ class TrackData {
       * push several Actors onto [this]
       */
     public function pushActors(names:Array<String>, done:Cb<Array<Actor>>):Void {
-        database.actorStore._cogActorsFromNames(names, function(?error, ?al) {
+        database.actorStore.cogActorsFromNames(names, function(?error, ?al) {
             if (error != null) {
                 return done(error, null);
             }

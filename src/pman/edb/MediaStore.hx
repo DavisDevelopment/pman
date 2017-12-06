@@ -49,58 +49,58 @@ class MediaStore extends TableWrapper {
     /**
       * get all rows whose uri was in the [uris] list
       */
-    public function getRowsByUris(uris : Array<String>):ArrayPromise<Maybe<MediaRow>> {
+    public function getRowsByUris(uris:Array<String>, ?done:Cb<Array<Maybe<MediaRow>>>):ArrayPromise<Maybe<MediaRow>> {
         var queryDef:Query = new Query({
             uri: {
                 "$in": uris
             }
         });
-        return query( queryDef );
+        return query(queryDef, done);
     }
 
     /**
       * get a single MediaRow by [uri]
       */
-    public function getRowByUri(uri : String):Promise<Maybe<MediaRow>> {
-        return getBy('uri', uri);
+    public function getRowByUri(uri:String, ?done:Cb<Maybe<MediaRow>>):Promise<Maybe<MediaRow>> {
+        return getBy('uri', uri, done);
     }
-    public function _getRowByUri(uri:String, done:Cb<Maybe<MediaRow>>) {
-        getRowByUri(uri).toAsync( done );
-    }
+    //public function _getRowByUri(uri:String, done:Cb<Maybe<MediaRow>>) {
+        //getRowByUri(uri).toAsync( done );
+    //}
 
     /**
       * get a single row by id
       */
-    public function getRowById(id : String):Promise<MediaRow> {
-        return getById( id );
+    public function getRowById(id:String, ?done:Cb<MediaRow>):Promise<MediaRow> {
+        return getById(id, done);
     }
-    public function _getRowById(id:String, done:Cb<Maybe<MediaRow>>) getRowById(id).toAsync( done );
+    //public function _getRowById(id:String, done:Cb<Maybe<MediaRow>>) getRowById(id).toAsync( done );
 
     // get all rows
-    public function allRows():ArrayPromise<MediaRow> {
-        return all();
+    public function allRows(?done : Cb<Array<MediaRow>>):ArrayPromise<MediaRow> {
+        return all( done );
     }
-    public function _allRows(done:Cb<Array<MediaRow>>) {
-        return allRows().toAsync(done);
-    }
+    //public function _allRows(done:Cb<Array<MediaRow>>) {
+        //return allRows().toAsync(done);
+    //}
 
     // insert a new row
-    public function insertRow(row : MediaRow):Promise<MediaRow> {
-        return insert( row );
+    public function insertRow(row:MediaRow, ?done:Cb<MediaRow>):Promise<MediaRow> {
+        return insert(row, done);
     }
-    public function _insertRow(row:MediaRow, done:Cb<MediaRow>) insertRow(row).toAsync(done);
+    //public function _insertRow(row:MediaRow, done:Cb<MediaRow>) insertRow(row).toAsync(done);
 
-    public function putRow(row:MediaRow):Promise<MediaRow> {
+    public function putRow(row:MediaRow, ?done:Cb<MediaRow>):Promise<MediaRow> {
         return put(function(q:Query) {
             if (row._id != null)
                 return q.eq('_id', row._id);
             else return q.eq('uri', row.uri);
-        }, row);
+        }, row, done);
     }
-    public function _putRow(row:MediaRow, done:Cb<MediaRow>) return putRow(row).toAsync(done);
+    //public function _putRow(row:MediaRow, done:Cb<MediaRow>) return putRow(row).toAsync(done);
 
     // create or get a row
-    public function _cogRow(uri:String, done:Cb<MediaRow>):Void {
+    public function cogRow(uri:String, ?done:Cb<MediaRow>):Promise<MediaRow> {
         function newRow():MediaRow {
             return {
                 uri: uri,
@@ -114,16 +114,13 @@ class MediaStore extends TableWrapper {
                 }
             };
         }
-        _cog(fn(_.eq('uri', uri)), newRow, null, done);
-    }
-    public function cogRow(uri:String):Promise<MediaRow> {
-        return _cogRow.bind(uri, _).toPromise();
+        return cog(fn(_.eq('uri', uri)), newRow, null, done);
     }
 
-    public function hasRowForUri(uri : String):BoolPromise {
-        return getRowByUri( uri ).transform.fn( _.exists ).bool();
+    public function hasRowForUri(uri:String, ?done:Cb<Bool>):BoolPromise {
+        return wrap(getRowByUri( uri ).transform.fn( _.exists ).bool(), done);
     }
-    public function _hasRowForUri(uri:String, done:Cb<Bool>) return hasRowForUri(uri).toAsync(done);
+    //public function _hasRowForUri(uri:String, done:Cb<Bool>) return hasRowForUri(uri).toAsync(done);
 
     public function deleteRow(row:MediaRow, done:VoidCb):Void {
         remove(function(q : Query) {
@@ -136,31 +133,34 @@ class MediaStore extends TableWrapper {
     /**
       * delete, modify, and reinsert a row
       */
-    public function refactorRow(row:MediaRow, mod:MediaRow->VoidCb->Void, done:Cb<MediaRow>):Void {
-        var _row:MediaRow = row;
-        var steps = [deleteRow.bind(row, _)];
-        steps.push(function(next) {
-            mod(_row, next);
-        });
-        steps.push(function(next) {
-            _putRow(_row, function(?error, ?savedRow:MediaRow) {
+    public function refactorRow(row:MediaRow, mod:MediaRow->VoidCb->Void, done:Cb<MediaRow>):Promise<MediaRow> {
+        return wrap(Promise.create({
+            var _row:MediaRow = row;
+            var steps = [deleteRow.bind(row, _)];
+            steps.push(function(next) {
+                mod(_row, next);
+            });
+            steps.push(function(next) {
+                putRow(_row, function(?error, ?savedRow:MediaRow) {
+                    if (error != null) {
+                        next( error );
+                    }
+                    else if (savedRow != null) {
+                        _row = savedRow;
+                        next();
+                    }
+                });
+            });
+            steps.series(function(?error) {
                 if (error != null) {
-                    next( error );
+                    throw error;
                 }
-                else if (savedRow != null) {
-                    _row = savedRow;
-                    next();
+                else {
+                    //done(null, _row);
+                    return _row;
                 }
             });
-        });
-        steps.series(function(?error) {
-            if (error != null) {
-                done(error, null);
-            }
-            else {
-                done(null, _row);
-            }
-        });
+        }), done);
     }
 }
 

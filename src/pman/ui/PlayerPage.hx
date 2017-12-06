@@ -48,7 +48,7 @@ class PlayerPage extends Page {
 	override function open(body : Body):Void {
 	    super.open( body );
 
-		css['overflow'] = 'hidden';
+        css.set('overflow', 'hidden');
 
 		var win = body.application.win;
 		var canvas = win.document.createCanvasElement();

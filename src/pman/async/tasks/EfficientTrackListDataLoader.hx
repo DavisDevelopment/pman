@@ -196,7 +196,7 @@ class EfficientTrackListDataLoader extends Task1 {
         
         // function to perform a basic INSERT operation
         function insert(done : VoidCb) {
-            ms._insertRow(raw, function(?error, ?row:MediaRow) {
+            ms.insertRow(raw, function(?error, ?row:MediaRow) {
                 if (error != null) {
                     return done( error );
                 }

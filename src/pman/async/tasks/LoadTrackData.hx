@@ -47,7 +47,7 @@ class LoadTrackData extends Task2<TrackData> {
       */
     override function execute(done : Cb<TrackData>):Void {
         track._loadingData = true;
-        [tryto_load, fill_missing_info].series(function(?error:Dynamic) {
+        [tryto_load, fill_missing_info, init_data].series(function(?error:Dynamic) {
             track._loadingData = false;
             if (error != null) {
                 done(error, null);
@@ -57,6 +57,13 @@ class LoadTrackData extends Task2<TrackData> {
                 track._dataLoaded.call( data );
             }
         });
+    }
+
+    /**
+      * just initialize the TrackData
+      */
+    private function init_data(done: VoidCb):Void {
+        data.initialize( done );
     }
 
     /**
@@ -82,7 +89,7 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function attempt_load(done : VoidCb):Void {
         if (track.mediaId != null) {
-            store._getRowById(track.mediaId, function(?error, ?irow) {
+            store.getRowById(track.mediaId, function(?error, ?irow) {
                 if (error != null)
                     return done(error);
                 data = new TrackData( track );
@@ -91,7 +98,7 @@ class LoadTrackData extends Task2<TrackData> {
         }
         else {
             var uri:String = track.uri;
-            store._getRowByUri(uri, function(?error:Dynamic, ?row:MediaRow) {
+            store.getRowByUri(uri, function(?error:Dynamic, ?row:MediaRow) {
                 if (error != null) {
                     return done( error );
                 }
@@ -130,7 +137,7 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function push_data_to_db(done : VoidCb):Void {
         var raw = data.toRaw();
-        store._insertRow(raw, function(?error, ?row) {
+        store.insertRow(raw, function(?error, ?row) {
             if (error != null) {
                 return done( error );
             }

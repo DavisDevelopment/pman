@@ -179,6 +179,7 @@ class TimeJumpPrompt extends PromptBox {
     }
 
     public function setSegmentValue(segment:SegmentBound, nval:Int, ?segs:Array<SegmentBound>):Int {
+        nval = nval.rclamp(0, 59);
         var sval:String = (nval + '').lpad('0', 2);
         setSegmentText(segment, sval, segs);
         return nval;
@@ -306,6 +307,15 @@ class TimeJumpPrompt extends PromptBox {
             case Down:
                 event.preventDefault();
                 modCaretSegmentValue( -1 );
+
+            case Equals if ( event.shiftKey ):
+                var index = getCaretSegmentIndex();
+                if (index == 0) {
+                    value = '';
+                }
+                else {
+                    event.preventDefault();
+                }
 
             default:
                 super.keydown( event );

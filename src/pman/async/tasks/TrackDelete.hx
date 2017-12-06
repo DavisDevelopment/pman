@@ -72,7 +72,7 @@ class TrackDelete extends Task1 {
         var tp = track.getFsPath();
         if (tp != null)
             trackPaths.push( tp );
-        store._getRowByUri(track.uri, function(?error:Dynamic, ?row) {
+        store.getRowByUri(track.uri, function(?error:Dynamic, ?row) {
             if (error != null) {
                 done( error );
             }
