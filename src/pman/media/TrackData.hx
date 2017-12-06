@@ -49,6 +49,51 @@ class TrackData {
 /* === Instance Methods === */
 
     /**
+      * initialize [this] TrackData
+      */
+    public function initialize(db:PManDatabase, done:VoidCb):Void {
+        var steps:Array<VoidAsync> = new Array();
+        inline function step(x:VoidAsync) steps.push( x );
+
+        step(_parseTitle.bind(db, _));
+        step(save.bind(_, db.mediaStore));
+        steps.series( done );
+    }
+
+    /**
+      * parse additional data from [this]'s title
+      */
+    public function _parseTitle(db:PManDatabase, done:VoidCb):Void {
+        var names:Set<String> = new Set();
+        for (actor in actors) {
+            names.push(actor.name.toLowerCase());
+        }
+        var allp = db.actorStore.allActors();
+        allp.then(function(all) {
+            var searchFor:Set<String> = new Set();
+            var actord:Dict<String, Actor> = new Dict();
+            for (actor in all) {
+                var name = actor.name.toLowerCase();
+                searchFor.push( name );
+                actord[name] = actor;
+            }
+            searchFor = searchFor.difference( names );
+            var found:Set<String> = new Set();
+            var title:String = track.title.toLowerCase();
+            for (name in searchFor) {
+                if (title.has( name )) {
+                    found.push( name );
+                    actors.push(actord[name]);
+                }
+                //TODO also use EReg to check for name
+            }
+            trace(found.toArray());
+            done();
+        });
+        allp.unless(done.raise());
+    }
+
+    /**
       * pull data from a MediaInfoRow
       */
     public function pullRaw(row:MediaRow, done:VoidCb, ?store:ActorStore):Void {
