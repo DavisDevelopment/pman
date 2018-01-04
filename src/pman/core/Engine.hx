@@ -26,5 +26,6 @@ class Engine {
     // a micro-task manager and executor
     public var executor : Executor;
 
+    // dialog manager instance
     public var dialogs : Dialogs;
 }
