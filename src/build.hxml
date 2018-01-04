@@ -37,3 +37,4 @@
 -D main_process
 -js ../dist/scripts/background.js
 
+--next
