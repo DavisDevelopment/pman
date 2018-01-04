@@ -12,6 +12,7 @@
 	.search-box {
 		margin-left: auto;
 		margin-right: auto;
+		margin-top: 10px;
 		width: 100%;
 		flex: 0 1 auto;
 
@@ -33,7 +34,7 @@
                 position: absolute;
                 z-index: 2;
                 right: 38px;
-                top: 37px;
+                top: 4px;
                 height: 45px;
                 cursor: pointer;
             }
@@ -176,4 +177,28 @@
 			border-bottom: solid @secondary 1.5px;
 		}
 	}
+
+    .options-row {
+        .left {
+            float: left;
+        }
+        .right {
+            float: right;
+        }
+
+        .columns {
+            position: relative;
+            top: -15px;
+            &.right {
+                right: -46px;
+            }
+            &.left {
+                left: -15px;
+            }
+
+            select {
+                transform: scale(0.76);
+            }
+        }
+    }
 }
