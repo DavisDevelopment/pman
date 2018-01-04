@@ -15,6 +15,10 @@ import electron.ext.MenuItem;
 import electron.Tools.defer;
 import electron.main.WebContents;
 
+import edis.concurrency.*;
+import hscript.*;
+import hscript.plus.*;
+
 import pman.LaunchInfo;
 import pman.core.*;
 import pman.ui.*;
@@ -22,13 +26,13 @@ import pman.db.*;
 import pman.edb.*;
 import pman.events.*;
 import pman.media.*;
-import pman.ww.Worker;
 import pman.ipc.RendererIpcCommands;
 import pman.async.*;
 
 import Std.*;
 import tannus.internal.CompileTime in Ct;
 import tannus.TSys as Sys;
+import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
