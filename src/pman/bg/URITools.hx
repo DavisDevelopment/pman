@@ -107,11 +107,7 @@ class URITools {
       * convert a URI to a file Path
       */
     public static function toFilePath(uri: String):Path {
-        if (uri.startsWith('file:')) {
-            uri = uri.after('file:');
-        }
-        uri = withoutLeadingSlashes( uri );
-        return Path.fromString( uri );
+        return Path.fromString(withoutLeadingSlashes(afterProtocol( uri )));
     }
 
     /**
