@@ -8,6 +8,7 @@ import tannus.events.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem in Fs;
 import tannus.math.Random;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -155,12 +156,63 @@ class PlayerTab {
 	    type = v();
 	    switch ( type ) {
             case Player:
-                playlist = Playlist.fromStrings(v());
+                var tl = Playlist.fromStrings(v());
+                this.playlist = new Playlist();
+                for (track in tl) {
+                    var path = track.getFsPath();
+                    if (path != null) {
+                        if (Fs.exists( path )) {
+                            playlist.push( track );
+                        }
+                        else {
+                            //_attemptToLocateMissingFile( path );
+                            //TODO
+                        }
+                    }
+                    else {
+                        playlist.push( track );
+                    }
+                }
                 blurredTrack = playlist[v()];
 
             default:
                 v();
 	    }
+	}
+
+    /**
+      * attempt to find a missing file
+      */
+	private function _attemptToLocateMissingFile(track:Track, path:Path, done:VoidCb):Void {
+	    var folder:Path = path.directory;
+	    while (folder.pieces.length > 1 && !Fs.exists( folder )) {
+	        folder = folder.directory;
+	    }
+	    if (Fs.exists( folder )) {
+	        var names = Fs.readDirectory( folder );
+	        var paths = names.map(name->folder.plusString( name ));
+	        var test = electron.ext.FileFilter.ALL.test.bind();
+	        paths = paths.filter(path->test(path.toString()));
+	        if (!paths.empty()) {
+	            track.getData(function(?error, ?data:TrackData) {
+	                if (error != null) {
+	                    done( error );
+                    }
+                    else if (data != null) {
+                        //TODO
+                    }
+                    else {
+                        done();
+                    }
+	            });
+	        }
+            else {
+                done();
+            }
+	    }
+        else {
+            done();
+        }
 	}
 
 /* === Computed Instance Fields === */
