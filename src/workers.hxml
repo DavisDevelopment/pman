@@ -1,34 +1,33 @@
-#-cp tannus/
-#-cp gryffin/
+
+-cp tannus/
+-cp gryffin/
+-cp edis/
 #-cp foundation/src/
 #-cp crayon/
 #-cp ida/
 #-cp vex/
 #-cp hxpress/src/
-#-cp hscript/
+-cp hscript/
 
-#-lib slambda
+-lib slambda
 #-lib actuate
-#-lib format
+-lib format
 #-lib electron
 #-lib closure
 
-#-D tannus
-#-D node
-#-D electron
-#-D gryffin
-#-D ida
-#-D vex
-#-D foundation
+-D tannus
+-D node
+-D electron
+-D underscore
+-D gryffin
 
-#--each
+--each
 #--next
 
-#-main pman.ww.workers.HDDProbe
-#-D worker
-#-js ../dist/scripts/diskprobe.worker.js
-
-#--next
+-main pman.bg.BgTest
+-D worker
+-D hscriptPos
+-js ../dist/scripts/bgdb.worker.js
 
 #-main pman.ww.workers.TrackDataLoader
 #-D worker
