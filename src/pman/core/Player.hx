@@ -94,6 +94,7 @@ class Player extends EventDispatcher {
         // Player flags
 		flags = new Dict();
 
+        // pmbash interpreter
 		pmbashInterp = new PMBashInterp();
 
 		// listen for 'trackChange' events
@@ -542,7 +543,7 @@ class Player extends EventDispatcher {
 	    }
 
 	    var bundle = track.getBundle();
-	    var snapp = bundle.getSnapshot(currentTime, '80%');
+	    var snapp = bundle.getSnapshot(currentTime, '30%');
         snapp.then(function(item) {
             var vu = new SnapshotView(this, item.getPath());
             view.addSibling( vu );
@@ -574,7 +575,7 @@ class Player extends EventDispatcher {
 	/**
 	  * add a bookmark to the current time
 	  */
-	public function addBookmark(?done : VoidCb):Void {
+	public function addBookmark(?done:VoidCb):Void {
         var wasPlaying = getStatus().equals( Playing );
 	    pause();
 	    function complete(?error:Dynamic) {
@@ -596,7 +597,14 @@ class Player extends EventDispatcher {
 
                 var mark = new Mark(Named(name), currentTime);
                 track.addMark(mark, function(?error) {
-                    complete( error );
+                    if (error != null) {
+                        complete( error );
+                    }
+                    else {
+                        snapshot(function(?err) {
+                            complete( err );
+                        });
+                    }
                 });
             });
             box.focus();
