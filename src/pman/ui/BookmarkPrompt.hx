@@ -74,6 +74,20 @@ class BookmarkPrompt extends PromptBox {
         super.line( l );
     }
 
+    /**
+      * add an item to the [history]
+      */
+    private function addHistoryItem(line: String):Void {
+        var rem = [];
+        for (item in history) {
+            if (item.trim() == line.trim()) {
+                rem.push( item );
+            }
+        }
+        history = history.without( rem );
+        history.unshift(line.trim());
+    }
+
 /* === Instance Fields === */
 
     private var peekDistance : Int = 0;
