@@ -32,3 +32,5 @@ dist/styles/pman\.css
 dist/scripts/process\.worker\.js
 
 dist/scripts/diskprobe\.worker\.js
+
+dist/scripts/bgdb\.worker\.js
