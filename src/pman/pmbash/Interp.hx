@@ -27,6 +27,9 @@ class Interp extends Interpreter {
 
 /* === Instance Methods === */
 
+    /**
+      * initialize all pmbash commands
+      */
     override function __initCommands():Void {
         function alias(code:String)
             return new AliasCommand( code );
@@ -58,6 +61,9 @@ class Interp extends Interpreter {
         ];
     }
 
+    /**
+      * initialize environment variables
+      */
     override function __initEnvironment():Void {
         super.__initEnvironment();
         if (this.environment == null)
