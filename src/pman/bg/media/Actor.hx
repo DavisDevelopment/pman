@@ -57,6 +57,13 @@ class Actor {
         };
     }
 
+    /**
+      * create and return a deep-copy of [this]
+      */
+    public function clone():Actor {
+        return new Actor(toRow());
+    }
+
 /* === Instance Fields === */
 
     public var id: Null<String>;
