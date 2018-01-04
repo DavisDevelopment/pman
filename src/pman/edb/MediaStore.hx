@@ -174,6 +174,8 @@ typedef MediaDataRow = {
     views: Int,
     starred: Bool,
     ?rating: Float,
+    ?contentRating: String,
+    ?channel: String,
     ?description: String,
     marks: Array<String>,
     tags: Array<String>,

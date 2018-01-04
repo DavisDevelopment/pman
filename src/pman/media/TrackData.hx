@@ -44,6 +44,8 @@ class TrackData {
         marks = new Array();
         tags = new Array();
         actors = new Array();
+        channel = null;
+        contentRating = 'NR';
     }
 
 /* === Instance Methods === */
@@ -55,8 +57,10 @@ class TrackData {
         var steps:Array<VoidAsync> = new Array();
         inline function step(x:VoidAsync) steps.push( x );
 
-        step(_parseTitle.bind(db, _));
-        step(save.bind(_, db.mediaStore));
+        //step(_parseTitle.bind(db, _));
+        //step(save.bind(_, db.mediaStore));
+        //TODO
+
         steps.series( done );
     }
 
@@ -470,6 +474,8 @@ class TrackData {
     public var marks : Array<Mark>;
     public var tags : Array<String>;
     public var actors : Array<Actor>;
+    public var channel : Null<String>;
+    public var contentRating : Null<String>;
 
     public var meta : Null<MediaMetadata>;
 }
