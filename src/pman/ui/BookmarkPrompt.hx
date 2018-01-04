@@ -19,6 +19,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
 
+@:expose
 class BookmarkPrompt extends PromptBox {
     /* Constructor Function */
     public function new():Void {
@@ -40,10 +41,10 @@ class BookmarkPrompt extends PromptBox {
                     originalValue = value;
                 }
                 peekDistance++;
-                if (history.peek( peekDistance ) == null) {
+                if (history[peekDistance] == null) {
                     peekDistance--;
                 }
-                value = history.peek( peekDistance );
+                value = history[peekDistance];
                 caret( value.length );
 
             case Down:
@@ -52,11 +53,12 @@ class BookmarkPrompt extends PromptBox {
                     value = originalValue;
                 }
                 else {
-                    value = history.peek( peekDistance-- );
+                    value = history[0 + peekDistance--];
                 }
                 caret( value.length );
 
             case _:
+                peekDistance = 0;
                 super.keydown( event );
         }
     }
@@ -65,8 +67,9 @@ class BookmarkPrompt extends PromptBox {
       * do the shit
       */
     override function line(l : String):Void {
-        if (l != history.peek()) {
-            history.add( l );
+        if (l != history[0]) {
+            //history.unshift( l );
+            addHistoryItem( l );
         }
         super.line( l );
     }
@@ -78,5 +81,5 @@ class BookmarkPrompt extends PromptBox {
 
 /* === Statics === */
 
-    public static var history : Stack<String> = {new Stack();};
+    public static var history : Array<String> = {new Array();};
 }
