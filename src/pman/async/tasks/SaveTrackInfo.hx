@@ -71,6 +71,12 @@ class SaveTrackInfo extends Task1 {
 
             // handle synchronous changes
             steps.push(function(end) {
+                if (delta.channel != null)
+                    data.channel = delta.channel.current;
+
+                if (delta.contentRating != null)
+                    data.contentRating = delta.contentRating.current;
+
                 if (delta.rating != null)
                     data.rating = delta.rating.current;
 
@@ -120,5 +126,7 @@ typedef TrackInfoFormValueDelta = {
     ?description: Delta<String>,
     ?tags: Delta<Array<String>>,
     ?actors: Delta<Array<String>>,
-    ?rating: Delta<Float>
+    ?rating: Delta<Float>,
+    ?contentRating: Delta<String>,
+    ?channel: Delta<String>
 };
