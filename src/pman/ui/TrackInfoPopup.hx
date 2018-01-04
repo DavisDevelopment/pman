@@ -250,7 +250,9 @@ class TrackInfoPopup extends Dialog {
             description: getDescription(),
             tags: getTags(),
             actors: getActors(),
-            rating: getRating()
+            rating: getRating(),
+            channel: getChannel(),
+            contentRating: getContentRating()
         };
     }
 
@@ -294,6 +296,12 @@ class TrackInfoPopup extends Dialog {
                 delta.actors = new Delta(vanl, danl);
             }
         }
+        if (v.channel != d.channel) {
+            delta.channel = new Delta(v.channel, d.channel);
+        }
+        if (v.contentRating != d.contentRating) {
+            delta.contentRating = new Delta(v.contentRating, d.contentRating);
+        }
         return delta;
     }
 
@@ -336,5 +344,7 @@ typedef TrackInfoFormValue = {
     description : String,
     tags : Array<String>,
     actors : Array<String>,
-    rating : Null<Float>
+    channel: Null<String>,
+    rating : Null<Float>,
+    contentRating : Null<String>
 };
