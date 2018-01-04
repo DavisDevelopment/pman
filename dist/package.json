@@ -29,17 +29,17 @@
     "bplayer",
     "cross-platform"
   ],
-  "dependencies": {
+  "dead_dependencies": {
     "chromecast-api": "0.2.5",
     "express": "^4.15.2",
+    "send-seekable": "^1.0.4"
+  },
+  "dependencies": {
     "fluent-ffmpeg": "^2.1.0",
-    "jsmediatags": "3.4.0",
+    "jsmediatags": "^3.8.1",
     "local-ip": "^1.0.1",
     "localforage": "^1.5.2",
-    "mp3-duration": "^1.0.10",
-    "mp4box": "0.3.15",
     "nedb": "^1.8.0",
-    "send-seekable": "^1.0.4",
     "underscore": "^1.8.3"
   },
   "devDependencies": {
