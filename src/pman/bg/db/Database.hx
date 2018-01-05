@@ -29,6 +29,7 @@ class Database {
     public function new(autoInit:Bool=false):Void {
         tables = new Dict();
         reqs = new Prerequisites();
+        _or = new OnceSignal();
 
         if (instance == null) {
             instance = this;
@@ -107,6 +108,8 @@ class Database {
 
     public var tables: Dict<String, Table>;
     public var reqs: Prerequisites;
+
+    private var _or: OnceSignal;
 
 /* === Static Fields === */
 
