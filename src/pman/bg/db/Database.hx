@@ -70,6 +70,22 @@ class Database {
         return _or.isReady();
     }
 
+    /**
+      * wait for [this] Database to be ready
+      */
+    public function ensure(action: Void->Void):Void {
+        return ((isReady() ? defer : _or.on)( action ));
+
+        if (isReady()) {
+            defer( action );
+        }
+        else {
+            _or.on( action );
+        }
+    }
+    public inline function onready(f: Void->Void):Void ensure( f );
+
+    /**
       * get a new Table
       */
     public function openTable<T:Table>(name:String, ?tableClass:Class<T>):T {
