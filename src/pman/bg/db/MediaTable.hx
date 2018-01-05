@@ -66,6 +66,14 @@ class MediaTable extends Table {
     }
 
     /**
+      * get an Array of MediaRows from an Array of 'keys' (Strings representing either an ID or URI)
+      */
+    public function getRowsByKeys(keys:Array<String>, ?done:Cb<Array<Maybe<MediaRow>>>):ArrayPromise<Maybe<MediaRow>> {
+        var queryDef:Query = new Query({id: {"$in": keys}}).or({uri:{"$in": keys}});
+        return query(queryDef, done);
+    }
+
+    /**
       * get a single MediaRow by [uri]
       */
     public function getRowByUri(uri:String, ?done:Cb<Maybe<MediaRow>>):Promise<Maybe<MediaRow>> {
