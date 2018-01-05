@@ -117,17 +117,70 @@ class MediaData {
         return copy;
     }
 
+/* === Setter Methods === */
+
+    private function set_views(v) {
+        var res = (views = v);
+        return res;
+    }
+
+    private function set_starred(v) {
+        var res = (starred = v);
+        return res;
+    }
+
+    private function set_rating(v) {
+        var res = (rating = v);
+        return res;
+    }
+
+    private function set_channel(v) {
+        var res = (channel = v);
+        return res;
+    }
+
+    private function set_contentRating(v) {
+        var res = (contentRating = v);
+        return res;
+    }
+
+    private function set_description(v) {
+        var res = (description = v);
+        return res;
+    }
+
+    private function set_marks(v) {
+        var res = (marks = v);
+        return res;
+    }
+
+    private function set_tags(v) {
+        var res = (tags = v);
+        return res;
+    }
+
+    private function set_actors(v) {
+        var res = (actors = v);
+        return res;
+    }
+
+    private function set_meta(v) {
+        var res = (meta = v);
+        return res;
+    }
+
 /* === Instance Fields === */
 
-    public var views: Int;
-    public var starred: Bool;
-    public var rating: Null<Float>;
-    public var contentRating: Null<String>;
-    public var channel: Null<String>;
-    public var description: Null<String>;
-    public var marks: Array<String>;
-    public var tags: Array<String>;
-    public var actors: Array<Actor>;
+    public var views(default, set): Int;
+    public var starred(default, set): Bool;
+    public var rating(default, set): Null<Float>;
+    public var contentRating(default, set): Null<String>;
+    public var channel(default, set): Null<String>;
+    public var description(default, set): Null<String>;
+    public var marks(default, set): Array<String>;
+    public var tags(default, set): Array<String>;
+    public var actors(default, set): Array<Actor>;
 
-    public var meta: Null<MediaMetadata>;
+    public var meta(default, set): Null<MediaMetadata>;
+
 }
