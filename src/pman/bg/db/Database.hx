@@ -34,6 +34,10 @@ class Database {
         if (instance == null) {
             instance = this;
         }
+
+        if ( autoInit ) {
+            init();
+        }
     }
 
 /* === Instance Methods === */
