@@ -42,13 +42,19 @@ class URITools {
         return (isUri(s) ? s.before(':') : null);
     }
 
+    /**
+      * get the textual content of [s] after the protocol
+      */
     public static function afterProtocol(s: String):Null<String> {
         var proto = protocol( s );
         if (proto == null) {
-            return null;
+            return withoutLeadingSlashes( s );
         }
         else {
-            return withoutLeadingSlashes(s.after( '$proto:' ));
+            var sub:String = '$proto:';
+            s = s.replace(sub, '');
+            s = withoutLeadingSlashes( s );
+            return s;
         }
     }
 
