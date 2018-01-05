@@ -44,43 +44,95 @@ class MediaData {
       * pull [row]'s data onto [this]
       */
     public function pullRow(row:MediaDataRow, done:VoidCb):Void {
+        var db:Database = Database.get();
         var steps:Array<VoidAsync> = new Array();
 
         // handle base fields
         steps.push(function(next: VoidCb) {
-            views = row.views;
-            starred = row.starred;
-            rating = row.rating;
-            contentRating = row.contentRating;
-            channel = row.channel;
-            description = row.description;
-            tags = row.tags.copy();
-            meta = null;
-            if (row.meta != null) {
-                meta = new MediaMetadata( row.meta );
-            }
+            suspendLinkage(function(me) {
+                views = row.views;
+                starred = row.starred;
+                rating = row.rating;
+                contentRating = row.contentRating;
+                channel = row.channel;
+                description = row.description;
+                tags = row.tags.copy();
+                meta = null;
+                if (row.meta != null) {
+                    meta = new MediaMetadata( row.meta );
+                }
+            });
             next();
+        });
+
+        // handle tags
+        steps.push(function(next) {
+            var tagSteps:Array<VoidAsync> = new Array();
+            // get array of tags in their raw form
+            var rawTags = row.tags.copy();
+            // temp variable that will become the value of [tags]
+            var _tags = new Array();
+            // for every 'raw tag'
+            for (rt in rawTags) {
+                // queue the 'loading' of [rt]
+                tagSteps.push(function(nxt) {
+                    _tags.push( rt );
+                    nxt();
+                });
+            }
+            // execute [tagSteps]
+            tagSteps.series(function(?error) {
+                if (error != null) {
+                    return next( error );
+                }
+                else {
+                    // assign value of [tags]
+                    this.tags = _tags;
+                    next();
+                }
+            });
         });
 
         // handle marks
         steps.push(function(next) {
-            marks = new Array();
-            for (m in row.marks) {
-                //TODO
+            var _marks = new Array();
+            var rawMarks = row.marks.copy();
+            for (m in rawMarks) {
+                trace( m );
             }
             next();
         });
 
         // handle actors
         steps.push(function(next) {
-            actors = new Array();
-            for (a in row.actors) {
-                //TODO
+            var _actors = new Array();
+            var rawActors = row.actors.copy();
+            var actorSteps = new Array();
+
+            for (name in rawActors) {
+                actorSteps.push(function(nxt: VoidCb) {
+                    var ap = db.actors.cogActor( name );
+                    ap.then(function(actor: Actor) {
+                        _actors.push( actor );
+                        nxt();
+                    }, nxt.raise());
+                });
             }
-            next();
+
+            actorSteps.series(function(?error) {
+                if (error != null) {
+                    return next( error );
+                }
+                else {
+                    this.actors = _actors;
+                    next();
+                }
+            });
         });
 
-        steps.series( done );
+        db.ensure(function() {
+            steps.series( done );
+        });
     }
 
     /**
