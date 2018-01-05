@@ -119,6 +119,20 @@ class MediaData {
     }
 
     /**
+      * announce that [this] object has changed
+      */
+    private inline function announceChange():Void {
+        if ( _linked ) {
+            if ( _suspended ) {
+                _susHasChanged = true;
+            }
+            else {
+                _changed.fire();
+            }
+        }
+    }
+
+    /**
       * declare whether [this] object will announce changes made to it
       */
     public inline function link(status:Bool=true):Void {
