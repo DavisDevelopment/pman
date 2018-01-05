@@ -52,10 +52,24 @@ class Database {
 
         _build();
 
-        reqs.meet( done );
+        reqs.meet(function(?error) {
+            if (error != null) {
+                return done( error );
+            }
+            else {
+                _or.announce();
+                done();
+            }
+        });
     }
 
     /**
+      * check if [this] Database is ready
+      */
+    public function isReady():Bool {
+        return _or.isReady();
+    }
+
       * get a new Table
       */
     public function openTable<T:Table>(name:String, ?tableClass:Class<T>):T {
