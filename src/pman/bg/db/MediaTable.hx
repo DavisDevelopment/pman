@@ -187,68 +187,9 @@ class MediaTable extends Table {
         return promise;
     }
 
-/* === Media Methods === */
-
     /**
-      * get a Media instance by id from [this] Table
-      */
-    //public function getMediaById(id:String, ?done:Cb<Media>):Promise<Media> {
-        //return mp(getRowById( id ), done);
-    //}
 
-    /**
-      * get a Media instance by uri from [this] Table
-      */
-    //public function getMediaByUri(uri:String, ?done:Cb<Media>):Promise<Media> {
-        //return mp(getRowByUri( uri ), done);
-    //}
 
-    /**
-      * get all Media
-      */
-    //public function allMedia(?done: Cb<Array<Media>>):ArrayPromise<Media> {
-        //return amp(allRows(), done);
-    //}
-
-    /**
-      * insert a media instance
-      */
-    //public function insertMedia(media:Media, ?done:Cb<Media>):Promise<Media> {
-        //return mp(insertRow(media.toRow()), done);
-    //}
-
-    /**
-      * insert or update a media instance
-      */
-    //public function putMedia(media:Media, ?done:Cb<Media>):Promise<Media> {
-        //return mp(putRow(media.toRow()), done);
-    //}
-
-    /**
-      * create or get a media instance
-      */
-    //public function cogMedia(uri:String, ?done:Cb<Media>):Promise<Media> {
-        //return mp(cogRow(uri), done);
-    //}
-
-    /**
-      * convert a Promise<MediaRow> to a Promise<Media>
-      */
-    //private inline function mp(promise:Promise<MediaRow>, ?done:Cb<Media>):Promise<Media> {
-        //var res:Promise<Media> = promise.transform(row->row.toMedia());
-        //if (done != null) {
-            //res.toAsync( done );
-        //}
-        //return res;
-    //}
-
-    //private inline function amp(promise:ArrayPromise<MediaRow>, ?done:Cb<Array<Media>>):ArrayPromise<Media> {
-        //var res:ArrayPromise<Media> = promise.map(row->row.toMedia());
-        //if (done != null) {
-            //res.toAsync( done );
-        //}
-        //return res;
-    //}
 
 /* === Instance Fields === */
 }
