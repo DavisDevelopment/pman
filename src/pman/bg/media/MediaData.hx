@@ -24,7 +24,17 @@ using pman.bg.URITools;
 class MediaData {
     /* Constructor Function */
     public function new():Void {
-        //TODO
+        views = 0;
+        starred = false;
+        rating = null;
+        contentRating = 'NR';
+        channel = null;
+        description = null;
+        tags = new Array();
+        marks = new Array();
+        actors = new Array();
+        meta = null;
+
     }
 
 /* === Instance Methods === */
