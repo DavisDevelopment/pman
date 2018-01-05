@@ -163,6 +163,20 @@ class MediaData {
         }
     }
 
+    /**
+      * listen for change events
+      */
+    public inline function observe(onChange:Void->Void, once:Bool=false):Void {
+        (once ? _changed.once : _changed.on)( onChange );
+    }
+
+    /**
+      * stop listening for change events
+      */
+    public inline function ignore():Void {
+        _changed.clear();
+    }
+
 /* === Setter Methods === */
 
     private function set_views(v) {
