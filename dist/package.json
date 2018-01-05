@@ -35,6 +35,7 @@
     "send-seekable": "^1.0.4"
   },
   "dependencies": {
+    "auto-launch": "^5.0.5",
     "fluent-ffmpeg": "^2.1.0",
     "jsmediatags": "^3.8.1",
     "local-ip": "^1.0.1",
@@ -50,10 +51,10 @@
     "electron": "1.6.2",
     "electron-builder": "^16.8.3",
     "electron-devtools-installer": "^2.1.0",
-    "electron-installer-debian": "^0.5.0",
+    "electron-installer-debian": "^0.5.2",
     "electron-installer-windows": "^0.2.0",
-    "electron-packager": "^8.6.0",
-    "electron-winstaller": "^2.5.2",
+    "electron-packager": "^8.7.2",
+    "electron-winstaller": "^2.6.3",
     "less": "^2.7.2",
     "prompt": "^1.0.0",
     "uglify-js": "^2.8.22"
