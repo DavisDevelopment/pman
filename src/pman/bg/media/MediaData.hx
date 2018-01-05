@@ -183,4 +183,8 @@ class MediaData {
 
     public var meta(default, set): Null<MediaMetadata>;
 
+    public var _changed: VoidSignal;
+    public var _linked: Bool = false;
+    private var _suspended: Bool = false;
+    private var _susHasChanged: Bool = false;
 }
