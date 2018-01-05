@@ -26,7 +26,7 @@ using pman.bg.MediaTools;
 
 class Database {
     /* Constructor Function */
-    public function new():Void {
+    public function new(autoInit:Bool=false):Void {
         tables = new Dict();
         reqs = new Prerequisites();
 
@@ -40,7 +40,11 @@ class Database {
     /**
       * initialize [this] Database instance
       */
-    public function init(done: VoidCb):Void {
+    public function init(?done: VoidCb):Void {
+        if (done == null) {
+            done = untyped ((?err)->trace( err ));
+        }
+
         _build();
 
         reqs.meet( done );
