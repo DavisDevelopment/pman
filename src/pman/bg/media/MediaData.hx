@@ -125,6 +125,14 @@ class MediaData {
         _linked = status;
     }
 
+    /**
+      * declare whether [this] object's linkage is suspended
+      */
+    public inline function sus(status:Bool=true):Void {
+        _suspended = status;
+        _susHasChanged = false;
+    }
+
 /* === Setter Methods === */
 
     private function set_views(v) {
