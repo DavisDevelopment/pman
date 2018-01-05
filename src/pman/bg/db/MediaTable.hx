@@ -15,6 +15,7 @@ import edis.core.Prerequisites;
 
 import Slambda.fn;
 import edis.Globals.*;
+import haxe.extern.EitherType;
 
 import pman.bg.Dirs;
 import pman.bg.media.*;
@@ -76,6 +77,15 @@ class MediaTable extends Table {
       */
     public function getRowById(id:String, ?done:Cb<MediaRow>):Promise<MediaRow> {
         return getById(id, done);
+    }
+
+    /**
+      * get a MediaRow from a 'key'
+      */
+    public function getRowByKey(key:String, ?done:Cb<MediaRow>):Promise<MediaRow> {
+        return queryOne(function(q: Query) {
+            return q.eq('id', key).or.fn(_.eq('uri', key));
+        }, done);
     }
 
     /**
