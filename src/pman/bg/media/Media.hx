@@ -74,6 +74,23 @@ class Media {
         }), done);
     }
 
+    /**
+      * apply some changes to [this], then save them
+      */
+    public function alter(action:Media->VoidCb->Void, ?done:Cb<Media>):Promise<Media> {
+        return wrap(Promise.create({
+            action(this, function(?error) {
+                if (error != null) {
+                    throw error;
+                }
+                else {
+                    return save();
+                }
+            });
+        }), done);
+    }
+
+    /**
       * export as a MediaRow
       */
     public function toRow():MediaRow {
