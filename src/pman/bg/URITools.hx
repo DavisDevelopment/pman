@@ -115,8 +115,9 @@ class URITools {
     /**
       * convert a URI to a file Path
       */
-    public static function toFilePath(uri: String):Path {
-        return Path.fromString(withoutLeadingSlashes(afterProtocol( uri )));
+    public static inline function toFilePath(uri: String):Path {
+        trace(afterProtocol( uri ));
+        return Path.fromString(afterProtocol( uri ));
     }
 
     /**
