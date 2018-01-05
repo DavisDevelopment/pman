@@ -188,8 +188,54 @@ class MediaTable extends Table {
     }
 
     /**
+      * apply changes to a certain MediaRow
+      */
+    public function refactorRow(row:EitherType<MediaRow, Thunk<Promise<MediaRow>>>, mod:MediaRow->VoidCb->Void, ?done:Cb<MediaRow>):Promise<MediaRow> {
+        return wrap(Promise.create({
+            var prow = pthunk( row );
+            prow.then(function(row: MediaRow) {
+                var _row:MediaRow = Reflect.copy( row );
+                var steps:Array<VoidAsync> = [deleteRow.bind(row, _)];
+                steps.push(function(next) {
+                    mod(_row, next);
+                });
+                steps.push(function(next) {
+                    putRow(_row, function(?error, ?savedRow:MediaRow) {
+                        if (error != null) {
+                            next( error );
+                        }
+                        else {
+                            _row = savedRow;
+                            next();
+                        }
+                    });
+                });
+                steps.series(function(?error) {
+                    if (error != null) {
+                        throw error;
+                    }
+                    else {
+                        return _row;
+                    }
+                });
+            });
+            prow.unless(function(error: Dynamic) {
+                throw error;
+            });
+        }), done);
+    }
 
+    private function pthunk(row:EitherType<MediaRow, Thunk<Promise<MediaRow>>>):Promise<MediaRow> {
+        if ((row is Promise<MediaRow>) || Reflect.isFunction( row )) {
+            var thunk:Thunk<Promise<MediaRow>> = new Thunk(untyped row);
+            return thunk.resolve();
+        }
+        else {
+            return Promise.resolve(untyped row);
+        }
+    }
 
+/* === Media Methods === */
 
 /* === Instance Fields === */
 }
