@@ -147,6 +147,22 @@ class MediaData {
         _susHasChanged = false;
     }
 
+    /**
+      * suspend the firing of [_changed] for every change made, and fire it only once,
+      * if a change is made during the execution of [body] on [this]
+      */
+    public inline function suspendLinkage(body: MediaData->Void):Void {
+        if (_linked && !_suspended) {
+            sus( true );
+            body( this );
+            var hc:Bool = _susHasChanged;
+            sus( false );
+            if ( hc ) {
+                announceChange();
+            }
+        }
+    }
+
 /* === Setter Methods === */
 
     private function set_views(v) {
