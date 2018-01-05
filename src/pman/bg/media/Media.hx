@@ -38,7 +38,7 @@ class Media {
       * load [this]'s data
       */
     public function getData(?done: Cb<MediaData>):Promise<MediaData> {
-        var res = Promise.create({
+        return wrap(Promise.create({
             if (hasData()) {
                 return data;
             }
@@ -54,11 +54,7 @@ class Media {
                     }
                 });
             }
-        });
-        if (done != null) {
-            res.toAsync( done );
-        }
-        return res;
+        }), done);
     }
 
     /**
