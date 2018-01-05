@@ -149,4 +149,20 @@ class Database {
 
     private static var _stores:Dict<String, DataStore> = {new Dict();};
     public static var instance:Null<Database> = null;
+
+/* === Static Methods === */
+
+    /**
+      * obtain a Database object
+      */
+    public static function get(?safeAction:Database->Void):Database {
+        var res:Database = instance;
+        if (res == null) {
+            res = new Database( true );
+        }
+        if (safeAction != null) {
+            res.ensure(safeAction.bind(res));
+        }
+        return res;
+    }
 }
