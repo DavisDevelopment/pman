@@ -151,51 +151,61 @@ class MediaData {
 
     private function set_views(v) {
         var res = (views = v);
+        announceChange();
         return res;
     }
 
     private function set_starred(v) {
         var res = (starred = v);
+        announceChange();
         return res;
     }
 
     private function set_rating(v) {
         var res = (rating = v);
+        announceChange();
         return res;
     }
 
     private function set_channel(v) {
         var res = (channel = v);
+        announceChange();
         return res;
     }
 
     private function set_contentRating(v) {
         var res = (contentRating = v);
+        announceChange();
         return res;
     }
 
     private function set_description(v) {
         var res = (description = v);
+        announceChange();
         return res;
     }
 
     private function set_marks(v) {
         var res = (marks = v);
+        announceChange();
         return res;
     }
 
     private function set_tags(v) {
         var res = (tags = v);
+        announceChange();
         return res;
     }
 
     private function set_actors(v) {
         var res = (actors = v);
+        announceChange();
         return res;
     }
 
     private function set_meta(v) {
         var res = (meta = v);
+        announceChange();
         return res;
     }
 
