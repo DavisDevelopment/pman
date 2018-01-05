@@ -22,7 +22,10 @@ class URITools {
       * remove leading slashes from [s]
       */
     public static inline function withoutLeadingSlashes(s: String):String {
-        return (s.startsWith('//')?s.slice( 2 ):s);
+        while (s.startsWith('//')) {
+            s = s.slice( 2 );
+        }
+        return s;
     }
 
     /**
