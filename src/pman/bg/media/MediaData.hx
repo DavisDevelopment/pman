@@ -35,6 +35,7 @@ class MediaData {
         actors = new Array();
         meta = null;
 
+        _changed = new VoidSignal();
     }
 
 /* === Instance Methods === */
@@ -115,6 +116,13 @@ class MediaData {
         copy.actors = actors.map(x->x.clone());
         copy.meta = (meta != null ? meta.clone() : null);
         return copy;
+    }
+
+    /**
+      * declare whether [this] object will announce changes made to it
+      */
+    public inline function link(status:Bool=true):Void {
+        _linked = status;
     }
 
 /* === Setter Methods === */
