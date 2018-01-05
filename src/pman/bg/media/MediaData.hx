@@ -83,25 +83,6 @@ class MediaData {
     }
 
     /**
-      * copy [row]'s data onto [this]
-      */
-    //public function writeRow(row: MediaDataRow):Void {
-        //views = row.views;
-        //starred = row.starred;
-        //rating = row.rating;
-        //contentRating = row.contentRating;
-        //channel = row.channel;
-        //description = row.description;
-        //marks = row.marks.copy();
-        //tags = row.tags.copy();
-        //actors = row.actors.copy();
-        //meta = null;
-        //if (row.meta != null) {
-            //meta = new MediaMetadata( row.meta );
-        //}
-    //}
-
-    /**
       * get [this] as a MediaDataRow object
       */
     public function toRow():MediaDataRow {
