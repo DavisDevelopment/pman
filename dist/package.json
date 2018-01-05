@@ -40,6 +40,7 @@
     "jsmediatags": "^3.8.1",
     "local-ip": "^1.0.1",
     "localforage": "^1.5.2",
+    "natural": "^0.5.4",
     "nedb": "^1.8.0",
     "underscore": "^1.8.3"
   },
