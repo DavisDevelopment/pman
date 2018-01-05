@@ -101,9 +101,18 @@ class Media {
     /**
       * set [this]'s _data field
       */
-    public inline function setData(d: MediaData):Void {
+    public function setData(d: MediaData):Void {
+        if (hasData()) {
+            data.ignore();
+            data.link( false );
+        }
+
         data = d;
         applyData( data );
+        data.observe(function() {
+            applyData( this.data );
+        });
+        data.link();
     }
 
     /**
@@ -160,6 +169,8 @@ class Media {
     public var mimeType: Null<String>;
     public var meta: Null<MediaMetadata>;
 
+    public var cache_data: Bool = true;
+
     public var data: Null<MediaData>;
 
 /* === Static Methods === */
@@ -180,5 +191,12 @@ class Media {
             res.toAsync( done );
         }
         return res;
+    }
+
+    private static function wrap<T, P:Promise<T>>(promise:P, ?callback:Cb<T>):P {
+        if (callback != null) {
+            promise.toAsync( callback );
+        }
+        return promise;
     }
 }
