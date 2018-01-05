@@ -42,7 +42,7 @@ class MediaSourceTools {
         else if (uri.isUri()) {
             switch (uri.protocol()) {
                 case 'file':
-                    return MSLocalPath(uri.toFilePath());
+                    return MSLocalPath(uri.toUri().toFilePath());
 
                 default:
                     return MSUrl( uri );
