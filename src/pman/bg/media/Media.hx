@@ -58,6 +58,22 @@ class Media {
     }
 
     /**
+      * save [this] Media object to the database
+      */
+    public function save(?done: Cb<Media>):Promise<Media> {
+        return wrap(Promise.create({
+            var db = Database.instance;
+            db.media.putRow(toRow(), function(?error, ?row) {
+                if (error != null) {
+                    throw error;
+                }
+                else {
+                    return fromRow( row );
+                }
+            });
+        }), done);
+    }
+
       * export as a MediaRow
       */
     public function toRow():MediaRow {
