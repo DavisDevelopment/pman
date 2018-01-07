@@ -70,6 +70,19 @@ class Mark {
         time = v();
     }
 
+    public function getName():Null<String> {
+        switch ( type ) {
+            case Named(name):
+                return name;
+
+            case Scene(_, name):
+                return name;
+
+            default:
+                return null;
+        }
+    }
+
     /**
       * parse out [this] Mark's "word-list"
       */
