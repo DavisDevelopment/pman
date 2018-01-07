@@ -61,4 +61,73 @@ class TagTable extends Table {
         });
         return query(queryDef, done);
     }
+
+    public function cogRows(names:Array<String>, ?done:Cb<Array<TagRow>>):ArrayPromise<TagRow> {
+        var _names = names.copy();
+        var steps:Array<VoidAsync> = new Array();
+        var results:Array<TagRow> = new Array();
+        
+        return wrap(new Promise(function(accept, reject) {
+            getRowsByNames( names ).then(function(rows) {
+                for (row in rows) {
+                    if (row != null) {
+                        names.remove( row.name );
+                        results.push( row );
+                    }
+                }
+                for (name in names) {
+                    steps.push(function(next) {
+                        createRow(name, function(?error, ?row) {
+                            if (error != null) {
+                                next( error );
+                            }
+                            else {
+                                results.push( row );
+                                next();
+                            }
+                        });
+                    });
+                }
+                steps.series(function(?error) {
+                    if (error != null) {
+                        reject( error );
+                    }
+                    else {
+                        results.sort(function(a, b) {
+                            return Reflect.compare(names.indexOf(a.name), names.indexOf(b.name));
+                        });
+                        accept( results );
+                    }
+                });
+            }, reject);
+        }).array(), done);
+    }
+
+    /**
+      * get all TagRows
+      */
+    public function allRows(?done:Cb<Array<TagRow>>):ArrayPromise<TagRow> {
+        return all( done );
+    }
+
+    /**
+      * create or get a TagRow
+      */
+    public function cogRow(name:String, ?done:Cb<TagRow>):Promise<TagRow> {
+        function newRow():TagRow {
+            return {
+                name: name
+            };
+        }
+
+        var query:Query = qd(fn(_.eq('name', name)));
+
+        return cog(query, newRow, null, done);
+    }
+
+    public function createRow(name:String, ?done:Cb<TagRow>):Promise<TagRow> {
+        return insert({
+            name: name
+        }, done);
+    }
 }
