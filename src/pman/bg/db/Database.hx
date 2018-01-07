@@ -131,6 +131,11 @@ class Database {
     private inline function _build():Void {
         actors = openTable('actors', ActorTable);
         tags = openTable('tags', TagTable);
+
+        var mtp = Dirs.dbPath('media.db');
+        if (Fs.exists( mtp )) {
+            Fs.copy(mtp, mtp.plusString('../media_test.db'));
+        }
         media = openTable('media_test', MediaTable);
     }
 
