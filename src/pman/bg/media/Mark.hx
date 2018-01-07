@@ -12,6 +12,7 @@ import pman.bg.tasks.*;
 import pman.bg.media.MediaSource;
 import pman.bg.media.MediaData;
 import pman.bg.media.MediaRow;
+import pman.tools.SimpleWordLexer;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -62,10 +63,40 @@ class Mark {
       */
     @:keep
     public function hxUnserialize(u : Unserializer):Void {
+        u.setResolver(new MediaData.PatchTypeResolver());
         inline function v<T>():T return u.unserialize();
 
         type = v();
         time = v();
+    }
+
+    /**
+      * parse out [this] Mark's "word-list"
+      */
+    public function getWords():Null<Array<String>> {
+        if (!hasName()) {
+            return null;
+        }
+        else if (_wl == null) {
+            var words = new Array();
+            var tree = SimpleWordLexer.lex(getName());
+            for (token in tree) {
+                switch ( token ) {
+                    case TkWord(word):
+                        words.push( word );
+
+                    case TkCompound(wl):
+                        words.push(wl.join('-'));
+
+                    default:
+                        null;
+                }
+            }
+            return _wl = words;
+        }
+        else {
+            return _wl;
+        }
     }
 
 /* === Instance Fields === */
