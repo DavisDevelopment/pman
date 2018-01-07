@@ -276,7 +276,7 @@ class EfficientTrackListDataLoader extends Task1 {
             patch_data( data );
         }
 
-        if (data.meta.isIncomplete()) {
+        if (data.meta == null || data.meta.isIncomplete()) {
             load_media_metadata(data.track, function(?error, ?meta) {
                 if (error != null)
                     return next( error );
