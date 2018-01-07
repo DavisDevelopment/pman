@@ -83,6 +83,10 @@ class Mark {
         }
     }
 
+    public function hasName():Bool {
+        return type.match(Named(_)|Scene(_, _));
+    }
+
     /**
       * parse out [this] Mark's "word-list"
       */
