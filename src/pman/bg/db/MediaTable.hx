@@ -69,7 +69,12 @@ class MediaTable extends Table {
       * get an Array of MediaRows from an Array of 'keys' (Strings representing either an ID or URI)
       */
     public function getRowsByKeys(keys:Array<String>, ?done:Cb<Array<Maybe<MediaRow>>>):ArrayPromise<Maybe<MediaRow>> {
+        if (keys.length == 1) {
+            return wrap(getRowByKey(keys[0]).transform.fn(row => [row].compact()).array(), done);
+        }
+
         var queryDef:Query = new Query({id: {"$in": keys}}).or({uri:{"$in": keys}});
+        trace(queryDef.toObject());
         return query(queryDef, done);
     }
 
@@ -91,9 +96,11 @@ class MediaTable extends Table {
       * get a MediaRow from a 'key'
       */
     public function getRowByKey(key:String, ?done:Cb<MediaRow>):Promise<MediaRow> {
-        return queryOne(function(q: Query) {
-            return q.eq('id', key).or.fn(_.eq('uri', key));
-        }, done);
+        var queryDef:Query = qd(function(q:Query) {
+            return (q.eq('id', key).or(fn(q => q.eq('uri', key))));
+        });
+        trace(queryDef.toObject());
+        return queryOne(queryDef, done);
     }
 
     /**
