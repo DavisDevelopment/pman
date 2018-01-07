@@ -77,6 +77,9 @@ class Mark {
 
 /* === Static Methods === */
 
+    /**
+      * convert a MarkType to a JSON-object
+      */
     public static function markTypeToJson(type: MarkType):Dynamic {
         var o:Object = {};
         switch ( type ) {
@@ -96,14 +99,17 @@ class Mark {
             case Scene(stype, name):
                 o.set('tn', 'scene');
                 o.set('st', (switch ( stype ) {
-                    case SceneBegin: 'begin';
-                    case SceneEnd: 'end';
+                    case SceneBegin: 0;
+                    case SceneEnd: 1;
                 }));
                 o.set('n', name);
         }
         return o;
     }
 
+    /**
+      * convert a MarkType JSON-object back to the MarkType
+      */
     public static function jsonToMarkType(o: Dynamic):Null<MarkType> {
         var o:Object = o;
         inline function has(n:String):Bool return o.exists( n );
@@ -128,11 +134,14 @@ class Mark {
                     return MarkType.Named( name );
 
                 case {tn:'scene', n:name, st:id}:
-                    return MarkType.Scene((switch (id.toLowerCase()) {
-                        case 'begin': SceneBegin;
-                        case 'end': SceneEnd;
-                        case other: throw 'Error: Invalid SceneMarkType-name "$other"';
+                    return MarkType.Scene((switch ( id ) {
+                        case 0: SceneBegin;
+                        case 1: SceneEnd;
+                        case other: throw 'Error: Invalid SceneMarkType-id "$other"';
                     }), name);
+
+                default:
+                    throw 'Invalid Object configuration';
             }
         }
         else {
