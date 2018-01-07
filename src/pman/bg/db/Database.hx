@@ -131,7 +131,7 @@ class Database {
     private inline function _build():Void {
         actors = openTable('actors', ActorTable);
         tags = openTable('tags', TagTable);
-        media = openTable('media', MediaTable);
+        media = openTable('media_test', MediaTable);
     }
 
 /* === Instance Fields === */
