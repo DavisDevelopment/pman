@@ -9,7 +9,12 @@ import tannus.http.Url;
 
 import pman.bg.media.MediaSource;
 import pman.bg.media.MediaRow;
+import pman.bg.media.Mark;
 import pman.bg.db.*;
+import pman.bg.tasks.*;
+
+import haxe.Serializer;
+import haxe.Unserializer;
 
 import Slambda.fn;
 
@@ -19,17 +24,21 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
-using pman.bg.URITools;
+using pman.bg.DictTools;
+
 
 class MediaData {
     /* Constructor Function */
-    public function new():Void {
+    public function new(?id:String, ?uri:String):Void {
+        mediaId = id;
+        mediaUri = uri;
         views = 0;
         starred = false;
         rating = null;
         contentRating = 'NR';
         channel = null;
         description = null;
+        attrs = new Dict();
         tags = new Array();
         marks = new Array();
         actors = new Array();
@@ -293,13 +302,17 @@ class MediaData {
 
 /* === Instance Fields === */
 
+    public var mediaId: Null<String>;
+    public var mediaUri: Null<String>;
+
     public var views(default, set): Int;
     public var starred(default, set): Bool;
     public var rating(default, set): Null<Float>;
     public var contentRating(default, set): Null<String>;
     public var channel(default, set): Null<String>;
     public var description(default, set): Null<String>;
-    public var marks(default, set): Array<String>;
+    public var attrs(default, set): Dict<String, Dynamic>;
+    public var marks(default, set): Array<Mark>;
     public var tags(default, set): Array<String>;
     public var actors(default, set): Array<Actor>;
 
@@ -309,4 +322,24 @@ class MediaData {
     public var _linked: Bool = false;
     private var _suspended: Bool = false;
     private var _susHasChanged: Bool = false;
+}
+
+class PatchTypeResolver {
+    public function new() {
+        //
+    }
+
+    public function resolveClass(name: String):Class<Dynamic> {
+        if (name == 'pman.media.info.Mark') {
+            name = 'pman.bg.media.Mark';
+        }
+        return Type.resolveClass( name );
+    }
+
+    public function resolveEnum(name: String):Enum<Dynamic> {
+        if (name == 'pman.media.info.MarkType') {
+            return pman.bg.media.Mark.MarkType;
+        }
+        return Type.resolveEnum( name );
+    }
 }
