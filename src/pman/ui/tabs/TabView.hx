@@ -15,6 +15,7 @@ import pman.core.*;
 import pman.async.*;
 import pman.display.*;
 import pman.display.media.*;
+import pman.media.Track;
 import pman.ui.*;
 
 import tannus.math.TMath.*;
@@ -59,14 +60,22 @@ class TabView extends Ent {
 
         var d = new Maybe(tab.track.ternary(_.data, null));
         var titleText:String = tab.title.ternary(_.slice(0, 15), 'New Tab');
-        if (titleText != '') {
-            var starred = d.ternary(_.starred, false);
-            if (starred) {
-                titleText = ('*' + titleText).slice(0, 15);
-            }
-        }
-        if (tb.text != titleText) {
+        if (titleText.hasContent() && tb.text != titleText) {
             tb.text = titleText;
+        }
+
+        if (content != null) {
+            var dd = content.data;
+            if (dd != null) {
+                if (dd.starred && leftIcon == null) {
+                    leftIcon = Icons.starIcon(16, 16, function(path) {
+                        path.style.fill = player.theme.secondary.lighten( 45.0 ).toString();
+                    }).toImage();
+                }
+                else if (!dd.starred && leftIcon != null) {
+                    leftIcon = null;
+                }
+            }
         }
 
         if (mouseDown != null) {
@@ -83,6 +92,7 @@ class TabView extends Ent {
       */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
+        inline function half(x:Float) return (x * 0.5);
         var _r = rect;
         if (dragRect != null)
             rect = dragRect;
@@ -109,10 +119,26 @@ class TabView extends Ent {
             c.closePath();
         c.stroke();
 
+        var lir:Null<Rectangle> = null;
+        var li:Null<Image> = leftIcon;
+        // draw the left icon
+        if (li != null) {
+            lir = new Rectangle((ir.x + 2.0), (ir.y + half(ir.h - li.height)), li.width, li.height);
+            //try {
+                c.drawComponent(li, 
+                    0, 0, li.width, li.height,
+                    lir.x, lir.y, lir.w, lir.h
+                );
+            //}
+        }
+
         // draw the title
         if (tb.text != null && tb.text != '') {
             // draw the title's text
             var tbr:Rectangle = new Rectangle((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
+            if (li != null && lir != null) {
+                tbr.x = (lir.w + 3.5 + tbr.x);
+            }
             c.drawComponent(tb, 
                 0, 0, tb.width, tb.height,
                 tbr.x, tbr.y, tbr.w, tbr.h
@@ -172,7 +198,16 @@ class TabView extends Ent {
       * calculate [this] view's content rectangle
       */
     override function calculateGeometry(r : Rectangle):Void {
-        rect.w = (min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
+        inline function leftMargin() {
+            return 
+            if (leftIcon == null)
+                0.0;
+            else {
+                (3.5 + leftIcon.width + 8.0);
+            }
+        }
+
+        rect.width = (leftMargin() + min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
         rect.h = 24.0;
         rect.y = (bar.y + (bar.h - rect.h));
     }
@@ -307,6 +342,9 @@ class TabView extends Ent {
     public var dragging(get, never):Bool;
     private inline function get_dragging() return (mouseDown != null);
 
+    public var content(get, never):Null<Track>;
+    private inline function get_content() return tab.track;
+
     public var ci(get, never):Null<Image>;
     private inline function get_ci() return closeIcon[closeHovered ? 1 : 0];
 
@@ -321,6 +359,7 @@ class TabView extends Ent {
 
     public var tb : TextBox;
     public var closeIcon : Array<Image>;
+    public var leftIcon: Null<Image> = null;
 
     public var hovered : Bool = false;
     public var closeHovered : Bool = false;
