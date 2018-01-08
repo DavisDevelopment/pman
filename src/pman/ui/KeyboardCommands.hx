@@ -253,7 +253,8 @@ class KeyboardCommands {
                                 sess.setTab(sess.newTab());
 
                             default:
-                                handleDefault( event );
+                                unNextKeyDown();
+                                defer(handleDefault.bind( event ));
                         }
                     });
 
