@@ -116,6 +116,25 @@ class Mark {
         }
     }
 
+    public inline function getWord(index: Int):Null<String> {
+        return getWords()[index];
+    }
+
+    public function firstWord(?text: String):Null<String> {
+        return getWord( 0 );
+    }
+
+    public static function firstWords(all: Array<Mark>):Array<String> {
+        var results = [];
+        for (m in all) {
+            var fw = m.firstWord();
+            if (fw != null) {
+                results.push( fw );
+            }
+        }
+        return results;
+    }
+
 /* === Instance Fields === */
 
     public var type(default, null): MarkType;
