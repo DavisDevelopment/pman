@@ -144,6 +144,14 @@ class KeyboardCommands {
 	public inline function nextKeyDown(f : KeyboardEvent->Void):Void {
 	    _nextKeyDown.push( f );
 	}
+	public inline function unNextKeyDown(?f: KeyboardEvent->Void):Void {
+	    if (f != null) {
+	        _nextKeyDown.remove( f );
+	    }
+        else {
+            _nextKeyDown = [];
+        }
+	}
 
 	/**
 	  * intercept the next 'keyup' event
