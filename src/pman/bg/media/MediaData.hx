@@ -147,11 +147,24 @@ class MediaData {
 
         // handle marks
         steps.push(function(next) {
-            var _marks = new Array();
-            var rawMarks = row.marks.copy();
+            var _marks:Array<Mark> = new Array();
+            var rawMarks = cast(row.marks.copy(), Array<Dynamic>);
+            var resolver = new PatchTypeResolver();
+
             for (m in rawMarks) {
-                trace( m );
+                if ((m is String)) {
+                    var decoder = new Unserializer( m );
+                    decoder.setResolver( resolver );
+
+                    _marks.push(decoder.unserialize());
+                }
+                else if (Reflect.isObject( m )) {
+                    _marks.push(Mark.fromJsonMark( m ));
+                }
             }
+
+            marks = _marks;
+
             next();
         });
 
@@ -198,7 +211,8 @@ class MediaData {
             contentRating: contentRating,
             channel: channel,
             description: description,
-            marks: [],
+            attrs: attrs.toAnon(),
+            marks: marks.map.fn(_.toJson()),
             tags: tags.copy(),
             actors: [],
             meta: (meta != null ? meta.toRaw() : null)
