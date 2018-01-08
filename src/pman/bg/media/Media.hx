@@ -43,7 +43,8 @@ class Media {
                 return data;
             }
             else {
-                var loader = new LoadMediaData(this, Database.instance);
+                trace('attempting to load real data now');
+                var loader = new LoadMediaData(uri, Database.instance);
                 loader.run(function(?error, ?data) {
                     if (error != null) {
                         throw error;
@@ -99,7 +100,7 @@ class Media {
             title: title,
             uri: source.toUri()
         };
-        if (hasData()) {
+        if (data != null) {
             row.data = data.toRow();
         }
         return row;
@@ -118,7 +119,15 @@ class Media {
         steps.push(function(next: VoidCb) {
             if (row.data != null) {
                 var dat = new MediaData();
-                dat.pullRow(row.data, next);
+                dat.pullRow(row.data, function(?error) {
+                    if (error != null) {
+                        next( error );
+                    }
+                    else {
+                        setData( dat );
+                        next();
+                    }
+                });
             }
             else {
                 next();
@@ -134,6 +143,7 @@ class Media {
         if (hasData()) {
             data.ignore();
             data.link( false );
+            data = null;
         }
 
         data = d;
@@ -148,6 +158,7 @@ class Media {
       * copy [row]'s data onto [this]
       */
     private function applyData(row: MediaData):Void {
+        id = row.mediaId;
         views = row.views;
         starred = row.starred;
         rating = row.rating;
@@ -157,15 +168,19 @@ class Media {
         marks = row.marks.copy();
         tags = row.tags.copy();
         actors = row.actors.copy();
-        meta = row.meta;
-        duration = meta.duration;
+        meta = null;
+
+        if (row.meta != null) {
+            meta = row.meta;
+            duration = meta.duration;
+        }
     }
 
     /**
       * check if [this] Media has its "_data" field
       */
     public inline function hasData():Bool {
-        return (data != null);
+        return (data != null && !data.empty());
     }
 
     /**
@@ -191,7 +206,7 @@ class Media {
     public var contentRating: Null<String>;
     public var channel: Null<String>;
     public var description: Null<String>;
-    public var marks: Null<Array<String>>;
+    public var marks: Null<Array<Mark>>;
     public var tags: Null<Array<String>>;
     public var actors: Null<Array<Actor>>;
     public var duration: Null<Float>;
@@ -204,7 +219,11 @@ class Media {
 
 /* === Static Methods === */
 
+    /**
+      * create and initialize a new Media instance from a MediaRow
+      */
     public static function fromRow(row: MediaRow, ?done:Cb<Media>):Promise<Media> {
+        trace(Reflect.fields( row ).join(', '));
         var res = Promise.create({
             var media:Media = new Media(row.uri.toMediaSource());
             media.applyRow(row, function(?error) {
@@ -220,6 +239,34 @@ class Media {
             res.toAsync( done );
         }
         return res;
+    }
+
+    /**
+      * obtain a filled-out Media instance from a URI
+      */
+    public static function get(uri:String, ?done:Cb<Media>):Promise<Media> {
+        return wrap(new Promise(function(accept, reject) {
+            Database.get(function(db) {
+                db.media.cogRow( uri ).then(function(row: MediaRow) {
+                    var media:Media = new Media(row.uri.toMediaSource());
+                    media.applyRow(row, function(?error) {
+                        if (error != null) {
+                            return reject( error );
+                        }
+                        else {
+                            media.getData().then(function( data ) {
+                                if (data.empty()) {
+                                    return reject('Error: MediaData was empty');
+                                }
+                                else {
+                                    return accept( media );
+                                }
+                            }, reject);
+                        }
+                    });
+                }, reject);
+            });
+        }), done);
     }
 
     private static function wrap<T, P:Promise<T>>(promise:P, ?callback:Cb<T>):P {
