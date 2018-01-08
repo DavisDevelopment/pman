@@ -128,6 +128,8 @@ class BPlayerMain extends Application {
 
                 dragManager = new DragDropManager( this );
                 dragManager.init();
+
+                //bgdbTest();
             });
         });
 
@@ -140,6 +142,53 @@ class BPlayerMain extends Application {
             ic.send( 'GetLaunchInfo' );
         });
 	}
+
+    /**
+      * test background-compatible database
+      */
+	private function bgdbTest() {
+	    var test = Boss.hire_ww( 'bgdb.worker' );
+	    test.on('ready', function(packet) {
+	        trace( packet.data );
+	    });
+	    test.on('::exception::', function(packet) {
+	        report( packet.data );
+	    });
+
+	    win.expose('sendMedia', function(all:Bool=false) {
+            var ctx = {
+                command: 'media:get',
+                uris: []
+            };
+
+            if (all && player.session.playlist != null) {
+                for (t in player.session.playlist.toArray()) {
+                    ctx.uris.push( t.uri );
+                }
+            }
+            else if (player.track != null) {
+	            ctx.uris.push( player.track.uri );
+	        }
+
+            trace( ctx );
+	        test.send('exec', ctx, null, function(response) {
+	            trace("== GOT A RESPONSE ==");
+	            (untyped win.console.log)(untyped response);
+	        });
+	    });
+	}
+
+    /**
+      * test the new Scripting Engine
+      */
+    private function test_scripting():Void {
+        var script = new ScriptState();
+        var code:String = Ct.readFileAsString('res/test_script.js');
+        var result = script.executeString( code );
+        
+        win.console.log( result );
+        //result.say('I need my urinal, boo');
+    }
 
 	/**
 	  * quit this shit
