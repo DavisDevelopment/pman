@@ -50,6 +50,25 @@ class MediaData {
 /* === Instance Methods === */
 
     /**
+      * check if [this] is in its "default" ("empty") state
+      */
+    public function empty():Bool {
+        return (
+            (mediaId == null) &&
+            (views == null || views == 0) &&
+            (!starred) &&
+            (rating == null) &&
+            (contentRating == null || contentRating == 'NR') &&
+            (channel == null) &&
+            (description == null) &&
+            (attrs == null) &&
+            (tags.empty()) &&
+            (marks.empty()) &&
+            (actors.empty()) &&
+            (meta == null)
+        );
+    }
+
       * pull [row]'s data onto [this]
       */
     public function pullRow(row:MediaDataRow, done:VoidCb):Void {
