@@ -498,10 +498,21 @@ class SeekBar extends Ent {
                 c.fillRect(p.x, p.y, mw, h);
 
             case MarkViewIndicator.MIBar(color):
+                /*
                 mw = 1.5;
                 p.x -= (mw / 2);
                 c.fillStyle = color;
                 c.fillRect(p.x, p.y, mw, h);
+                */
+                c.globalAlpha = 0.8;
+                mw = 1.5;
+                p.x -= (mw / 2);
+                c.strokeStyle = color;
+                c.lineWidth = 1.0;
+                c.beginPath();
+                c.moveToPoint( p );
+                c.lineTo(p.x, p.y + h);
+                c.stroke();
         }
 
         c.restore();
