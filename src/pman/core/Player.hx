@@ -61,6 +61,7 @@ using pman.core.ExecutorTools;
 using pman.media.MediaTools;
 using pman.core.PlayerTools;
 using pman.async.Asyncs;
+using tannus.FunctionTools;
 
 class Player extends EventDispatcher {
 	/* Constructor Function */
@@ -915,8 +916,12 @@ class Player extends EventDispatcher {
 			var ms = app.db.mediaStore;
 			newTrack.editData(function(data, done) {
 			    // increment the 'views'
-			    if (getStatus().match(Playing)) {
+			    if (getStatus().match( Playing )) {
 			        data.views++;
+			        done = done.wrap(function(f, ?error) {
+			            defer( newTrack.updateView );
+			            f( error );
+			        });
 			    }
 
                 // get previous playback progress (if available)
@@ -937,12 +942,16 @@ class Player extends EventDispatcher {
                 done();
 			});
 
-			if (!getStatus().match(Playing)) {
+			if (!getStatus().match( Playing )) {
 			    once('play', untyped function() {
 			        if (track == newTrack) {
 			            newTrack.editData(function(data, done) {
 			                data.views++;
-			                defer(done.void());
+							//defer(newTrack.updateView.join(done.void()));
+			                defer(function() {
+			                    newTrack.updateView();
+			                    done();
+			                });
 			            });
 			        }
 			    });
