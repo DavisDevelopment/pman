@@ -60,21 +60,35 @@ class SeekBarMarkView {
         return Percent.percent(time, bar.player.durationTime);
     }
 
+    /**
+      * get a Rectangle representing [this]'s position and size
+      */
     public function rect():Rectangle {
         var r = new Rectangle(0, 0, (0.7 * bar.h), (bar.h));
         r.centerX = (bar.x + prog().of( bar.w ));
         r.y = bar.y;
+        r = r.floor();
         return r;
     }
 
+    /**
+      * get a Point representing [this]'s position
+      */
     public inline function pos():Point {
         return new Point((bar.x + prog().of(bar.w)), bar.y);
     }
 
+    /**
+      * get the hotkey for [this] Mark
+      */
     @:access(pman.ui.ctrl.SeekBar)
     public function hotKey():Maybe<HotKey> {
+        inline function nil<T>(x: Null<T>):Maybe<T> return new Maybe( x );
+
         if (canNavigateTo()) {
-            return ((SeekBar.HOTKEYS)[bar.navMarkViews.indexOf(this)]);
+            @:privateAccess {
+                return SeekBar.HOTKEYS[nil(tooltip.group).ternary(_.members.indexOf( tooltip ), -1)];
+            };
         }
         else return null;
     }

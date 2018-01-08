@@ -8,6 +8,7 @@ import tannus.media.Duration;
 import tannus.graphics.Color;
 import tannus.math.Percent;
 import tannus.math.Random;
+import tannus.math.*;
 import tannus.events.*;
 import tannus.events.Key;
 
@@ -27,6 +28,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
+import pman.ui.ctrl.SeekBar;
 
 import motion.Actuate;
 
@@ -47,8 +49,8 @@ class SeekBarMarkViewTooltip extends Ent {
 
         markView = mv;
 
-        tb = [new TextBox(), new TextBox()];
-        tbr = new Array();
+        tb = [new TextBox(), new TextBox(), new TextBox()];
+        tbr = [new Rectangle(), new Rectangle(), new Rectangle()];
         border = new Border(3.0, player.theme.primary.lighten( 20 ), 3.0);
         var r = new Random();
         color = (function() {
@@ -72,6 +74,7 @@ class SeekBarMarkViewTooltip extends Ent {
         var colors = getColors();
 
         _update(colors, mr.centerX);
+        calculateGeometry( stage.rect );
     }
 
     /**
@@ -105,6 +108,7 @@ class SeekBarMarkViewTooltip extends Ent {
         }
 
         // draw indicator
+        /*
         var m = markView;
         var mr = m.rect();
         c.strokeStyle = color;
@@ -119,6 +123,7 @@ class SeekBarMarkViewTooltip extends Ent {
         c.lineTo(mr.centerX, centerY.lerp(dy, tunums[1]));
         c.lineTo(mr.centerX, dy);
         c.stroke();
+        */
 
         c.restore();
     }
@@ -157,47 +162,108 @@ class SeekBarMarkViewTooltip extends Ent {
       */
     public function _update(colors:Array<Color>, x:Float):Void {
         ttr = new Rectangle();
-        for (t in tb) {
-            //t.color = colors[0];
-            t.fontSizeUnit = 'px';
 
-            ttr.width = max(ttr.width, t.width);
-            ttr.height += t.height;
+        // assign properties to all text-boxes
+        for (t in tb) {
+            t.fontSizeUnit = 'px';
+            t.color = colors[0];
         }
-        var t = tb[0];
+
+        switch ( tb.length ) {
+            // without time
+            case 2:
+                ttr.width = (tb[0].width + tb[1].width);
+                ttr.height = (tb[0].height + tb[1].height);
+
+            // with time
+            case 3:
+                ttr.width = max(tb[0].width, (tb[1].width + tb[2].width + dbl( margin )));
+                ttr.height = sum([tb[0].height, max(tb[1].height, tb[2].height)]);
+
+            // urinal, poo
+            default:
+                throw 'invalid text-box count';
+        }
+
+        var t:TextBox = tb[0];
         t.text = markView.name;
         t.bold = true;
-        t.fontSize = 12;
+        t.fontSize = 11;
         t.color = colors[0];
+
         t = tb[1];
-        var hk = markView.hotKey();
-        var keyName = hk.key.name.toLowerCase();
-        if ( hk.shift ) {
-            keyName = keyName.toUpperCase();
+        var hk:Maybe<HotKey> = markView.hotKey();
+        if (hk == null) {
+            t.text = '(none)';
+            t.fontSize = 11;
+            t.color = colors[1].darken( 15 );
         }
-        t.text = ('(' + keyName + ')');
-        t.fontSize = 12;
-        t.color = player.theme.secondary;
+        else {
+            var keyName = hk.char.aschar.toLowerCase();
+            if ( hk.shift ) {
+                keyName = keyName.toUpperCase();
+            }
+            t.text = ('(' + keyName + ')');
+            t.fontSize = 11;
+            t.color = player.theme.secondary;
+        }
+
+        t = tb[2];
+        if (t != null) {
+            var time:Time = new Time( markView.mark.time );
+            t.text = time.toString();
+            t.fontSize = 9.5;
+            t.color = colors[0];
+        }
     }
 
     /**
       * calculate [this]'s geometry
       */
     override function calculateGeometry(_r : Rectangle):Void {
-        inline function dbl(x:Float):Float return (x * 2);
-
         var mr = markView.rect();
         w = (ttr.width + dbl( margin ));
         h = (ttr.height + margin);
 
         tbr = new Array();
         var yy:Float = (y + margin);
-        for (t in tb) {
-            var r = new Rectangle(0, 0, t.width, t.height);
-            r.centerX = centerX;
-            r.y = yy;
-            yy += (r.h - 2);
-            tbr.push( r );
+
+        switch ( tb.length ) {
+            // without time
+            case 2:
+                for (t in tb) {
+                    var r = new Rectangle(0, 0, t.width, t.height);
+                    r.centerX = centerX;
+                    r.y = yy;
+                    yy += (r.h - 2);
+                    tbr.push( r );
+                }
+
+            // with time
+            case 3:
+                // title
+                var t:TextBox = tb[0];
+                var r:Rectangle = new Rectangle(0, yy, t.width, t.height);
+                r.centerX = centerX;
+                yy += (r.h - 2);
+                tbr.push( r );
+
+                // determine 2nd row height
+                var rh:Float = max(tb[1].height, tb[2].height);
+
+                // hotkey
+                t = tb[1];
+                r = new Rectangle((x + half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
+                tbr.push( r );
+
+                // time
+                t = tb[2];
+                r = new Rectangle((x + w - t.width - half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
+                tbr.push( r );
+
+            // invalid
+            default:
+                throw 'betty';
         }
     }
 
@@ -248,6 +314,9 @@ class SeekBarMarkViewTooltip extends Ent {
         @:privateAccess player.app.keyboardCommands._nextKeyDown = [];
     }
 
+    private static inline function dbl<T:Float>(x: T):T return (x * 2);
+    private static inline function half(x: Float):Float return (x * 0.5);
+
 /* === Computed Instance Fields === */
 
     private var bar(get, never):SeekBar;
@@ -259,23 +328,27 @@ class SeekBarMarkViewTooltip extends Ent {
     public var progress(get, never):Percent;
     private inline function get_progress() return Percent.percent(markView.time, player.durationTime);
 
+    /*
     public var side(get, never):Bool;
     private function get_side() {
         var d = player.track.data;
         //return (progress.value >= 50.0);
         return (d.marks.indexOf(markView.mark) >= ceil(d.marks.length / 2));
     }
+    */
 
 /* === Instance Fields === */
 
     public var markView : SeekBarMarkView;
-    public var margin:Float = 5.0;
+    public var group: Null<SeekBarMarkViewTooltipGroup> = null;
+    public var margin:Float = 6.0;
     public var yOffset:Float = 0.0;
     public var opacity:Float = 1.0;
     public var activated : Bool = false;
     public var hovered : Bool = false;
     public var color : Color;
     public var tuning : Array<Bool>;
+    public var image: Null<Image> = null;
 
     private var tb : Array<TextBox>;
     private var ttr : Rectangle;

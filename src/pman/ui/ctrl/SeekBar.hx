@@ -29,6 +29,7 @@ import pman.ui.ctrl.SeekBarMarkView;
 import pman.ui.ctrl.SeekBarMarkView as MarkView;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
+import Slambda.fn;
 import tannus.math.TMath.*;
 import gryffin.Tools.*;
 
@@ -38,7 +39,11 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.math.TMath;
+using tannus.FunctionTools;
 
+/*
+   GUI Component that displays information like current time in media, duration of media, current progress through media, etc.
+*/
 @:access( pman.ui.PlayerControlsView )
 class SeekBar extends Ent {
     /* Constructor Function */
@@ -62,7 +67,7 @@ class SeekBar extends Ent {
         markViews = new Array();
     }
 
-    /* === Instance Methods === */
+/* === Instance Methods === */
 
     /**
      * initialize [this]
@@ -93,9 +98,63 @@ class SeekBar extends Ent {
     }
 
     /**
+      * cancel a bookmark-navigation in progress
+      */
+    public inline function abortBookmarkNavigation():Void {
+        if ( bmnav ) {
+            playerView.controls.unlockUiVisibility();
+            bmnav = false;
+            dispatch('bmnav:abort', this);
+        }
+    }
+
+    /**
       * the bookmark-navigation handler
       */
     private function bmnavHandler(event : KeyboardEvent):Void {
+        // handle the last keydown event captured after bookmark-navigation is completed
+        if ( !bmnav ) {
+            playerView.controls.unlockUiVisibility();
+            return player.app.keyboardCommands.handleDefault( event );
+        }
+
+        switch ( event.key ) {
+            // next mark
+            case Key.Right:
+                relativeMarkJump( 1 );
+                return abortBookmarkNavigation();
+
+            // prev mark
+            case Key.Left:
+                relativeMarkJump( -1 );
+                return abortBookmarkNavigation();
+
+            // image gallery
+            case Key.Down:
+                showImageGallery();
+                return abortBookmarkNavigation();
+
+            case Key.Backspace:
+                return bookmarkNavigationGoBack();
+
+            case Key.Esc:
+                return abortBookmarkNavigation();
+
+            default:
+                null;
+        }
+
+        markViewPanel.handle_bmnav( event );
+        if ( bmnav ) {
+            defer(function() {
+                player.app.keyboardCommands.nextKeyDown( bmnavHandler );
+            });
+        }
+        else {
+            playerView.controls.unlockUiVisibility();
+        }
+
+        /*
         for (mv in markViews) {
             var hkey = mv.hotKey();
             if (hkey != null && hkey.key == event.key && hkey.shift == event.shiftKey) {
@@ -106,6 +165,125 @@ class SeekBar extends Ent {
         }
         bmnav = false;
         playerView.controls.unlockUiVisibility();
+        */
+    }
+
+    /**
+      * schedule the 'capture' of the next keydown event for bm-navigation
+      */
+    private function bmcn():Void {
+        defer(player.app.keyboardCommands.nextKeyDown.bind(bmnavHandler.bind(_)));
+    }
+
+    /**
+      * go 'back'
+      */
+    public function bookmarkNavigationGoBack():Void {
+        if (markViewPanel.hasOpenTooltipGroup()) {
+            trace('back to group list');
+            markViewPanel.minimizeTooltipGroup();
+            //defer(player.app.keyboardCommands.nextKeyDown.bind(mnavHandler.bind(_)));
+            bmcn();
+        }
+        else {
+            trace('exit bookmark navigation');
+            abortBookmarkNavigation();
+        }
+    }
+
+    /**
+      * jump between marks relative to the current time
+      */
+    @:access( pman.ui.ctrl.SeekBarMarkViewTooltipPanel )
+    public function relativeMarkJump(d:Int):Void {
+        if (d == 0 || !markViewPanel.hasAnyMarks()) {
+            return ;
+        }
+
+        // get the current time
+        var ctime = player.currentTime;
+        // list of time positions of bookmarks
+        var times:Array<Float> = [];
+
+        // if there is a group open
+        if (markViewPanel.hasOpenTooltipGroup()) {
+            times = markViewPanel.currentlyOpenGroup.members.map(function(x: SeekBarMarkViewTooltip) {
+                var mk = x.markView.mark;
+                if (mk != null && mk.type.match(Named(_))) {
+                    return mk.time;
+                }
+                else {
+                    return null;
+                }
+            }).compact();
+        }
+        // we are looking at a list of groups
+        else {
+            var types = getMarkViewTypes();
+            times = types.mapfilter(fn(_.match(MarkViewType.MTReal(_))), function(type: MarkViewType) {
+                return (switch ( type ) {
+                    case MTReal(m): m.time;
+                    case _: null;
+                });
+            }).compact();
+        }
+
+        // if there are no bookmarks
+        if (times.empty() || times.length == 1) {
+            return ;
+        }
+        else {
+            // last time and next time
+            var ltime:Float = -1, ntime:Float = -1;
+            // iterate over all times
+            for (time in times) {
+                //if that's the time we're at
+                if (time == ctime) {
+                    // and we're navigating back
+                    if (d < 0 && ltime != -1) {
+                        // jump back
+                        player.currentTime = time;
+                        return ;
+                    }
+                    // otherwise, just set variable
+                    ltime = time;
+                }
+                // [time] is before [ctime]
+                else if (time < ctime) {
+                    ltime = time;
+                }
+                // [time] is after [ctime]
+                else if (time > ctime) {
+                    // then that's the next time
+                    ntime = time;
+                    // so, if we're navigating forward
+                    if (d > 0) {
+                        // we can just do that now
+                        player.currentTime = ntime;
+                        return ;
+                    }
+                    // or if we're navigating backward
+                    else if (d < 0) {
+                        // go to the last time that was before ctime
+                        player.currentTime = ltime;
+                        return ;
+                    }
+                }
+            }
+
+           return ; 
+        }
+    }
+
+    /**
+      * show gallery of snapshots and other images from [this] media
+      */
+    private function showImageGallery():Void {
+        if (!player.track.type.equals(MTVideo)) {
+            return ;
+        }
+
+        trace('SeekBar: Image Gallery');
     }
 
     /**
@@ -579,25 +757,70 @@ class SeekBar extends Ent {
     private var _lfml : Null<Array<Mark>> = null;
 
     private static var KEYCODES:Array<Key>;
+    private static var KEYCHARS:Map<Key, String>;
     private static var HOTKEYS:Array<HotKey>;
 
     private static function __init__():Void {
         KEYCODES = [
             Number1,Number2,Number3,Number4,Number5,Number6,Number7,Number8,Number9,
+            Numpad1,Numpad2,Numpad3,Numpad4,Numpad5,Numpad6,Numpad7,Numpad8,Numpad9,
             LetterA,LetterB,LetterC,LetterD,LetterE,LetterF,LetterG,LetterH,LetterI,
             LetterJ,LetterK,LetterL,LetterM,LetterN,LetterO,LetterP,LetterQ,LetterR,
             LetterS,LetterT,LetterU,LetterV,LetterW,LetterY,LetterZ
         ];
+
+        var kc = KEYCHARS = [
+            Number1 => '1', Numpad1 => '1',
+            Number2 => '2', Numpad2 => '2',
+            Number3 => '3', Numpad3 => '3',
+            Number4 => '4', Numpad4 => '4',
+            Number5 => '5', Numpad5 => '5',
+            Number6 => '6', Numpad6 => '6',
+            Number7 => '7', Numpad7 => '7',
+            Number8 => '8', Numpad8 => '8',
+            Number9 => '9', Numpad9 => '9',
+            LetterA => 'A', LetterB => 'B', LetterC => 'C', LetterD => 'D',
+            LetterE => 'E', LetterF => 'F', LetterG => 'G', LetterH => 'H',
+            LetterI => 'I', LetterJ => 'J', LetterK => 'K', LetterL => 'L',
+            LetterM => 'M', LetterN => 'N', LetterO => 'O', LetterP => 'P',
+            LetterQ => 'Q', LetterR => 'R', LetterS => 'S', LetterT => 'T',
+            LetterU => 'U', LetterV => 'V', LetterW => 'W', LetterX => 'X',
+            LetterY => 'Y', LetterZ => 'Z'
+        ];
+
+        var chars:Array<Array<String>> = ['123456789'.split(''), 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')];
+        inline function char(x:String) return x.toUpperCase().fastCodeAt(0);
         HOTKEYS = new Array();
-        for (i in 0...9) {
-            HOTKEYS.push({key: KEYCODES[i], shift: false});
+        for (c in chars[0]) {
+            HOTKEYS.push({
+                char: char( c ),
+                shift: false
+            });
         }
-        for (i in 9...KEYCODES.length) {
-            HOTKEYS.push({key:KEYCODES[i], shift: false});
+        for (c in chars[1]) {
+            HOTKEYS.push({
+                char: char( c ),
+                shift: false
+            });
         }
-        for (i in 9...KEYCODES.length) {
-            HOTKEYS.push({key:KEYCODES[i], shift: true});
+        for (c in chars[1]) {
+            HOTKEYS.push({
+                char: char( c ),
+                shift: true
+            });
         }
+    }
+
+    public static function checkEventWithHotKey(hk:HotKey, event:KeyboardEvent):Bool {
+        if (hk.char.isNumeric()) {
+            var n = (hk.char.asint - 48);
+            return (event.keyCode == (n + 48) || event.keyCode == (n + 96));
+        }
+        else if (hk.char.isLetter()) {
+            var lc = hk.char.toLowerCase();
+            return ((hk.char.asint == event.keyCode || lc.asint == event.keyCode) && hk.shift == event.shiftKey);
+        }
+        else return false;
     }
 }
 
@@ -607,6 +830,7 @@ typedef Thumbnail = {
 };
 
 typedef HotKey = {
-    key: Key,
+    //key: Key,
+    char: Byte,
     shift: Bool
 };
