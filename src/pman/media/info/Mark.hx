@@ -3,6 +3,7 @@ package pman.media.info;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.math.*;
 import tannus.media.Duration;
 
 import gryffin.display.Image;
@@ -26,6 +27,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
+using pman.tools.SimpleWordLexer;
 
 class Mark {
     /* Constructor Function */
@@ -141,12 +143,18 @@ class Mark {
     public function format(all:Array<Mark>, text:String):String {
         var result:String = text;
         var index:Int = all.indexOf( this );
+
         inline function set(x:String, y:Dynamic) {
-            result = result.replace('%$x', Std.string( y ));
+            result = result
+                .replace('%$x', Std.string( y ))
+                .replace('@$x', Std.string( y ));
         }
+
         set('i', index);
+
+        // get the first 'word' of [this]'s name
         var fw:Null<String> = firstWord( text );
-        if (fw != null && !fw.empty()) {
+        if (fw.hasContent()) {
             var wordWarper = (function(word : String) {
                 return word.toLowerCase();
             });
@@ -157,10 +165,25 @@ class Mark {
             set('w', (wordIndex > 1 ? '$wordIndex' : ''));
             set('W', (wordIndex + 1));
         }
-        set('t', Duration.fromFloat( time ));
-        set('urinal', '-------\n BETTY \n-------'.times( 5 ));
+
+        set('t', Time.fromFloat( time ));
         
         return result;
+    }
+
+    /**
+      * get the first word in [this]'s name
+      */
+    public function getFirstWord():Maybe<String> {
+        switch ( type ) {
+            case Named(firstWord(_) => fw):
+                if (!(fw == null || fw.empty())) {
+                    return fw;
+                }
+                else return null;
+
+            case _: return null;
+        }
     }
 
     /**
@@ -255,6 +278,12 @@ class Mark {
 
     public var type : MarkType;
     public var time : Float;
+
+    private var _wl : Null<Array<String>> = null;
+
+/* === Static Fields === */
+
+    
 }
 
 enum MarkType {
