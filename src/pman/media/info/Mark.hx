@@ -137,6 +137,25 @@ class Mark {
         time = v();
     }
 
+    public function getName():Null<String> {
+        return (switch ( type ) {
+            case Named(n): n;
+            case _: null;
+        });
+    }
+
+    public function getWords():Null<Array<String>> {
+        var name = getName().nullEmpty();
+        if (!name.hasContent()) {
+            return null;
+        }
+
+        var lexer = new SimpleWordLexer();
+        var tree = lexer.tokenize( name );
+        trace(tree + '');
+        return [];
+    }
+
     /**
       * get the 'title' of [this] Mark
       */
