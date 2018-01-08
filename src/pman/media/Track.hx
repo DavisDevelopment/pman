@@ -217,10 +217,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
                     else {
                         if (td != null) {
                             this.data = td;
-                            var tv = getView();
-                            if (tv != null) {
-                                tv.update();
-                            }
+                            updateView();
                         }
                         else {
                             throw 'Error: Loaded TrackData is null';
@@ -241,6 +238,16 @@ class Track extends EventDispatcher implements IComparable<Track> {
             defer(function() {
                 done(null, data);
             });
+        }
+    }
+
+    /**
+      * update [this]'s view, if it exists
+      */
+    public inline function updateView():Void {
+        var tv = getView();
+        if (tv != null) {
+            tv.update();
         }
     }
 
