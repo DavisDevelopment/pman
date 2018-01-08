@@ -569,6 +569,9 @@ class Track extends EventDispatcher implements IComparable<Track> {
         }, done);
     }
 
+    /**
+      * toggle the value of [this]'s starred property
+      */
     public function toggleStarred(?done : Cb<Bool>):Void {
         if (done == null)
             done = Cb.noop;
