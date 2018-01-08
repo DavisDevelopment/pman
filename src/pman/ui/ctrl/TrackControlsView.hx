@@ -60,7 +60,7 @@ class TrackControlsView extends Ent {
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
-        if (!uiEnabled || controls.seekBar.bmnav)
+        if (!uiEnabled || controls.seekBar.bmnav || player.track == null)
             return ;
 
         var colors = getColors();
