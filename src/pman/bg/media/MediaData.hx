@@ -334,6 +334,169 @@ class MediaData {
         _changed.clear();
     }
 
+/* === Modification Methods === */
+
+    /**
+      * filter [marks]
+      */
+    public function filterMarks(f : Mark->Bool):Void {
+        marks = marks.filter( f );
+    }
+
+    /**
+      * get a Mark via a predicate function
+      */
+    public function getMarkq(f : Mark->Bool):Null<Mark> {
+        return marks.firstMatch( f );
+    }
+
+    /**
+      * get a Mark by its type
+      */
+    public function getMarkByType(type : MarkType):Null<Mark> {
+        return getMarkq.fn(_.type.equals( type ));
+    }
+
+    /**
+      * remove all marks of the given type
+      */
+    public function removeMarksOfType(mt : MarkType):Void {
+        filterMarks.fn(!_.type.equals( mt ));
+    }
+
+    /**
+      * 
+      */
+    public function sortMarks():Void {
+        marks.sort((x, y) -> Reflect.compare(x.time, y.time));
+    }
+
+    /**
+      * add a Mark to [this]
+      */
+    public function addMark(mark: Mark):Void {
+        switch ( mark.type ) {
+            case Begin, End, LastTime:
+                //filterMarks.fn(!_.type.equals( mark.type ));
+                removeMarksOfType( mark.type );
+                marks.push( mark );
+
+            case Named( name ):
+                marks.push( mark );
+
+            case Scene(type, name):
+                filterMarks.fn(!_.type.equals( mark.type ));
+        }
+        sortMarks();
+    }
+
+    public function removeBeginMark():Void removeMarksOfType( Begin );
+    public function removeEndMark():Void removeMarksOfType( End );
+    public function removeLastTimeMark():Void removeMarksOfType( LastTime );
+
+    /**
+      * remove a specific Mark
+      */
+    public function removeMark(mark : Mark):Void {
+        filterMarks.fn(_ != mark);
+    }
+
+    /**
+      * set the time for the Mark of the given type
+      */
+    private function _setTime(type:MarkType, time:Float):Void {
+        removeMarksOfType( type );
+        addMark(new Mark(type, time));
+    }
+
+    /**
+      * get the time for a Mark of the given type
+      */
+    private function _getTime(type:MarkType):Null<Float> {
+        var m:Null<Mark> = getMarkByType( type );
+        return (m != null ? m.time : null);
+    }
+
+    /**
+      * get [this] Track's last time
+      */
+    public function getLastTime():Null<Float> {
+        return _getTime( LastTime );
+    }
+
+    /**
+      * get [this] Track's begin time
+      */
+    public function getBeginTime():Null<Float> {
+        return _getTime( Begin );
+    }
+
+    /**
+      * get [this] Track's end time
+      */
+    public inline function getEndTime():Null<Float> {
+        return _getTime( End );
+    }
+
+    /**
+      * set [this] Track's last time
+      */
+    public inline function setLastTime(time : Float):Void {
+        _setTime(LastTime, time);
+    }
+
+    /**
+      * set [this] Track's begin time
+      */
+    public inline function setBeginTime(time : Float):Void {
+        _setTime(Begin, time);
+    }
+
+    /**
+      * set [this] Track's end time
+      */
+    public inline function setEndTime(time : Float):Void {
+        _setTime(End, time);
+    }
+
+    /**
+      * attach a Tag instance to [this]
+      */
+    public function attachTag(tag : String):String {
+        for (t in tags) {
+            if (t == tag) {
+                return t;
+            }
+        }
+        tags.push( tag );
+        return tag;
+    }
+
+    /**
+      * attach a Tag to [this] as a String
+      */
+    public function addTag(tagName : String):String {
+        return attachTag( tagName );
+    }
+
+    /**
+      * select tag by oregex
+      */
+    public function selectTag(pattern : String):Null<String> {
+        var reg:RegEx = new RegEx(new EReg(pattern, 'i'));
+        return tags.firstMatch.fn(reg.match(_));
+    }
+
+    /**
+      * checks for attached tag by given name
+      */
+    public function hasTag(name:String):Bool {
+        for (t in tags)
+            if (t == name)
+                return true;
+        return false;
+    }
+
 /* === Setter Methods === */
 
     private function set_views(v) {
@@ -368,6 +531,12 @@ class MediaData {
 
     private function set_description(v) {
         var res = (description = v);
+        announceChange();
+        return res;
+    }
+
+    private function set_attrs(d) {
+        var res = (attrs = d);
         announceChange();
         return res;
     }
