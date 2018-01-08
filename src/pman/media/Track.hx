@@ -556,6 +556,12 @@ class Track extends EventDispatcher implements IComparable<Track> {
       * set whether [this] Track is starred
       */
     public function setStarred(value:Bool, ?done:VoidCb):Void {
+        if (done == null)
+            done = VoidCb.noop;
+        done = done.wrap(function(f, ?error) {
+            defer( updateView );
+            f( error );
+        });
         editData(function(i, next) {
             i.starred = value;
 
@@ -564,6 +570,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
     }
 
     public function toggleStarred(?done : Cb<Bool>):Void {
+        if (done == null)
+            done = Cb.noop;
+        done = done.wrap(function(f, ?error, ?value) {
+            defer( updateView );
+            f(error, value);
+        });
+
         var val:Bool = false;
         editData(function(i, next) {
             val = (i.starred = !i.starred);
