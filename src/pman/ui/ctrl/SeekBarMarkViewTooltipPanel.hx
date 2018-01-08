@@ -296,7 +296,10 @@ class SeekBarMarkViewTooltipPanel extends Ent {
             if (m != null) {
                 player.currentTime = m.time;
             }
-            bar.abortBookmarkNavigation();
+
+            return defer(defer.bind(function() {
+                bar.abortBookmarkNavigation();
+            }));
         }
 
         currentlyOpenGroup = group;

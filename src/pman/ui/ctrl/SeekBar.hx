@@ -103,6 +103,10 @@ class SeekBar extends Ent {
     public inline function abortBookmarkNavigation():Void {
         if ( bmnav ) {
             playerView.controls.unlockUiVisibility();
+            var kbc = player.app.keyboardCommands;
+            if (@:privateAccess !kbc._nextKeyDown.empty()) {
+                kbc.unNextKeyDown();
+            }
             bmnav = false;
             dispatch('bmnav:abort', this);
         }
@@ -115,7 +119,8 @@ class SeekBar extends Ent {
         // handle the last keydown event captured after bookmark-navigation is completed
         if ( !bmnav ) {
             playerView.controls.unlockUiVisibility();
-            return player.app.keyboardCommands.handleDefault( event );
+            player.app.keyboardCommands.unNextKeyDown();
+            return defer(player.app.keyboardCommands.handleDefault.bind( event ));
         }
 
         switch ( event.key ) {
