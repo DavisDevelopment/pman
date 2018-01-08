@@ -31,10 +31,12 @@ using pman.bg.MediaTools;
 
 class LoadMediaData extends Task2<MediaData> {
     /* Constructor Function */
-    public function new(media:Media, db:Database):Void {
+    public function new(uri:String, db:Database):Void {
         super();
 
-        this.media = media;
+        //this.media = media;
+        this.mediaUri = uri.toUri();
+        this.mediaSource = this.mediaUri.toMediaSource();
         this.db = db;
         this.data = new MediaData();
     }
@@ -45,6 +47,15 @@ class LoadMediaData extends Task2<MediaData> {
       * execute [this]
       */
     override function execute(done: Cb<MediaData>):Void {
+        trace('Starting LoadMediaData');
+        done = done.wrap(function(dun, ?error, ?data) {
+            if (error != null)
+                trace('LoadMediaData has failed');
+            else
+                trace('LoadMediaData completed successfully');
+            dun(error, data);
+        });
+
         [tryto_load, fill_missing_info].series(function(?error) {
             if (error != null) {
                 done(error, null);
@@ -56,7 +67,7 @@ class LoadMediaData extends Task2<MediaData> {
     }
 
     private function tryto_load(done: VoidCb):Void {
-        switch ( media.source ) {
+        switch ( mediaSource ) {
             case MediaSource.MSLocalPath( path ):
                 if (!Fs.exists( path )) {
                     done('Error: File "$path" does not exist');
@@ -70,36 +81,30 @@ class LoadMediaData extends Task2<MediaData> {
         }
     }
 
+    /**
+      * attempt to load the MediaRow
+      */
     private function attempt_load(done: VoidCb):Void {
-        if (media.id != null) {
-            store.getRowById(media.id, function(?error, ?irow) {
-                if (error != null)
-                    return done(error);
-
-                data = new MediaData();
-                data.pullRow(untyped irow, done);
-            });
-        }
-        else {
-            var uri:String = media.source.toUri();
-            store.getRowByUri(uri, function(?error:Dynamic, ?row:MediaRow) {
-                if (error != null) {
-                    return done( error );
+        trace('attempting to load MediaRow document');
+        store.cogRow(mediaUri.toUri(), function(?error:Dynamic, ?row:MediaRow) {
+            if (error != null) {
+                return done( error );
+            }
+            else {
+                if (row == null) {
+                    return create_new( done );
                 }
                 else {
-                    if (row == null) {
-                        return create_new( done );
-                    }
-                    else {
-                        media.applyRow(row, done);
-                    }
+                    trace('LOADED: MediaRow document');
+                    trace( row );
+                    data.pullMediaRow(row, done);
                 }
-            });
-        }
+            }
+        });
     }
 
     /**
-      *
+      * 
       */
     private function create_new(done: VoidCb):Void {
         data = new MediaData();
@@ -120,8 +125,7 @@ class LoadMediaData extends Task2<MediaData> {
     private function push_data_to_db(done: VoidCb):Void {
         var raw = data.toRow();
         var mraw:MediaRow = {
-            _id: media.id,
-            uri: media.source.toUri(),
+            uri: mediaUri,
             data: raw
         };
 
@@ -130,7 +134,7 @@ class LoadMediaData extends Task2<MediaData> {
                 return done( error );
             }
             else {
-                media.applyRow(row, done);
+                data.pullMediaRow(row, done);
             }
         });
     }
@@ -159,7 +163,7 @@ class LoadMediaData extends Task2<MediaData> {
       * load the Media's metadata
       */
     private function loadMediaMetadata(done: Cb<MediaMetadata>):Void {
-        switch ( media.source ) {
+        switch ( mediaSource ) {
             case MediaSource.MSLocalPath(path):
                 LoadMediaMetadata.load( path ).toAsync( done );
 
@@ -175,7 +179,9 @@ class LoadMediaData extends Task2<MediaData> {
 
 /* === Instance Fields === */
 
-    public var media: Media;
+    //public var media: Media;
+    public var mediaUri: String;
+    public var mediaSource: MediaSource;
     public var db: Database;
     public var data: Null<MediaData>;
 }
