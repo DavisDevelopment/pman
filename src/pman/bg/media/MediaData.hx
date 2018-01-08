@@ -267,6 +267,7 @@ class MediaData {
         copy.contentRating = contentRating;
         copy.channel = channel;
         copy.description = description;
+        copy.attrs = attrs.copy();
         copy.marks = marks.copy();
         copy.tags = tags.copy();
         copy.actors = actors.map(x->x.clone());
