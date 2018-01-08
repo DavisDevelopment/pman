@@ -123,7 +123,7 @@ class TabView extends Ent {
         var li:Null<Image> = leftIcon;
         // draw the left icon
         if (li != null) {
-            lir = new Rectangle((ir.x + 2.0), (ir.y + half(ir.h - li.height)), li.width, li.height);
+            lir = new Rectangle((ir.x + 1.33), (ir.y + half(ir.h - li.height)), li.width, li.height);
             //try {
                 c.drawComponent(li, 
                     0, 0, li.width, li.height,
@@ -137,7 +137,7 @@ class TabView extends Ent {
             // draw the title's text
             var tbr:Rectangle = new Rectangle((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
             if (li != null && lir != null) {
-                tbr.x = (lir.w + 3.5 + tbr.x);
+                tbr.x = (lir.w + 2.0 + tbr.x);
             }
             c.drawComponent(tb, 
                 0, 0, tb.width, tb.height,
