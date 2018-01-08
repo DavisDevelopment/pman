@@ -27,7 +27,7 @@ using Slambda;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
 
-class BookmarkCommand extends Command {
+class TrackCommand extends Command {
     /**
       * execute [this] command
       */
@@ -35,20 +35,12 @@ class BookmarkCommand extends Command {
         var args:Array<Dynamic> = argv.map.fn( _.value );
         var action:Null<String> = args.shift();
         if (action == null) {
-            player.addBookmark( done );
+            return done();
         }
         else {
             switch ( action ) {
-                case 'add':
-                    var name:Null<String> = args.shift();
-                    var time:Null<Float> = args.shift();
-                    if (time == null) time = player.currentTime;
-                    player.track.addMark(new pman.media.info.Mark(Named(name), time));
-                    player.track.data.save( done );
-
-                case 'rename':
-                    player.message('TODO: pmbash bookmark renaming');
-                    done();
+                case 'star', 'favorite':
+                    player.track.star( done );
 
                 default:
                     done();

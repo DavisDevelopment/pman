@@ -39,6 +39,8 @@ class Interp extends Interpreter {
             'playlist' => new PlaylistCommand(),
             'pl' => new PlaylistCommand(),
             'player' => new PlayerCommand(),
+            'track' => new TrackCommand(),
+            'mark' => new BookmarkCommand(),
             'play' => alias('player play'),
             'pause' => alias('player pause'),
             'mute' => alias('player mute'),
@@ -57,7 +59,7 @@ class Interp extends Interpreter {
             'fast' => alias("speed $pbr_fast"),
             'veryfast' => alias("speed $pbr_veryfast"),
             'superfast' => alias("speed $pbr_superfast"),
-            'volume' => alias('player volume')
+            'volume' => alias('player volume'),
         ];
     }
 
