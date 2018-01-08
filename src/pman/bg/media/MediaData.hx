@@ -69,11 +69,29 @@ class MediaData {
         );
     }
 
+    /**
+      *
+      */
+    public function pullMediaRow(row:MediaRow, done:VoidCb):Void {
+        this.mediaId = row._id;
+        this.mediaUri = row.uri;
+        
+        if (row.data != null) {
+            pullRow(row.data, done);
+        }
+        else {
+            done();
+        }
+    }
+
+    /**
       * pull [row]'s data onto [this]
       */
     public function pullRow(row:MediaDataRow, done:VoidCb):Void {
         var db:Database = Database.get();
         var steps:Array<VoidAsync> = new Array();
+
+        //this.mediaId = row.actors
 
         // handle base fields
         steps.push(function(next: VoidCb) {
@@ -84,7 +102,11 @@ class MediaData {
                 contentRating = row.contentRating;
                 channel = row.channel;
                 description = row.description;
-                tags = row.tags.copy();
+                attrs = new Dict();
+                if (row.attrs != null) {
+                    attrs = row.attrs.toDict();
+                }
+                //tags = row.tags.copy();
                 meta = null;
                 if (row.meta != null) {
                     meta = new MediaMetadata( row.meta );
@@ -96,6 +118,8 @@ class MediaData {
         // handle tags
         steps.push(function(next) {
             var tagSteps:Array<VoidAsync> = new Array();
+            if (row.tags == null)
+                return next();
             // get array of tags in their raw form
             var rawTags = row.tags.copy();
             // temp variable that will become the value of [tags]
