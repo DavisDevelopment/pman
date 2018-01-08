@@ -220,6 +220,44 @@ class MediaData {
     }
 
     /**
+      * save [this] MediaData
+      */
+    public function save(?done: VoidCb):VoidPromise {
+        return new VoidPromise(function(yes, no) {
+            var saver = new SaveMediaData( this );
+            saver.run(function(?error) {
+                if (error != null) {
+                    no( error );
+                }
+                else {
+                    yes();
+                }
+            });
+        }).toAsync( done );
+    }
+
+    public function sync(?done: VoidCb):VoidPromise {
+        return new VoidPromise(function(done, raise) {
+            var saver = new SaveMediaData( this );
+            saver.save(function(?error, ?mrow) {
+                if (error != null) {
+                    return raise( error );
+                }
+                else {
+                    pullMediaRow(mrow, function(?error) {
+                        if (error != null) {
+                            raise( error );
+                        }
+                        else {
+                            done();
+                        }
+                    });
+                }
+            });
+        }).toAsync( done );
+    }
+
+    /**
       * create and return a deep-copy of [this]
       */
     public function clone():MediaData {
