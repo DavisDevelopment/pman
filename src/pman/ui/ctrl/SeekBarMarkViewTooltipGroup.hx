@@ -284,13 +284,23 @@ class SeekBarMarkViewTooltipGroup extends Ent {
             col.push( member );
         }
 
-        inline function columnWidth(i: Int):Float {
-            return columns[coli].largest.fn( _.w );
+        function columnWidth(i: Int):Float {
+            var result:Float = 0.0;
+            var col = columns[i];
+            if (col != null) {
+                for (m in col) {
+                    result = max(result, m.w);
+                }
+            }
+            return result;
         }
 
         inline function nextColumn():Void {
             var cw = columnWidth( coli );
             ++coli;
+            if (columns[coli] == null) {
+                columns.insert(coli, new Array());
+            }
             p.x += (columnWidth(coli - 1) + (margin * 2));
             p.y = (pr.y + margin);
         }
