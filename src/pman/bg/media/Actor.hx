@@ -64,6 +64,10 @@ class Actor {
         return new Actor(toRow());
     }
 
+    public static function fromRow(row: ActorRow):Actor {
+        return new Actor( row );
+    }
+
 /* === Instance Fields === */
 
     public var id: Null<String>;
