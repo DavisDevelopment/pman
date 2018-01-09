@@ -285,7 +285,11 @@ class TrackData {
         switch ( mark.type ) {
             case Begin, End, LastTime:
                 //marks = marks.filter.fn(!_.type.equals( mark.type ));
-                filterMarks.fn(!_.type.equals( mark.type ));
+                removeMarksOfType( mark.type );
+                marks.push( mark );
+
+            case Scene(type, name):
+                removeMarksOfType( mark.type );
                 marks.push( mark );
 
             case Named( name ):
@@ -386,9 +390,9 @@ class TrackData {
     /**
       * attach a Tag instance to [this]
       */
-    public function attachTag(tag : String):String {
+    public function attachTag(tag : Tag):Tag {
         for (t in tags) {
-            if (t == tag) {
+            if (t.name == tag.name) {
                 return t;
             }
         }
@@ -399,24 +403,24 @@ class TrackData {
     /**
       * attach a Tag to [this] as a String
       */
-    public function addTag(tagName : String):String {
-        return attachTag( tagName );
+    public inline function addTag(tagName : String):Tag {
+        return attachTag(new Tag({name: tagName}));
     }
 
     /**
       * select tag by oregex
       */
-    public function selectTag(pattern : String):Null<String> {
+    public function selectTag(pattern : String):Null<Tag> {
         var reg:RegEx = new RegEx(new EReg(pattern, 'i'));
-        return tags.firstMatch.fn(reg.match(_));
+        return tags.firstMatch.fn(reg.match( _.name ));
     }
 
     /**
       * checks for attached tag by given name
       */
-    public function hasTag(name:String):Bool {
+    public function hasTag(name: String):Bool {
         for (t in tags)
-            if (t == name)
+            if (t.name == name)
                 return true;
         return false;
     }
@@ -434,7 +438,9 @@ class TrackData {
       * add an Actor to [this] by name
       */
     public function addActor(name : String):Void {
-        attachActor(new Actor(name, null));
+        attachActor(new Actor({
+            name: name
+        }));
     }
 
     /**
@@ -538,7 +544,7 @@ class TrackData {
     public function edit(action:TrackData->VoidCb->Void, done:VoidCb, _save:Bool=true):Void {
         var steps:Array<VoidAsync> = [action.bind(this, _)];
         if ( _save ) {
-            steps.push(untyped save.bind(_, database.mediaStore));
+            steps.push(untyped save.bind(_, null));
         }
         steps.series( done );
     }
@@ -553,7 +559,8 @@ class TrackData {
     public var rating : Null<Float>;
     public var description : Null<String>;
     public var marks : Array<Mark>;
-    public var tags : Array<String>;
+    //public var tags : Array<String>;
+    public var tags: Array<Tag>;
     public var actors : Array<Actor>;
     public var channel : Null<String>;
     public var contentRating : Null<String>;
