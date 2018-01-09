@@ -66,6 +66,27 @@ class Actor implements IComparable<Actor> {
         return new Actor(toRow());
     }
 
+    /**
+      * check if [this] Actor and [other] refer to the same person
+      */
+    public function equals(other: Actor):Bool {
+        return (
+            (name == other.name) ||
+            (aliases.hasContent() && aliases.has( other.name )) ||
+            (other.aliases.hasContent() && other.aliases.has( name ))
+        );
+    }
+
+    public function compareTo(x: Actor):Int {
+        var comps = [
+            St.stringComparator(name, x.name)
+        ];
+        if (aliases.hasContent() && x.aliases.hasContent()) {
+            comps.push(St.compareArrays.bind(aliases, x.aliases));
+        }
+        return comps.chain();
+    }
+
     public static function fromRow(row: ActorRow):Actor {
         return new Actor( row );
     }
