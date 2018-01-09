@@ -34,7 +34,7 @@ class EfficientTrackListDataLoader extends Task1 {
         super();
 
         this.tracks = tracks;
-        this.ms = ms;
+        this.db = PManDatabase.get();
         this.missingData = new Array();
         this.treg = new Dict();
         this.writes = exec.createBatch();
@@ -46,6 +46,7 @@ class EfficientTrackListDataLoader extends Task1 {
       * execute [this] Task
       */
     override function execute(done : VoidCb):Void {
+        trace('Starting EfficientTrackListDataLoader');
         var uris:Array<String> = new Array();//tracks.map.fn( _.uri );
         for (track in tracks) {
             uris.push( track.uri );
@@ -59,8 +60,9 @@ class EfficientTrackListDataLoader extends Task1 {
             done( error );
         }
 
-        var rlp = ms.getRowsByUris( uris );
+        var rlp = db.media.getRowsByUris( uris );
         rlp.then(function( rows ) {
+            trace('Loaded ${rows.length} documents from database in ${now() - startTime}ms');
             process_existing_rows(rows, complete);
         });
         rlp.unless(function( error ) {
@@ -120,16 +122,20 @@ class EfficientTrackListDataLoader extends Task1 {
       * update the views for all Tracks
       */
     private function update_views(done : VoidCb):Void {
-        var updates = exec.createBatch();
-        for (track in tracks) {
-            updates.task({
-                var view = track.getView();
-                if (view != null) {
-                    view.update();
+        defer(function() {
+            if (tracks.length < 50) {
+                for (t in tracks)
+                    t.updateView();
+            }
+            else {
+                var gf = ((t:Track) -> t.updateView.bind());
+                var ca = ((a:Array<Void->Void>) -> a.iter.fn(_()));
+                for (ta in tracks.chunk( 5 )) {
+                    ca(ta.map( gf ));
                 }
-            });
-        }
-        updates.start(done.void());
+            }
+            done();
+        });
     }
 
     /**
@@ -196,7 +202,7 @@ class EfficientTrackListDataLoader extends Task1 {
         
         // function to perform a basic INSERT operation
         function insert(done : VoidCb) {
-            ms.insertRow(raw, function(?error, ?row:MediaRow) {
+            db.media.insertRow(raw, function(?error, ?row:MediaRow) {
                 if (error != null) {
                     return done( error );
                 }
@@ -263,7 +269,7 @@ class EfficientTrackListDataLoader extends Task1 {
                     }
                 });
             });
-            steps.push(data.initialize.bind(bpmain.db, _));
+            steps.push(data.initialize.bind(db, _));
             VoidAsyncs.series(steps, next);
         });
     }
@@ -316,14 +322,14 @@ class EfficientTrackListDataLoader extends Task1 {
       */
     private function schedule_data_write(data : TrackData):Void {
         writes.task(@async {
-            data.save(next, ms);
+            data.save(next, db);
         });
     }
 
 /* === Instance Fields === */
 
     private var tracks : Array<Track>;
-    private var ms : MediaStore;
+    private var db: PManDatabase;
     private var missingData : Array<Track>;
     private var treg : Dict<String, Track>;
     private var writes : BatchExecutor;
