@@ -13,8 +13,10 @@ import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
+
 import pman.media.info.*;
-import pman.media.info.Mark;
+import pman.bg.media.Mark;
+import pman.bg.media.Tag;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -32,6 +34,8 @@ using Slambda;
 using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
+using pman.bg.DictTools;
+using tannus.FunctionTools;
 
 class TrackData {
     /* Constructor Function */
