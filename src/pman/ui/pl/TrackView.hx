@@ -116,8 +116,6 @@ class TrackView extends Pane {
 	  * update [this]'s content
 	  */
 	public function update():Void {
-	    var td = track.data;
-
         // generate the markup
         var markup = template.execute(track, tmacros);
 
