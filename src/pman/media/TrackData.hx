@@ -558,6 +558,7 @@ class TrackData {
     public var starred : Bool;
     public var rating : Null<Float>;
     public var description : Null<String>;
+    public var attrs : Dict<String, Dynamic>;
     public var marks : Array<Mark>;
     //public var tags : Array<String>;
     public var tags: Array<Tag>;
