@@ -13,6 +13,10 @@ import pman.ds.OnceSignal as ReadySignal;
 import edis.libs.nedb.DataStore;
 import edis.storage.db.Query;
 
+import pman.bg.media.MediaRow as Row;
+import pman.bg.media.MediaRow.MediaDataRow as DataRow;
+import pman.bg.media.MediaRow.MediaMetadataRow as MetadataRow;
+
 import Slambda.fn;
 import tannus.math.TMath.*;
 import haxe.extern.EitherType;
@@ -27,7 +31,12 @@ using tannus.async.Asyncs;
 using tannus.async.VoidAsyncs;
 using pman.edb.MediaRowTools;
 
-class MediaStore extends TableWrapper {
+typedef MediaStore = pman.bg.db.MediaTable;
+typedef MediaRow = Row;
+typedef MediaDataRow = DataRow;
+typedef MediaMetadataRow = MetadataRow;
+
+class MediaStore_ extends TableWrapper {
     /* Constructor Function */
     public function new(store:DataStore):Void {
         super(store);
@@ -164,6 +173,7 @@ class MediaStore extends TableWrapper {
     }
 }
 
+/*
 typedef MediaRow = {
     ?_id: String,
     uri: String,
@@ -193,3 +203,4 @@ typedef MediaMetadataRow = {
     }>,
     audio: Null<{}>
 };
+*/
