@@ -13,6 +13,7 @@ import pman.Globals.*;
 
 import edis.libs.nedb.DataStore;
 import pman.bg.db.*;
+import pman.bg.Dirs;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
@@ -25,58 +26,58 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.async.VoidAsyncs;
 
-class PManDatabase {
+class PManDatabase extends Database {
     /* Constructor Function */
     public function new():Void {
-        path = (Paths.userData().plusString('pmdb'));
+        super();
+
+        //path = (Paths.userData().plusString('pmdb'));
+        path = Dirs.dbPath();
         ops = new Operators();
 
-        rs = new ReadySignal();
+        if (instance == null) {
+            instance = this;
+        }
     }
 
 /* === Instance Methods === */
 
-    public function init(?done : VoidCb):Void {
+    override function init(?done : VoidCb):Void {
         if (!Fs.exists( path )) {
             Fs.createDirectory( path );
         }
 
-        defer(function() {
-            var tasks:Array<VoidAsync> = new Array();
-            inline function step(a : VoidAsync) tasks.push( a );
+        if (done == null)
+            done = VoidCb.noop;
+        done = done.wrap(function(_done, ?error) {
+            //TODO
+            _done( error );
+        });
 
-            // create TableWrapper properties
-            step(function(next) {
-                try {
-                    mediaStore = wrap('media', MediaStore);
-                    actorStore = wrap('actors', ActorStore);
+        super.init( done );
+    }
 
-                    var tables = [
-                        mediaStore,
-                        actorStore
-                    ];
-                    VoidAsyncs.series(untyped tables.map.fn(_.init.bind(_)), next);
-                }
-                catch (error : Dynamic) {
-                    next( error );
-                }
+    /**
+      * do the stuff
+      */
+    override function _build():Void {
+        super._build();
+
+        require(function(next) {
+            defer(function() {
+                mediaStore = media;
+                actorStore = actors;
+
+                next();
             });
+        });
 
-            // create other properties
-            step(function(next) {
-                defer(function() {
+        require(function(next) {
+            defer(function() {
+                configInfo = new ConfigInfo();
+                preferences = new Preferences();
 
-                    configInfo = new ConfigInfo();
-                    preferences = new Preferences();
-
-                    next();
-                });
-            });
-
-            tasks.series(function(?error) {
-                if (done != null) {
-                    done( error );
-                }
+                next();
             });
         });
     }
@@ -84,6 +85,7 @@ class PManDatabase {
     /**
       * create a TableWrapper
       */
+    /*
     private function wrap<T:TableWrapper>(name:String, ?type:Class<T>):T {
         if (type == null) {
             type = untyped TableWrapper;
@@ -98,6 +100,7 @@ class PManDatabase {
         });
         return Type.createInstance(type, untyped [store]);
     }
+    */
 
     /**
       * alter the serialization of documents
@@ -116,14 +119,27 @@ class PManDatabase {
     /**
       * queue [action] for when [this] database has been declared 'ready'
       */
-    public function onready(action : Void->Void):Void rs.await( action );
+    //public function onready(action : Void->Void):Void rs.await( action );
 
     /**
       * get the full path to the DataStore file
       */
-    public function dsfilename(name : String):String {
-        return Std.string(path.plusString( name ).normalize());
+    //public function dsfilename(name : String):String {
+        //return Std.string(path.plusString( name ).normalize());
+    //}
+
+    public static function get(?safeAction: PManDatabase->Void):PManDatabase {
+        var res = instance;
+        if (res == null) {
+            res = new PManDatabase();
+        }
+        if (safeAction != null) {
+            res.onready(safeAction.bind(res));
+        }
+        return res;
     }
+
+    public static var instance:Null<PManDatabase> = null;
 
 /* === Instance Fields === */
 
@@ -135,5 +151,5 @@ class PManDatabase {
     public var configInfo : ConfigInfo;
     public var preferences : Preferences;
     
-    private var rs : ReadySignal;
+    //private var rs : ReadySignal;
 }
