@@ -239,24 +239,34 @@ class TrackData {
     /**
       * push [this] TrackData to the database
       */
-    public function save(?complete:VoidCb, ?store:MediaStore):Void {
+    public function save(?complete:VoidCb, ?db:PManDatabase):Void {
         if (complete == null)
-            complete = untyped fn(e=>trace(e));
-        if (store == null) {
-            store = BPlayerMain.instance.db.mediaStore;
+            complete = VoidCb.noop;
+        if (db == null) {
+            db = PManDatabase.get();
         }
-        var db = BPlayerMain.instance.db;
 
-        var steps:Array<VoidAsync> = [];
-        steps.push(function(done : VoidCb) {
-            var prom = store.putRow(toRaw());
-            prom.then(function( row ) {
-                pullRaw(row, done);
-            });
-            prom.unless(function( error ) {
-                done( error );
-            });
+        var steps:Array<VoidAsync> = new Array();
+        inline function step(f: VoidAsync) steps.push( f );
+
+        // push [tags]
+        step(function(next) {
+            db.tags.cogRows(tags.map.fn(_.name)).then(function(x) next(), next.raise());
         });
+        
+        // push [actors]
+        step(function(next) {
+            db.actors.cogRowsFromNames(actors.map.fn(_.name)).then(x->next(), next.raise());
+        });
+
+        // push [this] to the database
+        step(function(next) {
+            var prom = db.media.putRow(toRaw());
+            prom.then(function( row ) {
+                pullRaw(row, next);
+            }, next.raise());
+        });
+
         steps.series( complete );
     }
 
