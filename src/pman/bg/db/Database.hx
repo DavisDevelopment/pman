@@ -86,6 +86,13 @@ class Database {
     public inline function onready(f: Void->Void):Void ensure( f );
 
     /**
+      * add to [this]'s requirements
+      */
+    public function require(task: VoidAsync):Void {
+        reqs.vasync( task );
+    }
+
+    /**
       * get a new Table
       */
     public function openTable<T:Table>(name:String, ?tableClass:Class<T>):T {
