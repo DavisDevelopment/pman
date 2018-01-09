@@ -390,15 +390,7 @@ class KeyboardCommands {
 
                 // ctrl+t
                 case LetterT if (event.ctrlKey || event.metaKey):
-                    if ( event.shiftKey ) {
-                        p.tdfprompt(function(?error) {
-                            if (error != null)
-                                throw error;
-                        });
-                    }
-                    else {
-                        sess.setTab(sess.newTab());
-                    }
+                    sess.setTab(sess.newTab());
 
             /* --- 'next-command-count' modifiers --- */
 
