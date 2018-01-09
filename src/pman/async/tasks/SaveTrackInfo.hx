@@ -80,12 +80,21 @@ class SaveTrackInfo extends Task1 {
                 if (delta.rating != null)
                     data.rating = delta.rating.current;
 
-                if (delta.tags != null)
-                    data.tags = delta.tags.current;
-
                 if (delta.description != null)
                     data.description = delta.description.current;
 
+                end();
+            });
+
+            // handle tags
+            steps.push(function(end) {
+                if (delta.tags != null) {
+                    var newTags = delta.tags.current;
+                    data.tags = new Array();
+                    for (t in newTags) {
+                        data.addTag( t );
+                    }
+                }
                 end();
             });
 
