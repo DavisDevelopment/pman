@@ -13,6 +13,7 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
 
+@:expose('WordTokenizer')
 class SimpleWordLexer extends LexerBase {
     /* Constructor Function */
     public function new(?options: WordLexerOptionsDecl):Void {
@@ -27,7 +28,7 @@ class SimpleWordLexer extends LexerBase {
         this.buffer = new ByteStack(ByteArray.ofString( text ));
         this.tokens = new Array();
 
-        while (!done) {
+        while ( !done ) {
             var t = nextToken();
             if (t != null) {
                 tokens.push( t );
@@ -45,6 +46,7 @@ class SimpleWordLexer extends LexerBase {
         while (tk == null && !done) {
             tk = tok();
         }
+        return tk;
         if (tk != null) {
             var prev:Null<WordToken> = null;
             while (!done && (prev == null || prev.equals( tk ))) {
@@ -60,12 +62,13 @@ class SimpleWordLexer extends LexerBase {
             return null;
 
         var c:Byte = next();
-        if (options.word_delimiters.has( c )) {
+        if (c.isWhiteSpace()) {
             cawd();
             return null;
         }
         else if (isWordChar( c )) {
             var txt = readWordString();
+            trace( txt );
             if (txt == null) {
                 return null;
             }
@@ -118,17 +121,19 @@ class SimpleWordLexer extends LexerBase {
     }
 
     private function readWordString():Null<String> {
-        var chars = new ByteArrayBuffer();
+        //var chars = new ByteArrayBuffer();
+        var chars:String = '';
         while (!done && (isWordChar(next()) || next().equalsChar("'"))) {
-            chars.addByte(advance());
+            chars += advance();
         }
 
-        if (chars.length == 0) {
+        if (chars.empty()) {
             return null;
         }
 
-        var chars:ByteArray = chars.getByteArray();
-        return chars.toString().trim().nullEmpty();
+        //var chars:ByteArray = ByteArray.ofString( chars );
+        //return chars.toString().trim().nullEmpty();
+        return chars.trim();
     }
 
     private inline function isWordChar(c: Byte):Bool {
@@ -161,7 +166,7 @@ class SimpleWordLexer extends LexerBase {
     }
 
     private inline function cawd():Void {
-        while (!done && options.word_delimiters.has(next())) {
+        while (!done && next().isWhiteSpace()) {
             advance();
         }
     }
