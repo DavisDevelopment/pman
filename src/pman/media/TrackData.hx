@@ -223,12 +223,17 @@ class TrackData {
                 starred: starred,
                 rating: rating,
                 description: description,
-                marks: marks.map( Serializer.run ),
-                tags: tags.map( Serializer.run ),
+                attrs: (attrs != null ? attrs.toAnon(_encodeAttrVal) : null),
+                marks: marks.map(m -> m.toJson()),
+                tags: tags.map.fn( _.name ),
                 actors: actors.map.fn( _.name ),
                 meta: (meta != null ? meta.toRaw() : null)
             }
         };
+    }
+    private function _encodeAttrVal(value: Dynamic):Dynamic {
+        //TODO actually encode values
+        return value;
     }
 
     /**
