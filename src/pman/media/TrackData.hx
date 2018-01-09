@@ -104,11 +104,16 @@ class TrackData {
     /**
       * pull data from a MediaInfoRow
       */
-    public function pullRaw(row:MediaRow, done:VoidCb, ?store:ActorStore):Void {
-        if (store == null) {
-            store = database.actorStore;
+    public function pullRaw(row:MediaRow, done:VoidCb, ?db:PManDatabase):Void {
+        // ensure that we have a reference to [db]
+        if (db == null) {
+            db = PManDatabase.get();
         }
 
+        // array to hold list of asynchronous actions to be taken
+        var steps:Array<VoidAsync> = new Array();
+
+        // copy over data which can be copied synchronously
         media_id = row._id;
         var d = row.data;
         views = d.views;
@@ -116,14 +121,71 @@ class TrackData {
         rating = d.rating;
         description = d.description;
 
+        // pull metadata
         if (d.meta != null) {
             meta = new MediaMetadata();
             meta.pullRaw( d.meta );
         }
-        marks = d.marks.map( Unserializer.run );
-        tags = d.tags.map( Unserializer.run );
 
-        var steps:Array<VoidAsync> = new Array();
+        // create a TypeResolver that will fix the broken reference to pman.media.info.Mark
+        var ntr = (function() {
+            var tr = Unserializer.DEFAULT_RESOLVER;
+            return ({
+                resolveClass: tr.resolveClass.wrap(function(_super, name:String) {
+                    if (name == 'pman.media.info.Mark')
+                        return cast Mark;
+                    return _super( name );
+                }),
+                resolveEnum: tr.resolveEnum.wrap(function(_super, name:String) {
+                    if (name == 'pman.media.info.MarkType')
+                        return cast MarkType;
+                    return _super( name );
+                })
+            });
+        }());
+
+        // a function that will decode encoded Mark instances,
+        // whether they're encoded using the new format or the previous one
+        function decode_mark(x: Dynamic):Mark {
+            if ((x is String)) {
+                var u = new Unserializer(cast x);
+                u.setResolver( ntr );
+                return u.unserialize();
+            }
+            else {
+                return Mark.fromJsonMark(untyped x);
+            }
+        }
+
+        // decode Mark instances
+        marks = d.marks.map( decode_mark );
+
+        // decode tags
+        // detect when tags are stored in previous format, and decode them
+        var ereg:EReg = ~/^y[0-9]+:/;
+        steps.push(function(next: VoidCb) {
+            var _tags = [];
+            next = next.wrap(function(_next, ?error) {
+                this.tags = _tags;
+                _next( error );
+            });
+
+            var tsteps:Array<VoidAsync> = new Array();
+            for (rawTag in d.tags) {
+                var name:String = rawTag;
+                if (ereg.match( rawTag )) {
+                    name = Unserializer.run( rawTag );
+                }
+                tsteps.push(function(nxt) {
+                    db.tags.cogRow( name ).then(function(row) {
+                        _tags.push(new Tag( row ));
+
+                        nxt();
+                    }, nxt.raise());
+                });
+            }
+            tsteps.series( next );
+        });
 
         // pull [actors]
         steps.push(function(next : VoidCb) {
