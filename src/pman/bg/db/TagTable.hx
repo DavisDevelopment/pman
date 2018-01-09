@@ -77,7 +77,7 @@ class TagTable extends Table {
                 }
                 for (name in names) {
                     steps.push(function(next) {
-                        createRow(name, function(?error, ?row) {
+                        cogRow(name, function(?error, ?row) {
                             if (error != null) {
                                 next( error );
                             }
