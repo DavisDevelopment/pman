@@ -128,7 +128,7 @@ class Database {
     /**
       * build [this] Database instance
       */
-    private inline function _build():Void {
+    private function _build():Void {
         actors = openTable('actors', ActorTable);
         tags = openTable('tags', TagTable);
 
