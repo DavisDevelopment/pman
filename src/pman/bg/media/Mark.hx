@@ -3,6 +3,7 @@ package pman.bg.media;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
+import tannus.math.*;
 import tannus.async.*;
 import tannus.sys.Path;
 import tannus.http.Url;
@@ -133,6 +134,23 @@ class Mark {
             }
         }
         return results;
+    }
+
+    public static function nfirstWords(all:Array<Mark>, ?mutateWord:String->String):Dict<String, Int> {
+        if (mutateWord == null) 
+            mutateWord = FunctionTools.identity;
+        var result:Dict<String, Int> = new Dict();
+        var fwl = firstWords( all ).map( mutateWord );
+        inline function add(w:String, n:Int=1) {
+            if (result.exists( w ))
+                result[w] += n;
+            else 
+                result[w] = n;
+        }
+        for (w in fwl) {
+            add( w );
+        }
+        return result;
     }
 
     public static function markNthWordIndexOf(all:Array<Mark>, mark:Mark, n:Int, ?mutateWord:String->String):Int {
