@@ -69,6 +69,8 @@ class BookmarkEditor extends Pane {
                 case Begin: "$begin";
                 case End: "$end";
                 case LastTime: "$lastTime";
+                case Scene(SceneBegin, n): '$$scene($${begin}, "$n")';
+                case Scene(SceneEnd, n): '$$scene($${end}, "$n")';
                 case Named( n ): n;
             });
             var nameCol = row.addCol(null, name);

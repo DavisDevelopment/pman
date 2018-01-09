@@ -273,11 +273,11 @@ class TrackInfoPopup extends Dialog {
             delta.rating = new Delta(v.rating, d.rating);
         }
         if (v.tags.length != d.tags.length) {
-            delta.tags = new Delta(v.tags, d.tags);
+            delta.tags = new Delta(v.tags, d.tags.map.fn(_.name));
         }
         else {
             var vt = v.tags.copy();
-            var dt = d.tags.copy();
+            var dt = d.tags.map.fn( _.name );
             vt.sort( Reflect.compare );
             dt.sort( Reflect.compare );
             if (!vt.compare( dt )) {
