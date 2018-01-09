@@ -88,6 +88,32 @@ class Mark {
         return type.match(Named(_)|Scene(_, _));
     }
 
+    public function format(all: Array<Mark>):Null<String> {
+        var text = getName();
+        if (!text.hasContent())
+            return null;
+        
+        var i:Int = all.indexOf( this );
+        inline function set(x:String, y:Dynamic) {
+            text = text
+                .replace('%$x', Std.string( y ))
+                .replace('@$x', Std.string( y ));
+        }
+
+        set('i', i);
+        var fw = firstWord();
+        if (fw.hasContent()) {
+            var mutateWord:String->String = (x -> x.toLowerCase());
+            var nfw = nfirstWords(all, mutateWord);
+            var wi = markNthWordIndexOf(all, this, 0, mutateWord);
+
+            set('w', (wi > 1 ? '$wi' : ''));
+            set('W', (wi + 1));
+        }
+        set('t', Time.fromFloat( time ));
+        return text;
+    }
+
     /**
       * parse out [this] Mark's "word-list"
       */
