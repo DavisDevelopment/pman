@@ -6,6 +6,10 @@ import pman.media.info.Mark;
 import pman.media.MediaSource;
 
 using Slambda;
+using StringTools;
+using tannus.ds.StringUtils;
+using tannus.ds.ArrayTools;
+using tannus.FunctionTools;
 
 class TrackSearchEngine extends SearchEngine<Track> {
 	override function getValue(track : Track):String {
@@ -20,7 +24,10 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	    var values:Array<String> = new Array();
 	    inline function add(x)
 	        values.push( x );
-	    inline function adds(x:Iterable<String>)
+	    inline function nadd(x:Null<String>)
+	        if (x.hasContent())
+	            add( x );
+	    inline function adds(x: Iterable<String>)
 	        x.iter.fn(add(_));
 
 	    // add track title
@@ -54,13 +61,16 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	        // add tag names
 	        for (t in track.data.tags) {
 	            // add tag name
-	            add( t );
+	            add( t.name );
 	        }
 
 	        // add actor names
 	        for (a in track.data.actors) {
 	            add( a.name );
 	        }
+
+	        nadd( track.data.description );
+	        nadd( track.data.channel );
 	    }
 	    
 	    return values;
