@@ -135,10 +135,32 @@ class Mark {
         return results;
     }
 
+    public static function markNthWordIndexOf(all:Array<Mark>, mark:Mark, n:Int, ?mutateWord:String->String):Int {
+        if (mutateWord == null)
+            mutateWord = FunctionTools.identity;
+        var targetWord = mark.getWord( n );
+        if (targetWord == null)
+            return -1;
+
+        var wi:Int = 0;
+        for (m in all) {
+            var nw = m.getWord( n );
+            if (nw != null) {
+                if (m == mark) {
+                    return ++wi;
+                }
+                else if (nw == targetWord) {
+                    ++wi;
+                }
+            }
+        }
+        return -1;
+    }
+
 /* === Instance Fields === */
 
-    public var type(default, null): MarkType;
-    public var time(default, null): Float;
+    public var type: MarkType;
+    public var time: Float;
 
     private var _wl:Null<Array<String>> = null;
 
