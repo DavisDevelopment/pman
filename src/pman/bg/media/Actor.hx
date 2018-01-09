@@ -8,6 +8,7 @@ import tannus.async.promises.*;
 import tannus.sys.Path;
 import tannus.http.Url;
 import tannus.sys.FileSystem as Fs;
+import tannus.ds.SortingTools as St;
 
 import Slambda.fn;
 import edis.Globals.*;
@@ -21,8 +22,9 @@ using tannus.ds.ArrayTools;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
 using pman.bg.MediaTools;
+using tannus.ds.SortingTools;
 
-class Actor {
+class Actor implements IComparable<Actor> {
     /* Constructor Function */
     public function new(?row: ActorRow):Void {
         if (row == null) {
