@@ -250,7 +250,7 @@ class SeekBarMarkViewTooltipPanel extends Ent {
         var m:Mark = t.markView.mark.toNonNullable();
 
         // the first word of the Mark's name
-        var fw:String = m.getFirstWord();
+        var fw:String = m.firstWord();
 
         // append [t] to the tooltip-group corresponding with [fw]
         ensureTooltipGroup( fw ).addTooltip( t );

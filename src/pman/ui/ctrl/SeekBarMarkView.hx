@@ -139,7 +139,7 @@ class SeekBarMarkView {
                     switch ( mark.type ) {
                         case Named( tname ):
                             var allMarks = player.track.data.marks;
-                            _name = mark.format(allMarks, tname);
+                            _name = mark.format( allMarks );
                             return _name;
 
                         default:
