@@ -10,25 +10,30 @@ import electron.main.*;
 import electron.main.Menu;
 import electron.main.MenuItem;
 import electron.NativeImage;
-import electron.ext.App;
-import electron.Tools.defer;
 
 import js.html.Window;
 
 import tannus.TSys as Sys;
 
+import edis.libs.electron.App;
+import edis.Globals.*;
+
 import pman.LaunchInfo;
 import pman.db.AppDir;
 import pman.ipc.MainIpcCommands;
 import pman.ww.*;
-import pman.server.*;
-import pman.tools.BackgroundArgParser;
+//import pman.server.*;
+import pman.tools.ArgParser;
+import pman.tools.DirectiveSpec;
+import pman.tools.Directive;
+import pman.tools.DirectiveExecutor;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
+using pman.bg.DictTools;
 
 class Background {
 	/* Constructor Function */
@@ -38,7 +43,7 @@ class Background {
 		ipcCommands.bind();
 		appDir = new AppDir();
 		//server = new Server( this );
-		argParser = new BackgroundArgParser();
+		argParser = new ArgParser();
 	}
 
 /* === Instance Methods === */
@@ -47,12 +52,16 @@ class Background {
 	 * start [this] Background script
 	 */
 	public function start():Void {
-
         parseArgs(Sys.args());
+
+        // fixed SingleInstance implementation
+		var notFirst = App.makeSingleInstance( _onSecondaryLaunch );
+		if ( notFirst ) {
+		    App.exit( 0 );
+		}
 
 		App.onReady( _ready );
 		App.onAllClosed( _onAllClosed );
-		App.makeSingleInstance( _onSecondaryLaunch );
 
 		_listen();
 	}
@@ -61,8 +70,8 @@ class Background {
       * stop the background script
       */
 	public function close():Void {
-	    if (server != null)
-            server.close();
+		//if (server != null)
+            //server.close();
 	    App.quit();
 	}
 
@@ -317,6 +326,19 @@ class Background {
 	public function buildTrayMenu():Menu {
 	    var menu = new Menu();
 
+        if ( !shouldOpen ) {
+            var openPman = new MenuItem({
+                label: 'Open PMan',
+                click: function(i, w) {
+                    updateMenu();
+                    openPlayerWindow(function(bw) {
+                        //didit
+                    });
+                }
+            });
+            menu.append( openPman );
+        }
+
         var openFiles = new MenuItem({
             label: 'Open Files',
             click: function(i, w) {
@@ -332,6 +354,11 @@ class Background {
             }
         });
         menu.append( openDir );
+        menu.append(new MenuItem({type: 'separator'}));
+        menu.append(new MenuItem({
+            label: 'Quit PMan',
+            click: function(i, w) close()
+        }));
 
 	    return menu;
 	}
@@ -353,13 +380,15 @@ class Background {
 	  */
 	public function launchInfo():RawLaunchInfo {
 	    var cwd = Sys.getCwd();
-        var paths = argParser.paths;
+        //var paths = argParser.paths;
+        var argv = Sys.args();
         var env = MapTools.toObject(Sys.environment());
 
 	    return {
             cwd: cwd,
             env: env,
-            paths: paths.map.fn(_.toString())
+            argv: argv
+            //paths: paths.map.fn(_.toString())
 	    };
 	}
 
@@ -388,30 +417,59 @@ class Background {
       * handle signal from player window to add route to given path
       */
     public function httpServe(path : Path):String {
-        if (server == null) {
-            server = new Server( this );
-            server.init();
-        }
-        return server.serve( path );
+        //if (server == null) {
+            //server = new Server( this );
+            //server.init();
+        //}
+        //return server.serve( path );
+        return 'not today, sir';
     }
 
     /**
       * parse command-line arguments
       */
     private function parseArgs(argv : Array<String>):Void {
-        argParser.parse( argv );
+        handleSpecialArgs( argv );
+
+        var spec = argParser.parse( argv );
+        trace( spec );
+        var executor = new DirectiveExecutor(clapi());
+        executor.exec( spec );
     }
 
     /**
-      * handle Squirrel events passed to [this] app
+      * command-line-api initialization
       */
-    private function _handleSquirrelEvents():Void {
-        var argv = Sys.args();
-        if (argv.length == 2) {
+    private function clapi():DirectiveSpec {
+        var spec = new DirectiveSpec('[toplevel]');
+        spec.flag('background-only');
+        spec.executor(function(c, argv, flags, params) {
+            if (flags.exists('background-only')) {
+                shouldOpen = false;
+                trace('GET MY URINAL');
+            }
+        });
+        spec.sub('betty', function(betty) {
+            betty.flag('--urinal');
+            betty.executor(function(c, argv, flags, params) {
+                trace('WAEL!');
+            });
+        });
+        return spec;
+    }
+
+    /**
+      * handle special command-line arguments used during or immediately after installation
+      */
+    private function handleSpecialArgs(argv: Array<String>):Void {
+        if (argv[0] == '--debian-install') {
+            shouldOpen = false;
+        }
+        else if (argv.length == 2) {
             var squirrelEvent = argv[1];
             switch ( squirrelEvent ) {
                 case '--squirrel-install', '--squirrel-updated':
-                    //TODO perform installation operations
+                    //TODO at least create a shortcut
                     close();
 
                 default:
@@ -420,7 +478,7 @@ class Background {
         }
     }
 
-	/**
+    /**
 	 * when the Application is ready to start doing stuff
 	 */
 	private function _ready():Void {
@@ -430,12 +488,28 @@ class Background {
             trace(' -- background process ready -- ');
         #end
 
-		updateMenu();
         updateTray();
 
-		openPlayerWindow(function( bw ) {
-			//server.init();
-		});
+        if ( shouldOpen ) {
+            updateMenu();
+            openPlayerWindow(function( bw ) {
+                //server.init();
+            });
+        }
+
+        #if release
+        var pmanAutoLauncher = Type.createInstance(js.Lib.require('auto-launch'), [{
+            name: 'PMan'
+        }]);
+        var bp:Promise<Bool> = Promise.fromJsPromise(pmanAutoLauncher.isEnabled());
+        bp.then(function(isEnabled) {
+            if ( !isEnabled ) {
+                pmanAutoLauncher.enable();
+            }
+        }).unless(function(error) {
+            trace( error );
+        });
+        #end
 	}
 
 	/**
@@ -494,9 +568,10 @@ class Background {
 	public var appDir : AppDir;
 
 	public var tray : Null<Tray> = null;
-	public var server : Null<Server> = null;
+	//public var server : Null<Server> = null;
 	private var _p:Null<Path> = null;
-	private var argParser : BackgroundArgParser;
+	private var argParser : ArgParser;
+	private var shouldOpen: Bool = true;
 
 	/* === Class Methods === */
 
