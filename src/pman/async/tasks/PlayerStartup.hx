@@ -126,7 +126,7 @@ class PlayerStartup extends Task1 {
       * load media from command-line input
       */
     private function startup_load_cli(done : VoidCb):Void {
-        var paths = expand_paths( player.app.launchInfo.paths );
+        var paths = expand_paths(player.app.launchInfo.argv.map.fn(Path.fromString(_)));
         var tracks = resolve_tracks( paths );
         declareReady(function(?err) {
             done.forward( err );
