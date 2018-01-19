@@ -45,12 +45,13 @@
     "underscore": "^1.8.3"
   },
   "devDependencies": {
+    "ajv": "^6.0.0",
     "async": "^2.1.5",
     "closurecompiler": "^1.6.1",
     "coffee-script": "1.12.4",
     "coffeescript": "^1.12.5",
     "electron": "1.6.2",
-    "electron-builder": "^16.8.3",
+    "electron-builder": "^16.8.4",
     "electron-devtools-installer": "^2.1.0",
     "electron-installer-debian": "^0.5.2",
     "electron-installer-windows": "^0.2.0",
