@@ -40,6 +40,7 @@ using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
 using pman.media.MediaTools;
+using pman.bg.URITools;
 
 class BPlayerMain extends Application {
 	/* Constructor Function */
@@ -113,7 +114,7 @@ class BPlayerMain extends Application {
             // await creation of Player
             playerPage.onPlayerCreated(function(p : Player) {
                 // -- set pre-launch player flags
-                if (i.paths.length > 0) {
+                if (i.argv.any.fn(_.isUri()||_.isPath())) {
                     p.flag('src', 'command-line-input');
                 }
 
