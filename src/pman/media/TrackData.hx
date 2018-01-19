@@ -215,7 +215,7 @@ class TrackData {
             //TODO
         }
 
-        return {
+        var row:MediaRow = ({
             _id: media_id,
             uri: track.uri,
             data: {
@@ -223,13 +223,15 @@ class TrackData {
                 starred: starred,
                 rating: rating,
                 description: description,
-                attrs: (attrs != null ? attrs.toAnon(_encodeAttrVal) : null),
+                attrs: (attrs != null ? attrs.toAnon(null, _encodeAttrVal) : null),
                 marks: marks.map(m -> m.toJson()),
                 tags: tags.map.fn( _.name ),
                 actors: actors.map.fn( _.name ),
                 meta: (meta != null ? meta.toRaw() : null)
             }
-        };
+        });
+        trace( row );
+        return row;
     }
     private function _encodeAttrVal(value: Dynamic):Dynamic {
         //TODO actually encode values
