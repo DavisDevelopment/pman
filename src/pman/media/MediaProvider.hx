@@ -1,8 +1,11 @@
 package pman.media;
 
+import tannus.ds.Dict;
 import tannus.ds.Promise;
 import tannus.sys.Path;
 import tannus.http.Url;
+
+import pman.bg.media.MediaFeature;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -19,7 +22,10 @@ using Slambda;
 class MediaProvider {
 	/* Constructor Function */
 	public function new():Void {
-
+	    features = new Dict();
+	    for (feat in MediaFeature.createAll()) {
+	        features[feat] = false;
+	    }
 	}
 
 /* === Instance Methods === */
@@ -58,6 +64,25 @@ class MediaProvider {
 		throw 'Not Implemented';
 	}
 
+	public function addFeatures(l: Iterable<MediaFeature>):Void {
+	    for (x in l) {
+	        features[x] = true;
+	    }
+	}
+
+	public function hasFeature(x: MediaFeature):Bool {
+	    return features.get( x );
+	}
+
+	public function hasFeatures(l: Iterable<MediaFeature>):Bool {
+	    for (x in l) {
+	        if (!hasFeature( x )) {
+	            return false;
+	        }
+	    }
+	    return true;
+	}
+
 /* === Serialization Methods === */
 
 	/**
@@ -80,4 +105,5 @@ class MediaProvider {
 
 	public var src(default, null):MediaSource;
 	public var type(default, null):MediaType;
+	public var features(default, null):Dict<MediaFeature, Bool>;
 }

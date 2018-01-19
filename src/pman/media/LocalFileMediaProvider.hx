@@ -20,6 +20,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.bg.DictTools;
 
 /**
   * MediaProvider for Media derived from media on the user's local filesystem
@@ -35,6 +36,8 @@ class LocalFileMediaProvider extends MediaProvider {
 		    type = MediaType.MTVideo;
         else if (FileFilter.AUDIO.test(_sp))
             type = MediaType.MTAudio;
+        else if (FileFilter.IMAGE.test(_sp))
+            type = MediaType.MTImage;
 		this.file = file;
 	}
 
@@ -49,6 +52,7 @@ class LocalFileMediaProvider extends MediaProvider {
 				var media:Media = cast new LocalFileMedia( file );
 				media.provider = this;
 				@:privateAccess media.type = type;
+				media.features = cast features.copy();
 				return media;
 			});
 		});

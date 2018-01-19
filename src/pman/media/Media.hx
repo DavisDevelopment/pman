@@ -9,6 +9,7 @@ import gryffin.media.MediaObject;
 
 import pman.display.*;
 import pman.display.media.*;
+import pman.bg.media.MediaFeature;
 
 import foundation.Tools.defer;
 
@@ -22,6 +23,7 @@ using Slambda;
   * an Object that represents the data for a piece of playable Media,
   * and any data necessary to build the PlaybackDriver for said Media
   */
+@:allow(pman.media.MediaProvider)
 class Media {
 	/* Constructor Function */
 	public function new():Void {
@@ -32,6 +34,7 @@ class Media {
 		_ready.signal.once(function() {
 			_ready.value = true;
 		});
+		features = new Dict();
 	}
 
 /* === Instance Methods === */
@@ -98,6 +101,7 @@ class Media {
 
 	public var src(default, null):MediaSource;
 	public var type(default, null):MediaType;
+	public var features(default, null):Dict<MediaFeature, Bool>;
 	public var provider : MediaProvider;
 
 	private var _ready : ReadyInfo;
