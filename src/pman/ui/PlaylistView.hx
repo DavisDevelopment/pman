@@ -62,11 +62,11 @@ class PlaylistView extends Pane {
 
         unbind();
         bind();
+
 	    var kc = player.app.keyboardCommands;
-		//kc.mode = 'playlist:sidebar';
 
 		defer(function() {
-            //searchWidget.searchInput.focus();
+            hiliteActive();
             scrollToActive();
             searchWidget.update();
 		});
@@ -195,44 +195,6 @@ class PlaylistView extends Pane {
         if (done != null)
             done();
 
-        /*
-        // create a batch of microtasks
-        var batch = exec.createBatch();
-		for (track in playlist) {
-		    // get the Track's view
-		    var trackView : Null<TrackView> = null;
-		    batch.task({
-		        trackView = tview( track );
-		    });
-		    batch.task({
-		        if (player.track == track) {
-		            trackView.focused( true );
-		        }
-		    });
-		    batch.task({
-		        if (trackView.needsRebuild) {
-		            trackView.build();
-		        }
-		    });
-		    batch.task({addTrack(trackView);});
-		}
-
-		// execute the batch
-		batch.start(function() {
-		    exec.task(@async {
-		        animFrame(function() {
-		            scrollToActive();
-		            continue;
-		        });
-		    });
-		    exec.task(@async {
-		        if (done != null)
-		            done();
-		        continue;
-		    });
-		});
-		*/
-
 		// remove scrollbar from view if there is nothing in the view
 		if (playlist.length == 0) {
 		    listRow.css.set('overflow-y', 'hidden');
@@ -260,9 +222,13 @@ class PlaylistView extends Pane {
 	  */
 	public function rebuildTracks(?done : Void->Void):Void {
 		searchResultsMode = false;
-		undoTrackList(function() {
-		    buildTrackList( done );
-		});
+		//undoTrackList(function() {
+			//buildTrackList( done );
+		//});
+		rebuildList(playlist.array());
+		if (done != null) {
+		    done();
+		}
 	}
 
 	/**
@@ -315,6 +281,47 @@ class PlaylistView extends Pane {
 	        var y:Float = (ar.y - (vr.h / 3));
 	        listRow.el.scrollTop( y );
 	    }
+	}
+
+	/**
+	  * hilite the active track
+	  */
+	public function hiliteActive():Void {
+	    if (player.track == null)
+	        return ;
+
+	    for (view in tracks) {
+	        view.focused(view.track == player.track);
+	    }
+	}
+
+    /**
+      * efficiently build out the TrackView list
+      */
+	public function rebuildList(ntl: Array<Track>):Void {
+        var scrollY:Float = (listRow.el.prop( 'scrollTop' ));
+	    var _views = tracks.copy();
+		var startTime = now();
+		var nodes:Array<TrackView> = ntl.map.fn(viewFor( _ ));
+		nodes.reverse();
+	    for (node in nodes) {
+	        list.prependItem( node );
+	        _views.remove( node );
+	    }
+	    nodes.reverse();
+	    this.tracks = nodes;
+
+	    for (v in _views) {
+	        if (v.parentWidget != null)
+	            v.parentWidget.detach();
+            else
+                v.detach();
+	    }
+        defer(function() {
+            listRow.el.prop('scrollTop', scrollY);
+        });
+
+	    trace('rebuilt track-list in ${now() - startTime}ms');
 	}
 
 	/**
