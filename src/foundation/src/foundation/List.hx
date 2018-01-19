@@ -19,7 +19,7 @@ class List extends Widget {
     /**
       * attach an arbitrary item to [this] List
       */
-    private function attachItem(thing:Dynamic, f:ListItem->Void):Void {
+    private function attachItem(thing:Dynamic, f:ListItem->Void):ListItem {
         var item : ListItem;
 	    if (Std.is(thing, ListItem)) {
 	        item = cast thing;
@@ -31,22 +31,29 @@ class List extends Widget {
 		//append( item );
 		f( item );
 		//attach( item );
+		return item;
     }
 
 	/**
 	  * Add a new List-Item to [this] List
 	  */
-	public function addItem(thing : Dynamic):Void {
-	    attachItem(thing, function(item) {
+	public function addItem(thing : Dynamic):ListItem {
+	    return attachItem(thing, function(item) {
 	        append( item );
+	    });
+	}
+
+	public function prependItem(thing: Dynamic):ListItem {
+	    return attachItem(thing, function(item) {
+	        prepend( item );
 	    });
 	}
 
     /**
       * insert an item after another item
       */
-	public function insertItemAfter(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):Void {
-	    attachItem(thing, function(item : ListItem) {
+	public function insertItemAfter(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):ListItem {
+	    return attachItem(thing, function(item : ListItem) {
 	        var ci:Null<ListItem> = getItemFor( child );
 	        if (ci == null) {
 	            listItems.remove( item );
@@ -60,8 +67,8 @@ class List extends Widget {
     /**
       * insert an item before another item
       */
-	public function insertItemBefore(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):Void {
-	    attachItem(thing, function(item : ListItem) {
+	public function insertItemBefore(thing:Dynamic, child:Dynamic, ?test:Dynamic->Dynamic->Bool):ListItem {
+	    return attachItem(thing, function(item : ListItem) {
 	        var ci:Null<ListItem> = getItemFor( child );
 	        if (ci == null) {
 	            listItems.remove( item );
