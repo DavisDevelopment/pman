@@ -5,43 +5,30 @@ import tannus.ds.*;
 import tannus.sys.*;
 
 using Slambda;
+using tannus.ds.ArrayTools;
+using StringTools;
+using tannus.ds.StringUtils;
+using tannus.FunctionTools;
+using tannus.ds.MapTools;
 
 class LaunchInfo {
-    public var cwd : Path;
-    public var env : Map<String, String>;
-    public var paths : Array<Path>;
+    public var cwd: Path;
+    public var env: Map<String, String>;
+    public var argv: Array<String>;
 
-    public function new():Void {
-        cwd = new Path('/');
-        env = new Map();
-        paths = new Array();
+    public function new(?cwd:String, ?argv:Array<String>, ?env:Map<String, String>):Void {
+        this.cwd = new Path(cwd != null ? cwd : '/');
+        this.env = (env == null ? new Map() : env);
+        this.argv = (argv == null ? [] : argv);
     }
 
     public static function fromRaw(raw : RawLaunchInfo):LaunchInfo {
-        var cwd = Path.fromString( raw.cwd );
-        var env:Map<String, String> = new Map();
-        for (key in Reflect.fields( raw.env )) {
-            env[key] = Std.string(Reflect.getProperty(raw.env, key));
-        }
-        var paths:Array<Path> = raw.paths.map.fn(new Path(_));
-        var i = new LaunchInfo();
-        i.cwd = cwd;
-        i.env = env;
-        i.paths = paths;
-        return i;
+        return new LaunchInfo(raw.cwd, raw.argv, raw.env);
     }
 }
 
-/*
-typedef LaunchInfo = {
-    argv: Array<String>,
-    cwd: Path,
-    env: Map<String, String>
-};
-*/
-
 typedef RawLaunchInfo = {
-    paths: Array<String>,
+    argv: Array<String>,
     cwd: String,
     env: Dynamic
 };
