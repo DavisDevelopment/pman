@@ -143,8 +143,11 @@ class Mark {
         }
     }
 
-    public inline function getWord(index: Int):Null<String> {
-        return getWords()[index];
+    public function getWord(index: Int):Null<String> {
+        var wl = getWords();
+        if (!wl.hasContent())
+            return null;
+        return wl[index];
     }
 
     public function firstWord(?text: String):Null<String> {
