@@ -14,6 +14,8 @@ import gryffin.media.MediaObject;
 
 import pman.core.*;
 import pman.display.*;
+import pman.bg.media.Dimensions;
+import pman.bg.media.MediaFeature;
 import pman.media.PlaybackCommand;
 import pman.Errors.*; 
 
@@ -29,7 +31,7 @@ using Slambda;
 class PlaybackDriver {
 	/* Constructor Function */
 	public function new():Void {
-
+	    features = new Dict();
 	}
 
 /* === Instance Methods === */
@@ -120,6 +122,8 @@ class PlaybackDriver {
 	public function getMuted():Bool ni();
 	public function getEnded():Bool ni();
 	public function getVolume():Float ni();
+	public function getNaturalDimensions():Dimensions ni();
+	public function getDimensions():Dimensions ni();
 
 	public function setSource(src : String):Void ni();
 	public function setCurrentTime(time : Float):Void ni();
@@ -144,4 +148,5 @@ class PlaybackDriver {
 /* === Instance Fields === */
 
 	public var player : Null<Player>;
+	public var features : Dict<MediaFeature, Bool>;
 }
