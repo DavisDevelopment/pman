@@ -1,4 +1,4 @@
-package pman.media.info;
+package pman.bg.media;
 
 import tannus.ds.*;
 import tannus.geom2.*;
