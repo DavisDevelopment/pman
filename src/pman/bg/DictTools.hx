@@ -32,7 +32,8 @@ class DictTools {
         return acc;
     }
 
-    public static function copy<K:DictKey, V>(d: Dict<K, V>):Dict<K, V> {
+    @:generic
+    public static function copy<K:DictKey>(d: Dict<K, Dynamic>):Dict<K, Dynamic> {
         var c = new Dict();
         for (k in d.keys()) {
             c.set(k, d.get(k));
