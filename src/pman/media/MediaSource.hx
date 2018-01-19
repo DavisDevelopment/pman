@@ -3,7 +3,9 @@ package pman.media;
 import tannus.sys.Path;
 import tannus.http.Url;
 
-enum MediaSource {
-	MSLocalPath(path : Path);
-	MSUrl(url : String);
-}
+typedef MediaSource = pman.bg.media.MediaSource;
+
+//enum MediaSource {
+	//MSLocalPath(path : Path);
+	//MSUrl(url : String);
+//}
