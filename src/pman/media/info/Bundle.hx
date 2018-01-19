@@ -13,6 +13,7 @@ import gryffin.display.Image;
 import pman.async.*;
 import pman.async.tasks.*;
 import pman.media.info.BundleItemType;
+import pman.bg.media.Dimensions;
 
 import haxe.Json;
 

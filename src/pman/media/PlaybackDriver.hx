@@ -3,9 +3,6 @@ package pman.media;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.events.*;
-import tannus.media.Duration;
-import tannus.media.TimeRange;
-import tannus.media.TimeRanges;
 import tannus.math.*;
 
 import gryffin.core.*;
@@ -18,6 +15,10 @@ import pman.bg.media.Dimensions;
 import pman.bg.media.MediaFeature;
 import pman.media.PlaybackCommand;
 import pman.Errors.*; 
+
+import tannus.media.Duration;
+import tannus.media.TimeRange;
+import tannus.media.TimeRanges;
 
 using StringTools;
 using tannus.ds.StringUtils;
