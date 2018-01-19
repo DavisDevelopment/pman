@@ -128,9 +128,8 @@ class TrackView extends Pane {
 	  */
 	private function __events():Void {
         forwardEvents([
-            'click', 'contextmenu',
-            'mousedown', 'mouseup',
-            'mousemove'
+            'click', 'contextmenu'//,
+            //'mousedown', 'mouseup'
         ], null, MouseEvent.fromJqEvent);
         on('click', onLeftClick);
 		on('contextmenu', onRightClick);
