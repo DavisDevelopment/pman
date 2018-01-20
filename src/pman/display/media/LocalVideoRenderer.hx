@@ -119,8 +119,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
         var vo = player.viewOptions;
         this.filter = vo.videoFilter;
         this.filterRaw = vo.videoFilterRaw;
-        //this.directRender = (filterRaw || preferences.directRender);
-        this.directRender = true;
+        this.directRender = (filterRaw || preferences.directRender);
+        //this.directRender = true;
 
         if ( directRender ) {
             if (underlay == null) {
