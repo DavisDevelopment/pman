@@ -93,8 +93,8 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 /* === Computed Instance Fields === */
 
 	// more specifically-typed reference to [mediaController]
-	private var tc(get, never):LocalMediaObjectPlaybackDriver<T>;
-	private inline function get_tc():LocalMediaObjectPlaybackDriver<T> {
+	private var tc(get, never):LocalMediaObjectMediaDriver<T>;
+	private inline function get_tc():LocalMediaObjectMediaDriver<T> {
 		return cast mediaController;
 	}
 
