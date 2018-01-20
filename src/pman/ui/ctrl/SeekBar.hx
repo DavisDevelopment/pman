@@ -366,6 +366,11 @@ class SeekBar extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
+        // skip when appropriate
+        if (player.track != null && player.track.type.equals(MTImage)) {
+            return ;
+        }
+
         var lastHovered:Bool = hovered;
         var lastHoverLocation:Null<Point> = hoverLocation;
         var mp = stage.getMousePosition();
@@ -438,6 +443,11 @@ class SeekBar extends Ent {
      */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
+
+        // skip the rendering process when appropriate
+        if (player.track != null && player.track.type.equals(MTImage)) {
+            return ;
+        }
 
         var bg = getBackgroundColor();
         var fg = getForegroundColor();
