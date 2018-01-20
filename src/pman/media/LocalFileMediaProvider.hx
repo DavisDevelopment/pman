@@ -11,6 +11,8 @@ import gryffin.audio.Audio;
 
 import electron.ext.FileFilter;
 
+import pman.bg.media.MediaFeature;
+
 import haxe.Serializer;
 import haxe.Unserializer;
 import foundation.Tools.defer;
@@ -39,6 +41,36 @@ class LocalFileMediaProvider extends MediaProvider {
         else if (FileFilter.IMAGE.test(_sp))
             type = MediaType.MTImage;
 		this.file = file;
+		switch ( type ) {
+            case MTVideo:
+                addFeatures(MediaFeature.createAll());
+
+            case MTAudio:
+                addFeatures([
+                    Playback, PlaybackSpeed,
+                    Duration, Volume, CurrentTime,
+                    FutureTime, RecordAudio, End,
+                    Mute, LoadEvent, CanPlayEvent,
+                    PlayEvent, PauseEvent, LoadedMetadataEvent,
+                    ErrorEvent, EndEvent, ProgressEvent,
+                    DurationChangeEvent, VolumeChangeEvent,
+                    SpeedChangeEvent
+                ]);
+
+            case MTImage:
+                addFeatures([
+                    CanvasDisplay,
+                    Display,
+                    DomDisplay,
+                    Dimensions,
+                    CaptureImage,
+                    LoadEvent
+                ]);
+
+
+            case null:
+                //betty
+		}
 	}
 
 /* === Instance Methods === */
@@ -51,7 +83,7 @@ class LocalFileMediaProvider extends MediaProvider {
 			defer(function() {
 				var media:Media = cast new LocalFileMedia( file );
 				media.provider = this;
-				@:privateAccess media.type = type;
+			    media.type = type;
 				media.features = cast features.copy();
 				return media;
 			});
