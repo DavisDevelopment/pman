@@ -7,6 +7,7 @@ import tannus.sys.Path;
 
 import gryffin.media.MediaObject;
 import gryffin.display.Video;
+import gryffin.display.Image;
 import gryffin.audio.Audio;
 
 import pman.display.*;
@@ -22,6 +23,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.bg.DictTools;
 
 class LocalFileMedia extends Media {
 	/* Constructor Function */
@@ -51,17 +53,27 @@ class LocalFileMedia extends Media {
 	override function getDriver():Promise<MediaDriver> {
 		return Promise.create({
 			onReady(function() {
+			    var driver:Null<MediaDriver> = null;
 				// video files
 				if (isVideoFile()) {
-					return cast new LocalVideoMediaDriver(buildVideoObject());
+					driver = cast new LocalVideoMediaDriver(buildVideoObject());
 				}
 				// audio files
 				else if (isAudioFile()) {
-					return cast new LocalAudioMediaDriver(buildAudioObject());
+					driver = cast new LocalAudioMediaDriver(buildAudioObject());
 				}
+				// image files
+                else if (isImageFile()) {
+                    driver = cast new LocalImageMediaDriver(buildImage());
+                }
 				// unsupported files
 				else {
 					throw MediaError.EInvalidFormat;
+				}
+
+				if (driver != null) {
+				    driver.features = cast features.copy();
+				    return driver;
 				}
 			});
 		});
@@ -81,6 +93,10 @@ class LocalFileMedia extends Media {
 				else if (isAudioFile()) {
 					return cast new LocalAudioRenderer(this, controller);
 				}
+				// image files
+                else if (isImageFile()) {
+                    return cast new LocalImageRenderer(this, controller);
+                }
 				// unsupported files
 				else {
 					throw MediaError.EInvalidFormat;
@@ -107,6 +123,12 @@ class LocalFileMedia extends Media {
 		return audio;
 	}
 
+	private function buildImage():Image {
+	    var image = new Image();
+	    image.src = 'file://${file.path}';
+	    return image;
+	}
+
 	/**
 	  * perform initialization tasks on MediaObject
 	  */
@@ -126,6 +148,13 @@ class LocalFileMedia extends Media {
 	  */
 	private inline function isAudioFile():Bool {
 	    return (type != null && type.equals(MTAudio));
+	}
+
+	/**
+	  * check whether [this] refers to an image file
+	  */
+	private inline function isImageFile():Bool {
+	    return (type != null && type.equals(MTImage));
 	}
 
 /* === Computed Instance Fields === */
