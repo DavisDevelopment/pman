@@ -16,6 +16,7 @@ import pman.display.media.*;
 import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
+import pman.bg.media.MediaFeature;
 import pman.ui.pl.TrackView;
 import pman.media.info.Mark;
 import pman.media.info.*;
@@ -120,8 +121,12 @@ class Track extends EventDispatcher implements IComparable<Track> {
 				nullify();
 			}
             else {
-                var ps = driver.getPlaySignal();
-                ps.on(function() player.dispatch('play', null));
+                if (hasFeature( PlayEvent )) {
+                    var ps = driver.getPlaySignal();
+                    ps.on(function() {
+                        player.dispatch('play', null);
+                    });
+                }
             }
 			callback( error );
 		});
