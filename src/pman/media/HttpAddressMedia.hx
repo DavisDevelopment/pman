@@ -14,7 +14,7 @@ import gryffin.audio.Audio;
 import pman.display.*;
 import pman.display.media.*;
 
-import foundation.Tools.defer;
+import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -35,11 +35,11 @@ class HttpAddressMedia extends Media {
 
 /* === Instance Methods === */
 
-	override function getPlaybackDriver():Promise<PlaybackDriver> {
+	override function getDriver():Promise<MediaDriver> {
 		return Promise.create({
 			onReady(function() {
 				if (mediaMime.type == 'video') {
-					return cast new LocalVideoPlaybackDriver(buildVideoObject());
+					return cast new LocalVideoMediaDriver(buildVideoObject());
 				}
 				else {
 					throw MediaError.EInvalidFormat;
@@ -48,7 +48,7 @@ class HttpAddressMedia extends Media {
 		});
 	}
 
-	override function getRenderer(controller : PlaybackDriver):Promise<MediaRenderer> {
+	override function getRenderer(controller : MediaDriver):Promise<MediaRenderer> {
 		return Promise.create({
 			onReady(function() {
 				return cast new LocalVideoRenderer(this, controller);
