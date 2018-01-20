@@ -31,7 +31,7 @@ class PlayerTools {
 		if (restArgs.length == 1) {
 			var body:Expr = restArgs.shift();
 
-			body = body.replace(macro _, macro $session.playbackDriver).replace(macro s_, session);
+			body = body.replace(macro _, macro $session.mediaDriver).replace(macro s_, session);
 
 			result = macro if ( $condition ) {
 				$body;
@@ -41,8 +41,8 @@ class PlayerTools {
 			var iftrue:Expr = restArgs.shift();
 			var iffalse:Expr = restArgs.shift();
 
-			iftrue = iftrue.replace(macro _, macro $session.playbackDriver).replace(macro s_, session);
-			iffalse = iffalse.replace(macro _, macro $session.playbackDriver).replace(macro s_, session);
+			iftrue = iftrue.replace(macro _, macro $session.mediaDriver).replace(macro s_, session);
+			iffalse = iffalse.replace(macro _, macro $session.mediaDriver).replace(macro s_, session);
 
 			result = macro if ( $condition ) {
 				$iftrue;
