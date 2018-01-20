@@ -716,6 +716,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
         return feats.any.fn(hasFeature( _ ));
     }
 
+    /**
+      * check whether [this] Track is missing any of the given MediaFeatures
+      */
+    public inline function isMissingAnyFeatures(feats: Iterable<MediaFeature>):Bool {
+        return !hasFeatures( feats );
+    }
+
 /* === Computed Instance Fields === */
 
 	public var title(get, never):String;
