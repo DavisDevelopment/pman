@@ -734,8 +734,8 @@ class SeekBar extends Ent {
     public var sess(get, never):PlayerSession;
     private inline function get_sess():PlayerSession return player.session;
 
-    private var pd(get, never):Null<PlaybackDriver>;
-    private inline function get_pd() return sess.playbackDriver;
+    private var pd(get, never):Null<MediaDriver>;
+    private inline function get_pd() return sess.mediaDriver;
 
     public var progress(get, never):Percent;
     private inline function get_progress():Percent return getCurrentPercent();
