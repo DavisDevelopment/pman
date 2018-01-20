@@ -93,7 +93,7 @@ class MediaTools {
 		var rethrow = fn([error] => callback( error ));
 		track.provider.getMedia().unless( rethrow ).then(function(media : Media) {
 			track.media = media;
-			media.getPlaybackDriver().unless( rethrow ).then(function(driver : PlaybackDriver) {
+			media.getDriver().unless( rethrow ).then(function(driver : MediaDriver) {
 				track.driver = driver;
 				media.getRenderer( driver ).unless( rethrow ).then(function(renderer : MediaRenderer) {
 					track.renderer = renderer;
