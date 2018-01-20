@@ -206,7 +206,7 @@ class PlayerSession {
 				defer( cb.attached );
 			}
 			var d = focusedTrack.driver;
-			if (cb.manipulate != null) {
+			if (cb.manipulate != null && t.hasFeature(LoadedMetadataEvent)) {
 				// loaded metadata event
 				var lmd = d.getLoadedMetadataSignal();
 				lmd.once(defer.bind(cb.manipulate.bind( d )));
@@ -219,10 +219,19 @@ class PlayerSession {
 			// wait for the media to be ready to play
 			if (cb.ready != null) {
 				// can play event
-				var cp = d.getCanPlaySignal();
-				cp.once(function() {
-					defer( cb.ready );
-				});
+				var cp:Null<VoidSignal> = null;
+				if (t.hasFeature( CanPlayEvent )) {
+				    cp = d.getCanPlaySignal();
+				}
+                else if (t.hasFeature( LoadEvent )) {
+                    cp = d.getLoadSignal();
+                }
+
+                if (cp != null) {
+                    cp.once(function() {
+                        defer( cb.ready );
+                    });
+                }
 			}
 		});
 	}
