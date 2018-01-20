@@ -22,4 +22,13 @@ enum MediaFeature {
 /* == Event Types == */
     EndEvent;
     LoadEvent;
+    PlayEvent;
+    CanPlayEvent;
+    PauseEvent;
+    LoadedMetadataEvent;
+    ErrorEvent;
+    ProgressEvent;
+    DurationChangeEvent;
+    VolumeChangeEvent;
+    SpeedChangeEvent;
 }
