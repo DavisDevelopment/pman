@@ -87,15 +87,6 @@ class PlayerControlsView extends Ent {
 		// draw the background
 		c.save();
 
-		/*
-		if ( hovered ) {
-			c.globalAlpha = 1.0;
-		}
-		else {
-			c.globalAlpha = 0.75;
-		}
-		*/
-
 		c.beginPath();
 		c.drawRect( rect );
 		c.closePath();
@@ -215,6 +206,10 @@ class PlayerControlsView extends Ent {
 		h = 55;
 		y = ((r.y + r.h) - playerView.statusBar.h + yOffset);
 		x = 0;
+
+		if (player.track != null && player.track.type.equals( MTImage )) {
+		    h -= seekBar.h;
+		}
 
 		__positionButtons();
 
