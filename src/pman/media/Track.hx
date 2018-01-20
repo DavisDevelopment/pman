@@ -696,9 +696,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
     }
 
     /**
+      * check for presence of the given MediaFeature
       */
+    public inline function hasFeature(feature: MediaFeature):Bool {
+        return (features.exists( feature ) && features.get( feature ));
     }
 
+    /**
 /* === Computed Instance Fields === */
 
 	public var title(get, never):String;
