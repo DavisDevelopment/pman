@@ -740,7 +740,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	public var data(default, null):Null<TrackData> = null;
 
 	public var media(default, null): Null<Media>;
-	public var driver(default, null): Null<PlaybackDriver>;
+	public var driver(default, null): Null<MediaDriver>;
 	public var renderer(default, null): Null<MediaRenderer>;
 
 	private var _ready : Bool = false;
