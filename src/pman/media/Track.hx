@@ -759,6 +759,16 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	public var playlist(get, never):Playlist;
 	private inline function get_playlist() return session.playlist;
 
+	public var features(get, never):Dict<MediaFeature, Bool>;
+	private inline function get_features() {
+	    return untyped (driver || media || provider).features;
+		//if (driver != null)
+			//return driver.features;
+        //else if (media != null)
+            //return media.features;
+        //else return provider.features;
+	}
+
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
