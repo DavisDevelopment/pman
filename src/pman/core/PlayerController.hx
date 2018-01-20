@@ -69,14 +69,14 @@ class PlayerController {
     /**
       * get the current Player status
       */
-    @:access( pman.media.LocalMediaObjectPlaybackDriver )
+    @:access( pman.media.LocalMediaObjectMediaDriver )
     public function getStatus():PlayerStatus {
         var status : PlayerStatus;
         switch ( player.target ) {
             case PTThisDevice:
                 if (player.session.hasMedia()) {
-                    if (Std.is(player.session.playbackDriver, LocalMediaObjectPlaybackDriver)) {
-                        var mo:MediaObject = cast(cast(player.session.playbackDriver, LocalMediaObjectPlaybackDriver<Dynamic>).mediaObject, MediaObject);
+                    if (Std.is(player.session.mediaDriver, LocalMediaObjectMediaDriver)) {
+                        var mo:MediaObject = cast(cast(player.session.mediaDriver, LocalMediaObjectMediaDriver<Dynamic>).mediaObject, MediaObject);
                         var me = mo.getUnderlyingMediaObject();
                         var readyState:MediaReadyState = me.readyState;
                         switch ( readyState ) {
