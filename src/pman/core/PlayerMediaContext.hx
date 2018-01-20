@@ -49,7 +49,7 @@ class PlayerMediaContext {
 		if (_validateInfo( info )) {
 			mediaProvider = info.mediaProvider;
 			media = info.media;
-			playbackDriver = info.playbackDriver;
+			mediaDriver = info.mediaDriver;
 			mediaRenderer = info.mediaRenderer;
 
 			// if [this] now has media
@@ -75,7 +75,7 @@ class PlayerMediaContext {
 		return {
 			mediaProvider : mediaProvider,
 			media : media,
-			playbackDriver : playbackDriver,
+			mediaDriver : mediaDriver,
 			mediaRenderer : mediaRenderer
 		};
 	}
@@ -89,7 +89,7 @@ class PlayerMediaContext {
 
 		if (allValuesPresent()) {
 			media.dispose();
-			playbackDriver.stop();
+			mediaDriver.stop();
 
 			_nullify();
 		}
@@ -113,7 +113,7 @@ class PlayerMediaContext {
 		return (
 			(mediaProvider != null) &&
 			(media != null) && 
-			(playbackDriver != null) &&
+			(mediaDriver != null) &&
 			(mediaRenderer != null)
 		);
 	}
@@ -124,7 +124,7 @@ class PlayerMediaContext {
 	private inline function _nullify():Void {
 		mediaProvider = null;
 		media = null;
-		playbackDriver = null;
+		mediaDriver = null;
 		mediaRenderer = null;
 	}
 
@@ -135,7 +135,7 @@ class PlayerMediaContext {
 		var flags:Array<Bool> = [
 			(info.mediaProvider != null),
 			(info.media != null),
-			(info.playbackDriver != null),
+			(info.mediaDriver != null),
 			(info.mediaRenderer != null)
 		];
 
@@ -177,7 +177,7 @@ class PlayerMediaContext {
 
 	public var mediaProvider(default, null): Null<MediaProvider>;
 	public var media(default, null): Null<Media>;
-	public var playbackDriver(default, null): Null<PlaybackDriver>;
+	public var mediaDriver(default, null): Null<MediaDriver>;
 	public var mediaRenderer(default, null): Null<MediaRenderer>;
 
 	public var changeEvent : Signal<Delta<MediaContextInfo>>;
@@ -194,7 +194,7 @@ class MediaContextInfo {
 	public var media : Null<Media>;
 
 	@:optional
-	public var playbackDriver : Null<PlaybackDriver>;
+	public var mediaDriver : Null<MediaDriver>;
 
 	@:optional
 	public var mediaRenderer : Null<MediaRenderer>;
@@ -208,7 +208,7 @@ class MediaContextInfo {
 		return {
 			mediaProvider : mediaProvider,
 			media : media,
-			playbackDriver : playbackDriver,
+			mediaDriver : mediaDriver,
 			mediaRenderer : mediaRenderer
 		};
 	}
@@ -220,7 +220,7 @@ class MediaContextInfo {
 		return (
 			(mediaProvider != null) &&
 			(media != null) && 
-			(playbackDriver != null) &&
+			(mediaDriver != null) &&
 			(mediaRenderer != null)
 		);
 	}
