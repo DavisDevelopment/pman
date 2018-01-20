@@ -22,7 +22,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class LocalVideoPlaybackDriver extends LocalMediaObjectPlaybackDriver<Video> {
+class LocalVideoMediaDriver extends LocalMediaObjectMediaDriver<Video> {
 	/* Constructor Function */
 	public function new(video : Video):Void {
 		super(cast video);
