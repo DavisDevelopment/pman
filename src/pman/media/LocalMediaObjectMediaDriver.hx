@@ -25,7 +25,7 @@ using Slambda;
   * base-class for all media controllers that make use of a MediaObject
   */
 @:allow( pman.display.media.LocalMediaObjectRenderer )
-class LocalMediaObjectPlaybackDriver <T : MediaObject> extends PlaybackDriver {
+class LocalMediaObjectMediaDriver <T : MediaObject> extends MediaDriver {
 	/* Constructor Function */
 	public function new(media : T):Void {
 		super();
