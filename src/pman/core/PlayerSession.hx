@@ -643,7 +643,7 @@ class PlayerSession {
 	    switch (delta.toPair()) {
             case [PTThisDevice, PTChromecast( cc )]:
                 if (focusedTrack != null) {
-                    focusedTrack.driver = new ChromecastPlaybackDriver( cc );
+                    focusedTrack.driver = new ChromecastMediaDriver( cc );
                 }
 
             case [PTChromecast(_), PTThisDevice]:
@@ -689,8 +689,8 @@ class PlayerSession {
 	public var media(get, never):Null<Media>;
 	private inline function get_media():Null<Media> return mft.ternary(_.media, null);
 
-	public var playbackDriver(get, never):Null<PlaybackDriver>;
-	private inline function get_playbackDriver():Null<PlaybackDriver> return mft.ternary(_.driver, null);
+	public var mediaDriver(get, never):Null<MediaDriver>;
+	private inline function get_mediaDriver() return mft.ternary(_.driver, null);
 
 	public var mediaRenderer(get, never):Null<MediaRenderer>;
 	private inline function get_mediaRenderer():Null<MediaRenderer> return mft.ternary(_.renderer, null);
@@ -741,7 +741,7 @@ class PlayerSession {
 class LoadCallbackOptions {
 /* === Fields === */
     @:optional public var trigger : LoadTrigger;
-    @:optional public var manipulate : PlaybackDriver->Void;
+    @:optional public var manipulate : MediaDriver->Void;
     @:optional public var ready : Void->Void;
     @:optional public var attached : Void->Void;
     @:optional public var error : Dynamic->Void;
