@@ -54,4 +54,10 @@ class PlaybackButton extends ImagePlayerControlButton {
 	override function click(event : MouseEvent):Void {
 		player.togglePlayback();
 	}
+
+	override function update(stage: Stage):Void {
+	    super.update( stage );
+
+	    enabled = (player.track != null && player.track.hasFeature( Playback ));
+	}
 }
