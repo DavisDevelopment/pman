@@ -16,4 +16,5 @@ enum MediaFeature {
     RecordVideo;
     RecordAudio;
     CaptureImage;
+    End;
 }
