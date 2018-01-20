@@ -59,4 +59,10 @@ class ShuffleButton extends ImagePlayerControlButton {
 	override function click(event : MouseEvent):Void {
 		player.shuffle = !player.shuffle;
 	}
+
+	override function update(stage: Stage):Void {
+	    super.update( stage );
+
+	    enabled = (player.track != null && !player.track.type.equals(MTImage));
+	}
 }
