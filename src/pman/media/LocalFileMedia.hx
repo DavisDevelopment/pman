@@ -48,16 +48,16 @@ class LocalFileMedia extends Media {
 	/**
 	  * create the playback driver
 	  */
-	override function getPlaybackDriver():Promise<PlaybackDriver> {
+	override function getDriver():Promise<MediaDriver> {
 		return Promise.create({
 			onReady(function() {
 				// video files
 				if (isVideoFile()) {
-					return cast new LocalVideoPlaybackDriver(buildVideoObject());
+					return cast new LocalVideoMediaDriver(buildVideoObject());
 				}
 				// audio files
 				else if (isAudioFile()) {
-					return cast new LocalAudioPlaybackDriver(buildAudioObject());
+					return cast new LocalAudioMediaDriver(buildAudioObject());
 				}
 				// unsupported files
 				else {
@@ -70,7 +70,7 @@ class LocalFileMedia extends Media {
 	/**
 	  * create the renderer
 	  */
-	override function getRenderer(controller : PlaybackDriver):Promise<MediaRenderer> {
+	override function getRenderer(controller : MediaDriver):Promise<MediaRenderer> {
 		return Promise.create({
 			onReady(function() {
 				// video files
