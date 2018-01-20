@@ -51,6 +51,8 @@ class PlaybackSpeedButton extends ImagePlayerControlButton {
 
 		var ispeed:Int = round(player.playbackRate * 100);
 		label = '$ispeed%';
+
+		enabled = (player.track != null && player.track.hasFeature( PlaybackSpeed ));
 	}
 
 	// set up the icon data
