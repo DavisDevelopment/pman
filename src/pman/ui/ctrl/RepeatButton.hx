@@ -59,6 +59,8 @@ class RepeatButton extends ImagePlayerControlButton {
             case RepeatPlaylist:
                 label = 'All';
         }
+
+        enabled = (player.track != null && !player.track.type.equals(MTImage));
     }
 
 	// set up icon info
