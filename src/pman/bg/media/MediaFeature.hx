@@ -20,4 +20,5 @@ enum MediaFeature {
 
 /* == Event Types == */
     EndEvent;
+    LoadEvent;
 }
