@@ -17,4 +17,7 @@ enum MediaFeature {
     RecordAudio;
     CaptureImage;
     End;
+
+/* == Event Types == */
+    EndEvent;
 }
