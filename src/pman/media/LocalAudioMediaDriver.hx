@@ -22,7 +22,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
-class LocalAudioPlaybackDriver extends LocalMediaObjectPlaybackDriver<Audio> {
+class LocalAudioMediaDriver extends LocalMediaObjectMediaDriver<Audio> {
 	/* Constructor Function */
 	public function new(audio : Audio):Void {
 		super(cast audio);
