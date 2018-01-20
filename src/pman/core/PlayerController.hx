@@ -42,21 +42,23 @@ class PlayerController {
       * play the current media
       */
     public function play():Void {
-        player.sim(_.play());
+        //player.sim(_.play());
+        player.asf([Playback], _.play());
     }
 
     /**
       * pause the current media
       */
     public function pause():Void {
-        player.sim(_.pause());
+        player.asf([Playback], _.pause());
     }
 
     /**
       * toggle media playback
       */
     public function togglePlayback():Void {
-        player.sim(_.togglePlayback());
+        //player.sim(_.togglePlayback());
+        player.asf([Playback], _.togglePlayback());
     }
 
 	/**
@@ -202,7 +204,8 @@ class PlayerController {
 	private function get_duration() {
 	    switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getDuration(), new Duration());
+                //return player.sim(_.getDuration(), new Duration());
+                return player.asf([Duration], _.getDuration(), new Duration());
 
             default:
                 return new Duration();
@@ -216,7 +219,8 @@ class PlayerController {
     private function get_durationTime() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getDurationTime(), 0.0);
+                //return player.sim(_.getDurationTime(), 0.0);
+                return player.asf([Duration], _.getDurationTime(), 0.0);
 
             default:
                 return 0.0;
@@ -230,7 +234,8 @@ class PlayerController {
     private function get_paused() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getPaused(), false);
+                //return player.sim(_.getPaused(), false);
+                return player.asf([Playback], _.getPaused(), false);
 
             default:
                 return false;
@@ -244,7 +249,8 @@ class PlayerController {
     private function get_currentTime() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getCurrentTime(), 0.0);
+                //return player.sim(_.getCurrentTime(), 0.0);
+                return player.asf([CurrentTime], _.getCurrentTime(), 0.0);
 
             case PTChromecast(c):
                 return c.currentTime;
@@ -256,7 +262,8 @@ class PlayerController {
     private function set_currentTime(newtime) {
         switch ( player.target ) {
             case PTThisDevice:
-                player.sim(_.setCurrentTime( newtime ));
+                //player.sim(_.setCurrentTime( newtime ));
+                player.asf([CurrentTime], _.setCurrentTime( newtime ));
                 defer(player.dispatch.bind('seek', currentTime));
                 return currentTime;
 
@@ -311,7 +318,8 @@ class PlayerController {
     private function get_mediaEnded() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getEnded(), false);
+                //return player.sim(_.getEnded(), false);
+                return player.asf([End], _.getEnded(), false);
 
             default:
                 return false;
@@ -333,7 +341,8 @@ class PlayerController {
     private function get_mediaVolume() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getVolume(), 1.0);
+                //return player.sim(_.getVolume(), 1.0);
+                return player.asf([Volume], _.getVolume(), 1.0);
 
             case PTChromecast(c):
                 return c.volume;
@@ -345,7 +354,8 @@ class PlayerController {
     private function set_mediaVolume(v) {
         switch ( player.target ) {
             case PTThisDevice:
-                player.sim(_.setVolume(v));
+                //player.sim(_.setVolume(v));
+                player.asf([Volume], _.setVolume( v ));
                 return mediaVolume;
 
             case PTChromecast(c):
@@ -363,7 +373,9 @@ class PlayerController {
     private function get_mediaMuted() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getMuted(), false);
+                return player.asf([Mute], _.getMuted(), {
+                    player.asf([Volume], (mediaVolume == 0.0), false);
+                });
 
             case PTChromecast(c):
                 return c.muted;
@@ -375,7 +387,9 @@ class PlayerController {
     private function set_mediaMuted(v) {
         switch ( player.target ) {
             case PTThisDevice:
-                player.sim(_.setMuted(v));
+                player.asf([Mute], _.setMuted(v), {
+                    mediaVolume = (v ? 0.0 : 0.10);
+                });
                 return mediaMuted;
 
             case PTChromecast( c ):
@@ -393,7 +407,8 @@ class PlayerController {
     private function get_mediaPlaybackRate() {
         switch ( player.target ) {
             case PTThisDevice:
-                return player.sim(_.getPlaybackRate(), 1.0);
+                //return player.sim(_.getPlaybackRate(), 1.0);
+                return player.asf([PlaybackSpeed], _.getPlaybackRate(), 1.0);
 
             default:
                 return 1.0;
@@ -402,7 +417,8 @@ class PlayerController {
     private function set_mediaPlaybackRate(v) {
         switch ( player.target ) {
             case PTThisDevice:
-                player.sim(_.setPlaybackRate( v ));
+                //player.sim(_.setPlaybackRate( v ));
+                player.asf([PlaybackSpeed], _.setPlaybackRate( v ));
                 return mediaPlaybackRate;
 
             default:
