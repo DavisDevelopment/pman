@@ -24,7 +24,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 
 @:access( pman.media.ChromecastController )
-class ChromecastPlaybackDriver extends PlaybackDriver {
+class ChromecastMediaDriver extends MediaDriver {
     private var cc : ChromecastController;
     public function new(cc : ChromecastController):Void {
         super();
