@@ -1,6 +1,7 @@
 package pman.bg.media;
 
 enum MediaFeature {
+/* == Interface Types == */
     Playback;
     PlaybackSpeed;
     Display;
@@ -9,6 +10,7 @@ enum MediaFeature {
     Duration;
     Dimensions;
     Volume;
+    Mute;
     CurrentTime;
     FutureTime;
     RecordVideo;
