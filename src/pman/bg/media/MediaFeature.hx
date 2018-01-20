@@ -13,6 +13,7 @@ enum MediaFeature {
     Mute;
     CurrentTime;
     FutureTime;
+    Seek;
     RecordVideo;
     RecordAudio;
     CaptureImage;
