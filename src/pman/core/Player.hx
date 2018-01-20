@@ -617,7 +617,13 @@ class Player extends EventDispatcher {
 		dialogs.selectFiles({
 			title: 'Select one or more files to open',
 			buttonLabel: 'Open That Shit',
-			filters: [FileFilter.ALL, FileFilter.VIDEO, FileFilter.AUDIO, FileFilter.PLAYLIST]
+			filters: [
+			    FileFilter.ALL,
+			    FileFilter.VIDEO,
+			    FileFilter.AUDIO,
+			    FileFilter.IMAGE,
+			    FileFilter.PLAYLIST
+			]
 		}, _callback);
 	}
 
