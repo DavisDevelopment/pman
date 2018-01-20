@@ -691,17 +691,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
     }
 
     /**
-      * generate/load thumbnail of given size
       */
-    public function getThumb(?size:String, ?slice:{pos:Int,?end:Int}):Void {
-        var b = getBundle();
-        var tnp = b.getThumbnails(size, slice);
-        tnp.then(function(items) {
-            trace( items );
-        });
-        tnp.unless(function(error) {
-            report( error );
-        });
     }
 
 /* === Computed Instance Fields === */
