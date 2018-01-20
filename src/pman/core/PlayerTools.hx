@@ -54,6 +54,39 @@ class PlayerTools {
 		return result;
 	}
 
+	public static macro function asf(player:Expr, feats:ExprOf<Array<pman.bg.media.MediaFeature>>, restArgs:Array<Expr>) {
+	    var session = macro $player.session;
+	    var condition:ExprOf<Bool> = macro ($session.hasMedia() && $session.focusedTrack.hasFeatures($feats));
+	    var result:Expr = macro null;
+
+	    if (restArgs.length >= 1) {
+	        var ifTrue:Expr = restArgs.shift();
+	        ifTrue = ifTrue.replace(macro _, macro $session.mediaDriver).replace(macro s_, session);
+
+            result = macro {
+                if ( $condition ) {
+                    $ifTrue;
+                }
+            };
+
+            if (restArgs.length >= 1) {
+                var ifFalse:Expr = restArgs.shift();
+                ifFalse = ifFalse.replace(macro _, macro $session.mediaDriver).replace(macro s_, session);
+
+                result = macro {
+                    if ( $condition ) {
+                        $ifTrue;
+                    }
+                    else {
+                        $ifFalse;
+                    }
+                };
+            }
+	    }
+
+	    return result;
+	}
+
 	/**
 	  * test whether the given extension name is indicative of a video file
 	  */
