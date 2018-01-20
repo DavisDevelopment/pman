@@ -132,6 +132,7 @@ class PlayerControlsView extends Ent {
             }
         }
 
+        var cursor:String = stage.cursor;
         if ( uiEnabled ) {
             if ( hovered ) {
                 var ihovered:Bool = false;
@@ -148,18 +149,22 @@ class PlayerControlsView extends Ent {
                 }
 
                 if ( ihovered ) {
-                    stage.cursor = 'pointer';
+                    cursor = 'pointer';
                 }
                 else {
-                    stage.cursor = 'default';
+                    cursor = 'default';
                 }
             }
             else {
-                stage.cursor = 'default';
+                cursor = 'default';
             }
         }
         else {
-            stage.cursor = 'none';
+            cursor = 'none';
+        }
+
+        if (cursor != stage.cursor) {
+            stage.cursor = cursor;
         }
 	}
 
