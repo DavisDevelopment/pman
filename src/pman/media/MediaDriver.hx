@@ -29,7 +29,7 @@ using Slambda;
 /**
   * class that receives playback commands and executes them
   */
-class PlaybackDriver {
+class MediaDriver {
 	/* Constructor Function */
 	public function new():Void {
 	    features = new Dict();
@@ -114,7 +114,7 @@ class PlaybackDriver {
 
 	public function getSource():String ni();
 	public function getDuration():Duration {
-		return Duration.fromFloat(getDurationTime());
+		return tannus.media.Duration.fromFloat(getDurationTime());
 	}
 	public function getDurationTime():Float ni();
 	public function getCurrentTime():Float ni();

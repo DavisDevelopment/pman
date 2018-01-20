@@ -1,4 +1,4 @@
 package pman.media;
 
-typedef MediaController = pman.media.PlaybackDriver;
+typedef MediaController = pman.media.MediaDriver;
 
