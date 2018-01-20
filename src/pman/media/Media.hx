@@ -52,14 +52,14 @@ class Media {
 	/**
 	  * build the PlaybackDriver for [this] Media
 	  */
-	public function getPlaybackDriver():Promise<PlaybackDriver> {
+	public function getDriver():Promise<MediaDriver> {
 		throw 'Not Implemented';
 	}
 
 	/**
 	  * build the MediaView for [this] Media
 	  */
-	public function getRenderer(controller : PlaybackDriver):Promise<MediaRenderer> {
+	public function getRenderer(controller : MediaDriver):Promise<MediaRenderer> {
 		throw 'Not Implemented';
 	}
 
