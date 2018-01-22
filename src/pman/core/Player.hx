@@ -473,17 +473,21 @@ class Player extends EventDispatcher {
 				}
 			},
 			manipulate: function(mc : MediaController) {
-				if (cb.startTime != null) {
-					mc.setCurrentTime( cb.startTime );
-				}
-				if (cb.manipulate != null) {
-					cb.manipulate( mc );
-				}
+			    if (track.hasFeature( Seek )) {
+                    if (cb.startTime != null) {
+                        mc.setCurrentTime( cb.startTime );
+                    }
+                }
+                if (cb.manipulate != null) {
+                    cb.manipulate( mc );
+                }
 			},
 			ready: function() {
-				if ( playing ) {
-					play();
-				}
+			    if (track.hasFeature( Playback )) {
+                    if ( playing ) {
+                        play();
+                    }
+                }
 				if (cb.ready != null) {
 					cb.ready();
 				}
@@ -1058,7 +1062,7 @@ class Player extends EventDispatcher {
 	  * start playback of media
 	  */
 	public function play():Void {
-		sim(_.play());
+		c.play();
 	}
 	
 	/**
