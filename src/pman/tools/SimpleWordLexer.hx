@@ -68,7 +68,6 @@ class SimpleWordLexer extends LexerBase {
         }
         else if (isWordChar( c )) {
             var txt = readWordString();
-            trace( txt );
             if (txt == null) {
                 return null;
             }
