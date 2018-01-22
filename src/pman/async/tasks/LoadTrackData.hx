@@ -13,6 +13,8 @@ import pman.edb.MediaStore;
 import pman.async.*;
 import pman.media.info.*;
 
+import haxe.Unserializer;
+
 import Std.*;
 import tannus.math.TMath.*;
 import electron.Tools.defer;
@@ -27,6 +29,7 @@ using Slambda;
 using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
+using pman.bg.DictTools;
 
 @:access( pman.media.Track )
 class LoadTrackData extends Task2<TrackData> {
@@ -38,6 +41,7 @@ class LoadTrackData extends Task2<TrackData> {
         this.db = db;
         this.store = db.mediaStore;
         this.data  = new TrackData( track );
+        this.cache = new TrackBatchCache( db );
     }
 
 /* === Instance Methods === */
@@ -93,7 +97,7 @@ class LoadTrackData extends Task2<TrackData> {
                 if (error != null)
                     return done(error);
                 data = new TrackData( track );
-                data.pullRaw(irow, done);
+                pull_raw(irow, data, done);
             });
         }
         else {
@@ -109,7 +113,7 @@ class LoadTrackData extends Task2<TrackData> {
                     else {
                         track.mediaId = row._id;
                         data = new TrackData( track );
-                        data.pullRaw(row, done);
+                        pull_raw(row, data, done);
                     }
                 }
             });
@@ -142,7 +146,7 @@ class LoadTrackData extends Task2<TrackData> {
                 return done( error );
             }
             else {
-                data.pullRaw(row, done);
+                pull_raw(row, data, done);
             }
         });
     }
@@ -151,20 +155,26 @@ class LoadTrackData extends Task2<TrackData> {
       * attempt to fill in missing info and stuff
       */
     private function fill_missing_info(done : VoidCb):Void {
+        var steps:Array<VoidAsync> = new Array();
         if (data.meta == null || data.meta.isIncomplete()) {
-            loadMediaMetadata(function(?error:Dynamic, ?meta) {
-                if (error != null) {
-                    return done( error );
-                }
-                else {
-                    data.meta = meta;
-                    done();
-                }
+            steps.push(function(next) {
+                loadMediaMetadata(function(?error:Dynamic, ?meta) {
+                    if (error != null) {
+                        return next( error );
+                    }
+                    else {
+                        data.meta = meta;
+                        next();
+                    }
+                });
             });
         }
-        else {
-            done();
-        }
+        steps.push(function(next) {
+            var filler = new TrackDataAutoFill(track, data);
+            filler.giveCache( cache );
+            filler.run( next );
+        });
+        steps.series( done );
     }
 
     /**
@@ -174,12 +184,22 @@ class LoadTrackData extends Task2<TrackData> {
         track.source.getMediaMetadata().then(done.yield()).unless(done.raise());
     }
 
+    /**
+      * pull raw
+      */
+    private function pull_raw(row:MediaRow, data:TrackData, done:VoidCb):Void {
+        cache.get().unless(done.raise()).then(function(info) {
+            data.pullRaw(row, done, db, info);
+        });
+    }
+
 /* === Instance Fields === */
 
     public var track : Track;
     public var db : PManDatabase;
     public var store : MediaStore;
     public var data : Null<TrackData>;
+    public var cache: TrackBatchCache;
 }
 
 enum LoadTrackDataError {
