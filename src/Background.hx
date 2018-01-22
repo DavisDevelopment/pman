@@ -86,6 +86,9 @@ class Background {
 			width: 640,
 			height: 480,
 			webPreferences: untyped {
+                session: Session.fromPartition('persist:pman', {
+                    cache: true
+                }),
                 nodeIntegration: true,
                 nodeIntegrationInWorker: true,
                 webSecurity: false,
