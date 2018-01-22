@@ -20,10 +20,44 @@ using tannus.FunctionTools;
 using tannus.async.Asyncs;
 using pman.bg.MediaTools;
 
-class Tag {
+class Tag implements tannus.ds.IComparable<Tag> {
+    /* Constructor Function */
     public inline function new(row: TagRow) {
-
+        this.name = row.name;
+        this.id = row._id;
     }
 
+/* === Instance Methods === */
+
+    /**
+      * convert [this] to a TagRow
+      */
+    public function toRow():TagRow {
+        var row:TagRow = {
+            name: name.trim()
+        };
+        if (id != null) {
+            row._id = id;
+        }
+        return row;
+    }
+
+    /**
+      * create and return a deep-copy of [this]
+      */
+    public inline function clone():Tag {
+        return new Tag(toRow());
+    }
+
+    /**
+      * compare [this] to [other]
+      */
+    public function compareTo(other: Tag):Int {
+        return Reflect.compare(name, other.name);
+    }
+
+/* === Instance FIelds === */
+
+    public var id: Null<String>;
     public var name: String;
 }
