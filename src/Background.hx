@@ -111,6 +111,9 @@ class Background {
 			win.show();
 			win.maximize();
 			win.focus();
+			win.webContents.openDevTools({
+                mode: 'bottom'
+			});
 			defer(function() {
                 if (cb != null) {
                     cb( win );
