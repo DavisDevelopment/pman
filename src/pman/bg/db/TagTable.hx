@@ -50,6 +50,26 @@ class TagTable extends Table {
         });
     }
 
+    public function removeRow(row:TagRow, ?done:VoidCb):VoidPromise {
+        return new VoidPromise(function(yes, no) {
+            remove(qd(function(q: Query) {
+                if (row._id != null) {
+                    return q.eq('_id', row._id);
+                }
+                else {
+                    return q.eq('name', row.name);
+                }
+            }), function(?error) {
+                if (error != null) {
+                    return no( error );
+                }
+                else {
+                    return yes();
+                }
+            }, false);
+        }).toAsync( done );
+    }
+
     /**
       * 
       */
