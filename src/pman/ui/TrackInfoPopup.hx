@@ -61,7 +61,7 @@ class TrackInfoPopup extends Dialog {
 
         tmacros = {
             tags: function(resolve:Dynamic) {
-                return track.data.tags.join(', ');
+                return track.data.tags.map.fn( _.name ).join(', ');
             },
             stars: function(resolve : Dynamic) {
                 return track.data.actors.map.fn( _.name ).join(', ');
