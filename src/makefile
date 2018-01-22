@@ -21,6 +21,9 @@ pack:
 build-installers:
 	cd ../dist/ && ./pack -release installer
 
+pack-all: compile-release
+	cd ../dist/ && ./pack -p linux -p windows -a x64 -release package
+
 release: compile-release
 	#cd ../dist/ && ./pack recompile preprocess package installer -release -p linux -a x64
 	cd ../dist/ && ./pack -p linux -a x64 -compress -release package installer
@@ -28,6 +31,7 @@ release: compile-release
 install_deps:
 	git clone http://github.com/DavisDevelopment/tnative tannus
 	git clone http://github.com/DavisDevelopment/jsgryf gryffin
+	git clone http://github.com/DavisDevelopment/edis
 	haxelib install slambda
 	haxelib install actuate
 	haxelib install format
