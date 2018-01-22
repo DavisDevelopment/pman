@@ -7,12 +7,14 @@
 -cp vex/
 -cp hxpress/src/
 -cp hscript/
+-cp hxelectron/src/
 -cp edis/
 
 -lib slambda
 -lib actuate
 -lib format
--lib electron
+-lib hxnodejs
+#-lib electron
 
 -D tannus
 -D node
