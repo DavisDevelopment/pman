@@ -13,6 +13,7 @@ import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.media.MediaType;
 import pman.async.*;
+import pman.async.tasks.TrackBatchCache;
 
 import pman.media.info.*;
 import pman.bg.media.Mark;
@@ -104,11 +105,23 @@ class TrackData {
     /**
       * pull data from a MediaInfoRow
       */
-    public function pullRaw(row:MediaRow, done:VoidCb, ?db:PManDatabase):Void {
+    public function pullRaw(row:MediaRow, done:VoidCb, ?db:PManDatabase, ?cache:DataCache):Void {
         // ensure that we have a reference to [db]
         if (db == null) {
             db = PManDatabase.get();
         }
+
+        var hasCache:Bool = false;
+        if (cache != null) {
+            hasCache = true;
+        }
+        else {
+            (new TrackBatchCache( db ).get().unless(done.raise()).then(function(info) {
+                pullRaw(row, done, db, info);
+            }));
+            return ;
+        }
+
 
         // array to hold list of asynchronous actions to be taken
         var steps:Array<VoidAsync> = new Array();
@@ -170,21 +183,34 @@ class TrackData {
                 _next( error );
             });
 
-            var tsteps:Array<VoidAsync> = new Array();
-            for (rawTag in d.tags) {
-                var name:String = rawTag;
-                if (ereg.match( rawTag )) {
-                    name = Unserializer.run( rawTag );
+            if ( hasCache ) {
+                var name: String;
+                for (rawTag in d.tags) {
+                    name = rawTag;
+                    if (ereg.match( rawTag )) {
+                        name = Unserializer.run( rawTag );
+                    }
+                    _tags.push(cache.tags.get( name ));
                 }
-                tsteps.push(function(nxt) {
-                    db.tags.cogRow( name ).then(function(row) {
-                        _tags.push(new Tag( row ));
-
-                        nxt();
-                    }, nxt.raise());
-                });
+                next();
             }
-            tsteps.series( next );
+            else {
+                var tsteps:Array<VoidAsync> = new Array();
+                for (rawTag in d.tags) {
+                    var name:String = rawTag;
+                    if (ereg.match( rawTag )) {
+                        name = Unserializer.run( rawTag );
+                    }
+                    tsteps.push(function(nxt) {
+                        db.tags.cogRow( name ).then(function(row) {
+                            _tags.push(new Tag( row ));
+
+                            nxt();
+                        }, nxt.raise());
+                    });
+                }
+                tsteps.series( next );
+            }
         });
 
         // pull [actors]
@@ -194,9 +220,17 @@ class TrackData {
                 next();
             }
             else {
-                writeActors(d.actors, function(?error, ?al) {
-                    next( error );
-                });
+                if ( hasCache ) {
+                    for (name in d.actors) {
+                        actors.push(cache.actors[name]);
+                    }
+                    next();
+                }
+                else {
+                    writeActors(d.actors, function(?error, ?al) {
+                        next( error );
+                    });
+                }
             }
         });
 
@@ -230,7 +264,6 @@ class TrackData {
                 meta: (meta != null ? meta.toRaw() : null)
             }
         });
-        trace( row );
         return row;
     }
     private function _encodeAttrVal(value: Dynamic):Dynamic {
@@ -570,3 +603,8 @@ class TrackData {
 
     public var meta : Null<MediaMetadata>;
 }
+
+typedef DataCache = {
+    actors: Dict<String, Actor>,
+    tags: Dict<String, Tag>
+};
