@@ -332,14 +332,19 @@ class Background {
 	public function buildTrayMenu():Menu {
 	    var menu = new Menu();
 
-        if ( !shouldOpen ) {
+        if (!shouldOpen || playerWindows.length == 0) {
             var openPman = new MenuItem({
                 label: 'Open PMan',
                 click: function(i, w) {
                     updateMenu();
-                    openPlayerWindow(function(bw) {
-                        //didit
-                    });
+                    if (playerWindow == null) {
+                        openPlayerWindow(function(bw) {
+                            //didit
+                        });
+                    }
+                    else {
+                        playerWindow.focus();
+                    }
                 }
             });
             menu.append( openPman );
@@ -522,7 +527,8 @@ class Background {
 	  * when a window closes
 	  */
 	private function _onAllClosed():Void {
-	    close();
+	    playerWindows = new Array();
+	    updateTray();
 	}
 
 	/**
