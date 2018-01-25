@@ -33,6 +33,7 @@ import Std.*;
 import tannus.internal.CompileTime in Ct;
 import tannus.TSys as Sys;
 import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -41,6 +42,8 @@ using Lambda;
 using Slambda;
 using pman.media.MediaTools;
 using pman.bg.URITools;
+using tannus.async.Asyncs;
+using tannus.FunctionTools;
 
 class BPlayerMain extends Application {
 	/* Constructor Function */
@@ -131,6 +134,7 @@ class BPlayerMain extends Application {
                 dragManager.init();
 
                 //bgdbTest();
+                test_edis_fs();
             });
         });
 
@@ -142,6 +146,112 @@ class BPlayerMain extends Application {
         defer(function() {
             ic.send( 'GetLaunchInfo' );
         });
+	}
+
+	private function test_edis_fs():Void {
+	    var tests:Array<VoidAsync> = new Array();
+	    function test(v: VoidAsync):Void {
+	        tests.push( v );
+	    }
+
+	    var echo = ((x:Dynamic) -> window.console.log( x ));
+	    var raise = (x -> throw x);
+
+	    var fs = edis.storage.fs.async.FileSystem.node();
+	    var path:Path = Path.fromString('/home/ryan/Videos/edis_fs.txt');
+	    var dpath:Path = path.plusString('../edis_fs/');
+
+	    test(function(next) {
+	        fs.exists( path )
+	            .nope(function() {
+	                fs.write(path, 'my name is pooyai'.replace(' ', '\n')).then(next.void(), next.raise());
+	            })
+	            .yep(next.void())
+	            .unless(next.raise());
+	    });
+	    test(function(next) {
+	        fs.read(path).unless(next.raise()).then(function(data) {
+	            echo( data );
+	            next();
+	        });
+	    });
+	    test(function(next) {
+	        fs.read(path, 3, 4).then(function(data) {
+	            echo( data );
+	            next();
+	        }, next.raise());
+	    });
+	    test(function(next) {
+	        fs.createDirectory( dpath ).then(next.void(), next.raise());
+	    });
+	    test(function(next) {
+	        fs.copy(path, dpath.plusString('/pooyai.txt')).unless(next.raise()).then(x->next());
+	    });
+	    test(function(next) {
+	        fs.readDirectory(dpath).then(function(names) {
+	            echo( names );
+	            next();
+	        }, next.raise());
+	    });
+	    test(function(next) {
+	        fs.deleteFile(dpath.plusString('/pooyai.txt'), next);
+	    });
+        test(function(next) {
+	        fs.readDirectory(dpath).then(function(names) {
+	            echo( names );
+	            next();
+	        }, next.raise());
+	    });
+	    test(function(next) {
+	        fs.deleteDirectory(dpath, next);
+	    });
+	    test(function(next) {
+	        fs.exists(dpath).then(function(val) {
+	            echo( val );
+	            next();
+	        }, next.raise());
+	    });
+	    test(function(next) {
+	        fs.write(path, ['well, betty'].times(6).join('\n')).then(next.void(), next.raise());
+	    });
+	    test(function(next) {
+	        fs.rename(path, path=path.directory.plusString('BETTY.txt')).then(untyped next.void(), next.raise());
+	    });
+	    test(function(next) {
+	        fs.stat(path).then(function(stat) {
+	            echo( stat );
+	            fs.createReadStream(path, {
+                    chunkSize: 10
+	            }).then(function(stream) {
+	                var chunks = [];
+	                window.expose('dataChunks', chunks);
+	                stream.onData(function(chunk) {
+	                    chunks.push( chunk );
+	                    trace('chunk received: ${chunk.length} bytes');
+	                });
+	                stream.onEnd(function() {
+	                    trace('Stream Ended');
+	                    next();
+	                });
+	                stream.onClose(function() {
+	                    trace('Stream Closed');
+	                    next();
+	                });
+	                stream.onError(function(error) {
+	                    next( error );
+	                });
+	            }, next.raise());
+	        }, next.raise());
+	    });
+
+	    tests.series(function(?error) {
+	        if (error != null) {
+	            raise( error );
+	        }
+            else {
+                trace('all tests completed successfully');
+            }
+	    });
 	}
 
     /**
