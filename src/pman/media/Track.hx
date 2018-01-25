@@ -542,6 +542,11 @@ class Track extends EventDispatcher implements IComparable<Track> {
     public function getFsPath():Null<Path> {
         return switch ( source ) {
             case MediaSource.MSLocalPath(path): path;
+            case MediaSource.MSUrl(url):
+                if (url.isPath() || url.protocol() == 'file') {
+                    url.toFilePath();
+                }
+                else url;
             default: null;
         };
     }
