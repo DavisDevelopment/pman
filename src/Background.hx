@@ -9,6 +9,7 @@ import tannus.sys.FileSystem as Fs;
 import electron.main.*;
 import electron.main.Menu;
 import electron.main.MenuItem;
+import electron.main.Session;
 import electron.NativeImage;
 
 import js.html.Window;
