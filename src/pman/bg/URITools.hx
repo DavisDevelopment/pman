@@ -17,6 +17,7 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.FunctionTools;
 
+@:expose("UriTools")
 class URITools {
     /**
       * remove leading slashes from [s]
@@ -116,8 +117,7 @@ class URITools {
       * convert a URI to a file Path
       */
     public static inline function toFilePath(uri: String):Path {
-        trace(afterProtocol( uri ));
-        return Path.fromString(afterProtocol( uri ));
+        return Path.fromString(afterProtocol( uri ).urlDecode());
     }
 
     /**
