@@ -298,7 +298,7 @@ class PlayerSession {
                 var loader = new pman.async.tasks.EfficientTrackListDataLoader(utracks.toArray(), player.app.db.mediaStore);
                 loader.run(function(?error) {
                     if (error != null) {
-                        report( error );
+                        #if debug throw error; #else report( error ); #end
                     }
                 });
                 defer(next.void());
