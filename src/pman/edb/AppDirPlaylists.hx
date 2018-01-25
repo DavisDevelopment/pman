@@ -13,6 +13,7 @@ import electron.Tools.*;
 
 import pman.core.*;
 import pman.media.Playlist;
+import pman.media.Track;
 import pman.Globals.*;
 
 #end
@@ -31,6 +32,9 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using pman.bg.URITools;
+#if renderer_process using pman.media.MediaTools; #end
 
 @:access( pman.edb.AppDir )
 class AppDirPlaylists {
@@ -44,7 +48,13 @@ class AppDirPlaylists {
 
     public function parsePlaylist(data:ByteArray):Playlist {
         var reader = new pman.format.xspf.Reader();
-        return reader.read(data.toString());
+        return reader.read(data.toString()).passTo(data -> data.tracks.reduce(function(l:Playlist, node) {
+            var loc = (node.locations[0] + '').toUri();
+            if (loc.isUri()) {
+                l.push(loc.parseToTrack());
+            }
+            return l;
+        }, new Playlist()));
     }
 
     public function printPlaylist(l : Playlist):ByteArray {
