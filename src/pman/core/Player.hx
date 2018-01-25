@@ -357,13 +357,22 @@ class Player extends EventDispatcher {
 	    if (app.appDir.playlistExists( name )) {
 	        var plf = app.appDir.playlistFile( name );
 	        var reader = new pman.format.xspf.Reader();
-	        var l:Playlist = reader.read(plf.read());
+	        var data = reader.read(plf.read());
+	        echo( data );
+	        var trackList:Array<Track> = data.tracks.reduce(function(l:Array<Track>, node) {
+	            var loc = (node.locations[0] + '').toUri();
+	            if (loc.isUri()) {
+	                l.push(loc.parseToTrack());
+	            }
+	            return l;
+	        }, new Array());
+
 	        clearPlaylist();
 	        var tmpShuffle = shuffle;
 	        shuffle = false;
 			session.name = name;
 
-	        addItemList(l.toArray(), function() {
+	        addItemList(trackList, function() {
                 shuffle = tmpShuffle;
                 session.name = name;
                 if (done != null) {
