@@ -34,6 +34,7 @@ using Slambda;
 /**
   * mixin class containing utility methods pertaining to the pman.media.* objects
   */
+@:expose('MediaTools')
 class MediaTools {
     /**
       * probe the given Directory for all openable files
@@ -163,7 +164,7 @@ class MediaTools {
             var protocol:String = uri.before(':');
             switch ( protocol ) {
                 case 'file':
-                    return MSLocalPath(new Path(stripSlashSlash(uri.after(':'))));
+                    return MSLocalPath(new Path(stripSlashSlash(uri.after(':')).urlDecode()));
 
                 case 'http', 'https':
                     return MSUrl( uri );
