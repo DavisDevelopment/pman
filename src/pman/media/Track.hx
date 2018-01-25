@@ -41,6 +41,7 @@ using Slambda;
 using pman.media.MediaTools;
 using tannus.ds.SortingTools;
 using tannus.math.TMath;
+using pman.bg.URITools;
 
 using pman.async.VoidAsyncs;
 
@@ -559,7 +560,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
         if (path != null) {
             return FileSystem.exists( path );
         }
-        else return true;
+        else return false;
     }
 
     /**
