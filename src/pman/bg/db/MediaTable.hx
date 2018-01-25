@@ -44,7 +44,7 @@ class MediaTable extends Table {
       */
     override function init(done: VoidCb):Void {
         var tasks = [];
-        tasks.push(createIndex.bind('uri', true, false, _));
+        //tasks.push(createIndex.bind('uri', true, false, _));
         super.init(function(?error) {
             if (error != null)
                 return done(error);
