@@ -356,7 +356,6 @@ class EfficientTrackListDataLoader extends Task1 {
                 return done( error );
             }
             else {
-                schedule_data_write( data );
                 done();
             }
         });
