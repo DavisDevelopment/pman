@@ -63,7 +63,12 @@ class TrackDataAutoFill extends Task1 {
                         done( error );
                     }
                     else {
-                        data.save(done, cache.db);
+                        if ( updated ) {
+                            data.save(done, cache.db);
+                        }
+                        else {
+                            done();
+                        }
                     }
                 });
             }
@@ -74,14 +79,16 @@ class TrackDataAutoFill extends Task1 {
       * automatically tag track with Actors, where possible
       */
     private function auto_actors(info:Info, done:VoidCb):Void {
+        var dactors = data.actors.map.fn(_.name.toLowerCase());
         for (star in info.actors) {
-            if (data.actors.has( star )) {
+            if (dactors.has(star.name.toLowerCase())) {
                 continue;
             }
 
             var name = star.name.toLowerCase();
             for (txt in fields) {
                 if (txt.has( name )) {
+                    updated = true;
                     data.actors.push( star );
                 }
             }
@@ -102,6 +109,7 @@ class TrackDataAutoFill extends Task1 {
            var tn = tag.name.toLowerCase();
            for (txt in fields) {
                if (txt.has( tn )) {
+                   updated = true;
                    data.tags.push( tag );
                }
            }
@@ -147,6 +155,7 @@ class TrackDataAutoFill extends Task1 {
 
     public var track: Track;
     public var data: TrackData;
+    public var updated:Bool = false;
     
     private var cache: TrackBatchCache;
     private var fields: Array<String>;
