@@ -129,7 +129,7 @@ class Player extends EventDispatcher {
 	    dispatch('tick', null);
 	    controller.tick();
 
-	    var time:Float = gryffin.Tools.now;
+	    var time:Float = now();
 	    for (c in components) {
 	        c.onTick( time );
 	    }
@@ -771,7 +771,8 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter.fn(_.isRealFile());
-	    var start = now;
+	    echo( items );
+	    var start = now();
 	    var plv = this.getPlaylistView();
 	    if (plv != null) {
 	        plv.lock();
@@ -780,7 +781,7 @@ class Player extends EventDispatcher {
 	    function completeEfficient():Void {
 	        engine.executor.syncTask(function() {
 	            #if debug
-	            trace('took ${now - start}ms for Player.addItemList(Track[${items.length}]) to complete');
+	            trace('took ${now() - start}ms for Player.addItemList(Track[${items.length}]) to complete');
 	            #end
 
                 if (plv != null) {
@@ -793,17 +794,18 @@ class Player extends EventDispatcher {
 	            var edl = new EfficientTrackListDataLoader(items, app.db.mediaStore);
 	            edl.run(function(?error) {
 	                if (error != null) {
-	                    report( error );
+						//report( error );
+					    #if debug throw error; #else report( error ); #end
 	                }
 	            });
 	        });
 	    }
 
 	    // initialize these items
-	    var initStart = now;
+	    var initStart = now();
 	    items.initAll(function() {
-	        trace('took ${now - initStart}ms to "initialize" ${items.length} tracks');
-	        initStart = now;
+	        trace('took ${now() - initStart}ms to "initialize" ${items.length} tracks');
+	        initStart = now();
             // if these are the first items added to the queue, autoLoad will be invoked once they are all added
             var autoLoad:Bool = session.playlist.empty();
             var willPlay:Null<Track> = null;
@@ -827,13 +829,13 @@ class Player extends EventDispatcher {
                 openTrack(willPlay, {
                     attached: function() {
                         //trace('Media linked to player by auto-load');
-                        trace('took ${now - initStart} to append ${items.length} tracks to queue');
+                        trace('took ${now() - initStart} to append ${items.length} tracks to queue');
                         completeEfficient();
                     }
                 });
             }
             else {
-                trace('took ${now - initStart} to append ${items.length} tracks to queue');
+                trace('took ${now() - initStart} to append ${items.length} tracks to queue');
                 completeEfficient();
             }
         });
