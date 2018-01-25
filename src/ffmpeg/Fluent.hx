@@ -26,6 +26,28 @@ extern class Fluent extends EventEmitter {
     public function addInput(src : String):Void;
     public function mergeAdd(src : String):Void;
 
+    public function inputFormat(format: String):Void;
+    public function fromFormat(format: String):Void;
+    public function withInputFormat(format: String):Void;
+
+    public function inputFps(fps: Float):Void;
+    public function nativeFrameRate():Void;
+    public function seekInput(time:Either<String, Float>):Void;
+    public function loop(duration: Either<String, Float>):Void;
+    
+    public function noAudio():Void;
+    public function audioCodec(codec: String):Void;
+    public function audioBitrate(rate: Float):Void;
+    public function audioChannels(count: Int):Void;
+    public function audioFrequency(freqHz: Float):Void;
+    public function audioQuality(q: Float):Void;
+    
+    @:overload(function<T:AudioFilterArg>(filters: Array<T>):Void {})
+    public function audioFilters<T:AudioFilterArg>(filters: Rest<T>):Void;
+
+    @:overload(function<T:AudioFilterArg>(filters: Array<T>):Void {})
+    public function audioFilter<T:AudioFilterArg>(filter: Rest<T>):Void;
+
     public function inputOption(option : Either<String, Array<String>>):Void;
     public function inputOptions(options : Rest<String>):Void;
     public function addInputOption(option : Either<String, Array<String>>):Void;
@@ -33,39 +55,65 @@ extern class Fluent extends EventEmitter {
     public function size(size : String):Void;
     public function videoSize(size : String):Void;
     public function withSize(size : String):Void;
+
     public function renice(niceness : Int = 0):Void;
 
-    //public function videoFilter(filters:Either<String, {
-        //filter: String,
-        //options: Either<String, Either<Array<Dynamic>, Dynamic>>
-    //}>):Void;
+    @:overload(function<T:VideoFilterArg>(filters: Array<T>):Void {})
+    public function videoFilters<T:VideoFilterArg>(filters: Rest<T>):Void;
 
-    @:overload(function(filter : Rest<String>):Void {})
-    @:overload(function(filter : Array<String>):Void {})
-    public function videoFilter(filter_o : Rest<{filter: String, options:Dynamic}>):Void;
+    @:overload(function<T:VideoFilterArg>(filters: Array<T>):Void {})
+    public function videoFilter<T:VideoFilterArg>(filter: Rest<T>):Void;
+
+    public function noVideo():Void;
+    public function videoCodec(codec: String):Void;
+    public function videoBitrate(bitrate:Float, ?constant:Bool):Void;
 
     public function fps(rate : Float):Void;
-    public function aspect(aspect : Either<String, Float>):Void;
     public function autopad(?color:String):Void;
-    public function output(dest:Either<String, WritableStream>):Void;
-    public function duration(time : Float):Void;
+    public function frames(count: Int):Void;
+    public function takeFrames(count: Int):Void;
+    public function aspect(aspect : Either<String, Float>):Void;
+    public function setAspectRatio(aspect: Either<String,Float>):Void;
+    public function keepPixelAspect():Void;
+    public function keepDisplayAspectRatio():Void;
+    public function duration(time : Time):Void;
+    public function setDuration(time: Time):Void;
     public function seek(time : Float):Void;
+    public function seekOutput(time: Float):Void;
     public function format(outputFormat : String):Void;
+    public function outputFormat(format: String):Void;
+    public function toFormat(format: String):Void;
+
+    @:overload(function(options: Array<String>):Void {})
+    @:overload(function(tokens: Rest<String>):Void {})
+    public function outputOptions(singleOption: String):Void;
+
+    @:overload(function<T:ComplexFilterArg>(filters: Array<T>):Void {})
+    public function complexFilter<T:ComplexFilterArg>(filters: Rest<T>):Void;
+
+    @:overload(function(stream: Either<Duplex, WritableStream>, ?options:Dynamic):Void {})
+    public function output(outputPath: String):Void;
+
+    @:overload(function(stream: Either<Duplex, WritableStream>, ?options:Dynamic):Void {})
+    public function addOutput(outputPath: String):Void;
+
+    public function pipe(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
+    public function stream(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
+    public function writeToStream(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
+
     public function run():Void;
     public function execute():Void;
+
     public function save(path : String):Void;
 
-    public function screenshots(options:ScreenshotOptions):Void;
-    inline public function onFileNames(f : Array<String>->Void):FFfmpeg {
-        return untyped this.on('filenames', f);
-    }
-    inline public function onProgress(f : FfmpegProgressEvent->Void):FFfmpeg {
-        return untyped this.on('progress', f);
-    }
+    public function mergeToFile(filename:String, tmpDir:String):Void;
 
-    inline function onEnd(f : Void->Void):FFfmpeg {
-        return untyped on('end', f);
-    }
+    public function screenshots(options:ScreenshotOptions):Void;
+
+    inline public function onFileNames(f : Array<String>->Void):FFfmpeg { return untyped this.on('filenames', f); }
+    inline public function onProgress(f : FfmpegProgressEvent->Void):FFfmpeg { return untyped this.on('progress', f); }
+
+    inline function onEnd(f : Void->Void):FFfmpeg { return untyped on('end', f); }
     inline function onError(f : Dynamic->Buffer->Buffer->Void):FFfmpeg return untyped on('error', f);
 
 /* === Instance Fields === */
@@ -209,3 +257,23 @@ typedef FfmpegProgressEvent = {
     timemark: Float,
     percent: Float
 };
+
+typedef AudioFilter = {
+    filter: String,
+    ?options: Either<String, Either<Array<Dynamic>, Dynamic>>
+};
+typedef AudioFilterArg = Either<String, AudioFilter>;
+
+typedef VideoFilter = {
+    filter: String,
+    ?options: Either<String, Either<Array<Dynamic>, Dynamic>>
+};
+typedef VideoFilterArg = Either<String, VideoFilter>;
+
+typedef ComplexFilter = {
+    filter: String,
+    ?options: Either<String, Either<Array<Dynamic>, Dynamic>>,
+    ?inputs: Either<String, Array<String>>,
+    ?outputs: Either<String, Array<String>>
+};
+typedef ComplexFilterArg = Either<String, ComplexFilter>;
