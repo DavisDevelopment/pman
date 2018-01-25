@@ -4,101 +4,112 @@ import tannus.ds.*;
 import tannus.io.*;
 import tannus.sys.*;
 
-import pman.core.*;
-import pman.media.*;
+import pman.bg.media.*;
+import pman.format.xspf.Data;
+
+import edis.xml.*;
 
 import Xml;
 import Xml.XmlType;
 import Slambda.fn;
+import tannus.io.Ptr.*;
+
+import haxe.macro.Expr;
 
 using StringTools;
 using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.ds.StringUtils;
 using Slambda;
-using pman.media.MediaTools;
+using pman.bg.URITools;
+using pman.bg.PathTools;
+using edis.xml.XmlTools;
 
-class Reader {
+@:noPackageRestrict
+class Reader extends BaseXmlParser {
 	/* Constructor Function */
 	public function new():Void {
-
+	    super();
 	}
 
 /* === Instance Methods === */
 
-	/**
-	  * read the given String as an xspf playlist
-	  */
-	public function read(s : String):Playlist {
-		root = Xml.parse( s );
-		playlist = new Playlist();
+    public function parseString(xmlString: String):Data {
+        doc = null;
+        handleString( xmlString );
+        return doc;
+    }
 
-		walk( root );
+    /**
+      * pull from a ByteArray
+      */
+    public function read(data: ByteArray):Data {
+        return parseString(data.toString());
+    }
 
-		return playlist;
-	}
+    /**
+      * set up the parsing procedures
+      */
+    override function setup():Void {
+        on('playlist', parsePlaylistNode);
+        onElement(function(node) {
+            trace( node );
+        });
+    }
 
-	private function element(e : Xml):Void {
-		switch (e.nodeName.toLowerCase()) {
-			case 'playlist', 'tracklist':
-				walk( e );
+    /**
+      * handles parsing of the playlist node
+      */
+    private function parsePlaylistNode(playlist: FunctionalNodeHandler):Void {
+        doc = new Data();
+        var txt = playlist.childGetText.bind(_, _);
+        
+        txt('title', fn(doc.title = _));
+        txt('creator', fn(doc.creator = _));
+        txt('annotation', fn(doc.annotation = _));
+        txt('info', fn(doc.info = _));
+        //TODO etc...
 
-			case 'track':
-				trackNode( e );
+        playlist.on('trackList', parseTrackListNode);
+    }
 
-			default:
-				null;
-		}
-	}
+    /**
+      * handles parsing of the trackList node
+      */
+    private function parseTrackListNode(l: FunctionalNodeHandler):Void {
+        l.on('track', function(_node) {
+            parseTrackNode(_node, function(t: Null<DataTrack>) {
+                if (t != null) {
+                    doc.addTrack( t );
+                }
+            });
+        });
+    }
 
-	private function trackNode(e : Xml):Void {
-		var subs = e.elements();
-		var info:Map<String, String> = new Map();
-		for (n in subs) {
-			info[n.nodeName] = text( n );
-		}
-		track( info );
-	}
+    /**
+      * parses each <track/> node
+      */
+    private function parseTrackNode(tn:FunctionalNodeHandler, f:Null<DataTrack>->Void):Void {
+        var txt = tn.childGetText.bind(_, _), num = tn.childGetTextAsFloat.bind(_, _), inum = tn.childGetTextAsInt.bind(_, _);
+        var track = doc.createTrack();
 
-	private function track(info : Map<String, String>):Void {
-		var t = info['location'].trim().parseToTrack();
-		playlist.push( t );
-	}
+        txt('title', setr(track.title));
+        txt('location', uri->track.addLocation( uri ));
+        inum('duration', setr(track.duration));
 
-	private function node(x : Xml):Void {
-		switch ( x.nodeType ) {
-			case Element:
-				element( x );
+        tn.then(function() {
+            if (track.locations.hasContent()) {
+                f( track );
+            }
+            else {
+                f( null );
+            }
+        });
+    }
 
-			default:
-				null;
-		}
-	}
+    //private static macro function ex(f:Expr, ctx:Expr, id:Expr) {
+        //return macro ($f('$id', x->$ctx.$id=x));
+    //}
 
-	private function walk(xmlNode : Xml):Void {
-		for (n in xmlNode) {
-			node( n );
-		}
-	}
-
-	/**
-	  * get the textual value of the given node
-	  */
-	private static function text(x : Xml):String {
-		switch ( x.nodeType ) {
-			case CData, PCData:
-				return x.nodeValue;
-
-			case Element:
-				return (x.array().map(text).join(''));
-
-			default:
-				return '';
-		}
-	}
-
-/* === Instance Fields === */
-
-	private var root : Xml;
-	private var playlist : Playlist;
+    private var doc: Data;
 }
