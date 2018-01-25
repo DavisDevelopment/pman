@@ -31,6 +31,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
+@:deprecated
 typedef AppDir = pman.edb.AppDir;
 
 class OAppDir {
