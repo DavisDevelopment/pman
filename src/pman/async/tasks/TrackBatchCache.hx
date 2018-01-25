@@ -114,10 +114,19 @@ class TrackBatchCache extends Task1 {
         var steps:Array<VoidAsync> = new Array();
 
         steps.push(function(next) {
-            db.tags.each(function(row: TagRow) {
-                var tag = new Tag( row );
-                tags[tag.name] = tag;
-            }, next);
+            //db.tags.each(function(row: TagRow) {
+                //var tag = new Tag( row );
+                //tags[tag.name] = tag;
+            //}, next);
+            db.tags.allRows().then(function(rows: Array<TagRow>) {
+                for (row in rows) {
+                    if ((row.name is String) && row.name.hasContent()) {
+                        var tag = new Tag( row );
+                        tags[tag.name] = tag;
+                    }
+                }
+                next();
+            }).unless(next.raise());
         });
 
         var removes = [], creates = [];
