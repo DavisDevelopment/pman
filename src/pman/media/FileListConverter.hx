@@ -11,13 +11,16 @@ import pman.format.m3u.Reader as M3UReader;
 import pman.format.xspf.Reader as XSPFReader;
 import pman.format.pls.Reader as PLSReader;
 
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.media.MediaTools;
+using pman.bg.URITools;
 
 /**
   * class used to convert a list of Files into a list of Tracks
@@ -102,9 +105,27 @@ class FileListConverter {
     /**
       * import an xspf file
       */
-    private inline function xspf_file(file : File):Void {
+    private function xspf_file(file : File):Void {
         var reader = new pman.format.xspf.Reader();
-        addMany(reader.read(file.read()));
+        var data = reader.read(file.read());
+        echo( data );
+        
+        //if (data.tracks.hasContent()) {
+            //var loc:Null<String>;
+            //for (t in data.tracks) {
+                //loc = t.locations[0].toUri();
+                //if (loc != null) {
+                    //add(loc.parseToTrack());
+                //}
+            //}
+        //}
+        addMany(echo(data.tracks.reduce(function(l:Array<Track>, node) {
+            var loc = (node.locations[0] + '').toUri();
+            if (loc.isUri()) {
+                l.push(loc.parseToTrack());
+            }
+            return l;
+        }, new Array())));
     }
 
     /**
