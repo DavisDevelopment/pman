@@ -26,7 +26,7 @@ class FluentTools {
         }
         if ( _isWin ) {
             if (_exeRoot == null) {
-                _exeRoot = pman.db.AppDir.getAppPath('assets/ffmpeg-static');
+                _exeRoot = pman.edb.AppDir.getAppPath('assets/ffmpeg-static');
             }
             Fluent.setFfmpegPath(_exeRoot.plusString('ffmpeg.exe'));
             Fluent.setFfprobePath(_exeRoot.plusString('ffprobe.exe'));
