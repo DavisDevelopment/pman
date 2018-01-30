@@ -223,53 +223,100 @@ class TrackData {
         // detect when tags are stored in previous format, and decode them
         var ereg:EReg = ~/^y[0-9]+:/;
         steps.push(function(next: VoidCb) {
-            var _tags = [];
+            // list to hold decoded Tags
+            var _tags:Array<Tag> = new Array();
+
+            // wrap [next], to set the [tags] field before returning
             next = next.wrap(function(_next, ?error) {
-                this.tags = _tags;
+                this.tags = _tags.compact();
                 _next( error );
             });
 
+            // if [cache] was provided
             if ( hasCache ) {
                 var name: String;
+                // for each 'raw' tag
                 for (rawTag in d.tags) {
                     name = rawTag;
+                    // check if it is stored in a serialized manner, and if so
                     if (ereg.match( rawTag )) {
-                        name = Unserializer.run( rawTag );
+                        // unserialize it
+                        var uname:String = Unserializer.run( rawTag );
+                        // check that it is a String, and non-empty
+                        if ((uname is String) && uname.hasContent()) {
+                            name = uname;
+                        }
                     }
-                    _tags.push(cache.tags.get( name ));
+                    // get cached 
+                    if (cache.tags.exists( name )) {
+                        _tags.push(cache.tags.get( name ));
+                    }
+                    else {
+                        _tags.push(new Tag({
+                            name: name
+                        }));
+                    }
                 }
                 next();
             }
+            // if cache was not provided
             else {
+                // create array to store async actions
                 var tsteps:Array<VoidAsync> = new Array();
+                // for every 'raw' tag
                 for (rawTag in d.tags) {
+                    // create variable to hold the name of the tag
                     var name:String = rawTag;
+                    // if that name seems to be serialized
                     if (ereg.match( rawTag )) {
+                        // unserialize it
                         name = Unserializer.run( rawTag );
                     }
+
+                    // create async step that will..
                     tsteps.push(function(nxt) {
+                        // fetch the 'row' for [this] tag from the database, simultaneously ensuring that one exists
                         db.tags.cogRow( name ).then(function(row) {
+                            // push that 'row' onto the list of tags
                             _tags.push(new Tag( row ));
 
                             nxt();
                         }, nxt.raise());
                     });
                 }
+                // execute all async actions for tags
                 tsteps.series( next );
             }
         });
 
         // pull [actors]
         steps.push(function(next : VoidCb) {
+            // create new array to hold pulled actors
             actors = new Array();
+            // if there's none to pull, just skip this step
             if (d.actors == null || d.actors.length == 0) {
                 next();
             }
+            // otherwise,
             else {
+                // if cache was provided
                 if ( hasCache ) {
+                    // iterate over all actor-names in [row]
                     for (name in d.actors) {
-                        actors.push(cache.actors[name]);
+                        // if there even exists a cached record of [name] actor
+                        if (cache.actors.exists( name )) {
+                            // use that one
+                            actors.push(cache.actors[name]);
+                        }
+                        // otherwise,
+                        else {
+                            // create a new one
+                            actors.push(new Actor({
+                                name: name
+                            }));
+                        }
                     }
+                    actors = actors.compact();
                     next();
                 }
                 else {
@@ -485,6 +532,7 @@ class TrackData {
       * attach a Tag to [this] as a String
       */
     public inline function addTag(tagName : String):Tag {
+        trace('adding tag: $tagName');
         return attachTag(new Tag({name: tagName}));
     }
 
