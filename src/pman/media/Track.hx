@@ -88,7 +88,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	/**
 	  * get the name of [this] Track
 	  */
-	public inline function getName():String return provider.getName();
+	public inline function getName():String {
+	    return provider.getName();
+    }
+
+	/**
+	  * get the URI for [this] Track
+	  */
 	public inline function getURI():String return provider.getURI();
 
 	/**
@@ -640,6 +646,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * capture screenshot of given size, at given time
       */
+    @:deprecated
     public function probe(time:Float, size:String, callback:Canvas->Void):Void {
         if (!type.equals( MTVideo ))
             return ;
@@ -672,6 +679,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * get all snapshots attached to [this] Track
       */
+    @:deprecated
     public function getSnapshots():Dict<Float, Ref<Image>> {
         var ssd = new Directory(player.app.appDir.snapshotPath(), true);
         var gs = new GlobStar('${title}@<time>.png', 'i');
