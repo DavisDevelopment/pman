@@ -380,7 +380,11 @@ class Background {
       */
     public function updateTray():Void {
         if (tray == null) {
-            tray = new Tray(ap('assets/icon64.png').toString());
+            var trayIconPath = ap('assets/icon64.png');
+            if (App.isUnityRunning()) {
+                trayIconPath = ap('assets/gray-icon64.png');
+            }
+            tray = new Tray(trayIconPath.toString());
         }
 
         tray.setToolTip('PMan');
