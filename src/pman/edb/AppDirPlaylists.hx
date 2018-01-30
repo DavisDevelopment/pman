@@ -58,7 +58,7 @@ class AppDirPlaylists {
     }
 
     public function printPlaylist(l : Playlist):ByteArray {
-        return pman.format.xspf.Writer.run( l );
+        return pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( l ));
     }
 
     public function readPlaylist(name:String):Maybe<Playlist> {

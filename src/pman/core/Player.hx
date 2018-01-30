@@ -326,7 +326,7 @@ class Player extends EventDispatcher {
 
 	    function finish():Void {
 	        var plf = app.appDir.playlistFile( session.name );
-	        var data = pman.format.xspf.Writer.run( l );
+	        var data = pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( l ));
 	        plf.write( data );
 	        if (done != null) {
 	            defer( done );
@@ -403,7 +403,7 @@ class Player extends EventDispatcher {
                     file.write( data );
 
                 case 'xspf':
-                    var data = pman.format.xspf.Writer.run( session.playlist );
+                    var data = pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( session.playlist ));
                     file.write( data );
 
                 default:
