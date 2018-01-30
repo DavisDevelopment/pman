@@ -81,7 +81,7 @@ class BPlayerMain extends Application {
         // need to find a better way to do this
 		browserWindow = BrowserWindow.getAllWindows()[0];
 
-        appDir = new AppDir();
+        //appDir = new AppDir();
 
         // handle pre-exit tasks
         var preCloseComplete:Bool = false;
@@ -382,7 +382,7 @@ class BPlayerMain extends Application {
 		if (o.directory == null)
 			o.directory = false;
 		if (o.title == null)
-			o.title = 'BPlayer FileSystem Prompt';
+			o.title = 'PMan FileSystem Prompt';
 		return o;
 	}
 
@@ -403,6 +403,9 @@ class BPlayerMain extends Application {
 		return res;
 	}
 
+    /**
+      * convert FSSPromptOptions to FileDialogOptions
+      */
 	private function _convertFSSPromptOptions(o : FSSPromptOptions):FileDialogOptions {
 	    var res:FileDialogOptions = {
             title: o.title,
@@ -436,7 +439,7 @@ class BPlayerMain extends Application {
 	    launchInfo = LaunchInfo.fromRaw( info );
 
         // initialize the database
-        db = new PManDatabase();
+        //db = new PManDatabase();
         db.init(function(?error) {
             if (error != null) {
                 throw error;
@@ -482,6 +485,12 @@ class BPlayerMain extends Application {
 	    return (playerPage != null ? playerPage.player : null);
     }
 
+    public var appDir(get, never):AppDir;
+    private inline function get_appDir() return engine.appDir;
+    
+    public var db(get, never):PManDatabase;
+    private inline function get_db() return engine.db;
+
     public var ic(get, never):RendererIpcCommands;
     private inline function get_ic() return ipcCommands;
 
@@ -491,8 +500,8 @@ class BPlayerMain extends Application {
 	public var playerPage : Null<PlayerPage>;
 	public var browserWindow : BrowserWindow;
 	public var keyboardCommands : KeyboardCommands;
-	public var appDir : AppDir;
-	public var db : PManDatabase;
+	//public var appDir : AppDir;
+	//public var db : PManDatabase;
 	public var dragManager : DragDropManager;
 	public var tray : Tray;
 	public var ipcCommands : RendererIpcCommands;
