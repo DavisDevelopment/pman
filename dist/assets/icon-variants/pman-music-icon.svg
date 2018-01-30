@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   viewBox="0 0 640 640"
+   height="640"
+   width="640"
+   version="1.1"
+   id="svg3390"
+   inkscape:version="0.91 r13725"
+   sodipodi:docname="pman-music-icon.svg">
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1319"
+     inkscape:window-height="744"
+     id="namedview9453"
+     showgrid="false"
+     showguides="false"
+     inkscape:zoom="0.7375"
+     inkscape:cx="229.21638"
+     inkscape:cy="292.86365"
+     inkscape:window-x="47"
+     inkscape:window-y="24"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg3390" />
+  <metadata
+     id="metadata3396">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs3394" />
+  <path
+     id="path3402"
+     d="M 99.599193,580.08393 95.237925,579.68618 94.437988,547.3192 C 93.377711,504.4184 94.766333,264.36442 96.134497,254.04021 106.36414,176.84696 150.9068,113.7743 219.41351,79.476394 c 21.1882,-10.607879 43.31774,-17.863037 68.00659,-22.295922 14.99426,-2.69222 58.84001,-2.700628 73.27842,-0.01405 49.45234,9.20167 89.92243,30.390125 124.33859,65.098529 37.09855,37.41357 59.52889,81.76125 66.02184,130.53362 1.75269,13.16561 1.96852,38.86724 0.43946,52.33487 -2.96358,26.10258 -11.65122,55.1808 -23.58332,78.93523 -32.2966,64.29616 -89.06121,109.63432 -155.77852,124.42105 -18.45757,4.09079 -31.61528,5.21641 -53.54149,4.58037 -26.74237,-0.77576 -42.87577,-3.70879 -72.82243,-13.23903 -11.76605,-3.74443 -13.25643,-4.00658 -13.89623,-2.44429 -0.39418,0.96248 -0.75003,19.82862 -0.79078,41.92474 l -0.0741,40.17478 -8.06682,0.68189 c -8.29536,0.70122 -115.53614,0.62796 -123.345517,-0.0842 z M 249.52953,401.51785 c 33.83647,-15.6325 226.27033,-110.52592 228.56652,-112.71124 1.33242,-1.2681 -17.37529,-10.83955 -102.63641,-52.51206 -125.50018,-61.33989 -135.07415,-65.82849 -136.77746,-64.12588 -0.4495,0.44931 -0.95004,52.54714 -1.11231,115.77293 -0.2813,109.60138 -0.11371,117.88377 2.38542,117.88377 0.13785,0 4.44625,-1.93838 9.57424,-4.30752 z"
+     style="fill:#e60000;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path4206"
+     d="m 238.31629,392.38221 c -0.89477,-14.11388 0.0852,-218.37654 1.05228,-219.34366 1.53544,-1.53544 19.56072,6.89633 126.87507,59.34893 83.77702,40.94813 110.46493,54.4836 110.28915,55.93601 -0.25826,2.13387 -232.31753,116.44751 -236.39106,116.44751 -0.58023,0 -1.38727,-5.4771 -1.82544,-12.38879 z"
+     style="fill:#f2f2f2;fill-opacity:1;stroke:none;stroke-width:0.2;stroke-linejoin:bevel;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+  <path
+     id="path10877"
+     d="m 351.74272,560.68645 11.41359,0.95031 0,-151.81897 182.62124,-30.17372 0,181.04238 c 0,16.66479 -20.44041,30.17372 -45.65515,30.17372 -25.21474,0 -45.65511,-13.50893 -45.65511,-30.17372 0,-16.6648 20.44037,-30.17373 45.65511,-30.17373 3.94103,0 7.76599,0.33032 11.41362,0.95094 l 0,-115.98845 -114.13818,18.85891 0,156.52605 c 0,16.6648 -20.44038,30.17373 -45.65512,30.17373 -25.21474,0 -45.65586,-13.50893 -45.65586,-30.17373 0,-16.66479 20.44112,-30.17372 45.65586,-30.17372 z"
+     inkscape:connector-curvature="0"
+     style="fill:#000000;fill-opacity:1;stroke-width:0.2;stroke-linejoin:round" />
+</svg>
