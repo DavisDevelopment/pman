@@ -136,3 +136,5 @@ class URITools {
     private static var unix_path_pattern:RegEx = {~/^(\.+\/)|(\.\/)|(\/)/g;};
     private static var dos_path_pattern:RegEx =  {~/^([A-Z]+:)?\\/g;};
 }
+
+typedef PathMixin = pman.bg.PathTools;
