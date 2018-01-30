@@ -18,9 +18,11 @@ import pman.async.tasks.TrackBatchCache;
 import pman.media.info.*;
 import pman.bg.media.Mark;
 import pman.bg.media.Tag;
+import pman.bg.media.MediaRow;
 
 import haxe.Serializer;
 import haxe.Unserializer;
+import Type.ValueType;
 
 import pman.Globals.*;
 
@@ -111,11 +113,14 @@ class TrackData {
             db = PManDatabase.get();
         }
 
+        // determine if [cache] was provided
         var hasCache:Bool = false;
         if (cache != null) {
             hasCache = true;
         }
+        // and if not
         else {
+            // load cache, and tail-call [pullRaw]
             (new TrackBatchCache( db ).get().unless(done.raise()).then(function(info) {
                 pullRaw(row, done, db, info);
             }));
@@ -126,13 +131,54 @@ class TrackData {
         // array to hold list of asynchronous actions to be taken
         var steps:Array<VoidAsync> = new Array();
 
+        // shorthand reference to the 'data' property of the MediaRow
+        var d:MediaDataRow = row.data;
+
+
         // copy over data which can be copied synchronously
         media_id = row._id;
-        var d = row.data;
         views = d.views;
         starred = d.starred;
         rating = d.rating;
         description = d.description;
+        attrs = null;
+
+        // if [d] has an 'attrs' property, pull that onto [this]
+        if (d.attrs != null) {
+            // ORegEx pattern for recognizing encoded attr values
+            var pattern = ORegEx.compile('["$$$$encoded" => {Array}]');
+            // function to transform [attr] values
+            function transform_attr_value(av: Dynamic):Dynamic {
+                // check type of [av]
+                switch (Type.typeof( av )) {
+                    // if [av] is an anonymous object type
+                    case TObject, TUnknown:
+                        // check for [pattern]
+                        if (pattern.applyTo( av )) {
+                            // extract 
+                            var pair:Array<String> = Reflect.field(av, "$$encoded");
+                            // decode encoded data
+                            switch ( pair ) {
+                                case ['json', s]:
+                                    return haxe.Json.parse( s );
+
+                                case ['haxe', s]:
+                                    return Unserializer.run( s );
+
+                                default:
+                                    throw 'Error: Invalid "$$$$encoded" object';
+                            }
+                        }
+                        else return av;
+
+                    default:
+                        return av;
+                }
+            }
+
+            // convert Anon object to a Dict<String, Dynamic>
+            attrs = d.attrs.toDict(null, transform_attr_value);
+        }
 
         // pull metadata
         if (d.meta != null) {
