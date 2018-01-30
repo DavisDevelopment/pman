@@ -27,17 +27,19 @@ typedef MediaRow = {
 };
 
 typedef MediaDataRow = {
-    views: Int,
-    starred: Bool,
-    ?rating: Float,
-    ?contentRating: String,
-    ?channel: String,
-    ?description: String,
-    ?attrs: Dynamic,
-    marks: Array<Dynamic>,
-    tags: Array<String>,
-    actors: Array<String>,
-    meta: Null<MediaMetadataRow>
+    >RawBaseMediaData,
+    >RawExtMediaData,
+    //views: Int,
+    //starred: Bool,
+    //?rating: Float,
+    //?contentRating: String,
+    //?channel: String,
+    //?description: String,
+    //?attrs: Dynamic,
+    //marks: Array<Dynamic>,
+    //tags: Array<String>,
+    //actors: Array<String>,
+    //meta: Null<MediaMetadataRow>
 }
 
 typedef MediaMetadataRow = {
@@ -50,3 +52,20 @@ typedef MediaMetadataRow = {
     }>,
     audio: Null<{}>
 };
+
+typedef RawBaseMediaData = {
+    views: Int,
+    starred: Bool,
+    ?meta: MediaMetadataRow,
+    ?rating: Float,
+    ?contentRating: String,
+    ?channel: String,
+    ?description: String
+}
+
+typedef RawExtMediaData = {
+    marks: Array<Dynamic>,
+    tags: Array<String>,
+    actors: Array<String>,
+    ?attrs: Dynamic
+}
