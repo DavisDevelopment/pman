@@ -78,9 +78,11 @@ class TabView extends Ent {
                     leftIcon = Icons.starIcon(16, 16, function(path) {
                         path.style.fill = player.theme.secondary.lighten( 45.0 ).toString();
                     }).toImage();
+                    hasUpdated = true;
                 }
                 else if (!dd.starred && leftIcon != null) {
                     leftIcon = null;
+                    hasUpdated = true;
                 }
             }
         }
@@ -92,6 +94,18 @@ class TabView extends Ent {
                 //trace(dragRect.toString());
             }
         }
+
+        // compare sizes
+        if (prevRect == null) {
+            //prevRect = rect.clone();
+            null;
+        }
+        else if (prevRect.nequals( rect )) {
+            trace('$prevRect !== $rect');
+        }
+
+        // update prevRect
+        prevRect = rect.clone();
     }
 
     /**
@@ -155,6 +169,7 @@ class TabView extends Ent {
         // draw the closeButton
         var ci:Image = closeIcon[closeHovered?1:0];
         var cir:Rect<Float> = new Rect((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
+
         // draw the hoveredness
         if ( closeHovered ) {
             var dif:Float = 2.5;
@@ -169,6 +184,8 @@ class TabView extends Ent {
             c.closePath();
             c.fill();
         }
+
+        // draw the icon itself
         c.drawComponent(ci, 
             0, 0, ci.width, ci.height,
             cir.x, cir.y, cir.width, cir.height
@@ -218,7 +235,7 @@ class TabView extends Ent {
 
         w = (leftMargin() + min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
         h = 24.0;
-        y = (bar.y + (bar.h - rect.h));
+        y = (bar.y + (bar.h - h));
     }
 
     /**
@@ -375,4 +392,6 @@ class TabView extends Ent {
     public var hasUpdated: Bool = false;
     public var mouseDown : Null<Point<Float>> = null;
     public var dragRect : Null<Rect<Float>> = null;
+
+    private var prevRect: Null<Rect<Float>> = null;
 }
