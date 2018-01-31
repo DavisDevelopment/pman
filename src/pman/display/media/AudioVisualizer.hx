@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
@@ -30,7 +30,7 @@ class AudioVisualizer {
     /* Constructor Function */
     public function new(r : Mor):Void {
         renderer = r;
-        viewport = new Rectangle();
+        viewport = new Rect();
     }
 
 /* === Instance Methods === */
@@ -39,7 +39,7 @@ class AudioVisualizer {
       * render visualization
       */
     public function render(stage:Stage, c:Ctx):Void {
-
+        //TODO
     }
 
     /**
@@ -135,7 +135,7 @@ class AudioVisualizer {
 
     public var renderer : Mor;
     public var player : Null<Player> = null;
-    public var viewport : Rectangle;
+    public var viewport : Rect<Float>;
 
     public var context : AudioContext;
     public var source : AudioSource;
