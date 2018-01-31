@@ -65,10 +65,15 @@ class Task2<T> extends T2<T> implements Trackable<T> {
         return progress;
     }
 
+    public var statusMessage(default, set):String;
+    private function set_statusMessage(v) {
+        return (this.statusMessage = v);
+    }
+
 /* === Instance Fields === */
 
     public var startTime(default, null):Float;
-    public var onComplete : Signal<Result<Dynamic,T>>;
+    public var onComplete : Signal<Result<Dynamic, T>>;
     public var onError : Signal<Dynamic>;
     public var onResult : Signal<T>;
     public var onProgress : Signal<Delta<Percent>>;
