@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
@@ -11,6 +11,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 import gryffin.ui.Border;
 
+import pman.async.Trackable;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
@@ -30,7 +31,7 @@ using Slambda;
 
 class CanvasProgressBar extends Ent {
     /* Constructor Function */
-    public function new(task:StandardTask<String, Dynamic>, ?player:Player):Void {
+    public function new(task:Trackable<Dynamic>, ?player:Player):Void {
         super();
 
         this.task = task;
@@ -55,7 +56,9 @@ class CanvasProgressBar extends Ent {
     override function init(stage : Stage):Void {
         super.init( stage );
 
-        task.onfinish.once( delete );
+        task.onResult.once(function(x) {
+            delete();
+        });
     }
 
     /**
@@ -104,9 +107,8 @@ class CanvasProgressBar extends Ent {
         border.color = cols[1];
 
         if ( pb.complete ) {
-            return delete();
+            delete();
         }
-
         pb.update();
 
         tb.text = pb.text;
@@ -116,7 +118,7 @@ class CanvasProgressBar extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         super.calculateGeometry( r );
 
         var vp = player.view.rect;
@@ -144,7 +146,7 @@ class CanvasProgressBar extends Ent {
 /* === Instance Fields === */
 
     public var player : Player;
-    public var task : StandardTask<String, Dynamic>;
+    public var task : Trackable<Dynamic>;
     public var pb : ProgressBar;
     public var border : Border;
     public var tb : TextBox;
