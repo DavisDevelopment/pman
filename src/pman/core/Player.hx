@@ -451,11 +451,11 @@ class Player extends EventDispatcher {
 	/**
 	  * create a new ProgressBar for the given Task and attach it to the view
 	  */
-	public function showProgressBar(task:StandardTask<String, Dynamic>, ?bar:CanvasProgressBar):Void {
-	    if (bar == null)
-	        bar = new CanvasProgressBar(task, this);
-	    view.addSibling( bar );
-	}
+	//public function showProgressBar(task:StandardTask<String, Dynamic>, ?bar:CanvasProgressBar):Void {
+		//if (bar == null)
+			//bar = new CanvasProgressBar(task, this);
+		//view.addSibling( bar );
+	//}
 
 /* === Media Methods === */
 
@@ -963,6 +963,10 @@ class Player extends EventDispatcher {
 			        }
 			    });
 			}
+
+			//defer(function() {
+				//view.stage.calculateGeometry();
+			//});
 		}
 
 		// automatically save the playback settings
@@ -1005,6 +1009,10 @@ class Player extends EventDispatcher {
 	    dispatch('track-ready', t);
 	    components.iter.fn(_.onTrackReady( t ));
 	}
+
+	/**
+	  *
+	  */
 
 	/**
 	  * build [this] context Menu
