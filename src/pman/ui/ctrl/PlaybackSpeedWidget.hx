@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -57,18 +57,22 @@ class PlaybackSpeedWidget extends Ent {
     private function cancelClick(event : MouseEvent):Void {
         if (!containsPoint( event.position )) {
             event.stopPropogation();
-            hide();
+            return hide();
         }
+
+        defer(function() {
+            player.view.stage.once('click', cancelClick);
+        });
     }
 
     override function show():Void {
         super.show();
-        player.view.stage.on('click', cancelClick);
+        player.view.stage.once('click', cancelClick);
     }
 
     override function hide():Void {
         super.hide();
-        player.view.stage.off('click', cancelClick);
+        //player.view.stage.off('click', cancelClick);
     }
 
 	/**
@@ -105,7 +109,7 @@ class PlaybackSpeedWidget extends Ent {
 		c.fill();
 		c.stroke();
 
-		var bi:Image=minus.image, br:Rectangle=minus.rect;
+		var bi:Image=minus.image, br:Rect<Float>=minus.rect;
 		c.drawComponent(bi, 0, 0, bi.width, bi.height, br.x, br.y, br.w, br.h);
 		bi = plus.image;
 		br = plus.rect;
@@ -117,7 +121,7 @@ class PlaybackSpeedWidget extends Ent {
 	/**
 	  * calculate [this]'s geometry
 	  */
-	override function calculateGeometry(r : Rectangle):Void {
+	override function calculateGeometry(r : Rect<Float>):Void {
 	    inline function double(x:Float) return (x * 2);
 		//w = ((btnSize[1] * 2) + (margin.left * 2) + (margin.right * 2));
 	    w = (double(btnSize[1]) + double( margin.left ) + double( margin.right ));
@@ -137,7 +141,7 @@ class PlaybackSpeedWidget extends Ent {
     /**
       * check whether [this] contains [p]
       */
-	override function containsPoint(p : Point):Bool {
+	override function containsPoint(p : Point<Float>):Bool {
 	    return (!isHidden() && super.containsPoint( p ));
 	}
 

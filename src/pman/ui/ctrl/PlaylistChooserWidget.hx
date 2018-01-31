@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -88,7 +88,7 @@ class PlaylistChooserWidget extends Ent {
       * calculate the positions of the items
       */
     private function positionItems(stage : Stage):Void {
-        var ip:Point = new Point((x), (y));
+        var ip:Point<Float> = new Point((x), (y));
 
         w = 0.0;
         for (i in items) {
@@ -199,7 +199,7 @@ class PlaylistChooserWidget extends Ent {
         }
     }
 
-    public function getItemByPoint(p : Point):Maybe<PlaylistChooserItem> {
+    public function getItemByPoint(p : Point<Float>):Maybe<PlaylistChooserItem> {
         for (i in items) {
             if (p.containedBy(x, i.y, w, i.h)) {
                 return i;
@@ -271,7 +271,7 @@ class PlaylistChooserItem extends Ent {
     /**
       * calculate geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         w = (t.width);
         h = (t.height);
     }

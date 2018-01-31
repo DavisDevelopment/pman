@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -61,7 +61,7 @@ class PlayerControlButton extends Ent {
 
         // update the value of [hovered]
         var _ph:Bool = hovered;
-	    var mp:Null<Point> = stage.getMousePosition();
+	    var mp:Null<Point<Float>> = stage.getMousePosition();
 	    hovered = (mp != null && containsPoint( mp ));
 
 	    switch ([_ph, hovered]) {
@@ -125,7 +125,7 @@ class PlayerControlButton extends Ent {
 	/**
 	  * update [this] object's geometry
 	  */
-	override function calculateGeometry(r : Rectangle):Void {
+	override function calculateGeometry(r : Rect<Float>):Void {
 		h = 35;
 		w = h;
 	}

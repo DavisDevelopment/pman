@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
@@ -51,7 +51,7 @@ class VolumeWidget extends Ent {
         //minus = Icons.selectionCollapse(64, 64, setStroke).toImage();
         plus = new VolBtn('selectionExpand', 64, cols);
         minus = new VolBtn('selectionCollapse', 64, cols);
-        bar = new Rectangle();
+        bar = new Rect();
     }
 
     /**
@@ -122,7 +122,7 @@ class VolumeWidget extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         w = 50;
         centerX = button.centerX;
         bar.w = 8;
@@ -179,7 +179,7 @@ class VolumeWidget extends Ent {
         player.volume = getPointFactor( event.position );
     }
 
-    private inline function getPointFactor(p : Point):Float {
+    private inline function getPointFactor(p : Point<Float>):Float {
         return (((bar.y + bar.h) - p.y) / bar.h);
     }
 
@@ -192,7 +192,7 @@ class VolumeWidget extends Ent {
         return [hy, hh];
     }
 
-    override function containsPoint(p : Point):Bool {
+    override function containsPoint(p : Point<Float>):Bool {
         return (!isHidden() && super.containsPoint( p ));
     }
 
@@ -234,7 +234,7 @@ class VolumeWidget extends Ent {
     public var minus : VolBtn;
     //public var plusRect : Rectangle;
     //public var minusRect : Rectangle;
-    public var bar : Rectangle;
+    public var bar : Rect<Float>;
 
     private var margin:Padding = {new Padding(3, 3, 3, 3);};
     private var btnSize:Float = 35;
@@ -244,7 +244,7 @@ class VolumeWidget extends Ent {
 class VolBtn {
     public var imgList:Array<Image>;
     public var state:VolBtnState;
-    public var rect:Rectangle;
+    public var rect:Rect<Float>;
     
     public function new(name:String, size:Int, colors:Array<Color>):Void {
         var ic = Obj.fromDynamic( Icons );
@@ -252,7 +252,7 @@ class VolBtn {
         colors = colors.with([bg, bar, outline, disabled], [outline, bar, disabled]);
         imgList = colors.map.fn([color] => gen(size, size, setcol.bind(_, color)).toImage());
         state = Normal;
-        rect = new Rectangle();
+        rect = new Rect();
     }
 
     public var image(get, never):Image;
