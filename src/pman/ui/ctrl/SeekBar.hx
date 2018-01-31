@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
@@ -51,7 +51,7 @@ class SeekBar extends Ent {
         super();
 
         controls = c;
-        viewed = new Rectangle();
+        viewed = new Rect();
         hoverLocation = null;
         hovered = false;
         lhct = now;
@@ -372,13 +372,13 @@ class SeekBar extends Ent {
         }
 
         var lastHovered:Bool = hovered;
-        var lastHoverLocation:Null<Point> = hoverLocation;
+        var lastHoverLocation:Null<Point<Float>> = hoverLocation;
         var mp = stage.getMousePosition();
         hovered = (mp != null && containsPoint( mp ) && sess.hasMedia());
         hoverLocation = hovered ? mp : null;
 
         if (hovered && hoverLocation != null) {
-            var hoverStatusChanged:Bool = (!lastHovered || (lastHoverLocation == null || hoverLocation.nequals( lastHoverLocation )));
+            var hoverStatusChanged:Bool = (!lastHovered || (lastHoverLocation == null || !hoverLocation.equals( lastHoverLocation )));
             if ( hoverStatusChanged ) {
                 lhct = now;
             }
@@ -502,7 +502,7 @@ class SeekBar extends Ent {
     private function drawMarkView(mv:MarkView, stage:Stage, c:Ctx):Void {
         c.save();
 
-        var p:Point = mv.pos();
+        var p:Point<Float> = mv.pos();
         var mw:Float = 0;
 
         switch (mv.getIndicatorType()) {
@@ -536,7 +536,7 @@ class SeekBar extends Ent {
     /**
      * calculate [this]'s geometry
      */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         w = (controls.w - (tb_margin * 2));
         h = 12;
         centerX = controls.centerX;
@@ -761,11 +761,11 @@ class SeekBar extends Ent {
     /* === Instance Fields === */
 
     public var controls : PlayerControlsView;
-    public var hoverLocation : Null<Point>;
+    public var hoverLocation : Null<Point<Float>>;
     public var hovered(default, null):Bool;
     public var bmnav : Bool = false;
 
-    private var viewed : Rectangle;
+    private var viewed : Rect<Float>;
 
     private var thumb : ThumbPreviewBox;
     private var markViewPanel : SeekBarMarkViewTooltipPanel;
