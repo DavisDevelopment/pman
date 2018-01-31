@@ -5,7 +5,7 @@ import gryffin.display.*;
 import gryffin.ui.*;
 
 import tannus.io.Ptr;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.MouseEvent;
 import tannus.graphics.Color;
 import tannus.media.Duration;
@@ -69,10 +69,10 @@ class ThumbPreviewBox extends Ent {
 	private function updateSize(stage : Stage):Void {
 		if (thumb != null) {
 			// 20% of the viewport
-			var vp:Rectangle = player.view.rect;
+			var vp:Rect<Float> = player.view.rect;
 
 			// scale the thumbnail to be 20% of the viewport height
-			var thumbRect:Rectangle = new Rectangle(0, 0, thumb.width, thumb.height);
+			var thumbRect:Rect<Float> = cast new Rect(0, 0, thumb.width, thumb.height);
 			thumbRect.scale(null, (0.2 * vp.height));
 
 			w = (max((thumbRect.w + 0.0), tbox.width) + 30);
@@ -103,7 +103,7 @@ class ThumbPreviewBox extends Ent {
 		c.fill();
 
 		/* draw the time text */
-		var ttr:Rectangle = new Rectangle(x, (y + h - 20), w, 20);
+		var ttr:Rect<Float> = new Rect(x, (y + h - 20), w, 20);
 		var ttx:Float = (ttr.centerX - (tbox.width / 2));
 		var tty:Float = (ttr.centerY - (tbox.height / 2));
 		c.drawComponent(tbox, 0, 0, tbox.width, tbox.height, ttx, tty, tbox.width, tbox.height);
@@ -133,8 +133,8 @@ class ThumbPreviewBox extends Ent {
 	/**
 	  * Get the total Box Rect
 	  */
-	private function getTotalRect():Rectangle {
-		var r:Rectangle = new Rectangle();
+	private function getTotalRect():Rect<Float> {
+		var r:Rect<Float> = new Rect();
 		if (thumb != null) {
 			r.w = (max(thumb.width, ceil(tbox.width)) + 30);
 			r.h = (thumb.height + 25);
@@ -163,8 +163,8 @@ class ThumbPreviewBox extends Ent {
 	}
 
 	/* the Point at which the user is hovering */
-	private var target(get, never):Null<Point>;
-	private inline function get_target():Null<Point> return bar.hoverLocation;
+	private var target(get, never):Null<Point<Float>>;
+	private inline function get_target():Null<Point<Float>> return bar.hoverLocation;
 
 /* === Instance Fields === */
 
