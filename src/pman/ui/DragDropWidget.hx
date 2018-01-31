@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.async.*;
 
@@ -63,7 +63,7 @@ class DragDropWidget extends Ent {
       */
     override function render(stage:Stage, c:Ctx):Void {
         if (dragInProgress && dp != null) {
-            var droprect = new Rectangle(0, 0, 95, 95);
+            var droprect:Rect<Float> = cast new Rect(0, 0, 95, 95);
             droprect.center = dp;
 
             c.save();
@@ -80,14 +80,14 @@ class DragDropWidget extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
-        rect.cloneFrom( pv.rect );
+    override function calculateGeometry(r : Rect<Float>):Void {
+        rect.pull( pv.rect );
     }
 
     /**
       * check whether the given Point is inside of [this]'s content rectangle
       */
-    override function containsPoint(p : Point):Bool {
+    override function containsPoint(p : Point<Float>):Bool {
         return false;
     }
 
@@ -250,7 +250,7 @@ class DragDropWidget extends Ent {
 /* === Instance Fields === */
 
     private var pv : PlayerView;
-    private var dp : Null<Point> = null;
+    private var dp : Null<Point<Float>> = null;
     private var dragInProgress : Bool = false;
 
     public var dragEnter : Signal<PlayerDragDropEvent>;
