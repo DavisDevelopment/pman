@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
@@ -62,7 +62,7 @@ class SeekBarMarkViewTooltipGroup extends Ent {
         }
 
         tb = [new TextBox(), new TextBox(), new TextBox()];
-        tbr = [new Rectangle(), new Rectangle(), new Rectangle()];
+        tbr = [new Rect(), new Rect(), new Rect()];
         border = new Border(3.0, player.theme.primary.lighten( 20 ), 3.0);
     }
 
@@ -112,7 +112,7 @@ class SeekBarMarkViewTooltipGroup extends Ent {
 
         // update state
         _update(colors, key);
-        calculateGeometry( stage.rect );
+        calculateGeometry(cast stage.rect);
     }
 
     /**
@@ -219,7 +219,7 @@ class SeekBarMarkViewTooltipGroup extends Ent {
         t.color = player.theme.secondary;
         t.fontSize = 10.0;
         // -- 
-        ttr = new Rectangle();
+        ttr = new Rect();
         for (t in tb) {
             t.fontSizeUnit = 'px';
             ttr.width = max(ttr.width, t.width);
@@ -230,9 +230,9 @@ class SeekBarMarkViewTooltipGroup extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r: Rectangle):Void {
+    override function calculateGeometry(r: Rect<Float>):Void {
         inline function dbl(x:Float):Float return (x * 2);
-        inline function reset(r: Rectangle) r.x = r.y = r.w = r.h = 0.0;
+        inline function reset(r: Rect<Float>) r.x = r.y = r.w = r.h = 0.0;
 
         // set content rectangle
         w = (ttr.width + dbl( margin ));
@@ -240,7 +240,7 @@ class SeekBarMarkViewTooltipGroup extends Ent {
 
         //tbr = new Array();
         var yy:Float = (y + margin);
-        var t:TextBox, r:Rectangle;
+        var t:TextBox, r:Rect<Float>;
         for (index in 0...tb.length) {
             t = tb[index];
             r = tbr[index];
@@ -267,8 +267,8 @@ class SeekBarMarkViewTooltipGroup extends Ent {
         var coli:Int = 0;
         var columns:Array<Array<SeekBarMarkViewTooltip>> = [new Array()];
 
-        var pr:Rectangle = player.view.rect;
-        var p:Point = new Point((pr.x + margin), (pr.y + margin));
+        var pr:Rect<Float> = player.view.rect;
+        var p:Point<Float> = new Point((pr.x + margin), (pr.y + margin));
 
         function position(member: SeekBarMarkViewTooltip) {
             var col:Array<SeekBarMarkViewTooltip> = columns[coli];
@@ -328,7 +328,7 @@ class SeekBarMarkViewTooltipGroup extends Ent {
     /**
       * check whether [p] falls within [this]'s content rectangle
       */
-    override function containsPoint(p: Point):Bool {
+    override function containsPoint(p: Point<Float>):Bool {
         if (super.containsPoint( p )) {
             return true;
         }
@@ -419,8 +419,8 @@ class SeekBarMarkViewTooltipGroup extends Ent {
     public var tuning: Array<Bool>;
 
     private var tb: Array<TextBox>;
-    private var ttr: Rectangle;
-    private var tbr: Array<Rectangle>;
+    private var ttr: Rect<Float>;
+    private var tbr: Array<Rect<Float>>;
     private var colors: Null<Array<Int>> = null;
     private var border: Border;
 }

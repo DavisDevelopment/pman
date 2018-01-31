@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
@@ -63,18 +63,18 @@ class SeekBarMarkView {
     /**
       * get a Rectangle representing [this]'s position and size
       */
-    public function rect():Rectangle {
-        var r = new Rectangle(0, 0, (0.7 * bar.h), (bar.h));
+    public function rect():Rect<Float> {
+        var r = new Rect(0.0, 0.0, (0.7 * bar.h), (bar.h));
         r.centerX = (bar.x + prog().of( bar.w ));
         r.y = bar.y;
-        r = r.floor();
+        r = cast r.floor();
         return r;
     }
 
     /**
       * get a Point representing [this]'s position
       */
-    public inline function pos():Point {
+    public inline function pos():Point<Float> {
         return new Point((bar.x + prog().of(bar.w)), bar.y);
     }
 

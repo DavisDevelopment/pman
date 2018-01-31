@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
@@ -121,8 +121,8 @@ class SeekBarMarkViewTooltipPanel extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
-        rect.cloneFrom( playerView.rect );
+    override function calculateGeometry(r : Rect<Float>):Void {
+        rect.pull( playerView.rect );
     }
 
     /**
@@ -180,7 +180,7 @@ class SeekBarMarkViewTooltipPanel extends Ent {
     /**
       * determine whether [p] is inside of [this]
       */
-    override function containsPoint(p : Point):Bool {
+    override function containsPoint(p : Point<Float>):Bool {
         if ( bar.bmnav ) {
             for (g in groups) {
                 if (g.containsPoint( p )) {

@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
@@ -50,7 +50,7 @@ class SeekBarMarkViewTooltip extends Ent {
         markView = mv;
 
         tb = [new TextBox(), new TextBox(), new TextBox()];
-        tbr = [new Rectangle(), new Rectangle(), new Rectangle()];
+        tbr = [new Rect(), new Rect(), new Rect()];
         border = new Border(3.0, player.theme.primary.lighten( 20 ), 3.0);
         var r = new Random();
         color = (function() {
@@ -70,11 +70,11 @@ class SeekBarMarkViewTooltip extends Ent {
       * update [this]
       */
     override function update(stage : Stage):Void {
-        var mr:Rectangle = markView.rect();
+        var mr:Rect<Float> = markView.rect();
         var colors = getColors();
 
         _update(colors, mr.centerX);
-        calculateGeometry( stage.rect );
+        calculateGeometry(cast stage.rect);
     }
 
     /**
@@ -161,7 +161,7 @@ class SeekBarMarkViewTooltip extends Ent {
       * update [this]
       */
     public function _update(colors:Array<Color>, x:Float):Void {
-        ttr = new Rectangle();
+        ttr = new Rect();
 
         // assign properties to all text-boxes
         for (t in tb) {
@@ -220,7 +220,7 @@ class SeekBarMarkViewTooltip extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(_r : Rectangle):Void {
+    override function calculateGeometry(_r : Rect<Float>):Void {
         var mr = markView.rect();
         w = (ttr.width + dbl( margin ));
         h = (ttr.height + margin);
@@ -232,7 +232,7 @@ class SeekBarMarkViewTooltip extends Ent {
             // without time
             case 2:
                 for (t in tb) {
-                    var r = new Rectangle(0, 0, t.width, t.height);
+                    var r = new Rect(0.0, 0.0, t.width, t.height);
                     r.centerX = centerX;
                     r.y = yy;
                     yy += (r.h - 2);
@@ -243,7 +243,7 @@ class SeekBarMarkViewTooltip extends Ent {
             case 3:
                 // title
                 var t:TextBox = tb[0];
-                var r:Rectangle = new Rectangle(0, yy, t.width, t.height);
+                var r:Rect<Float> = new Rect(0.0, yy, t.width, t.height);
                 r.centerX = centerX;
                 yy += (r.h - 2);
                 tbr.push( r );
@@ -253,12 +253,12 @@ class SeekBarMarkViewTooltip extends Ent {
 
                 // hotkey
                 t = tb[1];
-                r = new Rectangle((x + half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
+                r = new Rect((x + half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
                 tbr.push( r );
 
                 // time
                 t = tb[2];
-                r = new Rectangle((x + w - t.width - half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
+                r = new Rect((x + w - t.width - half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
                 tbr.push( r );
 
             // invalid
@@ -351,8 +351,8 @@ class SeekBarMarkViewTooltip extends Ent {
     public var image: Null<Image> = null;
 
     private var tb : Array<TextBox>;
-    private var ttr : Rectangle;
-    private var tbr : Array<Rectangle>;
+    private var ttr : Rect<Float>;
+    private var tbr : Array<Rect<Float>>;
     private var colors : Null<Array<Int>> = null;
     private var border : Border;
 }
