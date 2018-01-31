@@ -2,7 +2,7 @@ package pman.ui.tabs;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -81,7 +81,7 @@ class TabView extends Ent {
         if (mouseDown != null) {
             var mp = stage.getMousePosition();
             if (mp != null) {
-                dragRect = new Rectangle((mp.x - mouseDown.x), y, w, h);
+                dragRect = new Rect((mp.x - mouseDown.x), y, w, h);
                 //trace(dragRect.toString());
             }
         }
@@ -93,7 +93,7 @@ class TabView extends Ent {
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
         inline function half(x:Float) return (x * 0.5);
-        var _r = rect;
+        var _r = rect.clone();
         if (dragRect != null)
             rect = dragRect;
 
@@ -119,11 +119,11 @@ class TabView extends Ent {
             c.closePath();
         c.stroke();
 
-        var lir:Null<Rectangle> = null;
+        var lir:Null<Rect<Float>> = null;
         var li:Null<Image> = leftIcon;
         // draw the left icon
         if (li != null) {
-            lir = new Rectangle((ir.x + 1.33), (ir.y + half(ir.h - li.height)), li.width, li.height);
+            lir = new Rect((ir.x + 1.33), (ir.y + half(ir.h - li.height)), li.width, li.height);
             //try {
                 c.drawComponent(li, 
                     0, 0, li.width, li.height,
@@ -135,7 +135,7 @@ class TabView extends Ent {
         // draw the title
         if (tb.text != null && tb.text != '') {
             // draw the title's text
-            var tbr:Rectangle = new Rectangle((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
+            var tbr:Rect<Float> = new Rect((ir.x + 3.0), (ir.centerY - ((tb.height - 3.5) / 2)), tb.width, tb.height);
             if (li != null && lir != null) {
                 tbr.x = (lir.w + 2.0 + tbr.x);
             }
@@ -147,7 +147,7 @@ class TabView extends Ent {
 
         // draw the closeButton
         var ci:Image = closeIcon[closeHovered?1:0];
-        var cir:Rectangle = new Rectangle((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
+        var cir:Rect<Float> = new Rect((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
         // draw the hoveredness
         if ( closeHovered ) {
             var dif:Float = 2.5;
@@ -157,7 +157,8 @@ class TabView extends Ent {
             );
             c.beginPath();
             c.fillStyle = player.theme.secondary;
-            c.drawVertices(bge.getVertices());
+            //c.drawVertices(bge.getVertices());
+            c.drawEllipse( bge );
             c.closePath();
             c.fill();
         }
@@ -174,7 +175,8 @@ class TabView extends Ent {
       * draw the path for [this] Tab view
       */
     private function _path(c:Ctx, r:Float, outline:Bool=false):Void {
-        var lw:Float = c.lineWidth, hlw:Float = (lw / 2);
+        var lw:Float = c.lineWidth;
+        var hlw:Float = (lw / 2);
         if ( outline ) {
             x += hlw;
             y += hlw;
@@ -197,7 +199,7 @@ class TabView extends Ent {
     /**
       * calculate [this] view's content rectangle
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         inline function leftMargin() {
             return 
             if (leftIcon == null)
@@ -207,9 +209,9 @@ class TabView extends Ent {
             }
         }
 
-        rect.width = (leftMargin() + min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
-        rect.h = 24.0;
-        rect.y = (bar.y + (bar.h - rect.h));
+        w = (leftMargin() + min(tb.width, 100) + 8.0 + closeIcon[0].width + bw);
+        h = 24.0;
+        y = (bar.y + (bar.h - rect.h));
     }
 
     /**
@@ -257,8 +259,8 @@ class TabView extends Ent {
     /**
       * get the 'inner' rectangle
       */
-    public function getInnerRect():Rectangle {
-        return new Rectangle((x + bd), y, (w - bw), h);
+    public function getInnerRect():Rect<Float> {
+        return new Rect((x + bd), y, (w - bw), h);
     }
 
     /**
@@ -363,6 +365,7 @@ class TabView extends Ent {
 
     public var hovered : Bool = false;
     public var closeHovered : Bool = false;
-    public var mouseDown : Null<Point> = null;
-    public var dragRect : Null<Rectangle> = null;
+    public var hasUpdated: Bool = false;
+    public var mouseDown : Null<Point<Float>> = null;
+    public var dragRect : Null<Rect<Float>> = null;
 }
