@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
@@ -60,7 +60,7 @@ class SnapshotView extends Ent {
             lastTime = now;
         }
         else {
-            var mp:Maybe<Point> = null;
+            var mp:Maybe<Point<Float>> = null;
             hovered = (mp = stage.getMousePosition()).ternary(containsPoint(_), false);
             if (!hovered && (now - lastTime) >= duration) {
                 delete();
@@ -87,7 +87,7 @@ class SnapshotView extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         r = player.view.mediaRect;
         w = (r.w * 0.2);
         h = (r.h * 0.2);
