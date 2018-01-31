@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
@@ -36,7 +36,7 @@ class LocalImageRenderer extends MediaRenderer {
         else {
             throw 'WTF';
         }
-        vr = new Rectangle();
+        vr = new Rect();
     }
 
 /* === Instance Methods === */
@@ -48,7 +48,7 @@ class LocalImageRenderer extends MediaRenderer {
     override function update(stage: Stage):Void {
         super.update( stage );
 
-        var imgSize = new Rectangle(0, 0, i.width, i.height);
+        var imgSize:Rect<Float> = new Rect(0.0, 0.0, 0.0 + i.width, 0.0 + i.height);
         var viewport = pv.rect.clone();
         var scale:Float = (marScale(imgSize, pv.rect) * pv.player.scale);
 
@@ -61,7 +61,7 @@ class LocalImageRenderer extends MediaRenderer {
     /**
 	  * scale to the maximum size that will fit in the viewport AND maintain aspect ratio
 	  */
-	private inline function marScale(src:Rectangle, dest:Rectangle):Float {
+	private inline function marScale(src:Rect<Float>, dest:Rect<Float>):Float {
 		return min((dest.width / src.width), (dest.height / src.height));
 	}
 
@@ -85,7 +85,7 @@ class LocalImageRenderer extends MediaRenderer {
 /* === Instance Fields === */
 
     public var i: Null<Image>;
-    public var vr: Rectangle;
+    public var vr: Rect<Float>;
 
 	private var pv : Null<PlayerView> = null;
 }
