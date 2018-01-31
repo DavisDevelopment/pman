@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
@@ -11,6 +11,7 @@ import gryffin.core.*;
 import gryffin.display.*;
 import gryffin.ui.Border;
 
+import pman.async.Trackable;
 import pman.core.*;
 import pman.display.*;
 import pman.display.media.*;
@@ -30,14 +31,14 @@ using Slambda;
 
 class ProgressBar {
     /* Constructor Function */
-    public function new(task:StandardTask<String, Dynamic>):Void {
+    public function new(task:Trackable<Dynamic>):Void {
         this.task = task;
 
         complete = false;
         text = '';
         progress = 0;
 
-        this.task.onfinish.once(function() {
+        task.onComplete.once(function(res) {
             complete = true;
         });
     }
@@ -48,13 +49,13 @@ class ProgressBar {
       * update [this]'s data
       */
     public function update():Void {
-        text = task.status;
-        progress = task.completion;
+        text = task.statusMessage;
+        progress = new Percent( task.progress );
     }
 
 /* === Instance Fields === */
 
-    public var task : StandardTask<String, Dynamic>;
+    public var task : Trackable<Dynamic>;
     public var complete(default, null): Bool;
     public var text(default, null): String;
     public var progress(default, null): Percent;
