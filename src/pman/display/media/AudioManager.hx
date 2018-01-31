@@ -2,13 +2,14 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
 import gryffin.media.MediaObject;
 import gryffin.audio.*;
+import gryffin.audio.AudioNode;
 
 import pman.core.*;
 import pman.media.*;
@@ -86,7 +87,8 @@ class AudioManager {
       */
     @:access( pman.display.media.LocalMediaObjectRenderer )
     public function buildTree(done : Void->Void):Void {
-        (if (context != null) context.close else defer)(function() {
+        var prepare = ((context != null) ? context.close : defer);
+        prepare(function() {
             context = new AudioContext();
             source = context.createSource(untyped renderer.mediaObject);
             destination = context.destination;
@@ -99,6 +101,13 @@ class AudioManager {
 
             defer( done );
         });
+    }
+
+    /**
+      * append a builder
+      */
+    public function addTreeBuilder(builder: AudioManager->AudioPipelineNode->AudioPipelineNode):Void {
+        //TODO
     }
 
     /**
@@ -119,7 +128,32 @@ class AudioManager {
 
     public var active(default, null):Bool;
 
-    public var treeBuilders : Array<AudioManager -> Void>;
+    //public var treeBuilders : Array<AudioManager->AudioPipelineNode->AudioPipelineNode>;
+    public var treeBuilders: Array<AudioManager->Void>;
 
+    private var currentNode: Null<AudioPipelineNode> = null;
     private var _closing : Bool = false;
 }
+
+class AudioPipelineNode {
+    /* Constructor Function */
+    public inline function new(node:AudioNode<NativeAudioNode>) {
+        this.node = node;
+    }
+
+/* === Instance Methods === */
+
+/* === Computed Instance Fields === */
+
+    public var numberOfInputs(get, never):Int;
+    private inline function get_numberOfInputs() return node.numberOfInputs;
+
+    public var numberOfOutputs(get, never):Int;
+    private inline function get_numberOfOutputs() return node.numberOfOutputs;
+
+/* === Instance Fields === */
+
+    public var node: AudioNode<NativeAudioNode>;
+}
+
+typedef NativeAudioNode = js.html.audio.AudioNode;
