@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.css.Value;
@@ -34,7 +34,7 @@ class CanvasTooltip extends Ent {
         t.fontSizeUnit = 'px';
         t.fontSize = 14;
         t.color = new Color(255, 255, 255);
-        tr = new Rectangle();
+        tr = new Rect();
         //tt = new Triangle();
         tt = {
             x: 0.0,
@@ -47,9 +47,9 @@ class CanvasTooltip extends Ent {
         border = new Border(4, theme.primary.lighten( 22 ), 3);
         padding = new Padding();
         padding.horizontal = 6.0;
-        bounds = new Rectangle();
+        bounds = new Rect();
         position = {
-            from: new Rectangle(),
+            from: new Rect(),
             spacing: 0.0,
             direction: Top
         };
@@ -128,17 +128,17 @@ class CanvasTooltip extends Ent {
     }
 
     override function update(stage : Stage):Void {
-        calculateGeometry( stage.rect );
+        calculateGeometry(cast stage.rect);
     }
 
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         inline function dbl(x:Float) return (x*2);
         inline function half(x:Float) return (x / 2);
 
-        var pf:Rectangle = position.from;
+        var pf:Rect<Float> = position.from;
 
         switch ( position.direction ) {
             case Top:
@@ -272,15 +272,15 @@ class CanvasTooltip extends Ent {
     public var border : Border;
     public var padding : Padding;
     public var position : TooltipPosition;
-    public var bounds : Rectangle;
+    public var bounds : Rect<Float>;
 
     private var t : TextBox;
-    private var tr : Rectangle;
-    private var tt : {x:Float, w:Float,h:Float,t:Triangle};
+    private var tr : Rect<Float>;
+    private var tt : {x:Float, w:Float,h:Float,t:Triangle<Float>};
 }
 
 typedef TooltipPosition = {
-    from: Rectangle,
+    from: Rect<Float>,
     spacing: Float,
     direction: TooltipPositionDirection
 };
