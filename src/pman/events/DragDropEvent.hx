@@ -2,7 +2,7 @@ package pman.events;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.html.fs.WebFile;
 
@@ -35,8 +35,8 @@ class DragDropEvent extends Event {
 
 /* === Instance Methods === */
 
-    public function globalPosition():Point {
-        return new Point(e.pageX, e.pageY);
+    public function globalPosition():Point<Float> {
+        return cast new Point(e.pageX, e.pageY);
     }
 
 /* === Computed Instance Fields === */
