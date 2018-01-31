@@ -50,6 +50,8 @@ class TabViewBar extends Ent {
     public function addTabView(tab : TabView):TabView {
         if (!tabs.has( tab )) {
             tabs.push( tab );
+            tab.update( stage );
+            claimChild( tab );
         }
         return tab;
     }
@@ -115,6 +117,7 @@ class TabViewBar extends Ent {
 
         var _ad = anyDragging;
         anyDragging = false;
+        var anyRecalc:Bool = false;
 
         for (t in tabs) {
             t.hovered = false;
@@ -123,6 +126,9 @@ class TabViewBar extends Ent {
             if ( t.dragging ) {
                 anyDragging = true;
                 lastDraggingTab = t;
+            }
+            if ( t.hasUpdated ) {
+                anyRecalc = true;
             }
         }
 
@@ -167,7 +173,7 @@ class TabViewBar extends Ent {
             }
         }
 
-        if ( anyDragging ) {
+        if (anyDragging || anyRecalc) {
             calculateGeometry( rect );
         }
     }
@@ -296,7 +302,8 @@ class TabViewBar extends Ent {
         }
         else {
             for (index in 0...tabs.length) {
-                if (tabs[index].tab != session.tabs[index]) {
+                if (tabs[index].tab != session.tabs[index] || tabs[index].hasUpdated) {
+                    tabs[index].hasUpdated = false;
                     return false;
                 }
             }

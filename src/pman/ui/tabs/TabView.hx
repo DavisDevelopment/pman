@@ -58,10 +58,17 @@ class TabView extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
+        var _ptt:Null<String> = tb.text;
         var d = new Maybe(tab.track.ternary(_.data, null));
         var titleText:String = tab.title.ternary(_.slice(0, 15), 'New Tab');
         if (titleText.hasContent() && tb.text != titleText) {
+            var recalc:Bool = (tb.text.hasContent());
+
             tb.text = titleText;
+
+            if ( recalc ) {
+                hasUpdated = true;
+            }
         }
 
         if (content != null) {
