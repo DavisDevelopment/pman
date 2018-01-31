@@ -3,14 +3,14 @@ package pman.core;
 import gryffin.core.*;
 import gryffin.display.*;
 
-import tannus.geom.*;
+import tannus.geom2.*;
 
 class Ent extends EntityContainer {
 	/* Constructor Function */
 	public function new():Void {
 		super();
 
-		rect = new Rectangle();
+		rect = new Rect();
 	}
 
 /* === Instance Methods === */
@@ -18,7 +18,7 @@ class Ent extends EntityContainer {
 	/**
 	  * Check whether the given Point is 'inside' [rect]
 	  */
-	override public function containsPoint(p : Point):Bool {
+	override public function containsPoint(p : Point<Float>):Bool {
 		return (rect.containsPoint( p ));
 	}
 
@@ -27,33 +27,11 @@ class Ent extends EntityContainer {
 	  */
 	override public function update(stage : Stage):Void {
 		super.update( stage );
-		/*
-		var prev = _cc;
-		var mp = stage.getMousePosition();
-		var curr = (mp != null && containsPoint( mp ));
-
-		trace([prev, curr]);
-		switch ([prev, curr]) {
-			case [false, true]:
-				dispatch('mouseenter', null);
-
-			case [true, false]:
-				dispatch('mouseleave', null);
-
-			default:
-				null;
-		}
-		*/
 	}
 
 	/**
-	  * Get the Page on which [this] Ent currently resides
+	  *
 	  */
-	public function getPage():Null<gryffin.ui.Page> {
-		return parentUntil(function(e) {
-			return (e.is('gryffin.ui.Page') && e.hasChild( this ));
-		});
-	}
 
 /* === Computed Instance Fields === */
 
@@ -78,11 +56,10 @@ class Ent extends EntityContainer {
 	private function set_h(v : Float):Float return (rect.h = v);
 
 	/* the position of [this], as a Point */
-	public var pos(get, set):Point;
-	private function get_pos():Point {
-		return Point.linked(x, y);
-	}
-	private function set_pos(v : Point):Point {
+	public var pos(get, set):Point<Float>;
+	@:deprecated
+	private function get_pos():Point<Float> return new Point(rect.x, rect.y);
+	private function set_pos(v : Point<Float>) {
 		return new Point(x=v.x, y=v.y);
 	}
 
@@ -105,13 +82,16 @@ class Ent extends EntityContainer {
 	}
 
 	/* the center of [this] */
-	public var center(get, set):Point;
-	private function get_center():Point return Point.linked(centerX, centerY);
-	private function set_center(v : Point):Point return (rect.center = v);
+	public var center(get, set):Point<Float>;
+	@:deprecated
+	private function get_center() return new Point(centerX, centerY);
+	private function set_center(v : Point<Float>):Point<Float> {
+	    return new Point(centerX = v.x, centerY = v.y);
+	} 
 
 /* === Instance Fields === */
 
-	public var rect : Rectangle;
+	public var rect : Rect<Float>;
 	
 	/* whether [this] Ent currently contains the mouse cursor */
 	private var _cc : Bool = false;
