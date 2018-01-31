@@ -68,6 +68,11 @@ class Task1 extends T1 implements Trackable<Dynamic> {
         return progress;
     }
 
+    public var statusMessage(default, set):String;
+    private function set_statusMessage(v) {
+        return (this.statusMessage = v);
+    }
+
 /* === Instance Fields === */
 
     public var startTime(default, null):Float;
