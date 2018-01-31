@@ -41,8 +41,9 @@ class SpectographVisualizer extends AudioVisualizer {
 
     override function attached(done : Void->Void):Void {
         super.attached(function() {
-            fftSize = 1024;
-            smoothing = 0.60;
+            fftSize = 512;
+            smoothing = 0.00;
+
             done();
         });
     }
@@ -82,7 +83,26 @@ class SpectographVisualizer extends AudioVisualizer {
         pullData();
 
         if (leftData != null && rightData != null) {
-            if ( doubleRender ) {
+            if ( solidRender ) {
+                // 
+                //drawFilledWaveformPaths(c, ['peachpuff'], [leftData, rightData], [null, {value: invert}]);
+                c.save();
+                c.globalCompositeOperation = 'lighter';
+                drawFilledWaveformPaths(c, [
+                {
+                    data: [leftData, leftData],
+                    fillStyle: colors[0],
+                    mod: [null, {value: invert}]
+                },
+                {
+                    data: [rightData, rightData],
+                    fillStyle: colors[2],
+                    mod: [{value: diminish.bind(_, 0.22)}, {value: diminishedInvert.bind(_, 0.22)}]
+                }
+                ]);
+                c.restore();
+            }
+            else if ( doubleRender ) {
 
                 // draw the left-channel data
                 drawWaveformPath(c, 1, colors[3], leftData);
@@ -143,14 +163,31 @@ class SpectographVisualizer extends AudioVisualizer {
         c.stroke();
     }
 
+    /**
+      * draw a filled waveform path
+      */
+    private function drawFilledWaveformPaths(c:Ctx, paths:Array<FwpDecl>):Void {
+        for (w in paths) {
+            c.beginPath();
+            c.fillStyle = w.fillStyle;
+            
+            drawAudioDataPairVertices(w.data, c, w.mod);
+
+            c.closePath();
+            c.fill();
+        }
+    }
+
 	/**
 	  * draw the spectograph for the given AudioData, onto the given Ctx
 	  */
-	public function drawAudioDataVertices(data:AudioData<Int>, c:Ctx, ?mod:Mod):Void {
+	public function drawAudioDataVertices(data:AudioData<Int>, c:Ctx, ?mod:Mod, chained:Bool=false, reverse:Bool=false):Void {
 		var mid:Float = viewport.centerY;
 		var sliceWidth:Float = (ceil( viewport.width ) * 1.0 / data.length);
-		var offset:Float, value:Int, n:Float, x:Float=0, y:Float;
-		for (i in 0...data.length) {
+		var offset:Float, value:Int, n:Float, x:Float=(reverse?viewport.width:0), y:Float;
+		var i:Int = (reverse ? data.length - 1 : 0);
+
+		while ((reverse ? i >= 0 : i < data.length)) {
 			offset = ((data.length / 2) - abs((data.length / 2) - i));
 			offset = (offset / (data.length / 2));
 			if (mod != null && mod.offset != null) {
@@ -163,9 +200,69 @@ class SpectographVisualizer extends AudioVisualizer {
 			}
 			//n = (value / 128.0);
 			y = (mid + (mid - ((value / 128.0) * mid)) * offset);
-			(i == 0 ? c.moveTo : c.lineTo)(x, y);
-			x += sliceWidth;
+			(!chained && i == 0 ? c.moveTo : c.lineTo)(x, y);
+			x += ((reverse ? -1 : 1) * sliceWidth);
+			i += (reverse ? -1 : 1);
 		}
+	}
+
+    /**
+      * draw a pair of AudioData<Int> vertices as a single path
+      */
+	public function drawAudioDataPairVertices(datas:Array<AudioData<Int>>, c:Ctx, mods:Array<Null<Mod>>):Void {
+	    var mid:Float = viewport.centerY;
+	    var data:AudioData<Int> = datas[0], mod:Null<Mod> = mods[0];
+	    var sliceWidth:Float = (ceil( viewport.width ) * 1.0 / data.length);
+	    var offset:Float, value:Int, n:Float, x:Float=0, y:Float;
+	    var i:Int = 0;
+
+	    while (i < data.length) {
+	        offset = ((data.length / 2) - abs((data.length / 2) - i));
+	        offset = (offset / (data.length / 2));
+	        if (mod != null && mod.offset != null) {
+	            offset = mod.offset( offset );
+	        }
+
+	        value = data[i];
+	        if (mod != null && mod.value != null) {
+	            value = mod.value( value );
+	        }
+
+	        y = (mid + (mid - ((value / 128.0) * mid)) * offset);
+	        if (i == 0) {
+	            c.moveTo(x, y);
+	        }
+            else {
+                c.lineTo(x, y);
+            }
+
+            x += sliceWidth;
+            i++;
+	    }
+
+        data = datas[1];
+        mod = mods[1];
+	    i = data.length;
+	    x = viewport.width;
+
+	    while (i >= 0) {
+	        offset = ((data.length / 2) - abs((data.length / 2) - i));
+	        offset = (offset / (data.length / 2));
+	        if (mod != null && mod.offset != null) {
+	            offset = mod.offset( offset );
+	        }
+
+	        value = data[i];
+	        if (mod != null && mod.value != null) {
+	            value = mod.value( value );
+	        }
+
+	        y = (mid + (mid - ((value / 128.0) * mid)) * offset);
+            c.lineTo(x, y);
+
+            x -= sliceWidth;
+            i--;
+	    }
 	}
 
 	/**
@@ -230,7 +327,7 @@ class SpectographVisualizer extends AudioVisualizer {
 
 /* === Computed Instance Fields === */
 
-    private var vr(get, never):tannus.geom.Rectangle;
+    private var vr(get, never):Rect<Float>;
     private inline function get_vr() return player.view.rect;
 
 /* === Instance Fields === */
@@ -241,6 +338,7 @@ class SpectographVisualizer extends AudioVisualizer {
 
     private var doubleRender:Bool = true;
     private var quadRender:Bool = true;
+    private var solidRender:Bool = true;
 }
 
 // modifier for audio data rendering
@@ -248,3 +346,9 @@ typedef Mod = {
 	?value : Int -> Int,
 	?offset : Float -> Float
 };
+
+typedef FwpDecl = {
+    data: Array<AudioData<Int>>,
+    mod: Array<Null<Mod>>,
+    fillStyle: Dynamic
+}
