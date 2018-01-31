@@ -2,7 +2,7 @@ package pman.ui.tabs;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -237,7 +237,7 @@ class TabViewBar extends Ent {
     /**
       * calculate [this]'s content rect
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         x = 0;
         y = 0;
         w = playerView.w;
@@ -249,6 +249,7 @@ class TabViewBar extends Ent {
         if ( anyDragging ) {
             cdt = getDraggingTabView();
         }
+
         var oldTabs:Array<TabView> = tabs.copy();
         if (cdt != null) {
             var cdi = getDraggedIndex();
@@ -322,7 +323,7 @@ class TabViewBar extends Ent {
     /**
       * get a TabView by a Point
       */
-    public function getTabViewByPoint(p : Point):Maybe<TabView> {
+    public function getTabViewByPoint(p : Point<Float>):Maybe<TabView> {
         for (t in tabs) {
             if (t.containsPoint( p )) {
                 return t;
@@ -396,7 +397,7 @@ class TabViewBar extends Ent {
     /**
       * check whether [p] is inside of [this]'s content rect
       */
-    override function containsPoint(p : Point):Bool {
+    override function containsPoint(p : Point<Float>):Bool {
         return display ? super.containsPoint( p ) : false;
     }
 
