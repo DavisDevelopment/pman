@@ -2,7 +2,7 @@ package pman.display;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 
 import gryffin.core.*;
@@ -33,7 +33,7 @@ class PlayerView extends Ent {
 		player = p;
 
 		currentMediaRenderer = null;
-		mediaRect = new Rectangle();
+		mediaRect = new Rect();
 
         // await readiness of the Player
         //player.onReady(function() {
@@ -140,11 +140,11 @@ class PlayerView extends Ent {
 	/**
 	  * calculate [this]'s geometry
 	  */
-	override function calculateGeometry(r : Rectangle):Void {
+	override function calculateGeometry(r : Rect<Float>):Void {
 		if ( !player.isReady )
 		    return ;
 
-		rect.cloneFrom( r );
+		rect.pull( r );
 
         if ( tabBar.display ) {
             h -= tabBar.h;
@@ -192,7 +192,7 @@ class PlayerView extends Ent {
 	public var hud : PlayerHUD;
 	public var tabBar : TabViewBar;
 	public var dragDropWidget : DragDropWidget;
-	public var mediaRect : Rectangle;
+	public var mediaRect : Rect<Float>;
 
 	public var currentMediaRenderer : Null<MediaRenderer>;
 
