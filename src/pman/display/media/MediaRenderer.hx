@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
@@ -89,8 +89,8 @@ class MediaRenderer extends Ent {
 	/**
 	  * calculate [this] view's geometry
 	  */
-	override function calculateGeometry(viewport : Rectangle):Void {
-		rect.cloneFrom( viewport );
+	override function calculateGeometry(viewport : Rect<Float>):Void {
+		rect.pull( viewport );
 	}
 
 /* === Instance Fields === */
