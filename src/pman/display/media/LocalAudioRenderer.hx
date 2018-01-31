@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 import tannus.node.*;
 
@@ -59,10 +59,10 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
         super.update( stage );
 
         if (prefs.directRender && underlay != null) {
-            var imgSize:Rectangle = new Rectangle(0, 0, albumArt.width, albumArt.height);
-            var viewport:Rectangle = pv.rect.clone();
+            var imgSize:Rect<Float> = new Rect(0.0, 0.0, albumArt.width, albumArt.height);
+            var viewport:Rect<Float> = pv.rect.clone();
             var scale:Float = marScale(imgSize, viewport);
-            var aar:Rectangle = new Rectangle();
+            var aar:Rect<Float> = new Rect();
             
             aar.w = (imgSize.w * scale);
             aar.h = (imgSize.h * scale);
@@ -79,7 +79,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
     /**
       * 
       */
-	private inline function marScale(src:Rectangle, dest:Rectangle):Float {
+	private inline function marScale(src:Rect<Float>, dest:Rect<Float>):Float {
 		return min((dest.width / src.width), (dest.height / src.height));
 	}
 
