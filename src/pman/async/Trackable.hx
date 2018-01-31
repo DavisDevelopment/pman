@@ -10,8 +10,10 @@ import pman.async.Result;
 
 interface Trackable<T> {
     public var progress(default, set):Float;
+    public var statusMessage(default, set): String;
     public var startTime(default, null):Float;
 
+    public var onComplete : Signal<Result<Dynamic, T>>;
     public var onProgress : Signal<Delta<Percent>>;
     public var onError : Signal<Dynamic>;
     public var onResult : Signal<T>;
