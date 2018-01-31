@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
