@@ -2,7 +2,7 @@ package pman.events;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.html.fs.WebFile;
 
@@ -31,7 +31,7 @@ class PlayerDragDropEvent extends DragDropEvent {
         //onCancelled.clear();
     }
 
-    public function playerPanePosition():Point {
+    public function playerPanePosition():Point<Float> {
         return player.view.stage.globalToLocal(globalPosition());
     }
 
