@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 

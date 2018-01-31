@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -44,7 +44,7 @@ class TrackControlsView extends Ent {
 
         // add all Buttons
         defer(function() {
-            addButton(new TrackAddToPlaylistButton( this ));
+            //addButton(new TrackAddToPlaylistButton( this ));
             addButton(new TrackStarredButton( this ));
             //TODO separator
             addButton(new TrackShowInfoButton( this ));
@@ -119,7 +119,7 @@ class TrackControlsView extends Ent {
     /**
       * calculate the geometry of [this] widget
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         r = playerView.rect;
 
         __calculateHeight();
@@ -153,7 +153,7 @@ class TrackControlsView extends Ent {
       * calculate the positions of all buttons attached to [this] widget
       */
     private function __positionButtons():Void {
-        var c:Point = new Point();
+        var c:Point<Float> = new Point();
 
         switch ( layout ) {
             case TcvLeft, TcvRight:
@@ -228,6 +228,7 @@ class TrackControlsView extends Ent {
 
     private var colors : Null<Array<Int>>=null;
     private var playingAnimation : Bool = false;
+    private var minimized : Bool = false;
 }
 
 enum TcvLayout {

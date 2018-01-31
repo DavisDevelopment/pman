@@ -2,7 +2,7 @@ package pman.ui.ctrl;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -40,7 +40,7 @@ class TrackControlButton extends ImagePlayerControlButton {
 
 /* === Instance Methods === */
 
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         super.calculateGeometry( r );
 
         w = h = (iconSize);
