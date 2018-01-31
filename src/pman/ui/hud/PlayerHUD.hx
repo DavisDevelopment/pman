@@ -2,7 +2,7 @@ package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -53,6 +53,7 @@ class PlayerHUD extends Ent {
             #if debug
 
             addItem(new FPSDisplay( this ));
+            //addItem(new MemoryUsageDisplay( this ));
 
             #end
         });
@@ -68,7 +69,7 @@ class PlayerHUD extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         rect = playerView.rect.clone();
 
         super.calculateGeometry( r );
@@ -77,7 +78,7 @@ class PlayerHUD extends Ent {
     /**
       * check if [p] is inside of [this]
       */
-    override function containsPoint(p : Point):Bool {
+    override function containsPoint(p : Point<Float>):Bool {
         return false;
     }
 

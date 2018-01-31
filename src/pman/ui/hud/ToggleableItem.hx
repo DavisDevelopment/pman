@@ -2,7 +2,7 @@ package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.*;
@@ -80,7 +80,7 @@ class ToggleableItem extends TextualHUDItem {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         var hr = hud.rect;
 
         super.calculateGeometry( r );

@@ -2,7 +2,7 @@ package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
@@ -17,7 +17,7 @@ import pman.display.media.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -32,6 +32,7 @@ class FPSDisplay extends TextualHUDItem {
 
         frames = new Pair(0, 0);
         lt = null;
+        _fpsData = new Array();
         tb.color = new Color(34, 245, 51);
         tb.fontSize = 12;
     }
@@ -43,13 +44,13 @@ class FPSDisplay extends TextualHUDItem {
       */
     override function update(stage : Stage):Void {
         if (lt == null) {
-            lt = now;
+            lt = now();
         }
         else {
-            if ((now - lt) >= 1000) {
+            if ((now() - lt) >= 1000) {
                 frames.right = frames.left;
                 frames.left = 0;
-                lt = now;
+                lt = now();
             }
             else {
                 frames.left++;
@@ -71,7 +72,7 @@ class FPSDisplay extends TextualHUDItem {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         r = player.view.rect;
 
         x = (r.x + r.w - tb.width - 10);
@@ -80,8 +81,17 @@ class FPSDisplay extends TextualHUDItem {
         h = (tb.height / 4);
     }
 
+    private function addFps(n: Int):Void {
+        _fpsData.push( n );
+
+        if (_fpsData.length > 100) {
+            _fpsData = _fpsData.slice(-100);
+        }
+    }
+
 /* === Instance Fields === */
 
     private var frames : Pair<Int, Int>;
     private var lt : Null<Float>;
+    private var _fpsData: Array<Int>;
 }

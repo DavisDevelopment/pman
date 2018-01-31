@@ -2,7 +2,7 @@ package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.*;
@@ -81,7 +81,7 @@ class VolumeItem extends PlayerHUDItem {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         var hr = hud.rect;
 
         w = 30;

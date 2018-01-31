@@ -2,7 +2,7 @@ package pman.ui.hud;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 import tannus.math.*;
@@ -34,8 +34,8 @@ class TextualHUDItem extends PlayerHUDItem {
         tb.fontSizeUnit = 'px';
     }
 
-    private function getTextRect():Rectangle {
-        return new Rectangle(x, y, tb.width, tb.height);
+    private function getTextRect():Rect<Float> {
+        return new Rect(x, y, tb.width, tb.height);
     }
 
     private function shouldRenderText():Bool return enabled;
@@ -52,7 +52,7 @@ class TextualHUDItem extends PlayerHUDItem {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         var hr = hud.rect;
 
         w = tb.width;
