@@ -17,10 +17,10 @@ import pman.display.media.*;
 import pman.ui.ctrl.*;
 import pman.time.Timer;
 
-import electron.ext.App;
-import electron.ext.ExtApp.MemoryInfo;
+import edis.libs.electron.App;
 
 import tannus.math.TMath.*;
+import edis.Globals.*;
 import pman.Globals.*;
 
 using StringTools;
@@ -31,47 +31,52 @@ using Slambda;
 using pman.Tools;
 
 class MemoryUsageDisplay extends TextualHUDItem {
-    public function new(hud:PlayerHUD, prev:TextualHUDItem) {
+    public function new(hud:PlayerHUD) {
         super( hud );
 
         tb.color = prev.tb.color;
         tb.multiline = true;
 
-        this.prev = prev;
-        refreshTimer = new Timer(1.2, refresh);
+        //this.prev = prev;
         pid = (untyped __js__('process.pid'));
-        memInfo = null;
+        metrics = null;
 
         refresh();
     }
 
     private function refresh():Void {
-
         if (memTotal == null) {
             memTotal = tannus.node.Os.totalmem();
         }
 
-        var mi:Maybe<{pid:Int,memory:MemoryInfo}> = App.getAppMemoryInfo().firstMatch.fn(_.pid == pid);
-        if (mi != null) {
-            memInfo = mi.memory;
-        }
-        else return ;
+        var all = App.getAppMetrics();
+        metrics = all.firstMatch.fn(_.pid == pid);
 
-        var big = memInfo.workingSetSize * 1000;
-        var small = memInfo.privateBytes * 1000;
+        var jsHeap:Int = (metrics.memory.privateBytes * 1000);
+        var heapTxt:String = ('heap: ' + jsHeap.formatSize( false ));
 
-        tb.text = [
-            ('$big / $memTotal (${Percent.percent(big, memTotal)})')
-        ].join('\n');
+        tb.text = heapTxt;
     }
 
     override function update(stage : Stage):Void {
         super.update( stage );
 
-        refreshTimer.tick();
+        if (lt == null) {
+            lt = now();
+        }
+        else {
+            if ((now() - lt) >= 1000) {
+                refresh();
+
+                lt = now();
+            }
+            else {
+                //
+            }
+        }
     }
 
-    override function calculateGeometry(r : Rectangle):Void {
+    override function calculateGeometry(r : Rect<Float>):Void {
         super.calculateGeometry( r );
         var hr = hud.rect;
 
@@ -84,8 +89,14 @@ class MemoryUsageDisplay extends TextualHUDItem {
     }
 
     private var pid : Int;
-    private var prev : TextualHUDItem;
-    private var refreshTimer:Timer;
-    private var memInfo : Null<MemoryInfo>;
+    //private var prev : TextualHUDItem;
+    //private var refreshTimer:Timer;
+    private var metrics : Null<ProcessMetric>;
     private var memTotal : Null<Int>;
+
+    private var lt: Null<Float>;
+
+/* === Statics === */
+
+    private static var JS_MAX_HEAP:Int = {(20 * 1024 * 1024);};
 }
