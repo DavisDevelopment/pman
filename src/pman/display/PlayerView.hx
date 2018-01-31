@@ -58,6 +58,7 @@ class PlayerView extends Ent {
 
             dragDropWidget = new DragDropWidget( this );
             addSibling( dragDropWidget );
+
         //});
 	}
 
@@ -67,7 +68,27 @@ class PlayerView extends Ent {
       * initialize [this]
       */
     override function init(stage : Stage):Void {
+        defer(function() {
+            __listen();
+        });
+    }
+
+    /**
+      * bind event handlers
+      */
+    private function __listen():Void {
+        inline function pon<T>(n:String, f:T->Void) player.on(n, f);
+        inline function ponce<T>(n:String, f:T->Void) player.once(n, f);
+
         on('contextmenu', onRightClick);
+        
+        pon('tabswitching', function(d: Delta<PlayerTab>) {
+            //TODO
+        });
+
+        pon('tabswitched', function(d: Delta<PlayerTab>) {
+            //TODO
+        });
     }
 
 	/**
@@ -154,6 +175,7 @@ class PlayerView extends Ent {
 		if ( controls.uiEnabled ) {
 			h -= controls.h;
 		}
+
 		if (player.isPlaylistOpen()) {
 			var plv = player.getPlaylistView();
 			w -= plv.width;
