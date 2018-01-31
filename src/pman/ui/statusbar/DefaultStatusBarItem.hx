@@ -2,7 +2,7 @@ package pman.ui.statusbar;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -46,7 +46,7 @@ class DefaultStatusBarItem extends StatusBarItem {
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
-        var tbr = new Rectangle(0, 0, tb.width, tb.height);
+        var tbr = new Rect(0.0, 0.0, tb.width, tb.height);
         tbr.centerY = floor( centerY );
         tbr.x = 0;
 

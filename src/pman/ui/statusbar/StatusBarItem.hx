@@ -2,7 +2,7 @@ package pman.ui.statusbar;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -72,8 +72,8 @@ class StatusBarItem extends Ent {
     /**
       * calculate [this]'s geometry
       */
-    override function calculateGeometry(r : Rectangle):Void {
-        rect.cloneFrom( r );
+    override function calculateGeometry(r : Rect<Float>):Void {
+        rect.pull( r );
     }
 
     /**
