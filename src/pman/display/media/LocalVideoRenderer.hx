@@ -2,7 +2,7 @@ package pman.display.media;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.sys.*;
 
 import gryffin.core.*;
@@ -38,7 +38,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		super(m, mc);
 
 		canvas = new Canvas();
-		vr = new Rectangle();
+		vr = new Rect();
 		filter = null;
 	}
 
@@ -96,8 +96,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		super.update( stage );
 
 		if (pv != null) {
-			var videoSize:Rectangle = ovr;
-			var viewport:Rectangle = pv.rect.clone();
+			var videoSize:Rect<Float> = ovr;
+			var viewport:Rect<Float> = pv.rect.clone();
 			var scale:Float = (marScale(ovr, pv.rect) * pv.player.scale);
 
 			// scale the video-rect
@@ -139,7 +139,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	/**
 	  * scale to the maximum size that will fit in the viewport AND maintain aspect ratio
 	  */
-	private function marScale(src:Rectangle, dest:Rectangle):Float {
+	private function marScale(src:Rect<Float>, dest:Rect<Float>):Float {
 		return min((dest.width / src.width), (dest.height / src.height));
 	}
 
@@ -203,8 +203,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	public var v(get, never):Video;
 	private inline function get_v():Video return this.m;
 
-	private var ovr(get, never):Rectangle;
-	private inline function get_ovr():Rectangle return new Rectangle(0, 0, v.width, v.height);
+	private var ovr(get, never):Rect<Float>;
+	private inline function get_ovr():Rect<Float> return new Rect(0.0, 0.0, v.width, v.height);
 
     public var prefs(get, never):Preferences;
     private inline function get_prefs() return BPlayerMain.instance.db.preferences;
@@ -212,7 +212,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 /* === Instance Fields === */
 
 	private var canvas : Canvas;
-	private var vr : Rectangle;
+	private var vr : Rect<Float>;
 
 	private var pv : Null<PlayerView> = null;
 	private var underlay : Null<VideoUnderlay> = null;
