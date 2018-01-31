@@ -2,7 +2,7 @@ package pman.ui;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.geom.*;
+import tannus.geom2.*;
 import tannus.events.*;
 import tannus.graphics.Color;
 
@@ -205,7 +205,7 @@ class PlayerControlsView extends Ent {
 	/**
 	  * calculate [this]'s geometry
 	  */
-	override function calculateGeometry(r : Rectangle):Void {
+	override function calculateGeometry(r : Rect<Float>):Void {
 		r = playerView.rect;
 		w = r.w;
 		h = 55;
@@ -218,7 +218,7 @@ class PlayerControlsView extends Ent {
 
 		__positionButtons();
 
-		super.calculateGeometry( r );
+		super.calculateGeometry(cast r);
 	}
 
 	/**
@@ -278,7 +278,7 @@ class PlayerControlsView extends Ent {
 		var bdfb:Float = 30;
 
 		// position the left-floating buttons
-		var c:Point = new Point((x + padding), ((y + h) - bdfb - padding));
+		var c:Point<Float> = new Point((x + padding), ((y + h) - bdfb - padding));
 		for (btn in l) {
 			btn.calculateGeometry( rect );
 			btn.x = c.x;
