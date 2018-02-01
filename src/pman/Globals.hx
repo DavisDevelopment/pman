@@ -91,6 +91,14 @@ class Globals {
       */
     public static inline function report(error : Dynamic):Void { return Eg.report( error ); }
     public static inline function echo<T>(msg: T):T return Eg.echo( msg );
+    public static function warn<T>(msg: T):T {
+        if (console != null)
+            console.warn( msg );
+        return msg;
+    }
+
+    public static inline function recalc(?label: String):Void {
+        warn("RECALC" + (label != null ? ' ["$label"]' : ''));
     }
 
     public static inline function e(x : Dynamic):Element return new Element( x );
