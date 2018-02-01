@@ -117,7 +117,7 @@ class Globals {
     private static inline function get_theme() return player.theme;
 
     public static var database(get, never):PManDatabase;
-    private static inline function get_database() return bpmain.db;
+    private static inline function get_database() return engine.db;
 
     public static var engine(get, never):Engine;
     private static inline function get_engine() return bpmain.engine;
@@ -129,7 +129,7 @@ class Globals {
     private static inline function get_dialogs() return engine.dialogs;
 
     public static var appDir(get, never):AppDir;
-    private static inline function get_appDir() return bpmain.appDir;
+    private static inline function get_appDir() return engine.appDir;
 
     public static var preferences(get, never):Preferences;
     private static inline function get_preferences() return database.preferences;
