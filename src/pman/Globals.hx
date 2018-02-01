@@ -21,10 +21,14 @@ import pman.edb.*;
 import pman.edb.PManDatabase;
 import pman.display.ColorScheme;
 
+
 #end
 
+import js.html.Console;
+
+import edis.Globals as Eg;
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import edis.Globals.*;
 
 import haxe.extern.EitherType;
 
@@ -41,22 +45,20 @@ class Globals {
       * get the current timestamp
       */
     public static inline function now():Float {
-        return window.performance.now();
+        return Eg.now();
     }
 
     /**
       * invoke [f] after waiting [ms] milliseconds
       */
     public static inline function wait(ms:Int, f:Void->Void) {
-        return js.Browser.window.setTimeout(f, ms);
+        Eg.wait(ms, f);
     }
 
     /**
       * defer [f] to the next call stack
       */
-    public static function defer(f : Void->Void):Void {
-        tannus.node.Node.process.nextTick( f );
-    }
+    public static inline function defer(f : Void->Void):Void Eg.defer( f );
 
     /**
       * defer [f] using Window.requestAnimationFrame
@@ -87,8 +89,8 @@ class Globals {
     /**
       * output an error to the console
       */
-    public static inline function report(error : Dynamic):Void {
-        (untyped __js__('console.error')( error ));
+    public static inline function report(error : Dynamic):Void { return Eg.report( error ); }
+    public static inline function echo<T>(msg: T):T return Eg.echo( msg );
     }
 
     public static inline function e(x : Dynamic):Element return new Element( x );
@@ -127,6 +129,9 @@ class Globals {
     public static var window(get, never):Win;
     private static inline function get_window() return Win.current;
 
+    public static var us(get, never):Dynamic;
+    private static inline function get_us() return Eg.us;
+
 #end
 
     public static var platform(get, never):String;
@@ -137,8 +142,6 @@ class Globals {
     }
 
 /* === Variables === */
-
-    public static var us:Dynamic = {js.Lib.require('underscore');};
 
     private static var _platform : Null<String> = null;
 }
