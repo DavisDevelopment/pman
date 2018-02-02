@@ -175,14 +175,18 @@ class PlayerControlsView extends Ent {
 	    playingAnimation = true;
 	    Actuate.tween(this, 0.5, {
             yOffset: h
-	    }).onUpdate(function() {
-	        calculateGeometry( rect );
-        }).onComplete(function() {
+	    })
+	    .onUpdate(function() {
+			//calculateGeometry( rect );
+        })
+        .onComplete(function() {
             playingAnimation = false;
             uiEnabled = false;
+            calculateGeometry( rect );
             if (done != null)
                 done();
-        }).ease( Sine.easeInOut );
+        })
+        .ease( Sine.easeInOut );
 	}
 
     /**
@@ -193,13 +197,17 @@ class PlayerControlsView extends Ent {
 	    uiEnabled = true;
 	    Actuate.tween(this, 0.2, {
             yOffset: 0
-	    }).onUpdate(function() {
-	        calculateGeometry( rect );
-        }).onComplete(function() {
+	    })
+	    .onUpdate(function() {
+	        //calculateGeometry( rect );
+        })
+        .onComplete(function() {
             playingAnimation = false;
+            calculateGeometry( rect );
             if (done != null)
                 done();
-        }).ease( Sine.easeInOut );
+        })
+        .ease( Sine.easeInOut );
 	}
 
 	/**
