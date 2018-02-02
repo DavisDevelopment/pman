@@ -112,6 +112,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 			    underlay.setRect( vr );
 			}
 		}
+
 		if (visualizer != null) {
 		    visualizer.update( stage );
 		}

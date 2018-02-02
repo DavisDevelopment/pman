@@ -209,7 +209,10 @@ class PlayerControlsView extends Ent {
 		r = playerView.rect;
 		w = r.w;
 		h = 55;
-		y = ((r.y + r.h) - playerView.statusBar.h + yOffset);
+		y = ((r.y + r.h) + yOffset);
+		if (playerView.statusBar != null) {
+		    y -= playerView.statusBar.h;
+		}
 		x = 0;
 
 		if (player.track != null && player.track.type.equals( MTImage )) {
