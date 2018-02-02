@@ -45,6 +45,21 @@ class StatusBarItem extends Ent {
     }
 
     /**
+    /**
+      * bind any necessary event handlers to the app
+      */
+    private function bind():Void {
+        //TODO
+    }
+
+    /**
+      * unbind event handlers from the app to that garbage collection can take place
+      */
+    private function unbind():Void {
+        //TODO
+    }
+
+    /**
       * initialize [this] StatusBar item
       */
     override function init(stage : Stage):Void {
