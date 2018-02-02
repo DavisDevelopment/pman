@@ -137,6 +137,22 @@ class Globals {
     public static var window(get, never):Win;
     private static inline function get_window() return Win.current;
 
+    public static var console(get, never):Null<Console>;
+    private static function get_console() {
+        if (_c == null) {
+            _c = [untyped {
+            //return (untyped __js__('(typeof console !== "undefined")'));
+                if (__strict_neq__(__typeof__(__js__('console')), "undefined")) {
+                    __js__('console');
+                }
+                else {
+                    null;
+                }
+            }];
+        }
+        return _c[0];
+    }
+
     public static var us(get, never):Dynamic;
     private static inline function get_us() return Eg.us;
 
@@ -152,4 +168,5 @@ class Globals {
 /* === Variables === */
 
     private static var _platform : Null<String> = null;
+    private static var _c: Null<Array<Null<Console>>> = null;
 }
