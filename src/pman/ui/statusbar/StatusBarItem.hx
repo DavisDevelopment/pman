@@ -30,6 +30,8 @@ class StatusBarItem extends Ent {
     /* Constructor Function */
     public function new():Void {
         super();
+
+        contentRect = new Rect();
     }
 
 /* === Instance Methods === */
@@ -98,6 +100,7 @@ class StatusBarItem extends Ent {
 /* === Instance Fields === */
 
     public var duration : Float;
+    public var contentRect: Rect<Float>;
     public var statusBar : PlayerStatusBar;
 
     @:allow( pman.ui.statusbar.PlayerStatusBar )
