@@ -19,7 +19,7 @@ import pman.display.media.*;
 import pman.ui.*;
 
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -122,13 +122,17 @@ class TabViewBar extends Ent {
         for (t in tabs) {
             t.hovered = false;
             t.closeHovered = false;
+
             t.update( stage );
+
             if ( t.dragging ) {
                 anyDragging = true;
                 lastDraggingTab = t;
             }
+
             if ( t.hasUpdated ) {
                 anyRecalc = true;
+                t.hasUpdated = false;
             }
         }
 
@@ -174,9 +178,63 @@ class TabViewBar extends Ent {
         }
 
         if (anyDragging || anyRecalc) {
+        //if ( anyDragging ) {
             calculateGeometry( rect );
         }
     }
+
+    /**
+      * calculate [this]'s content rect
+      */
+    override function calculateGeometry(r : Rect<Float>):Void {
+        // set initial geometric values
+        x = 0;
+        y = 0;
+        w = playerView.w;
+        h = 30;
+
+        // set geom config values
+        var margin:Float = 4.2;
+
+        // 'x' cursor variable
+        var tx:Float = 0.0;
+
+        // currently dragging tab
+        var cdt:Null<TabView> = null;
+        if ( anyDragging ) {
+            cdt = getDraggingTabView();
+        }
+
+        // save tabview-list
+        var oldTabs:Array<TabView> = tabs.copy();
+        
+        // if there is currently a tab being dragged
+        if (cdt != null) {
+            // get the index being hovered over
+            var cdi = getDraggedIndex();
+            // remove that tab from the list
+            tabs.remove( cdt );
+            // and then reinsert it at the desired index
+            tabs.insert(cdi, cdt);
+        }
+
+        // repeat once for each tab with [i] as the current step
+        var t: TabView;
+        for (i in 0...tabs.length) {
+            t = tabs[i];
+            tx += margin;
+            t.x = tx;
+            tx += (t.w - t.bw + margin);
+
+            t.calculateGeometry( rect );
+        }
+    
+        // restore tabs
+        tabs = oldTabs;
+        //recalc('TabViewBar');
+    }
+
+
 
     /**
       * render [this] widget
@@ -238,41 +296,6 @@ class TabViewBar extends Ent {
         cc.lineTo(can.width, (can.height / 2));
         cc.stroke();
         return c.createPattern(can, 'repeat');
-    }
-
-    /**
-      * calculate [this]'s content rect
-      */
-    override function calculateGeometry(r : Rect<Float>):Void {
-        x = 0;
-        y = 0;
-        w = playerView.w;
-        h = 30;
-
-        var margin:Float = 4.2;
-        var tx:Float = 0.0;
-        var cdt:Null<TabView> = null;
-        if ( anyDragging ) {
-            cdt = getDraggingTabView();
-        }
-
-        var oldTabs:Array<TabView> = tabs.copy();
-        if (cdt != null) {
-            var cdi = getDraggedIndex();
-            tabs.remove( cdt );
-            tabs.insert(cdi, cdt);
-        }
-
-        for (i in 0...tabs.length) {
-            var t:TabView = tabs[i];
-            tx += margin;
-            t.x = tx;
-            tx += (t.w - t.bw + margin);
-
-            t.calculateGeometry( rect );
-        }
-    
-        tabs = oldTabs;
     }
 
     /**
