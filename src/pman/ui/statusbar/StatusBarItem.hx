@@ -80,11 +80,6 @@ class StatusBarItem extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
-        if (duration > -1) {
-            if ((now - attachedOn) >= duration) {
-                delete();
-            }
-        }
     }
 
     /**
