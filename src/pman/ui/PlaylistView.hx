@@ -405,6 +405,16 @@ class PlaylistView extends Pane {
         }
 	}
 
+    /**
+    /**
+      * compute what 'key' will be used for the given Track
+      */
+    private inline function tkey(t: Track):String {
+        // [mediaId] is preferred when available because, at least in theory, shorter object keys have better performance
+        return t.uri;
+        //return (t.mediaId != null ? t.mediaId : t.uri);
+    }
+
 	/**
 	  * react to 'track-change' events
 	  */
