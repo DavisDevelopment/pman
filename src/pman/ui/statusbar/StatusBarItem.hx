@@ -128,6 +128,14 @@ class StatusBarItem extends Ent {
     private inline function get_cy() return contentRect.y;
     private inline function set_cy(v) return (contentRect.y = v);
 
+    public var cw(get, set):Float;
+    private inline function get_cw() return contentRect.w;
+    private inline function set_cw(v) return (contentRect.w = v);
+
+    public var ch(get, set):Float;
+    private inline function get_ch() return contentRect.h;
+    private inline function set_ch(v) return (contentRect.h = v);
+
 /* === Instance Fields === */
 
     public var duration : Float;
