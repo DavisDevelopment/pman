@@ -64,13 +64,17 @@ class PlayerHUD extends Ent {
       */
     override function update(stage : Stage):Void {
         super.update( stage );
+
+        calculateGeometry(stage.rect.float());
     }
 
     /**
       * calculate [this]'s geometry
       */
     override function calculateGeometry(r : Rect<Float>):Void {
-        rect = playerView.rect.clone();
+        var pvr:Rect<Float> = playerView.rect, pvmr:Rect<Float> = playerView.mediaRect;
+        //rect = playerView.rect.clone();
+        rect.set(pvr.x, pvmr.y, pvr.w, pvmr.h);
 
         super.calculateGeometry( r );
     }
