@@ -60,7 +60,7 @@ class RepeatButton extends ImagePlayerControlButton {
                 label = 'All';
         }
 
-        enabled = (player.track != null && !player.track.type.equals(MTImage));
+        enabled = (player.track == null || !player.track.type.equals(MTImage));
     }
 
 	// set up icon info
@@ -81,6 +81,6 @@ class RepeatButton extends ImagePlayerControlButton {
 	override function click(event : MouseEvent):Void {
 		var repeatTypes: Array<RepeatType> = [RepeatOff, RepeatIndefinite, RepeatOnce, RepeatPlaylist];
         player.repeat = repeatTypes[(repeatTypes.indexOf(player.repeat) != repeatTypes.length - 1) ? repeatTypes.indexOf(player.repeat) + 1 : 0];
-        trace("Repeat mode is now: " + player.repeat);
+        //trace("Repeat mode is now: " + player.repeat);
 	}
 }

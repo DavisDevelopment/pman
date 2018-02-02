@@ -54,7 +54,7 @@ class VolumeButton extends ImagePlayerControlButton {
 		var ispeed:Int = round(player.volume * 100);
 		label = '$ispeed%';
 
-		enabled = (player.track != null && player.track.hasFeature( Volume ));
+		enabled = (player.track == null || player.track.hasFeature( Volume ));
 	}
 
 	// set up the icon data

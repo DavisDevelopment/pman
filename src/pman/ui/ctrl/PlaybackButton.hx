@@ -58,6 +58,12 @@ class PlaybackButton extends ImagePlayerControlButton {
 	override function update(stage: Stage):Void {
 	    super.update( stage );
 
-	    enabled = (player.track != null && player.track.hasFeature( Playback ));
+		//enabled = (player.track != null && player.track.hasFeature( Playback ));
+		if (player.track != null) {
+		    enabled = player.track.hasFeature( Playback );
+		}
+        else {
+            enabled = true;
+        }
 	}
 }
