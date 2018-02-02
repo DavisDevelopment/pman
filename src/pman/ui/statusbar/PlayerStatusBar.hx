@@ -52,8 +52,19 @@ class PlayerStatusBar extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
+        // variable that denotes whether layout will be recalculated
+        var willRecalc:Bool = true;
+
+        // update the 'item'
         if (item != null) {
             item.update( stage );
+        }
+
+        //TODO determine whether [calculateGeometry] should be invoked
+
+        // if so, invoke it now
+        if ( willRecalc ) {
+            calculateGeometry( playerView.rect );
         }
     }
 
@@ -85,12 +96,14 @@ class PlayerStatusBar extends Ent {
         r = playerView.rect;
         
         w = r.w;
-        h = 16;
+        h = 16.0;
         y = (playerView.controls.y + playerView.controls.h);
-        x = playerView.x;
+        x = r.x;
 
         if (item != null) {
             item.calculateGeometry( rect );
+            
+            h = max(h, item.ch);
         }
     }
 
@@ -98,10 +111,25 @@ class PlayerStatusBar extends Ent {
       * attach the given StatusBarItem to [this]
       */
     public function attach(i : StatusBarItem):Void {
-        var old = item;
+        var old:Null<StatusBarItem> = item;
+        if (old != null) {
+            detach( old );
+        }
+
         item = i;
         item.attached( this );
         item.prevItem = old;
+    }
+
+    /**
+      * detach the given StatusBarItem (or the currently attached one, if not provided) from [this]
+      */
+    public function detach(?i: StatusBarItem):Void {
+        if (i == null)
+            i = this.item;
+        if (i != null) {
+            i.detached( this );
+        }
     }
 
 /* === Computed Instance Fields === */
