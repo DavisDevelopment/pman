@@ -346,16 +346,26 @@ class TabViewBar extends Ent {
       * rebuild the [tabs] field
       */
     public function refresh():Void {
-        for (tab in tabs) {
-            removeTabView( tab );
+        var nt:Int = session.tabs.length;
+        var ntv:Int = tabs.length;
+
+        for (i in 0...min(nt, ntv)) {
+            // rebase the tabs that can be rebased
+            tabs[i].rebase(session.tabs[i]);
         }
-        tabs = new Array();
-        for (tab in session.tabs) {
-            addTab( tab );
+
+        if (nt > ntv) {
+            for (i in 0...(nt - ntv)) {
+                var v = addTab(session.tabs[i + ntv]);
+            }
         }
-        defer(function() {
-            calculateGeometry( rect );
-        });
+        else if (ntv > nt) {
+            for (i in 0...(ntv - nt)) {
+                removeTabView(tabs[i + nt]);
+            }
+        }
+
+        //TODO further initialize them somehow..?
     }
 
     /**
