@@ -16,7 +16,8 @@ import gryffin.display.*;
 import electron.ext.*;
 import electron.ext.Dialog;
 
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
 import pman.Globals.*;
 
 import pman.core.*;
@@ -43,10 +44,12 @@ class PlaylistView extends Pane {
 		tracks = new Array();
 		_tc = new Map();
 
-	    var kc = player.app.keyboardCommands;
-	    if (!kc.hasModeHandler('playlist:sidebar')) {
-	        kc.registerModeHandler('playlist:sidebar', keycom);
-	    }
+        if ( false ) {
+            var kc:KeyboardCommands = player.app.keyboardCommands;
+            if (!kc.hasModeHandler( 'playlist:sidebar' )) {
+                kc.registerModeHandler('playlist:sidebar', keycom);
+            }
+        }
 
         __bind();
 		build();
@@ -58,12 +61,14 @@ class PlaylistView extends Pane {
 	  * open [this] view
 	  */
 	public function open():Void {
+	    // append [this] widget to the page
 		player.page.append( this );
 
+        // cycle the event-binding state
         unbind();
         bind();
 
-	    var kc = player.app.keyboardCommands;
+		//var kc = player.app.keyboardCommands;
 
 		defer(function() {
             hiliteActive();
@@ -78,7 +83,8 @@ class PlaylistView extends Pane {
 	public function close():Void {
 		dispatch('close', null);
 		unbind();
-		var kc = player.app.keyboardCommands;
+
+		//var kc = player.app.keyboardCommands;
 		//kc.mode = 'default';
 	    deselectAll();
 		detach();
@@ -88,15 +94,8 @@ class PlaylistView extends Pane {
 	  * build the contents of [this]
 	  */
 	override function populate():Void {
+	    // build out basic 'row' structure of content
 		buildRows();
-		/*
-		var hed = new Heading(4, 'Playlist');
-		hed.css['color'] = 'white';
-		if (player.session.name != null) {
-		    hed.text = player.session.name;
-		}
-		hedRow.append( hed );
-		*/
 
 		buildSearchWidget();
 		
@@ -570,9 +569,11 @@ class PlaylistView extends Pane {
       * handle incoming keyboard input when playlistview is open
       */
 	private function keycom(event : KeyboardEvent):Void {
-	    var kc = player.app.keyboardCommands;
+	    var kc:KeyboardCommands = player.app.keyboardCommands;
+
 	    if ( isOpen ) {
 	        trace('plkeycom: ${event.key.name}');
+
 	        switch ( event.key ) {
 	            // stop selecting
                 case Esc:
