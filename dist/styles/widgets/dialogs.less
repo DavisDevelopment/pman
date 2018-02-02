@@ -165,3 +165,63 @@ div.track-info-dialog {
         }
     }
 }
+
+/* == Local Color Pallette Vars == */
+@ibg: #393939;
+@itxt: #DDDDDD;
+@ihilite: #FFA000;
+
+div.pman-prompt {
+
+    div.label-row {
+        // no distinct styling
+
+        span.label {
+            background-color: @ihilite;
+            font-size: 14.8px;
+            font-weight: bold;
+            border-radius: 3px 3px 0px 0px;
+            line-height: 11pt;
+            margin-left: 14px;
+        }
+    }
+
+    div.input-row {
+        // no distinct styling
+        
+        input[type=text] {
+            background-color: @ibg;
+            color: @itxt;
+            border: unset;
+        }
+    }
+}
+
+/* Bookmark Prompt Widget */
+div.pman-prompt.pman-mark-prompt {
+    div.label-row {
+        span.label {
+            //
+        }
+    }
+
+    div.input-row {
+        input[type=text] {
+            border-radius: 3px 0px 0px 3px;
+            width: 75%;
+            font-style: italic;
+            display: inline;
+        }
+
+        select {
+            background-color: @ibg;
+            color: @itxt;
+            width: auto;
+            position: relative;
+            display: inline;
+            left: -4px;
+            border: unset;
+            border-radius: 0px 3px 3px 0px;
+        }
+    }
+}
