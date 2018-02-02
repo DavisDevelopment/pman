@@ -70,9 +70,15 @@ class PlaylistView extends Pane {
 
 		//var kc = player.app.keyboardCommands;
 
+        // defer to next 'tick'
 		defer(function() {
+		    // highlight the 'active' Track
             hiliteActive();
+
+            // scroll the active track into view
             scrollToActive();
+
+            // update the search widget
             searchWidget.update();
 		});
 	}
@@ -81,12 +87,18 @@ class PlaylistView extends Pane {
 	  * close [this] view
 	  */
 	public function close():Void {
+	    // emit 'close' event
 		dispatch('close', null);
+		// un-bind event listeners
 		unbind();
 
 		//var kc = player.app.keyboardCommands;
 		//kc.mode = 'default';
+
+		// ensure that no tracks are 'select'ed
 	    deselectAll();
+
+	    // detach [this] widget from the DOM
 		detach();
 	}
 
@@ -97,10 +109,13 @@ class PlaylistView extends Pane {
 	    // build out basic 'row' structure of content
 		buildRows();
 
+        // build out the full content of the 'search' widget
 		buildSearchWidget();
 		
+		// build the track-list view
 		var start = now();
 		buildTrackList(function() {
+		    // report timing stats for the operation
 		    trace('took ${now() - start}ms to build the track-list view, containing ${playlist.length} tracks');
 		});
 
@@ -160,11 +175,13 @@ class PlaylistView extends Pane {
 	private function buildRows():Void {
 		hedRow = new Row();
 		append( hedRow );
+
 		searchRow = new Row();
-		searchRow.addClass('search-box');
+		searchRow.addClass( 'search-box' );
 		append( searchRow );
+		
 		listRow = new Row();
-		listRow.addClass('tracks');
+		listRow.addClass( 'tracks' );
 		append( listRow );
 	}
 
@@ -172,25 +189,38 @@ class PlaylistView extends Pane {
 	  * build out the track list
 	  */
 	private function buildTrackList(?done:Void->Void):Void {
+	    // if [list] hasn't yet been created, do that now
 	    if (list == null) {
             list = new List();
             listRow.append( list );
+            // disable text/element selection within [list]
             list.el.plugin( 'disableSelection' );
+
+            // bind event listeners related to [list]
             bindList();
         }
 
         // build the Track list out, poo sha
         for (track in playlist) {
+            // get the view for [track]
             var trackView:Null<TrackView> = tview( track );
+
+            // mark [track] as focused if it is focused in the Player
             if (player.track == track) {
                 trackView.focused( true );
             }
+
+            // if [trackView] has flagged itself as needing to be re-generated
             if ( trackView.needsRebuild ) {
+                // then do so
                 trackView.build();
             }
+
+            // append [trackView] to [this]
             addTrack( trackView );
         }
 
+        // if the [done] callback was provided, invoke it
         if (done != null)
             done();
 
@@ -298,28 +328,51 @@ class PlaylistView extends Pane {
       * efficiently build out the TrackView list
       */
 	public function rebuildList(ntl: Array<Track>):Void {
+	    // save the vertical scroll value
         var scrollY:Float = (listRow.el.prop( 'scrollTop' ));
+
+        // save copy of [tracks] before modifying it
 	    var _views = tracks.copy();
+
+	    // get current cpu-time
 		var startTime = now();
-		var nodes:Array<TrackView> = ntl.map.fn(viewFor( _ ));
+
+		// get list of TrackView instances corresponding to the given list of Track instances
+		var nodes:Array<TrackView> = ntl.map(track->tview(track));
+
+
 		nodes.reverse();
 	    for (node in nodes) {
 	        list.prependItem( node );
 	        _views.remove( node );
 	    }
 	    nodes.reverse();
+
+	    // set [nodes] as the new value for [this.tracks]
 	    this.tracks = nodes;
 
+        /*
+           now, all remaining items in [_views] represent items that are still attached to [this.list],
+           but don't point to any Track in [this] View's input, so we'll iterate over those and detach them
+        */
 	    for (v in _views) {
-	        if (v.parentWidget != null)
+	        // either by detaching their immediate parent
+	        if (v.parentWidget != null) {
 	            v.parentWidget.detach();
-            else
+            }
+            else {
+                // or by detaching them directly, depending on how they were attached
                 v.detach();
+            }
 	    }
+
+	    // defer to the next 'tick'
         defer(function() {
+            // and restore the saved scroll-position
             listRow.el.prop('scrollTop', scrollY);
         });
 
+        // report the speed of [this] algorithm
 	    trace('rebuilt track-list in ${now() - startTime}ms');
 	}
 
@@ -341,18 +394,29 @@ class PlaylistView extends Pane {
 	  * react to 'track-change' events
 	  */
 	private function on_track_change(delta : Delta<Null<Track>>):Void {
+	    // if there is a known 'previous' track
 		if (delta.previous != null) {
-			var pv = viewFor( delta.previous );
+		    // get its view
+			var pv:Null<TrackView> = viewFor( delta.previous );
+			// if it has one
 			if (pv != null) {
+			    // defocus it
 				pv.focused( false );
 			}
 		}
+
+		// if there is a known 'current' track
 		if (delta.current != null) {
-			var cv = viewFor( delta.current );
+		    // get its view
+			var cv:Null<TrackView> = viewFor( delta.current );
+			// if it has one
 			if (cv != null) {
+			    // highlight it as focused
 				cv.focused( true );
 			}
 		}
+
+		// schedule scrolling to the active trackview
 		exec.task( scrollToActive );
 	}
 
@@ -360,7 +424,9 @@ class PlaylistView extends Pane {
 	  * react to playlist-changes
 	  */
 	private function on_playlist_change(change : PlaylistChange):Void {
+	    // if [this] view isn't "locked"
         if (!isLocked()) {
+            // schedule a refresh
             exec.task(refresh( true ));
         }
 	}
@@ -369,6 +435,7 @@ class PlaylistView extends Pane {
 	  * react to an impending tab-change
 	  */
 	private function on_tab_changing(change : Delta<PlayerTab>):Void {
+	    // un-bind event listeners
 	    unbind();
 	}
 
@@ -376,11 +443,18 @@ class PlaylistView extends Pane {
 	  * a tab-change has just occurred
 	  */
 	private function on_tab_changed(change : Delta<PlayerTab>):Void {
+	    // rebuild [this]'s track-list
+	    defer(function() {
+	        refresh();
+	    });
+
+	    /*
 	    undoTrackList(function() {
 	        defer(function() {
 	            refresh();
 	        });
 	    });
+	    */
 	}
 
 	/**
@@ -452,21 +526,27 @@ class PlaylistView extends Pane {
 	}
 
 	/**
-	  * select Tracks
+	  * "select" a set of TrackViews
 	  */
+	@:deprecated
 	public function selectTracks(f : TrackView -> Bool):Null<TrackSelection> {
+	    // create [list] to hold results
 	    var list:Array<TrackView> = new Array();
+	    // iterate over [tracks]
 	    for (t in tracks) {
+	        // assign whether it is 'selected' based on the return-value of [f], and if it's selected
 	        if (t.selected = f( t )) {
+	            // add it to [list]
 	            list.push( t );
 	        }
 	    }
-	    if (list.length > 0) {
+
+        // if [list] has anything in it (if any TrackViews were selected)
+	    if (list.hasContent()) {
+	        // build a TrackSelection from [list]
 	        return new TrackSelection(playlist, list.map.fn(_.track));
 	    }
-        else {
-            return null;
-        }
+        return null;
 	}
 
 	/**
@@ -539,7 +619,7 @@ class PlaylistView extends Pane {
 	/**
 	  * set the 'focused' state of [this] playlist view
 	  */
-	public function setFocused(value : Bool):Bool {
+	public inline function setFocused(value : Bool):Bool {
 	    var ret = (focused = value);
 	    return ret;
 	}
@@ -548,14 +628,14 @@ class PlaylistView extends Pane {
 	  * 'lock'ing [this] view prevents it from rebuilding itself in response to every change made to the playlist
 	  * mainly designed to be used prior to actions that will trigger many changes to the playlist in rapid succession
 	  */
-	public function lock():Void {
+	public inline function lock():Void {
 	    _locked = true;
 	}
 
     /**
       * unlock [this] view
       */
-	public function unlock():Void {
+	public inline function unlock():Void {
 	    _locked = false;
 	    exec.task( refresh );
 	}
@@ -563,7 +643,7 @@ class PlaylistView extends Pane {
     /**
       * check whether [this] view is locked
       */
-	public function isLocked():Bool return _locked;
+	public inline function isLocked():Bool return _locked;
 
     /**
       * handle incoming keyboard input when playlistview is open
