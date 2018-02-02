@@ -23,12 +23,20 @@ class PromptBox extends Pane {
 	public function new():Void {
 		super();
 
+		addClass( 'pman-prompt' );
+
         modal = new Modal();
 		input = new TextInput();
+		inputRow = new Pane();
+		inputRow.addClass( 'input-row' );
 
+        titlRow = new Pane();
+        titlRow.addClass( 'label-row' );
 		titl = new LabelSpan();
-		append( titl );
-		append( input );
+		titlRow.append( titl );
+		append( titlRow );
+		inputRow.append( input );
+		append( inputRow );
 
 		title = 'Prompt Title';
 
@@ -126,14 +134,6 @@ class PromptBox extends Pane {
 		c['z-index'] = '11111';
 		c['top'] = '55px';
 		c['width'] = '90%';
-
-		c = input.css;
-
-		c['width'] = '100%';
-
-		c = titl.css;
-
-		c['font-size'] = '13.8px';
 	}
 
 	/**
@@ -242,7 +242,9 @@ class PromptBox extends Pane {
 /* === Instance Fields === */
 
 	public var input : TextInput;
+	public var inputRow : Pane;
 	public var titl : LabelSpan;
+	public var titlRow : Pane;
 
 	public var modal : Modal;
 
