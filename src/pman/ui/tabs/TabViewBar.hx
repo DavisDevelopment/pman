@@ -325,9 +325,17 @@ class TabViewBar extends Ent {
         }
         else {
             for (index in 0...tabs.length) {
-                if (tabs[index].tab != session.tabs[index] || tabs[index].hasUpdated) {
-                    tabs[index].hasUpdated = false;
+                var tab:PlayerTab = session.tabs[index];
+                var view:TabView = tabs[index];
+
+                if (tab != view.tab) {
                     return false;
+                }
+                else if ( view.hasUpdated ) {
+                    //
+                }
+                else {
+                    continue;
                 }
             }
             return true;
