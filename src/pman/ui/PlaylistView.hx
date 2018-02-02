@@ -344,13 +344,24 @@ class PlaylistView extends Pane {
 		// get list of TrackView instances corresponding to the given list of Track instances
 		var nodes:Array<TrackView> = ntl.map(track->tview(track));
 
+		// iterate over [nodes] in reverse order
+		var index:Int = nodes.length;
+		while (--index >= 0) {
+		    // prepend each item in [nodes] to [list]
+		    list.prependItem(nodes[index]);
+		    // removing each prepended [node] from [_views]
+		    _views.remove(nodes[index]);
+		}
 
+		/*
+		//= old, slower implementation of same algorithm
 		nodes.reverse();
 	    for (node in nodes) {
 	        list.prependItem( node );
 	        _views.remove( node );
 	    }
 	    nodes.reverse();
+	    */
 
 	    // set [nodes] as the new value for [this.tracks]
 	    this.tracks = nodes;
