@@ -36,3 +36,5 @@ dist/scripts/diskprobe\.worker\.js
 dist/scripts/bgdb\.worker\.js
 
 src/res/test_script\.js
+
+dist/theme-example\.css
