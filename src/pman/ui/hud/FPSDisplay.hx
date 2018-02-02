@@ -51,6 +51,7 @@ class FPSDisplay extends TextualHUDItem {
                 frames.right = frames.left;
                 frames.left = 0;
                 lt = now();
+                addFps( frames.right );
             }
             else {
                 frames.left++;
@@ -79,8 +80,16 @@ class FPSDisplay extends TextualHUDItem {
         y = (r.y + 10);
         w = tb.width;
         h = (tb.height / 4);
+
+        var tabs = player.view.tabBar;
+        if (tabs != null) {
+            //y += (tabs.y + tabs.h);
+        }
     }
 
+    /**
+      * add an integer to [this]'s dataset
+      */
     private function addFps(n: Int):Void {
         _fpsData.push( n );
 
