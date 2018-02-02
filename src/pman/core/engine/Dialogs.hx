@@ -45,7 +45,10 @@ class Dialogs {
                     stringPaths = [];
                 var paths:Array<Path> = stringPaths.compact().map.fn(Path.fromString(_));
                 if (!paths.empty()) {
-                    var first:Path = paths[0].directory;
+                    var first:Path = paths[0];
+                    while (!Fs.isDirectory( first ))
+                        first = first.directory;
+
                     if (first.toString().hasContent()) {
                         engine.db.configInfo.lastDirectory = first;
                     }
