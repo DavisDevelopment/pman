@@ -45,6 +45,14 @@ class StatusBarItem extends Ent {
     }
 
     /**
+      * [this] is being detached from the status bar
+      */
+    public function detached(bar: PlayerStatusBar):Void {
+        statusBar = null;
+        unbind();
+        delete();
+    }
+
     /**
       * bind any necessary event handlers to the app
       */
