@@ -236,6 +236,7 @@ class PlaylistView extends Pane {
 	/**
 	  * tear down the track list
 	  */
+	@:deprecated
 	private function undoTrackList(?done : Void->Void):Void {
 	    list.empty();
 	    tracks = new Array();
@@ -551,6 +552,7 @@ class PlaylistView extends Pane {
 	/**
 	  * apply a pre-constructed selection
 	  */
+	@:deprecated
 	public function applySelection(selection : TrackSelection):Void {
 	    selectTracks.fn(selection.has( _.track ));
 	}
@@ -558,6 +560,7 @@ class PlaylistView extends Pane {
 	/**
 	  * select all tracks
 	  */
+	@:deprecated
 	public function selectAll():Null<TrackSelection> {
 	    return selectTracks.fn(tv=>true);
 	}
@@ -565,6 +568,7 @@ class PlaylistView extends Pane {
 	/**
 	  * deselect all tracks
 	  */
+	@:deprecated
 	public function deselectAll():Null<TrackSelection> {
 	    return selectTracks.fn(tv=>false);
 	}
@@ -572,6 +576,7 @@ class PlaylistView extends Pane {
 	/**
 	  * check if any Tracks are selected
 	  */
+	@:deprecated
 	public function anySelected():Bool {
 	    return tracks.any.fn( _.selected );
 	}
@@ -579,6 +584,7 @@ class PlaylistView extends Pane {
 	/**
 	  * get the list of TrackViews that are selected
 	  */
+	@:deprecated
 	public function getSelectedTrackViews():Array<TrackView> {
 	    return tracks.filter.fn(_.selected);
 	}
@@ -586,6 +592,7 @@ class PlaylistView extends Pane {
 	/**
 	  * get the list of Tracks that are selected
 	  */
+	@:deprecated
 	public function getSelectedTracks():Array<Track> {
 	    return getSelectedTrackViews().map.fn( _.track );
 	}
@@ -593,6 +600,7 @@ class PlaylistView extends Pane {
 	/**
 	  * get the current Track selection
 	  */
+	@:deprecated
 	public function getTrackSelection():Maybe<TrackSelection> {
 	    var selectedTracks = getSelectedTracks();
 	    if (selectedTracks.length > 0) {
@@ -604,6 +612,7 @@ class PlaylistView extends Pane {
     /**
       * get the first Track in the list of selected Tracks
       */
+    @:deprecated
 	public function getFirstSelectedTrack():Null<Track> {
 	    return getTrackSelection().ternary(_.get( 0 ), null);
 	}
@@ -611,6 +620,7 @@ class PlaylistView extends Pane {
     /**
       * get the last Track in the list of selected tracks
       */
+    @:deprecated
 	public function getLastSelectedTrack():Null<Track> {
 	    return getTrackSelection().ternary(_.get(_.length - 1), null);
 	}
