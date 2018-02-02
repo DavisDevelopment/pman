@@ -31,6 +31,8 @@
 -main BPlayerMain
 -D debug
 -D renderer_process
+-D js-es=6
+-D js-enums-as-objects
 -js ../dist/scripts/content.js
 
 --next 
