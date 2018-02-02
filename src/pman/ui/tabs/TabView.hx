@@ -97,7 +97,11 @@ class TabView extends Ent {
 
         if (content != null) {
             var dd = content.data;
+            flags[0] = true;
+
             if (dd != null) {
+                flags[1] = true;
+
                 if (dd.starred && leftIcon == null) {
                     leftIcon = Icons.starIcon(16, 16, function(path) {
                         path.style.fill = player.theme.secondary.lighten( 45.0 ).toString();
@@ -108,9 +112,22 @@ class TabView extends Ent {
                     leftIcon = null;
                     hasUpdated = true;
                 }
+
+                flags[2] = dd.starred;
+            }
+            else {
+                // if [content.data] is null and [leftIcon] isnt
+                if (leftIcon != null) {
+                    leftIcon = null;
+                    hasUpdated = true;
+                }
             }
         }
+        else {
+            //TODO
+        }
 
+        // handle dragging
         if (mouseDown != null) {
             var mp = stage.getMousePosition();
             if (mp != null) {
@@ -122,14 +139,46 @@ class TabView extends Ent {
         // compare sizes
         if (prevRect == null) {
             //prevRect = rect.clone();
-            null;
+            prevRect = new Rect();
         }
+        // if [prevRect] is different from [rect]
         else if (prevRect.nequals( rect )) {
-            trace('$prevRect !== $rect');
+            // content has changed in some way
+            hasUpdated = true;
+        }
+
+        // compare flags
+        if (prevFlags == null) {
+            prevFlags = flags.copy();
+        }
+        else if ( !hasUpdated ) {
+            var comp:Array<Pair<Bool, Bool>> = prevFlags.zip( flags );
+            switch ( comp ) {
+                /* cases for specific situations that need to be handled in specific ways */
+                //TODO
+
+                // anything else gets a 1-to-1 comparison
+                default:
+                    // iterate over every tuple
+                    for (t in comp) {
+                        // and check for ..
+                        switch ( t ) {
+                            // flag has changed from 'off' to 'on'
+                            case {left:false, right:true}:
+                                hasUpdated = true;
+
+                            // flag has been changed from 'on' to 'off'
+                            case {left:true, right:false}:
+                                hasUpdated = true;
+
+                            default:
+                        }
+                    }
+            }
         }
 
         // update prevRect
-        prevRect = rect.clone();
+        prevRect.pull( rect );
     }
 
     /**
