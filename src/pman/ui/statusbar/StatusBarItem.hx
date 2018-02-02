@@ -120,6 +120,14 @@ class StatusBarItem extends Ent {
     public var player(get, never):Player;
     private inline function get_player() return statusBar.player;
 
+    public var cx(get, set):Float;
+    private inline function get_cx() return contentRect.x;
+    private inline function set_cx(v) return (contentRect.x = v);
+
+    public var cy(get, set):Float;
+    private inline function get_cy() return contentRect.y;
+    private inline function set_cy(v) return (contentRect.y = v);
+
 /* === Instance Fields === */
 
     public var duration : Float;
