@@ -119,14 +119,13 @@ class PlaylistView extends Pane {
 		    trace('took ${now() - start}ms to build the track-list view, containing ${playlist.length} tracks');
 		});
 
-		forwardEvents(['click', 'mousedown', 'mouseup', 'mousemove', 'mouseleave'], null, MouseEvent.fromJqEvent);
-
-        /*
-        var resizeOptions = {
-            handles: 'w'
-        };
-		el.plugin('resizable', [resizeOptions]);
-		*/
+        // forward basic mouse-events from underlying DOM structure to [this] widget model
+		forwardEvents([
+		    'click',
+		    'mousedown',
+		    'mouseup',
+		    'mouseleave'
+		], null, MouseEvent.fromJqEvent);
 	}
 
 	/**
