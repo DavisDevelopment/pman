@@ -406,6 +406,18 @@ class PlaylistView extends Pane {
 	}
 
     /**
+      * get the TrackView associated with the given Track
+      */
+    public function viewFor(track : Track):Null<TrackView> {
+        var _key:String = tkey( track );
+        if (!_tc.exists( _key ) && _tc.exists( track.uri )) {
+            var tmp = _tc[_key] = _tc[track.uri];
+            _tc.remove( track.uri );
+            return tmp;
+        }
+        return _tc[_key];
+    }
+
     /**
       * compute what 'key' will be used for the given Track
       */
@@ -527,13 +539,6 @@ class PlaylistView extends Pane {
 	    };
 	    list.el.plugin('sortable', [sortOptions]);
 	}
-
-    /**
-      * get the TrackView associated with the given Track
-      */
-    public function viewFor(track : Track):Null<TrackView> {
-        return _tc[track.uri];
-    }
 
     /**
       * get the index of the given TrackView
