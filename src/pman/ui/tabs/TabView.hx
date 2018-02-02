@@ -19,7 +19,8 @@ import pman.media.Track;
 import pman.ui.*;
 
 import tannus.math.TMath.*;
-import foundation.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -48,9 +49,24 @@ class TabView extends Ent {
                 path.style.fill = 'white';
             }).toImage()
         ];
+
+        //
     }
 
 /* === Instance Methods === */
+
+    /**
+      * rebind [this] TabView to another Tab
+      */
+    public function rebase(nt: PlayerTab):Void {
+        this.tab = nt;
+
+        update( stage );
+    }
+
+    override function init(stage: Stage):Void {
+        super.init( stage );
+    }
 
     /**
       * update [this] Tab view
@@ -58,9 +74,17 @@ class TabView extends Ent {
     override function update(stage : Stage):Void {
         super.update( stage );
 
+        // create 'flags' variable
+        var flags: Array<Bool> = [
+            false, // [content] exists
+            false, // [content.data] exists
+            false // [content.data.starred]
+        ];
+
         var _ptt:Null<String> = tb.text;
         var d = new Maybe(tab.track.ternary(_.data, null));
         var titleText:String = tab.title.ternary(_.slice(0, 15), 'New Tab');
+
         if (titleText.hasContent() && tb.text != titleText) {
             var recalc:Bool = (tb.text.hasContent());
 
@@ -394,4 +418,5 @@ class TabView extends Ent {
     public var dragRect : Null<Rect<Float>> = null;
 
     private var prevRect: Null<Rect<Float>> = null;
+    private var prevFlags: Null<Array<Bool>> = null;
 }
