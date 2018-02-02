@@ -395,6 +395,13 @@ class PlaylistView extends Pane {
 	  * create or get a TrackView for the given Track
 	  */
 	private function tview(t : Track):TrackView {
+	    var view:Null<TrackView> = viewFor( t );
+	    if (view == null) {
+	        return (_tc[tkey(t)] = new TrackView(this, t));
+	    }
+	    return view;
+
+	    /*
 	    if (_tc.exists( t.uri )) {
 	        return _tc[t.uri];
 	    }
@@ -403,6 +410,7 @@ class PlaylistView extends Pane {
             _tc[t.uri] = view;
             return view;
         }
+        */
 	}
 
     /**
