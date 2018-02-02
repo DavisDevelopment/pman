@@ -21,6 +21,7 @@ using tannus.math.TMath;
 using haxe.macro.ExprTools;
 using tannus.macro.MacroTools;
 
+@:deprecated
 class Tools {
 	/**
 	  * defer the given Function until the end of the current Stack
