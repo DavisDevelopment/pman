@@ -142,6 +142,10 @@ class PlaylistView extends Pane {
 	public function unbind():Void {
 		player.session.trackChanged.off( on_track_change );
 		player.session.playlist.changeEvent.off( on_playlist_change );
+
+        // output to console so I can check if listeners are being properly unbound
+		echo( player.session.trackChanged );
+		echo( player.session.playlist.changeEvent );
 	}
 
 	/**
