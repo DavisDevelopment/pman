@@ -131,14 +131,16 @@ class PlayerView extends Ent {
 	  * Update [this]
 	  */
 	override function update(stage : Stage):Void {
+		player.tick();
+
+		super.update( stage );
+
+		calculateGeometry(stage.rect.float());
+
 		// echo the playback properties onto the current media
 		if (cmr != null) {
             cmr.update( stage );
 		}
-
-		player.tick();
-
-		super.update( stage );
 	}
 
 	/**
