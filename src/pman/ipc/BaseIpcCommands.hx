@@ -32,13 +32,19 @@ class BaseIpcCommands {
         send(channel, null, null);
     }
 
-    public function fbind(exportName:String, func:Function):Void {
+    /**
+      * bind a function to a channel
+      */
+    public function fbind(exportName:String, func:Function, sendReturn:Bool=false):Void {
         on(exportName, function(packet) {
             var args:Array<Dynamic> = cast packet.data;
             if (args == null) {
                 args = [];
             }
-            Reflect.callMethod(null, func, args);
+            var result:Dynamic = Reflect.callMethod(null, func, args);
+            if ( sendReturn ) {
+                packet.reply( result );
+            }
         });
     }
 
