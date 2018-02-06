@@ -51,56 +51,17 @@ class RendererIpcCommands extends BaseIpcCommands {
         fbind('TogglePlaylist', player.togglePlaylist);
         fbind('ClearPlaylist', player.clearPlaylist);
         fbind('ShufflePlaylist', player.shufflePlaylist);
-
-        /*
-        b('OpenFile', function() player.selectAndOpenFiles());
-        b('OpenDirectory', function() player.selectAndOpenDirectory());
-        b('ExportPlaylist', function() player.exportPlaylist());
-        b('TogglePlaylist', function() player.togglePlaylist());
-        b('ClearPlaylist', function() player.clearPlaylist());
-        b('ShufflePlaylist', function() player.shufflePlaylist());
-        b('SavePlaylist', function(e, ?saveAs:Bool) {
-            trace( saveAs );
-            player.savePlaylist( saveAs );
-        });
-        b('LoadPlaylist', function(e, name:String) {
-            player.loadPlaylist( name );
-        });
-
-        b('Snapshot', function() {
-            player.snapshot();
-        });
-        b('EditPreferences', function() {
-            player.editPreferences();
-        });
-        b('EditMarks', function() {
-            player.editBookmarks();
-        });
-
-        // launch info has been received
-        b('LaunchInfo', function(e, info:RawLaunchInfo) {
-            main._provideLaunchInfo( info );
-        });
-
-        b('AddComponent', function(e, name:String) {
             switch ( name ) {
                 case 'skim':
                     player.skim();
 
                 default:
-                    null;
             }
         });
-
-        b('Exec', function(e, code:String) {
             player.exec(code, function(?error) {
-                null;
             });
         });
-
-        b('Notify', function(e, sdata:String) {
             var data:Dynamic = sdata;
-            if (sdata.has('{') || sdata.has('}'))
                 data = haxe.Json.parse( sdata );
             player.message(
                 if (Std.is(data, String))
@@ -109,19 +70,6 @@ class RendererIpcCommands extends BaseIpcCommands {
                     (pman.ui.PlayerMessageBoard.messageOptionsFromJson(untyped data))
             );
         });
-
-        b('Tab:Select', function(e, index:Int) {
-            player.session.setTab( index );
-        });
-
-        b('Tab:Create', function() {
-            player.session.newTab();
-        });
-
-        b('Tab:Delete', function(e, index:Int) {
-            player.session.deleteTab( index );
-        });
-        */
     }
 
 /* === Utils === */
