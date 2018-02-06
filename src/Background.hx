@@ -198,13 +198,18 @@ class Background {
                 accelerator: 'CommandOrControl+R',
                 click: function() {
                     App.relaunch();
-                    close();
+                    for (win in playerWindows) {
+                        win.close();
+                    }
+                    defer( close );
                 }
             },
             {
                 label: 'Quit',
                 accelerator: 'CommandOrControl+Q',
-                click: function() close()
+                click: function() {
+                    close();
+                }
             }
             ]
         });
