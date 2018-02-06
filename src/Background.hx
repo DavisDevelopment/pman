@@ -76,6 +76,13 @@ class Background {
 	    App.quit();
 	}
 
+    /**
+      * stop [this] application immediately
+      */
+	public inline function exit(code:Int=0):Void {
+	    App.exit( code );
+	}
+
 	/**
 	  * open a new Player window
 	  */
