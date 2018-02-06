@@ -295,6 +295,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'ShufflePlaylist');
                     */
+                    tap( 'ShufflePlaylist' );
                 }
             },
             {
