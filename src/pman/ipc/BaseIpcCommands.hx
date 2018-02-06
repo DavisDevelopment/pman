@@ -56,6 +56,36 @@ class BaseIpcCommands {
         return send(name, args, encoding);
     }
 
+    /**
+      * underlying method for [call]
+      */
+    private function _acall(params: Array<Dynamic>):Void {
+        var name:String = '';
+        var args:Null<Array<Dynamic>> = null;
+        var encoding:Null<WorkerPacketEncoding> = null;
+        var callback:Null<Function> = null;
+
+        if (params.length == 0) {
+            throw 'Error: Invalid "call"';
+        }
+
+        if ((params[0] is String)) {
+            name = cast params.shift();
+        }
+
+        if ((params.last() is String) && WorkerPacketEncoding.isWorkerPacketEncoding(params.last())) {
+            encoding = params.pop();
+        }
+
+        if (params.last() != null && Reflect.isFunction(params.last())) {
+            callback = params.pop();
+        } 
+
+        if (params.length > 0)
+            args = params;
+
+        acall(name, args, callback, encoding);
+    }
 
 /* === Instance Methods === */
 
