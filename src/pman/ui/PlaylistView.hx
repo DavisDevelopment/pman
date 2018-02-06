@@ -184,7 +184,7 @@ class PlaylistView extends Pane {
 		append( searchRow );
 		
 		listRow = new Row();
-		listRow.addClass( 'tracks' );
+		listRow.addClasses(['tracks', 'pmscroll']);
 		append( listRow );
 	}
 
