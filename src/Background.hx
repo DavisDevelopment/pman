@@ -501,6 +501,13 @@ class Background {
     }
 
     /**
+      * open the given URL in the user's browser
+      */
+    public inline function browserOpen(url: String):Void {
+        electron.Shell.openExternal( url );
+    }
+
+    /**
       * parse command-line arguments
       */
     private function parseArgs(argv : Array<String>):Void {
