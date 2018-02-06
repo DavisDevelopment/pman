@@ -22,7 +22,7 @@ using pman.async.VoidAsyncs;
 
 class RestartCommand extends Command {
     override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
-        main.ic.send('Reload');
+        // FIXME main.ic.send('Reload');
         done();
     }
 }
