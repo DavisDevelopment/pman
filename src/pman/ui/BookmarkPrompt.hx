@@ -2,16 +2,17 @@ package pman.ui;
 
 import foundation.*;
 
+import tannus.io.*;
+import tannus.ds.*;
 import tannus.html.Element;
-import tannus.ds.Memory;
-import tannus.ds.Maybe;
-import tannus.ds.Stack;
 import tannus.events.*;
 import tannus.events.Key;
 
 import pman.core.*;
+import pman.bg.media.Mark;
 
 import Std.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -37,19 +38,21 @@ class BookmarkPrompt extends PromptBox {
         switch ( event.key ) {
             case Up:
                 event.cancel();
-                if (peekDistance == 0) {
+                if (peekDistance == -1) {
                     originalValue = value;
                 }
+
                 peekDistance++;
                 if (history[peekDistance] == null) {
                     peekDistance--;
                 }
+
                 value = history[peekDistance];
                 caret( value.length );
 
             case Down:
                 event.cancel();
-                if (peekDistance == 0) {
+                if (peekDistance == -1) {
                     value = originalValue;
                 }
                 else {
@@ -58,7 +61,7 @@ class BookmarkPrompt extends PromptBox {
                 caret( value.length );
 
             case _:
-                peekDistance = 0;
+                peekDistance = -1;
                 super.keydown( event );
         }
     }
@@ -67,10 +70,10 @@ class BookmarkPrompt extends PromptBox {
       * do the shit
       */
     override function line(l : String):Void {
-        if (l != history[0]) {
+        //if (l != history[0]) {
             //history.unshift( l );
             addHistoryItem( l );
-        }
+        //}
         super.line( l );
     }
 
@@ -90,7 +93,8 @@ class BookmarkPrompt extends PromptBox {
 
 /* === Instance Fields === */
 
-    private var peekDistance : Int = 0;
+
+    private var peekDistance : Int = -1;
     private var originalValue : String;
 
 /* === Statics === */
