@@ -208,6 +208,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'OpenFile');
                     */
+                    ic.push('OpenFile');
                 }
             },
             {
@@ -217,6 +218,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'OpenDirectory');
                     */
+                    ic.push('OpenDirectory');
                 }
             },
             {type: 'separator'},
