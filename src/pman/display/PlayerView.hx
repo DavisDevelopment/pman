@@ -133,9 +133,24 @@ class PlayerView extends Ent {
 	override function update(stage : Stage):Void {
 		player.tick();
 
+        // save current rects
+        lastRect = new Pair(rect.clone(), (mediaRect != null ? mediaRect.clone() : null));
+
+        // update things
 		super.update( stage );
 
+		// recalculate geometry
 		calculateGeometry(stage.rect.float());
+
+		// determine whether any resizing has occurred
+		if (!rect.equals( lastRect.left )) {
+		    var delta:Delta<Rect<Float>> = new Delta(rect, lastRect.left);
+		    dispatch('resize', delta);
+		}
+        else if (mediaRect != null && !mediaRect.equals( lastRect.right )) {
+            var delta:Delta<Rect<Float>> = new Delta(mediaRect, lastRect.right);
+            dispatch('resize:media', delta);
+        }
 
 		// echo the playback properties onto the current media
 		if (cmr != null) {
@@ -221,4 +236,5 @@ class PlayerView extends Ent {
 	public var currentMediaRenderer : Null<MediaRenderer>;
 
 	private var lastStatus : Null<PlayerStatus> = null;
+	private var lastRect : Null<Pair<Rect<Float>, Rect<Float>>> = null;
 }
