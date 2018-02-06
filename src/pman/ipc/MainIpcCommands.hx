@@ -16,9 +16,11 @@ using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
 
-class MainIpcCommands {
+class MainIpcCommands extends BaseIpcCommands {
     /* Constructor Function */
     public function new(bg : Background):Void {
+        super();
+
         this.bg = bg;
     }
 
@@ -28,15 +30,16 @@ class MainIpcCommands {
       * bind commands
       */
     public function bind():Void {
-        inline function b(name, f) Ipc.on('command:$name', f);
-
+        /*
         b('Reload', function() {
             electron.ext.App.relaunch();
             bg.close();
         });
+
         b('UpdateMenu', function() bg.updateMenu());
+
         b('GetLaunchInfo', function() {
-            send(bg.playerWindow, 'LaunchInfo', [bg.launchInfo()]);
+            send('LaunchInfo', bg.launchInfo());
         });
 
         Ipc.on('command:HttpServe', function(event, spath:String) {
@@ -45,44 +48,40 @@ class MainIpcCommands {
             trace('$path => $id');
             event.returnValue = id;
         });
+        */
+
+        on('betty', function(packet) {
+            trace( packet );
+        });
+
+        on('GetLaunchInfo', function(packet) {
+            trace('launch-info requested');
+
+            packet.reply(bg.launchInfo());
+        });
     }
 
     /**
       * send pmbash code to the player window to be executed
       */
     public function execInPlayer(code : String):Void {
-        send(bg.playerWindow, 'Exec', [code]);
+        send('Exec', code);
     }
 
     /**
-      * display a textual notification
+      * post a message to the player window
       */
-    public function notify(info:Dynamic, ?t:EitherType<BrowserWindow, WebContents>):Void {
-        if (!(info is String))
-            info = haxe.Json.stringify( info );
-        var dest = bg.playerWindow;
-        
-        // if there is no renderer window with which to display a notification
-        if (dest == null) {
-            //TODO use native notifications
-        }
-        else {
-            send(dest, 'Notify', [info]);
-        }
+    override function _post(channel:String, data:Dynamic):Void {
+        bg.playerWindow.webContents.send(channel, data);
     }
 
     /**
-      * send command
+      * listen for a message on
       */
-    public function send(w:EitherType<BrowserWindow, WebContents>, cmd:String, ?args:Array<Dynamic>):Void {
-        var c : WebContents;
-        if (!(w is WebContents))
-            c = cast(w, BrowserWindow).webContents;
-        else c = cast w;
-        var params:Array<Dynamic> = ['command:$cmd'];
-        if (args != null)
-            params = params.concat( args );
-        Reflect.callMethod(c, c.send, params);
+    override function _onMessage(channel:String, handler:Dynamic->Void):Void {
+        Ipc.on(channel, function(event, ?data:Dynamic) {
+            handler( data );
+        });
     }
 
 /* === Instance Fields === */
