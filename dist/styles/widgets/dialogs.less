@@ -169,7 +169,8 @@ div.track-info-dialog {
 /* == Local Color Pallette Vars == */
 @ibg: #393939;
 @itxt: #DDDDDD;
-@ihilite: #FFA000;
+/*@ihilite: #FFA000;*/
+@ihilite: darken(@secondary, 15%);
 
 div.pman-prompt {
 
@@ -211,6 +212,7 @@ div.pman-prompt.pman-mark-prompt {
             width: 75%;
             font-style: italic;
             display: inline;
+            border-right: solid 1.25px #777;
         }
 
         select {
@@ -219,7 +221,7 @@ div.pman-prompt.pman-mark-prompt {
             width: auto;
             position: relative;
             display: inline;
-            left: -4px;
+            //left: -4px;
             border: unset;
             border-radius: 0px 3px 3px 0px;
         }
