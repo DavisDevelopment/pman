@@ -88,7 +88,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
       */
     override function onAttached(pv : PlayerView):Void {
         this.pv = pv;
-        var av = new SpectographVisualizer(cast this);
+        var av = new BarsVisualizer(cast this);
         attachVisualizer(av, function() {
             visualizer.player = pv.player;
         });
