@@ -7,19 +7,84 @@
     z-index: 2;
 }
 
+.pman-panel {
+    // positioning basics
+    display: block;
+    position: absolute;
+    z-index: 11;
+
+    // styling basics
+    color: #222;
+    background-color: @primary;
+    font-family: Ubuntu;
+}
+
 .right-panel {
+    .pman-panel;
+
+    /*
 	display: block;
 	position: absolute;
 	z-index: 11;
+	*/
 	right: 0px;
 	top: 0px;
 	width: 30vw;
 	height: 100vh;
+	/*
 	color: #222;
 	background-color: @primary;
 	font-family: Ubuntu;
-	border-right: solid @secondary 0.75px;
+	*/
+	border-left: solid darken(@secondary, 45%) 0.75px;
 }
+
+
+.left-panel {
+    .pman-panel;
+
+    left: 0px;
+    top: 0px;
+    width: 30vw;
+    height: 100vh;
+    border-right: solid darken(@secondary, 45%) 0.75px;
+}
+
+.button.orangeButton {
+    background-color: #FFA000;
+    color: rgb(0, 0, 0);
+    font-weight: bold;
+    border-radius: 4.5px;
+}
+
+/*
+ == Custom Scrollbar Styling ==
+*/
+
+.pmscroll::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+    background-color: darken(@secondary, 12%);
+    border-radius: 2.8px;
+}
+
+.pmscroll::-webkit-scrollbar {
+    width: 10px;
+    background-color: darken(@secondary, 12%);
+}
+
+.pmscroll::-webkit-scrollbar-thumb {
+    background-color: #F90;
+    background-image: -webkit-linear-gradient(45deg,
+    rgba(255, 255, 255, .2) 25%,
+    transparent 25%,
+    transparent 50%,
+    rgba(255, 255, 255, .2) 50%,
+    rgba(255, 255, 255, .2) 75%,
+    transparent 75%,
+    transparent)
+}
+
+/* == Import StyleSheets for Widgets == */
 
 @import "widgets/dialogs";
 @import "widgets/playlist";
