@@ -225,7 +225,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'OpenFile');
                     */
-                    ic.push('OpenFile');
+                    tap( 'OpenFile' );
                 }
             },
             {
