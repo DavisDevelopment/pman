@@ -118,15 +118,15 @@ class AudioVisualizer {
     private inline function get_mr():Mor return renderer;
 
     public var fftSize(get, set):Int;
-	private inline function get_fftSize():Int return leftAnalyser.fftSize;
-	private inline function set_fftSize(v : Int):Int {
+	private function get_fftSize():Int return leftAnalyser.fftSize;
+	private function set_fftSize(v : Int):Int {
 	    configChanged = true;
 		return (leftAnalyser.fftSize = rightAnalyser.fftSize = v);
 	}
 
 	public var smoothing(get, set):Float;
-	private inline function get_smoothing():Float return leftAnalyser.smoothing;
-	private inline function set_smoothing(v : Float):Float {
+	private function get_smoothing():Float return leftAnalyser.smoothing;
+	private function set_smoothing(v : Float):Float {
 	    configChanged = true;
 	    return (leftAnalyser.smoothing = rightAnalyser.smoothing = v);
     }
