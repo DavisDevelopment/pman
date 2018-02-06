@@ -139,6 +139,8 @@ class Background {
 	  * build the menu
 	  */
 	public function buildToolbarMenu():Menu {
+	    inline function tap(n:String) ic.push( n );
+	    var call:Dynamic = ic.call;
 	    var menu:Menu = new Menu();
 
         var pman_item = new MenuItem({
@@ -157,6 +159,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'EditPreferences');
                     */
+                    tap( 'EditPreferences' );
                 }
             },
             {
