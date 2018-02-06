@@ -34,7 +34,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		this.mediaController = c;
 
 		_av = null;
-		audioManager = new AudioManager(untyped this);
+		audioManager = new AudioPipeline(untyped this);
 	}
 
 /* === Instance Methods === */
@@ -68,10 +68,12 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	  */
 	public function attachVisualizer(v:AudioVisualizer, done:Void->Void):Void {
 	    detachVisualizer(function() {
-	        v.attached(function() {
-	            visualizer = v;
-	            done();
-	        });
+	        audioManager.activate(function() {
+                v.attached(function() {
+                    visualizer = v;
+                    done();
+                });
+            });
 	    });
 	}
 
@@ -115,5 +117,5 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 /* === Instance Fields === */
 
     public var _av : Null<AudioVisualizer>;
-    public var audioManager : AudioManager;
+    public var audioManager : AudioPipeline;
 }
