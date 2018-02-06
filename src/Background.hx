@@ -235,7 +235,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'OpenDirectory');
                     */
-                    ic.push('OpenDirectory');
+                    tap( 'OpenDirectory' );
                 }
             },
             {type: 'separator'},
