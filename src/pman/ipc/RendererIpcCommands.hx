@@ -24,6 +24,8 @@ import pman.ww.Worker;
 import Std.*;
 import tannus.internal.CompileTime in Ct;
 import tannus.TSys as Sys;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -51,18 +53,31 @@ class RendererIpcCommands extends BaseIpcCommands {
         fbind('TogglePlaylist', player.togglePlaylist);
         fbind('ClearPlaylist', player.clearPlaylist);
         fbind('ShufflePlaylist', player.shufflePlaylist);
+        fbind('SavePlaylist', player.savePlaylist);
+        fbind('LoadPlaylist', player.loadPlaylist);
+        fbind('Snapshot', player.snapshot);
+        fbind('EditPreferences', player.editPreferences);
+        fbind('EditMarks', player.editBookmarks);
+        fbind('AddComponent', function(name: String) {
             switch ( name ) {
                 case 'skim':
                     player.skim();
 
                 default:
+                    return ;
             }
         });
+        fbind('Exec', function(code: String) {
             player.exec(code, function(?error) {
+                return ;
             });
         });
+        fbind('Notify', dialogs.notify);
+        fbind('Notify:Player', function(sdata: String) {
             var data:Dynamic = sdata;
+            if (sdata.has('{') && sdata.has('}')) {
                 data = haxe.Json.parse( sdata );
+            }
             player.message(
                 if (Std.is(data, String))
                     (cast data)
@@ -70,6 +85,9 @@ class RendererIpcCommands extends BaseIpcCommands {
                     (pman.ui.PlayerMessageBoard.messageOptionsFromJson(untyped data))
             );
         });
+        fbind('Tab:Select', player.session.setTab);
+        fbind('Tab:Create', player.session.newTab);
+        fbind('Tab:Delete', player.session.deleteTab);
     }
 
 /* === Utils === */
