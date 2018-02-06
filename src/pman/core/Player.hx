@@ -588,6 +588,7 @@ class Player extends EventDispatcher {
 	    }
 
         if (track != null) {
+            /*
             var box = new BookmarkPrompt();
             box.open();
             box.readLine(function(name : Null<String>) {
@@ -608,6 +609,22 @@ class Player extends EventDispatcher {
                 });
             });
             box.focus();
+            */
+            var box = new BookmarkPrompt();
+            box.readMark(function(mark: Null<Mark>) {
+                if (mark != null) {
+                    track.addMark(mark, function(?error) {
+                        if (error != null) {
+                            complete( error );
+                        }
+                        else {
+                            snapshot(function(?err) {
+                                complete( err );
+                            });
+                        }
+                    });
+                }
+            });
         }
         else 
 			return complete();
