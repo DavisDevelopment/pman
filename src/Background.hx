@@ -324,6 +324,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'ExportPlaylist');
                     */
+                    tap('ExportPlaylist');
                 }
             }
             ]
