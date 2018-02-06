@@ -365,6 +365,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'Snapshot');
                     */
+                    tap( 'Snapshot' );
                 }
             },
             {type: 'separator'},
