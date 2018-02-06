@@ -146,23 +146,30 @@ class Background {
             {type: 'separator'},
             {
                 label: 'Preferences',
-                click: function(i,w) ic.send(w, 'EditPreferences')
+                click: function(i,w) {
+                    /* FIXME
+                    ic.send(w, 'EditPreferences');
+                    */
+                }
             },
             {
                 label: 'About',
                 click: function(i, w) {
+                    /* FIXME
                     ic.notify({
-                        text: 'Taste of my anal syrup',
+                        text: 'betty',
                         duration: 60000,
                         color: '#28e63f',
                         backgroundColor: '#222222',
                         fontSize: '16pt'
                     });
+                    */
                 }
             },
             {
                 label: 'Help',
                 click: function(i, w) {
+                    /* FIXME
                     ic.notify({
                         text: 'you require help?\n\n\n - git gud',
                         duration: 60000,
@@ -170,6 +177,7 @@ class Background {
                         backgroundColor: '#222222',
                         fontSize: '16pt'
                     });
+                    */
                 }
             },
             {type: 'separator'},
@@ -197,21 +205,27 @@ class Background {
                 label: 'Open File(s)',
                 accelerator: 'CommandOrControl+O',
                 click: function(i:MenuItem, w:BrowserWindow) {
+                    /* FIXME
                     ic.send(w, 'OpenFile');
+                    */
                 }
             },
             {
                 label: 'Open Directory',
                 accelerator: 'CommandOrControl+F',
                 click: function(i:MenuItem, w:BrowserWindow) {
+                    /* FIXME
                     ic.send(w, 'OpenDirectory');
+                    */
                 }
             },
             {type: 'separator'},
             {
                 label: 'Save Playlist',
                 click: function(i, w:BrowserWindow) {
+                    /* FIXME
                     ic.send(w, 'SavePlaylist');
+                    */
                 }
             }
             ]
@@ -225,7 +239,9 @@ class Background {
                 label: 'Playlist',
                 accelerator: 'CommandOrControl+L',
                 click: function(i, w:BrowserWindow) {
+                    /* FIXME
                     ic.send(w, 'TogglePlaylist');
+                    */
                 }
             },
             {
@@ -245,25 +261,45 @@ class Background {
             {
                 label: 'Clear',
                 accelerator: 'CommandOrControl+W',
-                click: function(i, w) ic.send(w, 'ClearPlaylist')
+                click: function(i, w) {
+                    /* FIXME
+                    ic.send(w, 'ClearPlaylist');
+                    */
+                }
             },
             {
                 label: 'Shuffle',
-                click: function(i, w) ic.send(w, 'ShufflePlaylist')
+                click: function(i, w) {
+                    /* FIXME
+                    ic.send(w, 'ShufflePlaylist');
+                    */
+                }
             },
             {
                 label: 'Save',
                 accelerator: 'CommandOrControl+S',
-                click: function(i, w) ic.send(w, 'SavePlaylist', [false])
+                click: function(i, w) {
+                    /* FIXME
+                    ic.send(w, 'SavePlaylist', [false]);
+                    */
+                }
             },
             {
                 label: 'Save As',
                 accelerator: 'CommandOrControl+Shift+S',
-                click: function(i, w) ic.send(w, 'SavePlaylist', [true])
+                click: function(i, w) {
+                    /* FIXME
+                    ic.send(w, 'SavePlaylist', [true]);
+                    */
+                }
             },
             {
                 label: 'Export',
-                click: function(i, w) ic.send(w, 'ExportPlaylist')
+                click: function(i, w) {
+                    /* FIXME
+                    ic.send(w, 'ExportPlaylist');
+                    */
+                }
             }
             ]
 	    };
@@ -282,7 +318,9 @@ class Background {
                 playlistsOptions.submenu.push({
                     label: name,
                     click: function(i, w) {
+                        /* FIXME
                         ic.send(w, 'LoadPlaylist', [name]);
+                        */
                     }
                 });
             }
@@ -296,12 +334,20 @@ class Background {
             submenu: [
             {
                 label: 'Take Snapshot',
-                click: function(i,w) ic.send(w, 'Snapshot')
+                click: function(i,w) {
+                    /* FIXME
+                    ic.send(w, 'Snapshot');
+                    */
+                }
             },
             {type: 'separator'},
             {
                 label: 'Bookmarks',
-                click: function(i,w) ic.send(w, 'EditMarks')
+                click: function(i,w) {
+                    /* FIXME
+                    ic.send(w, 'EditMarks');
+                    */
+                }
             },
             {type: 'separator'},
             {
@@ -309,7 +355,11 @@ class Background {
                 submenu: [
                 {
                     label: 'Skim Media',
-                    click: function(i,w) ic.send(w, 'AddComponent', untyped ['skim'])
+                    click: function(i,w) {
+                        /* FIXME
+                        ic.send(w, 'AddComponent', untyped ['skim']);
+                        */
+                    }
                 }
                 ]
             }
