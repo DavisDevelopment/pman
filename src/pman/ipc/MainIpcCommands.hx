@@ -30,35 +30,6 @@ class MainIpcCommands extends BaseIpcCommands {
       * bind commands
       */
     public function bind():Void {
-        /*
-        b('Reload', function() {
-            electron.ext.App.relaunch();
-            bg.close();
-        });
-
-        b('UpdateMenu', function() bg.updateMenu());
-
-        b('GetLaunchInfo', function() {
-            send('LaunchInfo', bg.launchInfo());
-        });
-
-        Ipc.on('command:HttpServe', function(event, spath:String) {
-            var path = new Path(spath);
-            var id = bg.httpServe( path );
-            trace('$path => $id');
-            event.returnValue = id;
-        });
-        */
-
-        on('betty', function(packet) {
-            trace( packet );
-        });
-
-        on('GetLaunchInfo', function(packet) {
-            trace('launch-info requested');
-
-            packet.reply(bg.launchInfo());
-        });
     }
 
     /**
