@@ -24,6 +24,8 @@ class BaseIpcCommands {
         @:privateAccess _pb.__checkEvents = false;
         _replyListeners = new Dict();
         _listened = new Set();
+
+        call = Reflect.makeVarArgs( _acall );
     }
 
 /* === Utility Methods === */
@@ -47,6 +49,11 @@ class BaseIpcCommands {
             }
         });
     }
+
+    /**
+      * "method" to 'call' a method remotely
+      */
+    public var call: Dynamic;
 
     /**
       * utility method to feel more like remotely calling a function
