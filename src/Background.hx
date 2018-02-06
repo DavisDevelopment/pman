@@ -375,6 +375,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'EditMarks');
                     */
+                    tap( 'EditMarks' );
                 }
             },
             {type: 'separator'},
