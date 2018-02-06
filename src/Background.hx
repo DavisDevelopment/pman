@@ -315,6 +315,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'SavePlaylist', [true]);
                     */
+                    call('SavePlaylist', true);
                 }
             },
             {
