@@ -335,7 +335,7 @@ class BPlayerMain extends Application {
 	  * create route to [path] on the HTTP server
 	  */
 	public function httpServe(path : Path):String {
-	    return ic.sendSync('HttpServe', untyped [path.toString()]);
+	    throw 'Error: HTTP-serving is unimplemented';
 	}
 
 	/**
