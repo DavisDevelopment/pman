@@ -245,6 +245,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'SavePlaylist');
                     */
+                    tap( 'SavePlaylist' );
                 }
             }
             ]
