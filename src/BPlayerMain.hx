@@ -14,6 +14,7 @@ import electron.ext.Dialog;
 import electron.ext.MenuItem;
 import electron.Tools.defer;
 import electron.main.WebContents;
+import electron.renderer.IpcRenderer;
 
 import edis.concurrency.*;
 import hscript.*;
@@ -144,7 +145,11 @@ class BPlayerMain extends Application {
 
         // request launch info from background
         defer(function() {
-            ic.send( 'GetLaunchInfo' );
+            trace('requesting launch info..');
+            ic.send('GetLaunchInfo', null, null, function(launchInfo) {
+                trace( launchInfo );
+                _provideLaunchInfo( launchInfo );
+            });
         });
 	}
 
@@ -312,7 +317,7 @@ class BPlayerMain extends Application {
       * send command to the main process, telling it to update the application menu
       */
 	public inline function updateMenu():Void {
-	    ic.send('UpdateMenu');
+	    ic.send('UpdateMenu', null);
 	}
 
 	/**
