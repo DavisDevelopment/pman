@@ -286,6 +286,7 @@ class Background {
                     /* FIXME
                     ic.send(w, 'ClearPlaylist');
                     */
+                    tap( 'ClearPlaylist' );
                 }
             },
             {
