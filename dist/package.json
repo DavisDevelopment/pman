@@ -30,9 +30,6 @@
     "cross-platform"
   ],
   "dead_dependencies": {
-    "chromecast-api": "0.2.5",
-    "express": "^4.15.2",
-    "send-seekable": "^1.0.4"
   },
   "dependencies": {
     "auto-launch": "^5.0.5",
@@ -42,7 +39,10 @@
     "localforage": "^1.5.2",
     "natural": "^0.5.4",
     "nedb": "^1.8.0",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "chromecast-api": "0.2.5",
+    "express": "^4.15.2",
+    "send-seekable": "^1.0.4"
   },
   "devDependencies": {
     "ajv": "^6.0.0",
