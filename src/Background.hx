@@ -174,6 +174,7 @@ class Background {
                         fontSize: '16pt'
                     });
                     */
+                    browserOpen( 'https://github.com/DavisDevelopment/pman' );
                 }
             },
             {
