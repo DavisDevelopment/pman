@@ -13,6 +13,7 @@ import gryffin.audio.*;
 import pman.core.*;
 import pman.media.*;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
+import pman.display.media.AudioPipeline;
 
 import electron.Tools.defer;
 import Std.*;
@@ -75,8 +76,8 @@ class AudioVisualizer {
       * build out the audio analysis tree
       */
     private function build_tree(done : Void->Void):Void {
+        /*
         mr.audioManager.treeBuilders = [function(m : AudioManager):Void {
-            /* == Build Nodes == */
             var c = context = m.context;
             source = m.source;
             destination = m.destination;
@@ -86,7 +87,6 @@ class AudioVisualizer {
             leftAnalyser = c.createAnalyser();
             rightAnalyser = c.createAnalyser();
 
-            /* == Connect Nodes == */
             source.connect( splitter );
             splitter.connect(leftAnalyser, [0]);
             splitter.connect(rightAnalyser, [1]);
@@ -97,6 +97,31 @@ class AudioVisualizer {
             config();
         }];
         mr.audioManager.buildTree( done );
+        */
+
+        var vizNode = mr.audioManager.createNode({
+            init: function(self: Fapn) {
+                var m = self.pipeline;
+                context = m.context;
+                source = m.source;
+                destination = m.destination;
+
+                splitter = context.createChannelSplitter( 2 );
+                merger = context.createChannelMerger( 2 );
+                leftAnalyser = context.createAnalyser();
+                rightAnalyser = context.createAnalyser();
+
+                splitter.connect(leftAnalyser, [0]);
+                splitter.connect(rightAnalyser, [1]);
+                leftAnalyser.connect(merger, [0, 0]);
+                rightAnalyser.connect(merger, [0, 1]);
+
+                self.setNode(cast splitter, cast merger);
+            }
+        });
+        mr.audioManager.prependNode( vizNode );
+        config();
+        done();
     }
 
 /* === Computed Instance Fields === */
