@@ -388,6 +388,7 @@ class Background {
                         /* FIXME
                         ic.send(w, 'AddComponent', untyped ['skim']);
                         */
+                        call('AddComponent', 'skim');
                     }
                 }
                 ]
