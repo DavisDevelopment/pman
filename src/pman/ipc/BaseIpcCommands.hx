@@ -48,6 +48,13 @@ class BaseIpcCommands {
         });
     }
 
+    /**
+      * utility method to feel more like remotely calling a function
+      * TODO (implement the callback portion of that)
+      */
+    public inline function acall(name:String, ?args:Array<Dynamic>, ?callback:Function, ?encoding:WorkerPacketEncoding):Void {
+        return send(name, args, encoding);
+    }
 
 
 /* === Instance Methods === */
