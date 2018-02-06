@@ -15,6 +15,7 @@ import gryffin.audio.*;
 import pman.core.*;
 import pman.media.*;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
+import pman.display.media.AudioPipeline;
 
 import electron.Tools.defer;
 import Std.*;
@@ -31,8 +32,6 @@ class BarsVisualizer extends AudioVisualizer {
     /* Constructor Function */
     public function new(r) {
         super( r );
-
-
     }
 
 /* === Instance Methods === */
@@ -73,16 +72,22 @@ class BarsVisualizer extends AudioVisualizer {
             var barHeight:Float;
             var barX:Float = 0.0;
             var index:Int = 0;
+            var color:Color = new Color(255, 255, 50);
 
             while (index < bufferLength) {
                 barHeight = ceil(data[index]);
                 
+                /*
                 c.fillStyle = color(
                     barHeight + (25 * (index / bufferLength)),
                     250 * (index / bufferLength),
                     50
                 );
+                */
+                color.red = floor(barHeight + (25 * (index / bufferLength)));
+                color.green = floor(250 * (index / bufferLength));
 
+                c.fillStyle = color;
                 c.fillRect(floor(rect.x + barX), floor(rect.y + rect.height - barHeight), barWidth, barHeight);
 
 
@@ -105,6 +110,7 @@ class BarsVisualizer extends AudioVisualizer {
       * override that [build_tree] method
       */
     override function build_tree(done: Void->Void):Void {
+        /*
         mr.audioManager.treeBuilders = [function(m : AudioManager) {
             var c = this.context = m.context;
             source = m.source;
@@ -118,13 +124,34 @@ class BarsVisualizer extends AudioVisualizer {
             config(1024, 0.65);
         }];
         mr.audioManager.buildTree( done );
+        */
+
+        var vizNode = mr.audioManager.createNode({
+            init: function(self: Fapn) {
+                var m = self.pipeline;
+                var c = context = m.context;
+                source = m.source;
+                destination = m.destination;
+
+                analyzer = c.createAnalyser();
+
+                self.setNode(cast analyzer);
+
+                config(1024, 0.65);
+            } 
+        });
+        mr.audioManager.prependNode( vizNode );
+        done();
     }
 
     /**
       * pull data
       */
-    private inline function pullData():Void {
-        data = analyzer.getByteFrequencyData();
+    private function pullData():Void {
+        var shouldPull:Bool = (configChanged || player.getStatus().match(Playing));
+        if ( shouldPull ) {
+            data = analyzer.getByteFrequencyData();
+        }
     }
 
 /* === Computed Instance Fields === */
