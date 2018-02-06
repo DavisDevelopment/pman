@@ -31,9 +31,11 @@ using tannus.ds.ArrayTools;
 using Lambda;
 using Slambda;
 
-class RendererIpcCommands {
+class RendererIpcCommands extends BaseIpcCommands {
     /* Constructor Function */
     public function new(m : BPlayerMain):Void {
+        super();
+
         this.main = m;
     }
 
@@ -43,22 +45,20 @@ class RendererIpcCommands {
       * bind commands
       */
     public function bind():Void {
-        inline function b(name, f) {
-            Ipc.on('command:$name', f);
-        }
+        fbind('OpenFile', player.selectAndOpenFiles);
+        fbind('OpenDirectory', player.selectAndOpenDirectory);
+        fbind('ExportPlaylist', player.exportPlaylist);
+        fbind('TogglePlaylist', player.togglePlaylist);
+        fbind('ClearPlaylist', player.clearPlaylist);
+        fbind('ShufflePlaylist', player.shufflePlaylist);
 
+        /*
         b('OpenFile', function() player.selectAndOpenFiles());
         b('OpenDirectory', function() player.selectAndOpenDirectory());
         b('ExportPlaylist', function() player.exportPlaylist());
         b('TogglePlaylist', function() player.togglePlaylist());
         b('ClearPlaylist', function() player.clearPlaylist());
         b('ShufflePlaylist', function() player.shufflePlaylist());
-        /*
-        b('SaveSession', function() player.saveState());
-        b('LoadSession', function(e, name:String) {
-            player.loadState( name );
-        });
-        */
         b('SavePlaylist', function(e, ?saveAs:Bool) {
             trace( saveAs );
             player.savePlaylist( saveAs );
@@ -121,25 +121,21 @@ class RendererIpcCommands {
         b('Tab:Delete', function(e, index:Int) {
             player.session.deleteTab( index );
         });
+        */
     }
 
-    /**
-      * send a command
-      */
-    public function send(cmd:String, ?args:Array<Dynamic>):Void {
-        var params:Array<Dynamic> = ['command:$cmd'];
-        if (args != null)
-            params = params.concat( args );
-        Reflect.callMethod(Ipc, Ipc.send, params);
+/* === Utils === */
+
+/* === Overrides === */
+
+    override function _post(channel:String, data:Dynamic):Void {
+        Ipc.send(channel, data);
     }
-    /**
-      * send a command synchronously
-      */
-    public function sendSync(cmd:String, ?args:Array<Dynamic>):Dynamic {
-        var params:Array<Dynamic> = ['command:$cmd'];
-        if (args != null)
-            params = params.concat( args );
-        return Reflect.callMethod(Ipc, Ipc.sendSync, params);
+
+    override function _onMessage(channel:String, handler:Dynamic->Void):Void {
+        Ipc.on(channel, function(event, ?packet:Dynamic) {
+            handler( packet );
+        });
     }
 
 /* === Computed Instance Fields === */
