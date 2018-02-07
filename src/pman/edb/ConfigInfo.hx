@@ -44,11 +44,28 @@ class ConfigInfo extends JsonFileStorage {
         if (lastDirectory == null) {
             lastDirectory = Paths.videos();
         }
+
+        if (visualizer == null) {
+            visualizer = Bars;
+        }
     }
 
+/* === Computed Instance Fields === */
+
+    // the last directory that was interacted with
     public var lastDirectory(get,set):Null<Path>;
     private inline function get_lastDirectory() return _lastDirectory!=null?new Path(_lastDirectory):null;
     private inline function set_lastDirectory(v) return Path.fromString(_lastDirectory = (v != null ? Std.string(v) : null));
 
+/* === Instance Fields === */
+
+    public var visualizer:Null<VisualizerName>;
+
     private var _lastDirectory:String;
+}
+
+@:enum
+abstract VisualizerName (String) from String to String {
+    var Bars = 'bars';
+    var Spectograph = 'spectograph';
 }
