@@ -135,7 +135,7 @@ class BPlayerMain extends Application {
                 dragManager.init();
 
                 //bgdbTest();
-                test_edis_fs();
+                //test_edis_fs();
             });
         });
 
@@ -153,6 +153,9 @@ class BPlayerMain extends Application {
         });
 	}
 
+	/**
+	  * method to comprehensively test the [edis.storage.fs.async.FileSystem] system
+	  */
 	private function test_edis_fs():Void {
 	    var tests:Array<VoidAsync> = new Array();
 	    function test(v: VoidAsync):Void {
@@ -297,14 +300,16 @@ class BPlayerMain extends Application {
     /**
       * test the new Scripting Engine
       */
+    /*
     private function test_scripting():Void {
         var script = new ScriptState();
-        var code:String = Ct.readFileAsString('res/test_script.js');
+        var code:String = "";//Ct.readFileAsString('res/test_script.js');
         var result = script.executeString( code );
         
         win.console.log( result );
         //result.say('I need my urinal, boo');
     }
+    */
 
 	/**
 	  * quit this shit
