@@ -461,7 +461,7 @@ class Background {
     public function updateTray():Void {
         if (tray == null) {
             var trayIconPath = ap('assets/icon64.png');
-            if (App.isUnityRunning()) {
+            if (Sys.systemName() == 'Linux' && App.isUnityRunning()) {
                 trayIconPath = ap('assets/gray-icon64.png');
             }
             tray = new Tray(trayIconPath.toString());
