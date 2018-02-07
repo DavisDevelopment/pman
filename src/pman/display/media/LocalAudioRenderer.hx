@@ -10,9 +10,9 @@ import gryffin.core.*;
 import gryffin.display.*;
 import gryffin.media.MediaObject;
 import gryffin.audio.*;
-import gryffin.Tools.now;
 
-import pman.async.AlbumArtLoader;
+//import pman.async.AlbumArtLoader;
+import pman.async.tasks.LoadAlbumArt;
 import pman.core.*;
 import pman.media.*;
 import pman.tools.mediatags.MediaTagReader;
@@ -20,9 +20,10 @@ import pman.ui.*;
 import pman.edb.*;
 
 import js.Browser.window;
-import electron.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -130,6 +131,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
                 return ;
             } 
             else {
+                /*
                 var artLoader = new AlbumArtLoader();
                 var artPromise = artLoader.loadAlbumArt( t );
                 artPromise.then(function(art : Null<Image>) {
@@ -139,9 +141,23 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
                         underlay.appendTo('body');
                     }
                 });
+                */
+                var artProm = LoadAlbumArt.loadAlbumArt(t.getFsPath() + '');
+                artProm.then(function(art: Null<Image>) {
+                    albumArt = art;
+                    if ( prefs.directRender ) {
+                        underlay = new AlbumArtUnderlay( albumArt );
+                        underlay.appendTo('body');
+                    }
+                });
+                artProm.unless(function(error: Dynamic) {
+                    throw error;
+                });
             }
         }
-        window.setTimeout(_load_albumart, 2000);
+
+        //window.setTimeout(_load_albumart, 2000);
+        wait(2000, _load_albumart);
     }
 
     public var prefs(get, never):Preferences;
