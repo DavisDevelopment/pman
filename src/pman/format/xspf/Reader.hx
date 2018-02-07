@@ -62,7 +62,7 @@ class Reader extends BaseXmlParser {
       */
     private function parsePlaylistNode(playlist: FunctionalNodeHandler):Void {
         doc = new Data();
-        var txt = playlist.childGetText.bind(_, _);
+        var txt = (n:String, f:String->Void) -> playlist.childGetText(n, (s:String)->f(s.trim()));
         
         txt('title', fn(doc.title = _));
         txt('creator', fn(doc.creator = _));
@@ -90,7 +90,12 @@ class Reader extends BaseXmlParser {
       * parses each <track/> node
       */
     private function parseTrackNode(tn:FunctionalNodeHandler, f:Null<DataTrack>->Void):Void {
-        var txt = tn.childGetText.bind(_, _), num = tn.childGetTextAsFloat.bind(_, _), inum = tn.childGetTextAsInt.bind(_, _);
+        var num = tn.childGetTextAsFloat.bind(_, _), inum = tn.childGetTextAsInt.bind(_, _);
+        inline function txt(n:String, f:String->Void) {
+            tn.childGetText(n, function(s) {
+                f(echo(s.trim()));
+            });
+        }
         var track = doc.createTrack();
 
         txt('title', setr(track.title));

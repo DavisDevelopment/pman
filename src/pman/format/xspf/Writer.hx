@@ -35,7 +35,7 @@ class Writer {
 		toXml( list );
 		//var el = tannus.xml.Elem.fromXml( root );
 		//var data:String = el.print( true );
-		var data:String = XmlPrinter.print(doc, true);
+		var data:String = XmlPrinter.print(doc, false);
 		data = ('<?xml version="1.0" encoding="UTF-8"?>\n' + data);
 		return ByteArray.ofString( data );
 	}
