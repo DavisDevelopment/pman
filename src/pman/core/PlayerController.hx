@@ -73,29 +73,48 @@ class PlayerController {
       */
     @:access( pman.media.LocalMediaObjectMediaDriver )
     public function getStatus():PlayerStatus {
+        // declare variable to hold the current status
         var status : PlayerStatus;
+
+        // based on current playback target
         switch ( player.target ) {
+            // if playing on local device
             case PTThisDevice:
+                // if there is any media mounted
                 if (player.session.hasMedia()) {
+                    // if the driver for that media is using a MediaObject
                     if (Std.is(player.session.mediaDriver, LocalMediaObjectMediaDriver)) {
+                        // get that media object
                         var mo:MediaObject = cast(cast(player.session.mediaDriver, LocalMediaObjectMediaDriver<Dynamic>).mediaObject, MediaObject);
+                        // and then the one on which it is built
                         var me = mo.getUnderlyingMediaObject();
+                        // check its [readyState] property
                         var readyState:MediaReadyState = me.readyState;
                         switch ( readyState ) {
+                            // there is nothing loaded, or only metadata is loaded
                             case HAVE_NOTHING, HAVE_METADATA:
+                                // we are waiting
                                 status = Waiting;
 
+                            // we have data that can be played
                             case HAVE_CURRENT_DATA, HAVE_FUTURE_DATA, HAVE_ENOUGH_DATA:
+                                // if media-object has ended
                                 if ( ended ) {
+                                    // then that is our status: ended
                                     status = Ended;
                                 }
+                                // otherwise, if MediaObject is paused
                                 else if ( paused ) {
+                                    // our status is paused
                                     status = Paused;
                                 }
+                                // otherwise
                                 else {
+                                    // we must be playing
                                     status = Playing;
                                 }
 
+                            // status defaults to empty
                             default:
                                 status = Empty;
                                 throw 'What the fuck';
@@ -109,9 +128,12 @@ class PlayerController {
                     status = Empty;
                 }
 
+            // if playback target is a chromecast
             case PTChromecast( cc ):
+                // ask the cast-controller for our status
                 return cc.getPlayerStatus();
 
+            // default to empty
             default:
                 status = Empty;
                 throw 'What the fuck';
@@ -131,19 +153,23 @@ class PlayerController {
                 cc.tick();
         }
 
+        // if media is mounted
         if (session.hasMedia()) {
+            // get shorthand for playback-properties
             var pp = session.pp;
 
+            // copy over playback-properties
             mediaVolume = pp.volume;
             mediaPlaybackRate = pp.speed;
             mediaMuted = pp.muted;
 
+            // get currentStatus
             var currentStatus = getStatus();
             switch ( currentStatus ) {
                 case Ended:
                     var ls = lastStatus;
-                    trace(repeat + "");
-                    switch (repeat) {
+                    //trace(repeat + "");
+                    switch ( repeat ) {
                         case RepeatOff:
                             if (session.indexOfCurrentMedia() == (session.playlist.length-1)) return;
                             else{
