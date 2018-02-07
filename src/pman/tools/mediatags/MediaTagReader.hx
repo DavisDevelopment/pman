@@ -7,7 +7,7 @@ import Slambda.fn;
 
 @:jsRequire('jsmediatags', 'Reader')
 extern class MediaTagReader {
-    public function new(file:String):Void;
+    public function new(file: String):Void;
     public function setTagsToRead(tags : Array<String>):Void;
     public function read(cbo : MediaTagReadCb):Void;
     public inline function pread():Promise<TagResults> {
