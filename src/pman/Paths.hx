@@ -20,7 +20,7 @@ class Paths {
 
     public static function home():Path {
         if (_home == null) {
-            _home = new Path(Sys.getEnv(os() == 'Win32' ? 'USERPROFILE' : 'HOME'));
+            _home = new Path(Sys.getEnv(os() == 'Windows' ? 'USERPROFILE' : 'HOME'));
         }
         return _home;
     }
