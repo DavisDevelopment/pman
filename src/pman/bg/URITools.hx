@@ -130,12 +130,23 @@ class URITools {
             //return new 
         //}
     //}
+    /**
+    /**
+      * get system name
+      */
+    private static function os():String {
+        if (sys_name == null) {
+            return (sys_name = Sys.systemName());
+        }
+        return sys_name;
+    }
 
 /* === Variables === */
 
     private static var uri_pattern:RegEx = {~/^([a-z0-9]+):/gi;};
-    private static var unix_path_pattern:RegEx = {~/^(\.+\/)|(\.\/)|(\/)/g;};
+    private static var unix_path_pattern:RegEx = {~/^(\.+\/)|^(\.\/)|^(\/)/g;};
     private static var dos_path_pattern:RegEx =  {~/^([A-Z]+:)?\\/g;};
+    private static var sys_name:Null<String> = null;
 }
 
 typedef PathMixin = pman.bg.PathTools;
