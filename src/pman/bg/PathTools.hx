@@ -25,7 +25,7 @@ class PathTools {
       * convert a Path to a URI
       */
     public static inline function toUri(path: Path):String {
-        return ('file://' + path.toString().urlEncode());
+        return ('file://' + path.toString());
     }
 
     /**
