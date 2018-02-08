@@ -131,6 +131,15 @@ class URITools {
         //}
     //}
     /**
+      * obtain reference to the appropriate RegEx to use for the current platform
+      */
+    private static function path_pattern():RegEx {
+        return (switch (os()) {
+            case 'Windows': dos_path_pattern;
+            default: unix_path_pattern;
+        });
+    }
+
     /**
       * get system name
       */
