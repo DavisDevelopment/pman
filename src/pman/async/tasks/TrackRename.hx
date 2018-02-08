@@ -158,7 +158,8 @@ class TrackRename extends Task1 {
       */
     private function repoint_db_row(done : VoidCb):Void {
         var raise = done.raise();
-        var uri = fn(p => ('file://'+(MediaSource.MSLocalPath(p).mediaSourceToUri())));
+        //var uri = fn(p => ('file://'+(MediaSource.MSLocalPath(p).mediaSourceToUri())));
+        inline function uri(p: Path) return (MediaSource.MSLocalPath( p ).toUri());
         var new_uri:String = uri( name.current );
         var old_uri:String = uri( name.previous );
 
@@ -236,8 +237,9 @@ class TrackRename extends Task1 {
       * update any/all views displaying Track information
       */
     private function update_track_views(done : VoidCb):Void {
-        var uri = fn(p => ('file://'+(MediaSource.MSLocalPath(p).mediaSourceToUri())));
-        var oldUri = uri( name.previous );
+        //var uri = fn(p => ('file://'+(MediaSource.MSLocalPath(p).mediaSourceToUri())));
+        inline function uri(p: Path) return (MediaSource.MSLocalPath( p ).toUri());
+        var oldUri:String = uri( name.previous );
         defer(function() {
             // relink the Track's view to it
             var plv = track.player.page.playlistView;
@@ -248,8 +250,14 @@ class TrackRename extends Task1 {
                 if (tv != null) {
                     tc.remove( oldUri );
                     tc[track.uri] = tv;
+                    tv.update();
                 }
-                tv.update();
+                else {
+                    tv = tc[track.mediaId];
+                    if (tv != null) {
+                        tv.update();
+                    }
+                }
             }
             defer( done );
         });
