@@ -14,6 +14,8 @@ import Xml.XmlType;
 import Slambda.fn;
 import tannus.io.Ptr.*;
 
+import edis.Globals.*;
+
 import haxe.macro.Expr;
 
 using StringTools;
@@ -34,6 +36,9 @@ class Reader extends BaseXmlParser {
 
 /* === Instance Methods === */
 
+    /**
+      * parse out an XML string
+      */
     public function parseString(xmlString: String):Data {
         doc = null;
         handleString( xmlString );
@@ -62,7 +67,11 @@ class Reader extends BaseXmlParser {
       */
     private function parsePlaylistNode(playlist: FunctionalNodeHandler):Void {
         doc = new Data();
-        var txt = (n:String, f:String->Void) -> playlist.childGetText(n, (s:String)->f(s.trim()));
+        inline function txt(n:String, f:String->Void) {
+            playlist.childGetText(n, function(s: String) {
+                f(s.trim());
+            });
+        }
         
         txt('title', fn(doc.title = _));
         txt('creator', fn(doc.creator = _));
@@ -91,15 +100,17 @@ class Reader extends BaseXmlParser {
       */
     private function parseTrackNode(tn:FunctionalNodeHandler, f:Null<DataTrack>->Void):Void {
         var num = tn.childGetTextAsFloat.bind(_, _), inum = tn.childGetTextAsInt.bind(_, _);
-        inline function txt(n:String, f:String->Void) {
+        function txt(n:String, f:String->Void) {
             tn.childGetText(n, function(s) {
-                f(echo(s.trim()));
+                f(s.trim());
             });
         }
         var track = doc.createTrack();
 
-        txt('title', setr(track.title));
-        txt('location', uri->track.addLocation( uri ));
+        txt('title', setr( track.title ));
+        txt('location', function(uri: String) {
+            track.addLocation( uri );
+        });
         inum('duration', setr(track.duration));
 
         tn.then(function() {
