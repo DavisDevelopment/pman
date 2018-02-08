@@ -122,14 +122,19 @@ class URITools {
     }
 
     /**
-      * convert [uri] to a MediaSource
+      * percent-encode the given text
       */
-    //public static function toMedia(s: String):Null<Media> {
-        //var uri:Null<String> = toUri( s );
-        //if (uri != null) {
-            //return new 
-        //}
-    //}
+    public static function percentEncode(text:String, ?leaveUnencoded:String):String {
+        var pre:PRegEx = PRegEx.build(function(re: PRegEx) {
+            return re.anyOf('!*\'();:@&=+$,/?#[]', false, true).or().whitespace();
+        }).withOptions('g');
+        trace(pre.toString());
+        var re:RegEx = pre.toRegEx();
+        return re.map(text, function(re) {
+            return ('%' + re.matched(0).charCodeAt(0).hex(2));
+        });
+    }
+
     /**
       * obtain reference to the appropriate RegEx to use for the current platform
       */
