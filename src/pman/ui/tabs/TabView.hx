@@ -29,6 +29,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.ds.AnonTools;
 using pman.async.VoidAsyncs;
+using tannus.math.TMath;
 
 class TabView extends Ent {
     /* Constructor Function */
@@ -235,7 +236,7 @@ class TabView extends Ent {
             }
             c.drawComponent(tb, 
                 0, 0, tb.width, tb.height,
-                tbr.x, tbr.y, tbr.w, tbr.h
+                tbr.x.floor(), tbr.y.floor(), tbr.w.int(), tbr.h.int()
             );
         }
 
