@@ -6,6 +6,7 @@ import tannus.sys.*;
 import tannus.async.*;
 import tannus.sys.Path;
 import tannus.http.Url;
+import tannus.TSys as Sys;
 
 import pman.bg.media.*;
 
@@ -40,7 +41,7 @@ class URITools {
       * attempt to extract the 'protocol' specified in the given uri
       */
     public static inline function protocol(s: String):Null<String> {
-        return (isUri(s) ? s.before(':') : null);
+        return (isUri( s ) ? s.before(':') : null);
     }
 
     /**
