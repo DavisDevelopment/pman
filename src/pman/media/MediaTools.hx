@@ -22,6 +22,7 @@ import pman.media.MediaSource;
 import pman.async.*;
 import pman.async.tasks.*;
 import pman.async.tasks.TrackListDataLoader;
+//import pman.bg.MediaTools;
 
 import js.html.MediaElement as NativeMediaObject;
 
@@ -30,6 +31,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda; 
+using pman.bg.MediaTools;
 
 /**
   * mixin class containing utility methods pertaining to the pman.media.* objects
@@ -44,6 +46,7 @@ class MediaTools {
         probe.setSources([dir]);
         probe.run( done );
     }
+
     public static function igetAllOpenableFiles(idir:Iterable<Directory>, done:Array<File>->Void):Void {
         var coll = new Array();
         function collect(d:Directory, next:Void->Void) {
@@ -81,6 +84,7 @@ class MediaTools {
     /**
       * load data for a list of Tracks
       */
+    @:deprecated
     public static function loadDataForAll(tracks:Array<Track>, ?done:Cb<TLDLResult>):Void {
         var loader = new TrackListDataLoader();
         loader.load(tracks, done);
@@ -102,14 +106,6 @@ class MediaTools {
 				});
 			});
 		});
-	}
-
-	/**
-	  * wraps a Promise in a standard js-style callback
-	  */
-	private static function jscbWrap<T>(promise:Promise<T>, handler:Null<Dynamic>->T->Void):Void {
-		promise.then(fn([result] => handler(null, result)));
-		promise.unless(fn([error] => handler(error, null)));
 	}
 
 	/**
