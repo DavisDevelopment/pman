@@ -32,6 +32,6 @@ class PathTools {
       * convert a Path to a MediaSource
       */
     public static inline function toMediaSource(path: Path):MediaSource {
-        return MediaSourceTools.toMediaSource(toUri( path ));
+        return UriTools.toMediaSource(toUri( path ));
     }
 }
