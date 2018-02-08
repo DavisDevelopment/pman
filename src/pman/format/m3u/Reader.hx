@@ -63,14 +63,25 @@ class Reader {
 		else {
 			var line:String = nextLine();
 
-			if (line.empty()) {
+			if (!line.hasContent()) {
 				parseNextLine();
 			}
 			else if (line.startsWith('#EXTINF:')) {
 				var infoLine:String = line.after( '#EXTINF:' );
 				line = nextLine();
 				if (!line.empty()) {
-					var track:Track = line.parseToTrack();
+				    var src:Null<MediaSource> = null;
+				    if (line.isPath()) {
+				        src = line.toFilePath().toMediaSource();
+				    }
+                    else if (line.isUri()) {
+                        src = line.toMediaSource();
+                    }
+                    else {
+                        throw 'M3UErrorInvalidEntryError: "$line" cannot be resolved to a media resource';
+                    }
+
+					var track:Track = src.toTrack();
 					playlist.push( track );
 				}
 				nextLine();

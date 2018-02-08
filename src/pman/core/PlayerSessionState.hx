@@ -49,7 +49,7 @@ class PlayerSessionState {
       * Pull info from a PlayerSession
       */
     public function pull(p : PlayerSession):Void {
-        playlist = p.playlist.map.fn(_.source.mediaSourceToUri());
+        playlist = p.playlist.map.fn(_.source.toUri());
         focused = p.playlist.indexOf( p.focusedTrack );
     }
 

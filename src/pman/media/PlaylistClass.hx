@@ -373,7 +373,7 @@ class PlaylistClass {
 	  * Build a Playlist from a JSON array
 	  */
 	public static function fromJSON(dataStrings : Array<String>):PlaylistClass {
-		var tracks:Array<Track> = dataStrings.map.fn(_.parseToTrack());
+		var tracks:Array<Track> = dataStrings.map.fn(_.toTrack());
 		return new PlaylistClass( tracks );
 	}
 
@@ -381,15 +381,13 @@ class PlaylistClass {
       * build a Playlist from a MediaSourceList object
       */
 	public static function fromMediaSourceList(msl : MediaSourceList):PlaylistClass {
-	    return new PlaylistClass(msl.map.fn(new Track(_.mediaSourceToMediaProvider())));
+	    return new PlaylistClass(msl.map.fn(new Track(_.toMediaProvider())));
 	}
 
     /**
       * build a Playlist from an Array of Strings that represent references to playable media in some form or another
       */
 	public static function fromStrings(sl : Iterable<String>):PlaylistClass {
-	    return new PlaylistClass([for (s in sl) {
-	        s.parseToTrack();
-	    }]);
+	    return new PlaylistClass(sl.array().map.fn(_.toTrack()));
 	}
 }

@@ -66,7 +66,7 @@ class SearchTools {
 
     public static function name(q:QuickOpenItem):String {
         return switch ( q ) {
-            case QOMedia( src ): src.mediaSourceName();
+            case QOMedia( src ): src.getTitle();
             case QOPlaylist( name ): name;
         }
     }

@@ -362,7 +362,9 @@ class Player extends EventDispatcher {
 	        var trackList:Array<Track> = data.tracks.reduce(function(l:Array<Track>, node) {
 	            var loc = (node.locations[0] + '').toUri();
 	            if (loc.isUri()) {
-	                l.push(loc.parseToTrack());
+	                var src = loc.toMediaSource();
+	                var provider = src.toMediaProvider();
+	                l.push(new Track( provider ));
 	            }
 	            return l;
 	        }, new Array());
@@ -796,7 +798,10 @@ class Player extends EventDispatcher {
 	  * add a batch of media items to the queue
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
-	    items = items.filter.fn(_.isRealFile());
+	    items = items.filter(function(item) {
+	        echo( item.source );
+	        return item.isRealFile();
+	    });
 	    echo( items );
 	    var start = now();
 	    var plv = this.getPlaylistView();

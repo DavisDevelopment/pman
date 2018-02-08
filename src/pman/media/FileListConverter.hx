@@ -122,7 +122,7 @@ class FileListConverter {
         addMany(echo(data.tracks.reduce(function(l:Array<Track>, node) {
             var loc = (node.locations[0] + '').toUri();
             if (loc.isUri()) {
-                l.push(loc.parseToTrack());
+                l.push(loc.toTrack());
             }
             return l;
         }, new Array())));

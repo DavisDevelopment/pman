@@ -12,13 +12,18 @@ import haxe.Unserializer;
 import pman.core.*;
 import pman.media.PlaylistChange;
 import pman.media.MediaSource;
+import pman.bg.MediaTools as MediaMixin;
+import pman.bg.MediaTools.MediaSourceTools as MediaSrcTools;
+import pman.bg.MediaTools.UriTools as UriMixin;
+import pman.bg.URITools;
+import pman.media.MediaTools;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
-using pman.media.MediaTools;
+//using pman.media.MediaTools;
 
 @:forward
 abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<MediaSource> {
@@ -36,7 +41,7 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
       */
     @:to
     public inline function toStrings():Array<String> {
-        return this.map( MediaTools.mediaSourceToUri );
+        return this.map(MediaSrcTools.toUri);
     }
 
     /**
@@ -44,17 +49,19 @@ abstract MediaSourceList (Array<MediaSource>) from Array<MediaSource> to Array<M
       */
     @:from
     public static inline function fromStrings(sl : Array<String>):MediaSourceList {
-        return sl.map( pman.media.MediaTools.uriToMediaSource );
+        return sl.map(UriMixin.toMediaSource);
     }
 
     @:to
     public inline function toMediaProviders():Array<MediaProvider> {
-        return this.map.fn(_.mediaSourceToMediaProvider());
+        //return this.map.fn(_.mediaSourceToMediaProvider());
+        return this.map(MediaSourceTools.toMediaProvider);
     }
 
     @:to
     public inline function toTracks():Array<Track> {
-        return this.map.fn(new Track(_.mediaSourceToMediaProvider()));
+        //return this.map.fn(new Track(_.mediaSourceToMediaProvider()));
+        return this.map(MediaSourceTools.toTrack);
     }
 
     @:from

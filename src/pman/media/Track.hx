@@ -95,7 +95,9 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	/**
 	  * get the URI for [this] Track
 	  */
-	public inline function getURI():String return provider.getURI();
+	public inline function getURI():String {
+	    return provider.getURI();
+    }
 
 	/**
 	  * nullify the m,d,r fields
@@ -547,24 +549,31 @@ class Track extends EventDispatcher implements IComparable<Track> {
       * get the Path to [this]
       */
     public function getFsPath():Null<Path> {
-        return switch ( source ) {
-            case MediaSource.MSLocalPath(path): path;
+        switch ( source ) {
+            case MediaSource.MSLocalPath(path): 
+                return path.toUri().toFilePath();
+
             case MediaSource.MSUrl(url):
                 if (url.isPath() || url.protocol() == 'file') {
-                    url.toFilePath();
+                    return url.toUri().toFilePath();
                 }
-                else url;
-            default: null;
-        };
+                else {
+                    return null;
+                }
+            
+            default:
+                throw 'What the fuck?';
+        }
     }
 
     /**
       * check whether [this] Track references a real file
       */
     public function isRealFile():Bool {
-        var path = getFsPath();
+        var path:Null<Path> = getFsPath();
         if (path != null) {
-            return FileSystem.exists( path );
+            echo(path+'');
+            return FileSystem.exists(path + '');
         }
         else return false;
     }

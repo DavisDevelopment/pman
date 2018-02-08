@@ -52,7 +52,7 @@ class Reader {
                     //TODO actually use the other extracted values somehow
                     var title:Null<String> = iget('Title', i+1);
                     var slength:Null<String> = iget('Length', i+1);
-                    var track:Track = location.parseToTrack();
+                    var track:Track = location.toTrack();
                     playlist.push( track );
                 }
             }

@@ -463,7 +463,7 @@ class BPlayerMain extends Application {
 	  * map the given Array to an Array of URIs
 	  */
 	private function toUris(a : Array<String>):Array<String> {
-	    return a.map.fn(_.uriToMediaSource()).map.fn(_.mediaSourceToUri());
+	    return a.map.fn(_.toMediaSource()).map.fn(_.toUri());
 	}
 
     /**

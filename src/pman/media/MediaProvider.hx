@@ -15,6 +15,8 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using pman.media.MediaTools;
+using pman.bg.URITools;
 
 /**
   * class used to represent an Object that builds and provides the Media object
@@ -34,13 +36,7 @@ class MediaProvider {
 	  * get the name of the Media that [this] will provide
 	  */
 	public function getName():String {
-		switch ( src ) {
-			case MediaSource.MSLocalPath( path ):
-				return path.name;
-
-			case MediaSource.MSUrl( url ):
-				return url;
-		}
+		return src.getTitle();
 	}
 
 	/**
@@ -48,13 +44,8 @@ class MediaProvider {
 	  * and information regarding how that media is being obtained
 	  */
 	public function getURI():String {
-		switch ( src ) {
-			case MediaSource.MSLocalPath( path ):
-				return 'file://${path.normalize().toString()}';
-
-			case MediaSource.MSUrl( url ):
-				return url.toString();
-		}
+		//return src.mediaSourceToUri();
+		return src.toUri();
 	}
 
 	/**
