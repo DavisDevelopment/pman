@@ -64,7 +64,7 @@ class URITools {
       * checks that [s] appears to be a FileSystem path
       */
     public static inline function isPath(s: String):Bool {
-        return (unix_path_pattern.match( s ) || dos_path_pattern.match( s ));
+        return path_pattern().match( s );
     }
 
     /**
