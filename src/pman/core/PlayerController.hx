@@ -238,7 +238,7 @@ class PlayerController {
      * attempt to determine whether the current media has 'ended'
      */
     public function isEnded():Bool {
-        if (hasMedia() && player.track != null) {
+        if (session.hasMedia() && player.track != null) {
             inline function fe(x: MediaFeature) return player.track.hasFeature( x );
             if (fe( CurrentTime ) && fe( Duration )) {
                 if (player.currentTime >= player.durationTime) {
