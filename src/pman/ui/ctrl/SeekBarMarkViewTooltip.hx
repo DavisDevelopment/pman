@@ -107,24 +107,6 @@ class SeekBarMarkViewTooltip extends Ent {
             c.drawComponent(t, 0, 0, t.width, t.height, r.x, r.y, r.w, r.h);
         }
 
-        // draw indicator
-        /*
-        var m = markView;
-        var mr = m.rect();
-        c.strokeStyle = color;
-        c.lineWidth = 4.5;
-        c.beginPath();
-        var ix = (side ? x : x + w);
-        var dy = (player.view.controls.y - 2.0);
-        var tunums = [tuning[0]?0.60:0.40, tuning[1]?0.7:0.3];
-        c.moveTo(ix, centerY);
-        c.lineTo(ix.lerp(mr.centerX, tunums[0]), centerY);
-        c.lineTo(ix.lerp(mr.centerX, tunums[0]), centerY.lerp(dy, tunums[1]));
-        c.lineTo(mr.centerX, centerY.lerp(dy, tunums[1]));
-        c.lineTo(mr.centerX, dy);
-        c.stroke();
-        */
-
         c.restore();
     }
 
