@@ -125,86 +125,6 @@ class MediaTools {
         }
 	}
 
-	public static function mediaSourceToUri(src : MediaSource):String {
-	    switch ( src ) {
-            case MSLocalPath(_.toString() => path):
-                return path;
-
-            case MSUrl( url ):
-                return url;
-	    }
-	}
-
-	public static function mediaSourceName(src : MediaSource):String {
-	    switch ( src ) {
-            case MSLocalPath( path ):
-                return path.name;
-
-            case MSUrl( url ):
-                return url;
-	    }
-	}
-
-    /**
-      * convert the given URI to a MediaSource
-      */
-	public static function uriToMediaSource(uri : String):MediaSource {
-        var winPath:RegEx = new RegEx(~/^([A-Z]):\\/i);
-        if (winPath.match( uri )) {
-            return MSLocalPath(new Path( uri ));
-        }
-        else if (uri.startsWith('/')) {
-	        return MSLocalPath(new Path( uri ));
-	    }
-        else {
-            var protocol:String = uri.before(':');
-            switch ( protocol ) {
-                case 'file':
-                    return MSLocalPath(new Path(stripSlashSlash(uri.after(':')).urlDecode()));
-
-                case 'http', 'https':
-                    return MSUrl( uri );
-
-                default:
-                    return MSLocalPath(new Path( uri ));
-            }
-        }
-	}
-
-	/**
-	  * convert MediaSource to a MediaProvider
-	  */
-	public static function mediaSourceToMediaProvider(src : MediaSource):MediaProvider {
-	    switch ( src ) {
-            case MSLocalPath( path ):
-                return cast new LocalFileMediaProvider(new File( path ));
-
-            case MSUrl( url ):
-                var protocol:String = url.before(':').toLowerCase();
-                switch ( protocol ) {
-                    case 'http', 'https':
-                        return cast new HttpAddressMediaProvider( url );
-
-                    default:
-                        throw 'Error: Unsupported URL "$url"';
-                }
-	    }
-	}
-
-	/**
-	  * parse the given URI to a MediaProvider
-	  */
-	public static function uriToMediaProvider(uri : String):MediaProvider {
-	    return mediaSourceToMediaProvider(uriToMediaSource( uri ));
-	}
-
-    /**
-      * parse the given URI into a Track object
-      */
-	public static inline function parseToTrack(uri : String):Track {
-	    return new Track(uriToMediaProvider( uri ));
-	}
-
 	/**
 	  * load the MediaMetadata attached to the given MediaSource
 	  */
@@ -221,28 +141,67 @@ class MediaTools {
 	}
 
     /**
-      * get the metadata loader class associated with the mime type of the given path
-      */
-    /*
-	private static function metadataLoaderClass(path : Path):Null<Class<MediaMetadataLoader>> {
-	    switch (path.extension.toLowerCase()) {
-            case 'mp3':
-                return MP3MetadataLoader;
-            case 'mp4':
-                return MP4MetadataLoader;
-            default:
-                return null;
-	    }
-	}
-	*/
-
-    /**
       * trim leading '//' from String
       */
-	public static function stripSlashSlash(s : String):String {
-	    if (s.startsWith('//')) {
-	        s = s.slice( 2 );
+	public static inline function stripSlashSlash(s : String):String return s.withoutLeadingSlashes();
+}
+
+class UriTools {
+    //
+    public static function toMediaProvider(uri: String):MediaProvider {
+        return MediaSourceTools.toMediaProvider(uri.toMediaSource());
+    }
+
+    public static function toTrack(uri: String):Track {
+        return new Track(toMediaProvider( uri ));
+    }
+}
+
+class MediaSourceTools {
+    /**
+      * make an educated guess at the title of the media referred to by the given MediaSource
+      */
+    public static function getTitle(src: MediaSource):String {
+	    switch ( src ) {
+            case MSLocalPath( path ):
+                return path.name;
+
+            case MSUrl( url ):
+                return url;
 	    }
-	    return s;
+    }
+
+	/**
+	  * convert MediaSource to a MediaProvider
+	  */
+	public static function toMediaProvider(src: MediaSource):MediaProvider {
+	    switch ( src ) {
+            case MSLocalPath( path ):
+                return cast new LocalFileMediaProvider(new File( path ));
+
+            case MSUrl( url ):
+                var protocol:String = url.protocol().toLowerCase();
+                switch ( protocol ) {
+                    case 'http', 'https':
+                        return cast new HttpAddressMediaProvider( url );
+
+                    default:
+                        throw 'Error: Unsupported URL "$url"';
+                }
+	    }
+	}
+
+	/**
+	  * convert a MediaSource to a Track
+	  */
+	public static function toTrack(src: MediaSource):Track {
+	    return new Track(toMediaProvider( src ));
 	}
 }
+
+typedef URIMixin = pman.bg.URITools;
+typedef URIMixin2 = pman.bg.MediaTools.UriTools;
+typedef PathMixin = pman.bg.PathTools;
+typedef MediaMixin = pman.bg.MediaTools;
+typedef MediaRowMixin = pman.bg.MediaTools.MediaRowTools;
+typedef MediaSourceMixin = pman.bg.MediaTools.MediaSourceTools;
