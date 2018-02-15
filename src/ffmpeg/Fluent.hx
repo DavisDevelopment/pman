@@ -91,15 +91,15 @@ extern class Fluent extends EventEmitter {
     @:overload(function<T:ComplexFilterArg>(filters: Array<T>):Void {})
     public function complexFilter<T:ComplexFilterArg>(filters: Rest<T>):Void;
 
-    @:overload(function(stream: Either<Duplex, WritableStream>, ?options:Dynamic):Void {})
+    @:overload(function(stream:Either<Duplex,Writable>, ?options:Dynamic):Void {})
     public function output(outputPath: String):Void;
 
-    @:overload(function(stream: Either<Duplex, WritableStream>, ?options:Dynamic):Void {})
+    @:overload(function(stream:Either<Duplex,Writable>, ?options:Dynamic):Void {})
     public function addOutput(outputPath: String):Void;
 
-    public function pipe(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
-    public function stream(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
-    public function writeToStream(?stream:Either<WritableStream,Duplex>, ?options:Dynamic):Null<PassThrough>;
+    public function pipe(?stream:Either<Writable,Duplex>, ?options:Dynamic):Null<PassThrough>;
+    public function stream(?stream:Either<Writable,Duplex>, ?options:Dynamic):Null<PassThrough>;
+    public function writeToStream(?stream:Either<Writable,Duplex>, ?options:Dynamic):Null<PassThrough>;
 
     public function run():Void;
     public function execute():Void;
