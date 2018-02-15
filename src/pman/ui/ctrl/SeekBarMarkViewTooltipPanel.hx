@@ -70,9 +70,6 @@ class SeekBarMarkViewTooltipPanel extends Ent {
       */
     override function render(stage:Stage, c:Ctx):Void {
         if ( bar.bmnav ) {
-            //for (tip in tips) {
-                //tip.render(stage, c);
-            //}
             for (group in groups) {
                 group.render(stage, c);
             }
@@ -84,11 +81,7 @@ class SeekBarMarkViewTooltipPanel extends Ent {
       */
     override function update(stage : Stage):Void {
         if ( bar.bmnav ) {
-            //tips.sort(function(x, y) {
-                //return Reflect.compare(x.markView.mark.time, y.markView.mark.time);
-            //});
             _sort();
-            //positionTips();
             positionGroups();
 
             var anyHovered:Bool = false;
@@ -141,43 +134,6 @@ class SeekBarMarkViewTooltipPanel extends Ent {
     }
 
     /**
-      * calculate the positions of the tooltips
-      */
-    /*
-    private function positionTips():Void {
-        var left = new Array();
-        var right = new Array();
-        for (t in tips) {
-            
-            (t.side?right:left).push( t );
-        }
-
-        var margin:Float = 10.0;
-        var pr = playerView.rect;
-        var p = new Point((pr.x + margin), (pr.y + margin));
-        for (t in left) {
-            t.update( stage );
-            t.x = p.x;
-            t.y = p.y;
-            p.y += (t.h + margin);
-            t.calculateGeometry( rect );
-        }
-
-        p = new Point((pr.x + pr.w - margin), (pr.y + margin));
-        if (fps != null) {
-            p.y = (fps.y + fps.h + (margin * 2));
-        }
-        for (t in right) {
-            t.update( stage );
-            t.x = (p.x - t.w);
-            t.y = p.y;
-            p.y += (t.h + margin);
-            t.calculateGeometry( rect );
-        }
-    }
-    */
-
-    /**
       * determine whether [p] is inside of [this]
       */
     override function containsPoint(p : Point<Float>):Bool {
@@ -187,15 +143,13 @@ class SeekBarMarkViewTooltipPanel extends Ent {
                     return true;
                 }
             }
-            //for (tip in tips) {
-                //if (tip.containsPoint( p )) {
-                    //return true;
-                //}
-            //}
         }
         return false;
     }
 
+    /**
+      * get [this]'s children
+      */
     override function getChildren():Array<Entity> {
         return cast groups;
     }

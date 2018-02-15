@@ -67,20 +67,54 @@ class SeekBarMarkViewTooltip extends Ent {
 /* === Instance Methods === */
 
     /**
+      * initialize [this]
+      */
+    override function init(stage: Stage):Void {
+        super.init( stage );
+
+        //_update(getColors());
+        //calculateGeometry(new Rect<Float>());
+    }
+
+    /**
       * update [this]
       */
     override function update(stage : Stage):Void {
         var mr:Rect<Float> = markView.rect();
-        var colors = getColors();
 
-        _update(colors, mr.centerX);
-        calculateGeometry(cast stage.rect);
+        var shouldRecalc:Bool = true;
+
+        if ( shouldRecalc ) {
+            var colors = getColors();
+            _update( colors );
+            calculateGeometry(cast stage.rect);
+        }
     }
 
     /**
       * render [this]
       */
     override function render(stage:Stage, c:Ctx):Void {
+        // if [this] is flagged to cache its display
+        if (cacheAsBitmap()) {
+            // if there's no canvas to draw the cache onto
+            if (cc == null) {
+                // create one
+                cc = Canvas.offscreen(w.ceil(), h.ceil());
+                geomChangedSinceRedraw = true;
+            }
+
+            //if redrawing the cache is deemed necessary
+            if (needsRedraw()) {
+                cc.resize(ceil(w + 5), ceil(h + 5));
+                _paint( cc.context );
+            }
+
+            // draw the cache 'bitmap' onto the screen
+            c.drawComponent(cc, 0, 0, cc.width, cc.height, x, y, cc.width, cc.height);
+            return ;
+        }
+
         c.save();
         c.globalAlpha = opacity;
         var colors = getColors();
@@ -113,17 +147,26 @@ class SeekBarMarkViewTooltip extends Ent {
     /**
       * Paint [this]
       */
-    public function _paint(c:Ctx, x:Float, y:Float):Void {
+    public function _paint(?c: Ctx):Void {
+        if (c == null) c = cc.context;
+        var tmp = rect.clone();
+        rect.enlarge(5.0, 5.0);
+        rect.x = rect.y = 0.0;
+        rect.enlarge(-5.0, -5.0);
+        //cc.resize(tmp.width.ceil(), tmp.height.ceil());
+
         c.save();
         c.globalAlpha = opacity;
         var colors = getColors();
 
+        // draw the background
         c.beginPath();
         c.fillStyle = colors[1];
         c.drawRoundRect(rect, 3.0);
         c.closePath();
         c.fill();
 
+        // draw the border
         c.beginPath();
         c.strokeStyle = border.color;
         c.lineWidth = border.width;
@@ -131,18 +174,22 @@ class SeekBarMarkViewTooltip extends Ent {
         c.closePath();
         c.stroke();
 
+        // draw the text-boxes
         for (index in 0...tb.length) {
             var t = tb[index];
             var r = tbr[index];
-            c.drawComponent(t, 0, 0, t.width, t.height, r.x, r.y, r.w, r.h);
+            c.drawComponent(t, 0, 0, t.width, t.height, 3.0, 3.0, ceil(r.w), ceil(r.h));
         }
         c.restore();
+
+        rect = tmp;
+        geomChangedSinceRedraw = false;
     }
 
     /**
       * update [this]
       */
-    public function _update(colors:Array<Color>, x:Float):Void {
+    public function _update(colors: Array<Color>):Void {
         ttr = new Rect();
 
         // assign properties to all text-boxes
@@ -151,22 +198,7 @@ class SeekBarMarkViewTooltip extends Ent {
             t.color = colors[0];
         }
 
-        switch ( tb.length ) {
-            // without time
-            case 2:
-                ttr.width = (tb[0].width + tb[1].width);
-                ttr.height = (tb[0].height + tb[1].height);
-
-            // with time
-            case 3:
-                ttr.width = max(tb[0].width, (tb[1].width + tb[2].width + dbl( margin )));
-                ttr.height = sum([tb[0].height, max(tb[1].height, tb[2].height)]);
-
-            // urinal, poo
-            default:
-                throw 'invalid text-box count';
-        }
-
+        // update TextBox properties, one-by-one
         var t:TextBox = tb[0];
         t.text = markView.name;
         t.bold = true;
@@ -197,12 +229,30 @@ class SeekBarMarkViewTooltip extends Ent {
             t.fontSize = 9.5;
             t.color = colors[0];
         }
+
+        // calculate the total content rectangle for the text
+        switch ( tb.length ) {
+            // without time
+            case 2:
+                ttr.width = (tb[0].width + tb[1].width);
+                ttr.height = (tb[0].height + tb[1].height);
+
+            // with time
+            case 3:
+                ttr.width = max(tb[0].width, (tb[1].width + tb[2].width + dbl( margin )));
+                ttr.height = sum([tb[0].height, max(tb[1].height, tb[2].height)]);
+
+            // urinal, poo
+            default:
+                throw 'invalid text-box count';
+        }
     }
 
     /**
       * calculate [this]'s geometry
       */
     override function calculateGeometry(_r : Rect<Float>):Void {
+        _update(getColors());
         var mr = markView.rect();
         w = (ttr.width + dbl( margin ));
         h = (ttr.height + margin);
@@ -225,28 +275,33 @@ class SeekBarMarkViewTooltip extends Ent {
             case 3:
                 // title
                 var t:TextBox = tb[0];
-                var r:Rect<Float> = new Rect(0.0, yy, t.width, t.height);
+                var r:Rect<Int> = new Rect(0.0, yy, t.width, t.height).floor();
                 r.centerX = centerX;
+                r = r.floor();
                 yy += (r.h - 2);
-                tbr.push( r );
+                tbr.push(cast r);
 
                 // determine 2nd row height
                 var rh:Float = max(tb[1].height, tb[2].height);
 
                 // hotkey
                 t = tb[1];
-                r = new Rect((x + half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
-                tbr.push( r );
+                //yy += rh;
+                r = new Rect((x + half( margin )), (yy + half(rh) - half(t.height)), t.width, t.height).floor();
+                tbr.push(cast r);
 
                 // time
                 t = tb[2];
-                r = new Rect((x + w - t.width - half( margin )), (yy + half(rh) - half(t.height)), t.width, rh);
-                tbr.push( r );
+                //yy += rh;
+                r = new Rect((x + w - t.width - half( margin )), (yy + half( rh ) - half( t.height )), t.width, t.height).floor();
+                tbr.push(cast r);
 
             // invalid
             default:
                 throw 'betty';
         }
+
+        geomChangedSinceRedraw = true;
     }
 
     /**
@@ -299,6 +354,17 @@ class SeekBarMarkViewTooltip extends Ent {
     private static inline function dbl<T:Float>(x: T):T return (x * 2);
     private static inline function half(x: Float):Float return (x * 0.5);
 
+    /**
+      * calculate whether a redraw is necessary
+      */
+    private inline function needsRedraw():Bool {
+        return (true && geomChangedSinceRedraw);
+    }
+
+    private inline function cacheAsBitmap():Bool {
+        return false;
+    }
+
 /* === Computed Instance Fields === */
 
     private var bar(get, never):SeekBar;
@@ -309,15 +375,6 @@ class SeekBarMarkViewTooltip extends Ent {
 
     public var progress(get, never):Percent;
     private inline function get_progress() return Percent.percent(markView.time, player.durationTime);
-
-    /*
-    public var side(get, never):Bool;
-    private function get_side() {
-        var d = player.track.data;
-        //return (progress.value >= 50.0);
-        return (d.marks.indexOf(markView.mark) >= ceil(d.marks.length / 2));
-    }
-    */
 
 /* === Instance Fields === */
 
@@ -337,4 +394,7 @@ class SeekBarMarkViewTooltip extends Ent {
     private var tbr : Array<Rect<Float>>;
     private var colors : Null<Array<Int>> = null;
     private var border : Border;
+
+    private var cc: Null<OffscreenCanvas> = null;
+    private var geomChangedSinceRedraw:Bool = false;
 }
