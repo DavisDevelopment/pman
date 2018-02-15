@@ -65,6 +65,7 @@ class BarsVisualizer extends AudioVisualizer {
 
         if (data != null) {
             c.save();
+            c.globalAlpha = 0.75;
 
             var rect = viewport;
             var bufferLength:Int = analyzer.frequencyCount;
