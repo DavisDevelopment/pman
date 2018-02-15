@@ -19,13 +19,14 @@ import pman.events.KeyboardEventDescriptor as Ked;
 import pman.events.KeyboardEventType;
 import pman.events.KeyboardEventType as Ket;
 import pman.sid.Clipboard as Clip;
-import pman.Globals.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
-import electron.Tools.defer;
+//import electron.Tools.defer;
 
 import Slambda.fn;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -232,7 +233,8 @@ class KeyboardCommands {
 
                 // paste
                 case LetterV if (event.metaKey || event.ctrlKey):
-                    //TODO paste
+                    var availableFormats = Clip.availableFormats();
+                    echo( availableFormats );
 
                 case LetterX if (event.metaKey || event.ctrlKey):
                     //TODO cut
