@@ -131,7 +131,7 @@ class BarsVisualizer extends AudioVisualizer {
 
                 self.setNode(cast analyzer);
 
-                config(1024 * 2, 0.65);
+                config(1024 * 2, 0.75);
             } 
         });
         mr.audioManager.prependNode( vizNode );
