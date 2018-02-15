@@ -40,6 +40,7 @@ class Interp extends Interpreter {
             'pl' => new PlaylistCommand(),
             'player' => new PlayerCommand(),
             'track' => new TrackCommand(),
+            'media' => new MediaCommand(),
             'mark' => new BookmarkCommand(),
             'play' => alias('player play'),
             'pause' => alias('player pause'),
