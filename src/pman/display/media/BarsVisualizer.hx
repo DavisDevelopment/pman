@@ -5,6 +5,7 @@ import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
 import tannus.graphics.Color;
+import tannus.math.Percent;
 import tannus.html.Win;
 
 import gryffin.core.*;
@@ -69,25 +70,17 @@ class BarsVisualizer extends AudioVisualizer {
             var bufferLength:Int = analyzer.frequencyCount;
             var barWidth:Float = ((rect.width / bufferLength) + 1.0);
             var padding:Float = 0.0;
+            var intensity:Float = 0.0;
             var barHeight:Float;
             var barX:Float = 0.0;
             var index:Int = 0;
-            var color:Color = new Color(255, 255, 50);
+            var colors:Array<Color> = [player.theme.primary, player.theme.secondary];
 
             while (index < bufferLength) {
                 barHeight = ceil(data[index]);
-                
-                /*
-                c.fillStyle = color(
-                    barHeight + (25 * (index / bufferLength)),
-                    250 * (index / bufferLength),
-                    50
-                );
-                */
-                color.red = floor(barHeight + (25 * (index / bufferLength)));
-                color.green = floor(250 * (index / bufferLength));
+                intensity = Percent.percent(data[index], 255).of( 1.0 );
 
-                c.fillStyle = color;
+                c.fillStyle = colors[0].lerp(colors[1], intensity);
                 c.fillRect(floor(rect.x + barX), floor(rect.y + rect.height - barHeight), barWidth, barHeight);
 
 
