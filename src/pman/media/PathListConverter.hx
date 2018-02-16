@@ -27,6 +27,9 @@ class PathListConverter {
 
     }
 
+    /**
+      * convert [this]
+      */
     public function convert(paths : Array<Path>):Array<Path> {
         input = paths;
         output = new Array();
