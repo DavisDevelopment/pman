@@ -19,6 +19,7 @@ import pman.events.KeyboardEventDescriptor as Ked;
 import pman.events.KeyboardEventType;
 import pman.events.KeyboardEventType as Ket;
 import pman.sid.Clipboard as Clip;
+import pman.async.tasks.*;
 
 import electron.ext.*;
 import electron.ext.GlobalShortcut in Gs;
@@ -234,7 +235,12 @@ class KeyboardCommands {
                 // paste
                 case LetterV if (event.metaKey || event.ctrlKey):
                     var availableFormats = Clip.availableFormats();
-                    echo( availableFormats );
+                    trace( availableFormats );
+                    if (availableFormats.has( 'text/plain' )) {
+                        var clipboardData:String = Clip.readText();
+                        trace( clipboardData );
+                        HandleClipboardPaste.handle( clipboardData );
+                    }
 
                 case LetterX if (event.metaKey || event.ctrlKey):
                     //TODO cut
