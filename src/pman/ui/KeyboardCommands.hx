@@ -235,10 +235,8 @@ class KeyboardCommands {
                 // paste
                 case LetterV if (event.metaKey || event.ctrlKey):
                     var availableFormats = Clip.availableFormats();
-                    trace( availableFormats );
                     if (availableFormats.has( 'text/plain' )) {
                         var clipboardData:String = Clip.readText();
-                        trace( clipboardData );
                         HandleClipboardPaste.handle( clipboardData );
                     }
 
