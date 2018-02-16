@@ -48,6 +48,7 @@ using pman.async.VoidAsyncs;
 /**
   * pman.media.Track -- object that centralizes media playback state
   */
+@:expose('PManTrack')
 class Track extends EventDispatcher implements IComparable<Track> {
 	/* Constructor Function */
 	public function new(p:MediaProvider):Void {
@@ -814,7 +815,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	}
 	
 	// Url => Track
-	public static inline function fromUrl(url : String):Track {
+	public static function fromUrl(url : String):Track {
 		return new Track(cast new HttpAddressMediaProvider( url ));
 	}
 }
