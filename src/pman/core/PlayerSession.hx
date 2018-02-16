@@ -277,7 +277,10 @@ class PlayerSession {
 	  * decode the given String to 
 	  */
 	public function decode(s:String, ?done:VoidCb):Void {
+	    // create a new Unserializer
 	    var us = new Unserializer( s );
+
+	    // shorthand function for getting a value from that Unserializer
 	    inline function v():Dynamic return us.unserialize();
 
 	    var ntabs:Int = v(), tabi:Int = v();
@@ -289,33 +292,56 @@ class PlayerSession {
 	    }
 
         var tasks:Array<VoidAsync> = [
-            (function(next) {
+            (function(next: VoidCb):Void {
+                // container to put Tracks into
                 var utracks:Set<Track> = new Set();
+
+                // iterate over the tabs
                 for (t in tabs) {
+                    // push the list of tracks from [t] into [utracks]
                     utracks.pushMany( t.playlist );
                 }
+
+                // create a new data loader
                 var loader = new pman.async.tasks.EfficientTrackListDataLoader(utracks.toArray(), player.app.db.mediaStore);
+
+                // run the loader
                 loader.run(function(?error) {
+                    // report any errors that may occur
                     if (error != null) {
-                        #if debug throw error; #else report( error ); #end
+                        #if debug 
+                        throw error;
+                        #else
+                        report( error );
+                        #end
                     }
                 });
+                // defer announcing completion till the next stack
                 defer(next.void());
             }),
-            (function(next) {
+            (function(next: VoidCb):Void {
+                // defer assigning the tab to the next stack
                 defer(function() {
                     setTab( tabi );
+
+                    // announce completion
                     next();
                 });
             })
         ];
 
-        if (done == null)
-            done = untyped fn(err => if (err != null) (untyped __js__('console.error')( err )));
+        // ensure that [done] isn't null
+        if (done == null) {
+            //done = untyped fn(err => if (err != null) (untyped __js__('console.error')( err )));
+            function done(?error: Dynamic):Void {
+                if (error != null) {
+                    report( error );
+                }
+            }
+        }
 
+        // execute [tasks]
         tasks.series(function(?error : Dynamic) {
-            //if (error != null)
-                //(untyped __js__('console.error')( error ));
             done( error );
         });
 	}
@@ -376,13 +402,10 @@ class PlayerSession {
 	/**
 	  * load state
 	  */
-	public function restore(?done : VoidCb):Void {
+	public inline function restore(?done : VoidCb):Void {
 	    // if the File exists
 	    if (hasSavedState()) {
-	        // decode the state
-			//var state = PlayerSessionState.decode(Fs.read(filePath()));
-	        // pull the state onto [this] Session
-			//pullState(state, done);
+	        // decode it
 			decode(Fs.read(filePath()), done);
 	    }
         else {
@@ -395,14 +418,14 @@ class PlayerSession {
 	/**
 	  * check whether there is a session.dat file
 	  */
-	public function hasSavedState():Bool {
+	public inline function hasSavedState():Bool {
 		return FileSystem.exists(filePath());
 	}
 
 	/**
 	  * delete the session.dat file
 	  */
-	public function deleteSavedState():Void {
+	public inline function deleteSavedState():Void {
 	    try {
             FileSystem.deleteFile(filePath());
         }
@@ -414,7 +437,7 @@ class PlayerSession {
 	/**
 	  * save the PlaypackProperties
 	  */
-	public function savePlaybackSettings():Void {
+	public inline function savePlaybackSettings():Void {
 	    Fs.write(psPath(), encodePlaybackSettings());
 	}
 
