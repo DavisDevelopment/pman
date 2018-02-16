@@ -18,9 +18,12 @@ import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using pman.bg.DictTools;
+using tannus.ds.MapTools;
+using tannus.ds.AnonTools;
 
 class HttpAddressMedia extends Media {
 	/* Constructor Function */
@@ -30,7 +33,8 @@ class HttpAddressMedia extends Media {
 		src = MediaSource.MSUrl( url );
 		this.url = url;
 
-		determineMimeType();
+		//determineMimeType();
+		process_url();
 	}
 
 /* === Instance Methods === */
@@ -70,11 +74,23 @@ class HttpAddressMedia extends Media {
 		r.open('HEAD', url);
 		r.load(function() {
 			var all = r.getAllResponseHeaders();
+			trace(all.toObject());
 			mediaMime = new Mime(all['content-type'].before( ';' ));
 			trace( mediaMime );
 			declareReady();
 		});
 		r.send();
+	}
+
+	private function process_url():Void {
+	    var handler = new pman.http.UrlTransformer();
+	    handler.transform( url ).then(function(new_url) {
+	        this.url = new_url;
+	        trace( url );
+	        declareReady();
+	    }).unless(function(error) {
+	        report( error );
+	    });
 	}
 
 /* === Instance Fields === */
