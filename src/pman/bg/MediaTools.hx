@@ -34,6 +34,7 @@ class MediaRowTools {
     //}
 }
 
+@:expose('MediaSourceTools')
 class MediaSourceTools {
     public static function toUri(src: MediaSource):String {
         return (switch ( src ) {
@@ -50,6 +51,7 @@ class MediaSourceTools {
 }
 
 @:access( pman.bg.URITools )
+@:expose('UriTools2')
 class UriTools {
     /**
       * convert a URI String into a Media instance
