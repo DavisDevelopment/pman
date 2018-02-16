@@ -170,6 +170,8 @@ class LoadTrackData extends Task2<TrackData> {
             });
         }
         steps.push(function(next) {
+            //FIXME skip over this step
+            return next();
             var filler = new TrackDataAutoFill(track, data);
             filler.giveCache( cache );
             filler.run( next );

@@ -131,7 +131,6 @@ class TrackBatchCache extends Task1 {
 
         var removes = [], creates = [];
         steps.push(function(next) {
-            window.console.log(tags.toAnon());
             for (row in refactor) {
                 removes.push(Reflect.copy( row ));
                 row.name = Unserializer.run( row.name );

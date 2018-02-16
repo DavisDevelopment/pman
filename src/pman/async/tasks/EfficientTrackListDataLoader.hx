@@ -69,7 +69,19 @@ class EfficientTrackListDataLoader extends Task1 {
         var rlp = db.media.getRowsByUris( uris );
         rlp.then(function( rows ) {
             trace('Loaded ${rows.length} documents from database in ${now() - startTime}ms');
-            process_existing_rows(rows, complete);
+
+            // create the [cache] object
+            cache = new TrackBatchCache( db );
+
+            // preload [cache] so that multiple 'load's don't get triggered
+            cache.get(function(?error, ?info) {
+                if (error != null) {
+                    complete( error );
+                }
+                else {
+                    process_existing_rows(rows, complete);
+                }
+            });
         });
         rlp.unless(function( error ) {
             complete( error );
@@ -81,7 +93,6 @@ class EfficientTrackListDataLoader extends Task1 {
       */
     private function process_existing_rows(rows:Array<MediaRow>, done:VoidCb):Void {
         var subs:Array<VoidAsync> = new Array();
-        cache = new TrackBatchCache( db );
 
         var stupidTracks = new List();
         for (track in tracks) {
@@ -349,6 +360,9 @@ class EfficientTrackListDataLoader extends Task1 {
       * automatically fill in data where possible
       */
     private function autofill_data(data:TrackData, done:VoidCb):Void {
+        //TODO fix auto-filler so that skipping it isn't beneficial
+        //FIXME skip this step entirely
+        return defer(done.void());
         var autoFiller = new TrackDataAutoFill(data.track, data);
         autoFiller.giveCache( cache );
         autoFiller.run(function(?error) {
