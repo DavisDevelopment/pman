@@ -450,15 +450,6 @@ class Player extends EventDispatcher {
 	    return c.getStatus();
 	}
 
-	/**
-	  * create a new ProgressBar for the given Task and attach it to the view
-	  */
-	//public function showProgressBar(task:StandardTask<String, Dynamic>, ?bar:CanvasProgressBar):Void {
-		//if (bar == null)
-			//bar = new CanvasProgressBar(task, this);
-		//view.addSibling( bar );
-	//}
-
 /* === Media Methods === */
 
 	/**
@@ -473,28 +464,46 @@ class Player extends EventDispatcher {
 
 		// load the new Track
 		session.load(track, {
+		    // who/what triggered [this] load
             trigger: 'user',
+
+            // when [track] is attached to [this]
 			attached: function() {
+			    // invoke callback if provided
 				if (cb.attached != null) {
 					cb.attached();
 				}
 			},
+
+			// when manipulation of [track] is possible
 			manipulate: function(mc : MediaController) {
-			    if (track.hasFeature( Seek )) {
+			    // if [track] can be seeked and is not audio media
+			    if (track.hasFeature( Seek ) && !track.type.equals(MTAudio)) {
+			        // if a start time was provided
                     if (cb.startTime != null) {
+                        // seek to that start time
                         mc.setCurrentTime( cb.startTime );
                     }
                 }
+
+                // invoke callback if provided
                 if (cb.manipulate != null) {
                     cb.manipulate( mc );
                 }
 			},
+
+			// when the media is completely ready to play
 			ready: function() {
+			    // if [track] has playback feature
 			    if (track.hasFeature( Playback )) {
+			        // and if we were playing before beginning to switch tracks
                     if ( playing ) {
+                        // then play
                         play();
                     }
                 }
+
+                // invoke callback if provided
 				if (cb.ready != null) {
 					cb.ready();
 				}
@@ -502,6 +511,9 @@ class Player extends EventDispatcher {
 		});
 	}
 
+    /**
+      * open some Media
+      */
 	public inline function openMedia(provider:MediaProvider, ?cb:OpenCbOpts):Void {
 		openTrack(new Track( provider ), cb);
 	}
@@ -511,115 +523,103 @@ class Player extends EventDispatcher {
 	/**
 	  * wait until Player is ready
 	  */
-	public function onReady(callback : Void->Void):Void {
+	public inline function onReady(callback : Void->Void):Void {
 	    _rs.await( callback );
-		//if ( isReady ) {
-			//defer( callback );
-		//}
-		//else {
-			//readyEvent.once(function() {
-				//defer( callback );
-			//});
-		//}
 	}
 
 	/**
 	  * add the Media referred to by the given paths to the Session
 	  */
-	public function addPathsToSession(paths : Array<String>):Void {
-		trace( paths );
+	public inline function addPathsToSession(paths : Array<String>):Void {
+	    addItemList(paths.map(s->s.toTrack()));
 	}
 
 	/**
 	  * capture snapshot of media
 	  */
 	public function snapshot(?done : VoidCb):Void {
+	    // create a callback if none was provided
 		if (done == null) {
-			done = (function(?error) {
+		    // create a new [done] callback
+			done = (function(?error: Dynamic) {
 				if (error != null)
-					throw error;
+				    report( error );
 			});
 		}
+
+		// return out if media isn't video
 	    if (!track.type.match(MTVideo)) {
 	        return ;
 	    }
 
+        // get the Track's bundle
 	    var bundle = track.getBundle();
+
+	    // get the snapshot itself
 	    var snapp = bundle.getSnapshot(currentTime, '30%');
+
+	    // when [snapp] has completed
         snapp.then(function(item) {
-            var vu = new SnapshotView(this, item.getPath());
-            view.addSibling( vu );
+            // if snapshot should be shown
+            if ( preferences.showSnapshot ) {
+                // create a snapshot view
+                var vu = new SnapshotView(this, item.getPath());
+
+                // add it to the stage
+                view.addSibling( vu );
+            }
         });
+
+        // if [snapp] fails
         snapp.unless(function(error) {
             done( error );
         });
 	}
 
-    // get media object
-    /*
-    @:access( pman.media.LocalMediaObjectPlaybackDriver )
-	private function gmo_():Null<MediaObject> {
-	    var pd = session.playbackDriver;
-	    if (pd == null) {
-	        return null;
-	    }
-        else {
-            if (Std.is(pd, pman.media.LocalMediaObjectPlaybackDriver)) {
-                return cast(cast(pd, LocalMediaObjectPlaybackDriver<Dynamic>).mediaObject, MediaObject);
-            }
-            else {
-                return null;
-            }
-        }
-	}
-	*/
-
 	/**
 	  * add a bookmark to the current time
 	  */
 	public function addBookmark(?done:VoidCb):Void {
-        var wasPlaying = getStatus().equals( Playing );
+	    // check whether we're currently playing
+        var wasPlaying:Bool = getStatus().equals( Playing );
+
+        // pause [this]
 	    pause();
-	    function complete(?error:Dynamic) {
+
+	    // create a callback
+	    function complete(?error: Dynamic):Void {
+	        // if we were playing
 	        if ( wasPlaying ) {
+	            // initiate playback
 	            play();
 	        }
+
+	        // if a callback was provided
 	        if (done != null) {
+	            // invoke it
 	            done( error );
 	        }
 	    }
 
+        // if [track] isn't null
         if (track != null) {
-            /*
-            var box = new BookmarkPrompt();
-            box.open();
-            box.readLine(function(name : Null<String>) {
-                if (name.trim().empty()) {
-                    return complete();
-                }
+            // create a new BookmarkPrompt object
+            var box:BookmarkPrompt = new BookmarkPrompt();
 
-                var mark = new Mark(Named(name), currentTime);
-                track.addMark(mark, function(?error) {
-                    if (error != null) {
-                        complete( error );
-                    }
-                    else {
-                        snapshot(function(?err) {
-                            complete( err );
-                        });
-                    }
-                });
-            });
-            box.focus();
-            */
-            var box = new BookmarkPrompt();
-            box.readMark(function(mark: Null<Mark>) {
+            // 'read' a Mark object from [box]
+            box.readMark(function(mark: Null<Mark>):Void {
+                // if [mark] exists
                 if (mark != null) {
+                    // add [mark] to [track], and when that's done
                     track.addMark(mark, function(?error) {
+                        // if there was an error
                         if (error != null) {
+                            // forward that to [complete]
                             complete( error );
                         }
+                        // otherwise
                         else {
+                            // capture a snapshot at [mark.time]
                             snapshot(function(?err) {
                                 complete( err );
                             });
@@ -628,8 +628,9 @@ class Player extends EventDispatcher {
                 }
             });
         }
-        else 
+        else {
 			return complete();
+        }
 	}
 
 	/**
