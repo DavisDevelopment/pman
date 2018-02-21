@@ -51,6 +51,7 @@ class Dialogs {
 
                     if (first.toString().hasContent()) {
                         engine.db.configInfo.lastDirectory = first;
+                        engine.db.configInfo.push();
                     }
                 }
                 return paths;
