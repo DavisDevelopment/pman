@@ -53,6 +53,9 @@ class ConfigInfo extends JsonFileStorage {
             restorePreviousSession = true;
         }
 
+        if (autoSaveSession == null) {
+            autoSaveSession = true;
+        }
     }
 
 /* === Instance Methods === */
@@ -68,6 +71,7 @@ class ConfigInfo extends JsonFileStorage {
 
     public var visualizer:Null<VisualizerName>;
     public var restorePreviousSession: Null<Bool>;
+    public var autoSaveSession: Null<Bool>;
 
     private var _lastDirectory:String;
 }
