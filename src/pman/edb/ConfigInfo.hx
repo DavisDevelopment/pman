@@ -48,7 +48,14 @@ class ConfigInfo extends JsonFileStorage {
         if (visualizer == null) {
             visualizer = Bars;
         }
+
+        if (restorePreviousSession == null) {
+            restorePreviousSession = true;
+        }
+
     }
+
+/* === Instance Methods === */
 
 /* === Computed Instance Fields === */
 
@@ -60,6 +67,7 @@ class ConfigInfo extends JsonFileStorage {
 /* === Instance Fields === */
 
     public var visualizer:Null<VisualizerName>;
+    public var restorePreviousSession: Null<Bool>;
 
     private var _lastDirectory:String;
 }
