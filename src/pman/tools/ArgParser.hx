@@ -22,14 +22,19 @@ class ArgParser {
         commands = [
             // content-control
             'open', 'close', 'close-all',
+
             // media control
             'play', 'pause', 'stop',
+
             // editing
             'slice', 'convert', 'extract-audio',
+
             // data manipulation
             'set', 'remove', 'search',
+
             // database
             'update', 'clean', 'patch',
+
             // library
             'scan'
         ];
