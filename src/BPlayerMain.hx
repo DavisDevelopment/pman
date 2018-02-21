@@ -378,15 +378,25 @@ class BPlayerMain extends Application {
 	    // get LaunchInfo
 	    launchInfo = LaunchInfo.fromRaw( info );
 
+	    // parse the launch info
+	    parseLaunchInfo( launchInfo );
+
         // initialize the database
-        //db = new PManDatabase();
-        db.init(function(?error) {
+        engine.init(function(?error) {
             if (error != null) {
-                throw error;
+                report( error );
             }
-            // declare ready
-            _rs.fire();
+            else {
+                _rs.fire();
+            }
         });
+	}
+
+	/**
+	  * parse the given launch info
+	  */
+	public function parseLaunchInfo(info: LaunchInfo):Void {
+	    //TODO
 	}
 
 	/**
