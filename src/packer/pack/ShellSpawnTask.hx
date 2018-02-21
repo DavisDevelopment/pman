@@ -26,8 +26,7 @@ class ShellSpawnTask extends Task {
         command = cmd;
         this.args = args;
         options = {};
-        if (o != null) {
-            options.write( o );
+        if (o != null) { options.write( o );
         }
     }
 
@@ -58,7 +57,7 @@ class ShellSpawnTask extends Task {
     /**
       * read all data from [x]
       */
-    private function flush(x:ReadableStream, cb:ByteArray->Void):Void {
+    private function flush(x:ReadableStream<Buffer>, cb:ByteArray->Void):Void {
         var chunks = [];
         x.on('data', function(chunk) {
             chunks.push(Std.string( chunk ));

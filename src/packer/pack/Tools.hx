@@ -47,7 +47,7 @@ class Tools {
     /**
       * read entire data from Readable
       */
-    public static function readAll(s:ReadableStream, cb:ByteArray->Void):Void {
+    public static function readAll(s:ReadableStream<Buffer>, cb:ByteArray->Void):Void {
         var buf = new ByteArrayBuffer();
         s.onData(function(dat : Dynamic) {
             if (Std.is(dat, Buffer)) {

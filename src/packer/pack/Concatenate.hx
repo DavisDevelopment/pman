@@ -44,7 +44,7 @@ class Concatenate extends Task {
         var stack = new AsyncStack();
         for (src in sources) {
             stack.push(function( next ) {
-                Fs.readFile(src.toString(), function(err, dat) {
+                Fs.readFile(src.toString(), function(?err, ?dat) {
                     if (err != null) {
                         callback( err );
                     }
