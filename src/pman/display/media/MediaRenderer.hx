@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -14,6 +15,8 @@ import pman.media.*;
 import foundation.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -21,6 +24,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 /**
   * base-class for the rendering systems of each Media implementation
@@ -31,6 +35,7 @@ class MediaRenderer extends Ent {
 		super();
 
 		this.media = media;
+		this.components = new Array();
 	}
 
 /* === PMan Methods === */
@@ -40,6 +45,16 @@ class MediaRenderer extends Ent {
 	  */
 	public function onAttached(pv : PlayerView):Void {
 		//trace(Type.getClassName(Type.getClass( this )) + ' attached to the main view');
+		var tasks:Array<VoidAsync> = new Array();
+		for (c in components) {
+		    tasks.push(function(next) {
+		        c.attached(next.void());
+		    });
+		}
+		tasks.series(function(?error) {
+		    if (error != null)
+		        report( error );
+		});
 	}
 
 	/**
@@ -47,6 +62,16 @@ class MediaRenderer extends Ent {
 	  */
 	public function onDetached(pv : PlayerView):Void {
 		//trace(Type.getClassName(Type.getClass( this )) + ' detached from the main view');
+        var tasks:Array<VoidAsync> = new Array();
+		for (c in components) {
+		    tasks.push(function(next) {
+		        c.detached(next.void());
+		    });
+		}
+		tasks.series(function(?error) {
+		    if (error != null)
+		        report( error );
+		});
 	}
 
 	/**
@@ -70,6 +95,16 @@ class MediaRenderer extends Ent {
 		delete();
 	}
 
+	public function _addComponent(c: MediaRendererComponent):Void {
+	    components.push( c );
+		//c.renderer = this;
+	}
+
+	public function _deleteComponent(c: MediaRendererComponent):Void {
+	    components.remove( c );
+	    c.renderer = null;
+	}
+
 /* === Gryffin Methods === */
 
 	/**
@@ -77,6 +112,10 @@ class MediaRenderer extends Ent {
 	  */
 	override function update(stage : Stage):Void {
 		super.update( stage );
+
+		for (c in components) {
+		    c.update( stage );
+		}
 	}
 	
 	/**
@@ -84,6 +123,10 @@ class MediaRenderer extends Ent {
 	  */
 	override function render(stage:Stage, c:Ctx):Void {
 		super.render(stage, c);
+
+		for (comp in components) {
+		    comp.render(stage, c);
+		}
 	}
 
 	/**
@@ -97,4 +140,6 @@ class MediaRenderer extends Ent {
 
 	public var media : Media;
 	public var mediaController : MediaController;
+
+	private var components: Array<MediaRendererComponent>;
 }
