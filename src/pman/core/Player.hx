@@ -6,6 +6,7 @@ import tannus.events.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem in Fs;
 import tannus.http.*;
+import tannus.geom2.*;
 import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
@@ -90,6 +91,7 @@ class Player extends EventDispatcher {
 
         // Player flags
 		flags = new Dict();
+		conf = new PlayerInterfaceConfiguration( this );
 
         // pmbash interpreter
 		pmbashInterp = new PMBashInterp();
@@ -117,8 +119,12 @@ class Player extends EventDispatcher {
 	private function initialize(stage : Stage):Void {
 	    var startup = new PlayerStartup( this );
 	    startup.run(function(?error : Dynamic) {
-	        if (error != null)
+	        if (error != null) {
 	            throw error;
+            }
+	    });
+	}
+
 	    });
 	}
 
@@ -1389,6 +1395,7 @@ class Player extends EventDispatcher {
 	public var components : Array<PlayerComponent>;
 	public var controller : PlayerController;
 	public var flags : Dict<String, Dynamic>;
+	public var conf: PlayerInterfaceConfiguration;
 
 	public var pmbashInterp : PMBashInterp;
 
