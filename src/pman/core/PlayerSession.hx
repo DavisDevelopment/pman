@@ -114,7 +114,7 @@ class PlayerSession {
 	  * mount the given Track, and switch focus to it
 	  */
 	public function focus(track:Track, ?done:Void->Void):Void {
-		var prev = focusedTrack;
+		var prev:Null<Track> = focusedTrack;
 		var pre_delta:Delta<Null<Track>> = new Delta(track, prev);
 		trackChanging.call( pre_delta );
 		if (focusedTrack != null && focusedTrack.isMounted()) {
