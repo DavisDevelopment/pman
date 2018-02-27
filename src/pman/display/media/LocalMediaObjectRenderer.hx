@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -14,7 +15,10 @@ import pman.media.*;
 
 import electron.Tools.defer;
 import Std.*;
+import Slambda.fn;
 import tannus.math.TMath.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -22,6 +26,8 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using tannus.async.Asyncs;
 
 /**
   * base-class for all MediaRenderer implementations making use of a MediaObject
@@ -53,28 +59,75 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
       * when [this] is attached to player view
       */
 	override function onAttached(pv : PlayerView):Void {
-	    audioManager.activate();
+	    buildAudioPipeline(function(?error) {
+	        if (error != null)
+	            report( error );
+	    });
 	}
 
     /**
       * when [this] is detached from player view
       */
 	override function onDetached(pv : PlayerView):Void {
-	    return ;
+	    super.onDetached( pv );
 	}
 
 	/**
 	  * attach a visualizer to [this]
 	  */
 	public function attachVisualizer(v:AudioVisualizer, done:Void->Void):Void {
+	    done = done.wrap(function(f) {
+	        _addComponent(new AudioEqualizer());
+	        _attach_components( pman.Globals.player.view );
+	        f();
+	    })
+	    .wrap(function(f) {
+	        defer( f );
+	    });
+
+        var steps:Array<VoidAsync> = [];
+        inline function step(a: VoidAsync) steps.push( a );
+
+        //step(fn(destroyAudioPipeline( _ )));
+        step(fn(detachVisualizer(_.void())));
+
+        if (audioManager == null || !audioManager.active) {
+            step(fn(buildAudioPipeline( _ )));
+        }
+        
+        step(fn(v.attached(_.void())));
+        step(function(next) {
+            visualizer = v;
+            visualizer.player = player;
+
+            next();
+        });
+
+        steps.series(function(?error) {
+            if (error != null) {
+                report( error );
+            }
+            else {
+                done();
+            }
+        });
+
+        /*
 	    detachVisualizer(function() {
 	        audioManager.activate(function() {
                 v.attached(function() {
                     visualizer = v;
+
+                    // kick shit off
                     done();
                 });
+
             });
 	    });
+	    */
+	}
+	private function _attach_components(pv: PlayerView):Void {
+	    super.onAttached( pv );
 	}
 
 	/**
@@ -90,6 +143,44 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
         else {
             defer( done );
         }
+	}
+
+    private var bapCount:Int = 0;
+	public function buildAudioPipeline(done: VoidCb):Void {
+	    audioManager.activate(function() {
+			//defer(done.void());
+
+	        ++bapCount;
+            if (bapCount == 2) {
+				//throw 'Called Twice. What the fuck';
+	        }
+            else {
+                window.console.error('Betty, why');
+            }
+
+            /*
+	        if (bapCount == 1) {
+	            throw 'Called. Oh yai';
+	        }
+            else if (bapCount == 2) {
+	            throw 'Called Twice. What the fuck';
+	        }
+            else if (bapCount == 3) {
+                throw 'Get the urinal';
+            }
+            */
+            done();
+	    });
+		//throw 'build-audio-pipeline';
+	}
+
+	public function destroyAudioPipeline(done: VoidCb):Void {
+	    audioManager.deactivate(done.void());
+	}
+
+	override function _addComponent(c: MediaRendererComponent):Void {
+	    super._addComponent( c );
+	    c.renderer = cast this;
 	}
 
 /* === Computed Instance Fields === */
