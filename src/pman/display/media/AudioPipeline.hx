@@ -26,6 +26,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.html.JSTools;
+using tannus.FunctionTools;
 
 /*
    class used to represent the flow of audio data through a pipeline
@@ -45,24 +46,40 @@ class AudioPipeline {
       * Activate [this]
       */
     public function activate(?done : Void->Void):Void {
+        if (done == null) done = (function() null);
+
         if ( !active ) {
             buildit(function() {
                 active = true;
-                if (done != null)
-                    done();
+
+                done();
             });
         }
-        else if (done != null) {
-            done();
+        else {
+            throw 'Error: Cannot reactivate an active AudioPipeline';
         }
+
+        done();
     }
 
     /**
       * Deactivate [this]
       */
     public function deactivate(?done : Void->Void):Void {
+        if (done == null)
+            done = (function() null);
+
+        done = done.wrap(function(_) {
+            active = false;
+            _closing = false;
+            context = null;
+            trace('deactivate() finished');
+            _();
+        });
+
         if ( !_closing ) {
             _closing = true;
+
             try {
                 if (context != null) {
                     context.close(function() {
@@ -72,17 +89,22 @@ class AudioPipeline {
                         source.disconnect();
                         source = null;
                         destination = null;
-                        if (done != null)
-                            defer( done );
+
+                        done();
                     });
                 }
                 else {
-                    defer(function() if (done != null) done());
+                    //defer(function() if (done != null) done());
+                    done();
                 }
             }
             catch (error : Dynamic) {
-                defer(function() if (done != null) done());
+                //defer(function() if (done != null) done());
+                done();
             }
+        }
+        else {
+            done();
         }
     }
 
@@ -111,9 +133,31 @@ class AudioPipeline {
       * build out the node list
       */
     public function buildit(done: Void->Void):Void {
-        var prepare = ((context != null) ? context.close : defer);
-        prepare(function() {
+        //var prepare = ((context != null) ? context.close : defer);
+        var mumps = (function() trace('middleware'));
+        function prepare(f: Void->Void) {
+            if (context != null) {
+                context.close( f );
+            }
+            else {
+                call( f );
+            }
+        }
+
+        mumps
+        .join(function() {
+            trace('create audio context');
             context = new AudioContext();
+            trace('audio context created');
+            
+            try {
+                source.disconnect();
+                source = null;
+            }
+            catch (error: Dynamic) {
+                null;
+            }
+
             source = context.createSource(untyped renderer.mediaObject);
             destination = context.destination;
 
@@ -132,8 +176,10 @@ class AudioPipeline {
 
             connectNodes(currentNode, destNode);
 
-            defer( done );
-        });
+            //defer( done );
+            done();
+        })
+        .passTo( prepare );
     }
 
     /**
@@ -196,6 +242,8 @@ class AudioPipeline {
         a.connect( b );
         a.setNextNode( b );
     }
+
+    private static function call(f: Void->Void):Void f();
 
 /* === Instance Fields === */
 
@@ -284,6 +332,7 @@ class AudioPipelineNode {
             node.nextNode = this;
         }
     }
+
 
 /* === Computed Instance Fields === */
 
