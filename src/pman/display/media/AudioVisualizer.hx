@@ -67,7 +67,7 @@ class AudioVisualizer {
 	/**
 	  * Configure [this] AudioVisualizer
 	  */
-	public inline function config(fftSize:Int=2048, smoothing:Float=0.8):Void {
+	public function config(fftSize:Int=2048, smoothing:Float=0.8):Void {
 		this.fftSize = fftSize;
 		this.smoothing = smoothing;
 	}
