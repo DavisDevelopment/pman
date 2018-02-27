@@ -33,6 +33,8 @@ class BarsVisualizer extends AudioVisualizer {
     /* Constructor Function */
     public function new(r) {
         super( r );
+
+        this.player = Globals.player;
     }
 
 /* === Instance Methods === */
