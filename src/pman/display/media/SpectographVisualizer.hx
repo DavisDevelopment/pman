@@ -56,10 +56,12 @@ class SpectographVisualizer extends AudioVisualizer {
 
         if (player.track.type.match( MTVideo )) {
             viewport = player.view.mediaRect;
-            var r = viewport.clone();
-            r.height = 100.0;
-            r.y = (viewport.y + viewport.height - r.height);
-            viewport = r;
+            //var r = viewport.clone();
+            //viewport.height = 100.0;
+            //viewport.y = (r.y + r.height - r.height);
+
+            // take on the same dimensions as the status bar
+            viewport.pull( player.view.statusBar.rect );
         }
     }
 
@@ -68,10 +70,13 @@ class SpectographVisualizer extends AudioVisualizer {
       */
     override function render(stage:Stage, c:Ctx):Void {
         c.save();
+
         var r = viewport;
         c.clearRect(r.x, r.y, r.w, r.h);
 
         waveform(stage, c);
+
+        c.restore();
     }
 
     /**
