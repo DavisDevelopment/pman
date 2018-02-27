@@ -159,6 +159,15 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             underlay = new VideoUnderlay( v );
             underlay.appendTo( 'body' );
         }
+
+        if ( player.conf.videoShowVisualizer ) {
+            //var visualizer = new SpectographVisualizer(cast this);
+            //var visualizer = new BarsVisualizer(cast this);
+            var visualizer = new VideoAudioVisualizer(cast this);
+            attachVisualizer(visualizer, function() {
+                //
+            });
+        }
 	}
 
 	/**
@@ -166,6 +175,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	  */
 	override function onDetached(pv : PlayerView):Void {
 		super.onDetached( pv );
+
 		detachVisualizer(function() {
             if (underlay != null)
                 underlay.destroy();
@@ -180,6 +190,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	        underlay.detach();
 	        underlay = null;
 	    }
+
 	    detachVisualizer(function() {
 	        return ;
 	    });
