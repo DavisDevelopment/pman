@@ -394,6 +394,10 @@ class KeyboardCommands {
                         p.terminal();
                     });
 
+                // '/'
+                case BackSlash:
+                    trace('Betty');
+
                 // ctrl+t
                 case LetterT if (event.ctrlKey || event.metaKey):
                     sess.setTab(sess.newTab());
