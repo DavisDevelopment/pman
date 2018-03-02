@@ -224,6 +224,9 @@ class CharacterMatrixView {
         ));
     }
 
+    /**
+      * 
+      */
     public inline function calculateCanvasRect():Rect<Int> {
         return new Rect(0, 0, ceil(charMetrics.width) * width, ceil(charMetrics.height) * height);
     }
@@ -298,17 +301,33 @@ class CharacterMatrixView {
         defer(applyStyles.bind(style.clone()));
     }
 
+    /**
+      * get character metrics
+      */
     public inline function getCharMetrics():Null<Area<Int>> {
         return charMetrics;
     }
 
+    /**
+      * assign the value of [changed]
+      */
     public inline function setChanged(v: Bool):Bool {
         return (changed = v);
     }
 
+    /**
+      * flag [this] as having changed
+      */
     public inline function touch():Void setChanged( true );
+
+    /**
+      * remove 'changed' flag
+      */
     public inline function untouch():Void setChanged( false );
 
+    /**
+      * get a Color instance from either a String or an existing Color instance
+      */
     private static function _color(x: Either<String, Color>):Color {
         if ((x is String)) {
             return Color.fromString(cast x);
