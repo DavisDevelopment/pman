@@ -362,3 +362,9 @@ typedef CharacterMatrixViewOptions = {
     ?backgroundColor: Either<String, Color>,
     ?autoBuild: Bool
 };
+
+enum CharacterMatrixError {
+    EIndexOutOfBounds(index:Int, ?bounds:IntRange);
+    ENamed(errorName:String, ?errorData:Dynamic);
+    ECoded(errorCode:Int, ?errorData:Dynamic);
+}
