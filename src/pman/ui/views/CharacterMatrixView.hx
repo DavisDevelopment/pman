@@ -357,5 +357,6 @@ typedef CharacterMatrixViewOptions = {
     ?fontSize: Either<String, Float>,
     ?fontSizeUnit: String,
     ?foregroundColor: Either<String, Color>,
-    ?backgroundColor: Either<String, Color>
+    ?backgroundColor: Either<String, Color>,
+    ?autoBuild: Bool
 };
