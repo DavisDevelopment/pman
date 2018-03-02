@@ -60,7 +60,9 @@ class CharacterMatrixView {
         _parseOptions( options );
 
         // initialize [this]
-        init();
+        if (options.autoBuild == null || !options.autoBuild) {
+            init();
+        }
     }
 
 /* === Instance Methods === */
