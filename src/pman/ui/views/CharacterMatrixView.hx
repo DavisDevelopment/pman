@@ -337,6 +337,18 @@ class CharacterMatrixView {
         }
     }
 
+    /**
+      * raise an IndexOutOfBounds exception
+      */
+    private static function outOfBounds(v:Int, ?boundMin:Int, ?boundMax:Int):Void {
+        throw (if (boundMin != null && boundMax != null) {
+            CharacterMatrixError.EIndexOutOfBounds(v, new IntRange(boundMin, boundMax));
+        }
+        else {
+            CharacterMatrixError.EIndexOutOfBounds( v );
+        });
+    }
+
 /* === Computed Instance Fields === */
 
     private var ctx(get, never):Ctx;
