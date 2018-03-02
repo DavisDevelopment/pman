@@ -232,6 +232,15 @@ class CharacterMatrixView {
     }
 
     /**
+      * calculate maximum size allowed by the given viewport rect
+      */
+    public function calculateSize(viewport: Rect<Int>):Void {
+        calculateCharMetrics();
+        width = floor(viewport.width / charMetrics.width);
+        height = floor(viewport.height / charMetrics.height);
+    }
+
+    /**
       * build out the content buffer
       */
     private inline function buildBuffer():Void {
