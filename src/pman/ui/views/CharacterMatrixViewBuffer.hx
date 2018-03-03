@@ -160,12 +160,12 @@ class CharacterMatrixViewBuffer implements CharacterMatrixViewAccessor {
       * shift all lines down
       */
     public function shiftDown(startY:Int=0, ?endY:Int):Void {
-        if (endY == null) {
+        if (endY == null)
             endY = (height - 1);
-        }
-        var i:Int = endY;
-        while (--i >= startY) {
-            moveLine(lines[i], (i + 1));
+        clearLine( endY );
+        var curY:Int = endY;
+        while (curY != startY) {
+            swapLines(curY, --curY);
         }
     }
 
