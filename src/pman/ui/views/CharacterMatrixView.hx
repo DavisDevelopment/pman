@@ -356,6 +356,15 @@ class CharacterMatrixView {
         return y;
     }
 
+    /**
+      * sanitize an x-coordinate value
+      */
+    public function sanitize_x(x: Int):Int {
+        if (!x.inRange(0, width)) {
+            outOfBounds(x, 0, width);
+        }
+        return x;
+    }
       * raise an IndexOutOfBounds exception
       */
     private static function outOfBounds(v:Int, ?boundMin:Int, ?boundMax:Int):Void {
