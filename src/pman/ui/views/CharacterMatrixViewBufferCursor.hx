@@ -36,8 +36,9 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         line = 0;
         column = 0;
 
-        styles = null;
         savedIndices = new Stack();
+        savedStyles = new Stack();
+        styles = {};
     }
 
 /* === Instance Methods === */
@@ -61,11 +62,29 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     }
 
     /**
+      * save [this] cursor's current styling options
+      */
+    public function saveStyle():Void {
+        savedStyles.add(_copyCsd( styles ));
+    }
+
+    /**
+      * restore the most recently saved styling options
+      */
+    public function restoreStyle():Void {
+        var saved:Null<CellStyleDecl> = savedStyles.pop();
+        if (saved == null) {
+            throw 'Error: No style-info to restore';
+        }
+    }
+
+    /**
       * move [this] cursor to [y, x]
       */
     public function moveTo(y:Int, x:Int):Void {
         line = y;
         column = x;
+        _check();
     }
 
     /**
@@ -353,21 +372,22 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * get the cell's styling
       */
-    public function getCharStyle(?y:Int, ?x:Int):Null<CharacterMatrixViewStyle> {
-        return ncol(y, x).ternary(_.style, null);
+    public function getCharStyle(?y:Int, ?x:Int):Null<CellStyleDecl> {
+        //return ncol(y, x).ternary(_.style, null);
+        return ncol(y, x).ternary(_pullCellStyle(_), null);
     }
 
     /**
       * set a cell's styling
       */
-    public function setCharStyle(style:Either<CharacterMatrixViewStyle,CharacterMatrixViewStyleDecl>, ?y:Int, ?x:Int):Void {
-        ncol(y, x).attempt(_.applyStyle( style ));
+    public function setCharStyle(style:CellStyleDecl, ?y:Int, ?x:Int):Void {
+        ncol(y, x).attempt(_putCellStyle(style, _));
     }
 
     /**
       * set a cell-range styling
       */
-    public function setCharRangeStyle(style:Either<CharacterMatrixViewStyle,CharacterMatrixViewStyleDecl>, ?y:Int, ?startX:Int, ?endX:Int):Void {
+    public function setCharRangeStyle(style:CellStyleDecl, ?y:Int, ?startX:Int, ?endX:Int):Void {
         moveTo(_y(y), _x(startX));
         if (endX == null) {
             endX = (tty.width - 1);
@@ -380,7 +400,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * set a line's styling
       */
-    public function setLineStyle(style: Either<CharacterMatrixViewStyle, CharacterMatrixViewStyleDecl>, ?start:Int, ?end:Int, ?y:Int):Void {
+    public function setLineStyle(style:CellStyleDecl, ?start:Int, ?end:Int, ?y:Int):Void {
         setCharRangeStyle(style, y, start, end);
     }
 
@@ -446,73 +466,39 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     }
 
     /**
-      * goto the next line
+      * modify the styling info functionally
       */
-    public inline function nextLine():Void {
-        line++;
-        column = 0;
+    public function setStyle(styleInfo: CellStyleDecl):CharacterMatrixViewBufferCursor {
+        //styles.fg = styleInfo.textColor;
+        //styles.bg = styleInfo.bgColor;
+        //styles.bold = styleInfo.bold;
+        //styles.underline = styleInfo.underline;
+        _copyCsd(styleInfo, styles);
+        return this;
     }
 
     /**
-      * goto the previous line
+      * revert styling to the default styles (global to the entire charMatrix)
       */
-    public inline function prevLine():Void {
-        line--;
-        gotoEndOfLine();
+    public inline function defaultStyle() {
+        styles = {};
     }
 
     /**
-      * set the color of the actual text itself
+      * invoke [body] with [attr] set as styling info, then revert [styles] once [body] has returned
       */
-    public function setTextColor(v: Null<Color>):Null<Color> {
-        enstyl();
-        styles.setForegroundColor( v );
-        return styles.foregroundColor;
-    }
+    public function etch(body:CharacterMatrixViewBufferCursor->Void, ?attr:CellStyleDecl):CharacterMatrixViewBufferCursor {
+        savePos();
+        saveStyle();
 
-    /**
-      * set the background-color for the text
-      */
-    public function setBackgroundColor(v: Null<Color>):Null<Color> {
-        enstyl();
-        styles.setBackgroundColor( v );
-        return styles.backgroundColor;
-    }
+        if (attr != null) {
+            _copyCsd(attr, styles);
+        }
+        body( this );
 
-    /**
-      * set whether the text is emboldened
-      */
-    public function setBold(v: Bool):Bool {
-        enstyl();
-        styles.setBold( v );
-        return styles.bold;
-    }
-
-    /**
-      * set whether text is italicized
-      */
-    public function setItalic(v: Bool):Bool {
-        enstyl();
-        styles.setItalic( v );
-        return styles.italic;
-    }
-
-    /**
-      * set whether text is underlined
-      */
-    public function setUnderline(v: Bool):Bool {
-        enstyl();
-        styles.setUnderline( v );
-        return styles.underline;
-    }
-
-    /**
-      * assign the decoration given to textual characters
-      */
-    public function setTextDecoration(?bold:Bool, ?italic:Bool, ?underline:Bool):Void {
-        qm(bold, setBold(_));
-        qm(italic, setItalic(_));
-        qm(underline, setUnderline(_));
+        restoreStyle();
+        restorePos();
+        return this;
     }
 
 /* === Utility Methods === */
@@ -536,17 +522,18 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         var cc = (c != null ? c : col(y, x));
         if (cc == null)
             return ;
-        if (styles == null) {
-            cc.clearStyle();
-        }
-        else {
-            cc.applyStyle( styles );
-        }
+        _putCellStyle(styles, cc);
+        //if (styles == null) {
+            //cc.clearStyle();
+        //}
+        //else {
+            //cc.applyStyle( styles );
+        //}
     }
 
     private inline function ensureStyles():Void {
         if (styles == null)
-            styles = new CharacterMatrixViewStyle();
+            styles = {};
     }
     private inline function enstyl():Void ensureStyles();
 
@@ -620,8 +607,52 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       * reset [this] styles
       */
     private inline function _resetStyles():Void {
-        styles = null;
+        styles = {};
     }
+
+    /**
+      * pull styling options from [c] onto [this.styles]
+      */
+    private function _pullCellStyle(c: CharacterMatrixViewBufferLineChar):CellStyleDecl {
+        var s:Maybe<CharacterMatrixViewStyle> = c.style;
+        return (styles = {
+            fg: s.ternary(_.foregroundColor, null),
+            bg: s.ternary(_.backgroundColor, null),
+            bold: s.ternary(_.bold, null),
+            underline: s.ternary(_.underline, null)
+        });
+    }
+
+    /**
+      * apply simple [CellStyleDecl] object to [c] as styling options
+      */
+    private function _putCellStyle(s:CellStyleDecl, c:CharacterMatrixViewBufferLineChar):Void {
+        if (s.bg == null && s.fg == null && s.bold == null && s.underline == null) {
+            c.style = null;
+            return ;
+        }
+
+        c.applyStyle(untyped {
+            backgroundColor: s.bg,
+            text: untyped {
+                color: s.fg,
+                decoration: {
+                    bold: s.bold,
+                    underline: s.underline
+                }
+            }
+        });
+    }
+
+    /**
+      * create and return a deep-copy of [style]
+      */
+    private function _copyCsd(style:CellStyleDecl, ?to:CellStyleDecl):CellStyleDecl {
+        if (to == null) 
+            to = {};
+        return (untyped __js__('Object.assign({1}, {0})', style, to));
+    }
+
 
 /* === Computed Instance Fields === */
 
