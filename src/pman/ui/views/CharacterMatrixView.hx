@@ -160,6 +160,16 @@ class CharacterMatrixView {
             // draw the text
             c.fillText(cell.char, cr.x, cr.y, cr.width);
         }
+
+        // draw the underline
+        if (nullOr(ls.underline, false)) {
+            var lw:Float = 0.8;
+
+            c.strokeStyle = c.fillStyle;
+            c.moveTo(cr.x, (cr.y + lw / 2));
+            c.lineTo((cr.x + cr.width), (cr.y + lw / 2));
+            c.stroke();
+        }
     }
 
     /**
