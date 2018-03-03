@@ -36,8 +36,8 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         line = 0;
         column = 0;
 
-        savedStates = new Stack();
         styles = null;
+        savedIndices = new Stack();
     }
 
 /* === Instance Methods === */
@@ -45,15 +45,15 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * save [this] cursor's current position
       */
-    public function save():Void {
-        savedStates.add(_index());
+    public function savePos():Void {
+        savedIndices.add(_index());
     }
 
     /**
       * restore the last-saved position
       */
-    public function restore():Void {
-        var saved:Null<Int> = savedStates.pop();
+    public function restorePos():Void {
+        var saved:Null<Int> = savedIndices.pop();
         if (saved == null) {
             throw 'Error: No state to restore to';
         }
@@ -87,9 +87,9 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       * transform the content of the specified line
       */
     public function lioc(?f:Array<Char>->Array<Char>, ?cf:CharacterMatrixViewBufferLineChar->Void, ?y:Int, ?sx:Int, ?ex:Int):Void {
-        save();
+        savePos();
         ln(y).ioChars(f, cf, sx, ex);
-        restore();
+        restorePos();
     }
 
     /**
@@ -117,7 +117,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         // keep track of how far we've gone
         var delta:Point<Int> = new Point();
         // save where we are now
-        save();
+        savePos();
         // navigate to specified new position (if any)
         _nav(y, x);
         // create variable for holding our 'current' char and a temp value for changing [column]
@@ -146,7 +146,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
             }
         }
         // restore to starting position
-        restore();
+        restorePos();
         // move relative to current position by [delta]
         move(delta.y, delta.x);
     }
@@ -158,7 +158,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         // keep track of how far we've gone
         var delta:Point<Int> = new Point();
         // save where we are now
-        save();
+        savePos();
         // navigate to specified new position (if any)
         _nav(y, x);
         // create variable for holding our 'current' char and a temp value for changing [column]
@@ -187,7 +187,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
             }
         }
         // restore to starting position
-        restore();
+        restorePos();
         // move relative to current position by [delta]
         move(delta.y, delta.x);
     }
@@ -232,7 +232,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       * "erase" the text from a line
       */
     public function clearLine(?y:Int, ?sx:Int, ?ex:Int, ?emptyChar:Char):Void {
-        save();
+        savePos();
         if (sx == null) {
             sx = 0;
         }
@@ -261,6 +261,8 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         //}
         //buffer.refreshLine( line );
         restore();
+        
+        restorePos();
     }
 
     /**
@@ -300,7 +302,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       * navigate to the end of the line
       */
     public function gotoEndOfLine(?y: Int):Void {
-        save();
+        savePos();
         var l = ln( y );
         var i = tty.width;
         while (--i >= 0) {
@@ -308,7 +310,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
                 break;
             }
         }
-        restore();
+        restorePos();
         moveTo(_y(y), i);
     }
 
@@ -387,7 +389,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       */
     public function delete(?len:Int, ?y:Int, ?x:Int):Void {
         //_nav(y, x);
-        save();
+        savePos();
         var c:Char;
         var cc:CharacterMatrixViewBufferLineChar;
         var deleted:Int = 0, y1:Int = line;
@@ -415,7 +417,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         else {
             buffer.refreshLineRange(y1, y2);
         }
-        restore();
+        restorePos();
     }
 
     /**
@@ -632,6 +634,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     public var line(default, null): Int;
     public var column(default, null): Int;
 
-    private var savedStates: Stack<Int>;
     private var styles: Null<CharacterMatrixViewStyle>;
+    // stack used to store past positions in the buffer that [this] cursor has 'occupied'
+    private var savedIndices: Stack<Int>;
 }
