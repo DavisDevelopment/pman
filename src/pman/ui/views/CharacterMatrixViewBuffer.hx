@@ -114,6 +114,16 @@ class CharacterMatrixViewBuffer implements CharacterMatrixViewAccessor {
         }
     }
 
+    /**
+      * assign the 'y' property value for the given line
+      */
+    public function setLineIndex(line:CharacterMatrixViewBufferLine, index:Int):Void {
+        var tmp = new Pair(line.y, lines[index]);
+        line.y = index;
+        lines[index] = line;
+    }
+
+    /**
       * move a line from one index to another
       */
     public inline function moveLine(line:CharacterMatrixViewBufferLine, newY:Int):Void {
