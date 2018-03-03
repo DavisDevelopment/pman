@@ -365,6 +365,16 @@ class CharacterMatrixView {
         }
         return x;
     }
+
+    /**
+      * sanitize the given position
+      */
+    public function sanitizePos(y:Int, x:Int):Void {
+        sanitize_y( y );
+        sanitize_x( x );
+    }
+
+    /**
       * raise an IndexOutOfBounds exception
       */
     private static function outOfBounds(v:Int, ?boundMin:Int, ?boundMax:Int):Void {
