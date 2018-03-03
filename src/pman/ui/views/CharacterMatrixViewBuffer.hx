@@ -93,6 +93,27 @@ class CharacterMatrixViewBuffer implements CharacterMatrixViewAccessor {
     }
 
     /**
+      * synchronize a line's index in [lines] with the value of its 'y' property
+      * if [bias] is true, then its position in [lines] is found, and 'y' is set to that.
+      * conversely, if [bias] is false, its position in [lines] is set it the value of 'y'
+      */
+    public function reconcileLineIndex(line:CharacterMatrixViewBufferLine, bias:Bool):Void {
+        if ( bias ) {
+            var index:Int = -1;
+            for (i in 0...lines.length) {
+                if (lines[i] == line) {
+                    index = i;
+                    break;
+                }
+            }
+            line.y = index;
+            lines[index] = line;
+        }
+        else {
+            lines.set(line.y, line);
+        }
+    }
+
       * move a line from one index to another
       */
     public inline function moveLine(line:CharacterMatrixViewBufferLine, newY:Int):Void {
