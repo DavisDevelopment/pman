@@ -100,6 +100,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     public function move(?y:Int, ?x:Int):Void {
         qm(y, line += _);
         qm(x, column += _);
+        _check();
     }
 
     /**
@@ -545,13 +546,18 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * get the line specified by [y]
       */
-    private function ln(?y: Int):Null<CharacterMatrixViewBufferLine> return b().line(nullOr(y, line));
+    private function ln(?y: Int):Null<CharacterMatrixViewBufferLine> {
+        return b().line(sany(_y( y )));
+    }
     private function mln(?y: Int):Maybe<CharacterMatrixViewBufferLine> return ln( y );
 
     /**
       * get the cell specified by (y, x)
       */
-    private function col(?y:Int, ?x:Int):Null<CharacterMatrixViewBufferLineChar> return b().line(nullOr(y, line)).col(nullOr(x, column));
+    private function col(?y:Int, ?x:Int):Null<CharacterMatrixViewBufferLineChar> {
+        //return b().line(nullOr(y, line)).col(nullOr(x, column));
+        return ln( y ).col(sanx(_x( x )));
+    }
     private inline function pcol(pos: Point<Int>):Null<CharacterMatrixViewBufferLineChar> return col(pos.y, pos.x);
     private inline function ncol(?y:Int, ?x:Int):Maybe<CharacterMatrixViewBufferLineChar> {
         _nav(y, x);
@@ -653,6 +659,11 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         return (untyped __js__('Object.assign({1}, {0})', style, to));
     }
 
+    /* -- sanitization methods -- */
+    private inline function sany(y:Int):Int return tty.sanitize_y( y );
+    private inline function sanx(x: Int):Int return tty.sanitize_x( x );
+    private inline function sanpos(y:Int, x:Int):Void tty.sanitizePos(y, x);
+    private inline function _check():Void sanpos(line, column);
 
 /* === Computed Instance Fields === */
 
