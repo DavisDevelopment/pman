@@ -151,7 +151,7 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
                 // grab [column] value
                 tmp = column;
                 // jump ahead to the next line
-                nextLine();
+                down();
                 // reset [column] to 0
                 column = 0;
                 // adjust [delta] for the movement down+backward
@@ -213,6 +213,26 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     }
 
     /**
+      * read characters from the character matrix
+      */
+    public function read(len:Int, ?y:Int, ?x:Int):String {
+        var start:Int = _x( x );
+        return getLineText(y, null, start, (start + len));
+    }
+
+    /**
+      * write text onto the character matrix
+      */
+    public function write(s:String, ?y:Int, ?x:Int, ?attr:CellStyleDecl):Void {
+        var tmp = this.styles;
+        if (attr != null) {
+            styles = attr;
+        }
+        putText(s, y, x);
+        styles = tmp;
+    }
+
+    /**
       * replace [what] with [with] on either a single given line, or all of them
       */
     public function replaceText(what:String, with:String, ?y:Int):Void {
@@ -263,24 +283,12 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         while (cc != null && cc.x != ex) {
             cc.setChar( emptyChar );
             stych( cc );
-            //cc.touch();
+            cc = cc.nextChar;
         }
         var row = ln( y );
         if (row != null) {
             row.touch();
         }
-        //moveTo(_y(y), sx);
-        //for (x in sx...ex) {
-            //var cc = col();
-            //if (cc == null) {
-                //throw '[$sx, $ex] OutOfBounds';
-            //}
-            //else {
-                //cc.setChar( emptyChar );
-            //}
-        //}
-        //buffer.refreshLine( line );
-        restore();
         
         restorePos();
     }
@@ -289,8 +297,9 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
       * delete a line
       */
     public function deleteLine(?y: Int):Null<CharacterMatrixViewBufferLine> {
-        buffer.deleteLine(_y( y ));
+        var res = buffer.deleteLine(_y( y ));
         buffer.refreshLine(_y( y ));
+        return res;
     }
 
     /**
@@ -332,6 +341,14 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
         }
         restorePos();
         moveTo(_y(y), i);
+    }
+
+    /**
+      * go to the next line, betty
+      */
+    public function nextLine():Void {
+        down();
+        column = 0;
     }
 
     /**
@@ -444,17 +461,16 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * delete the character to the left of [this] cursor
       */
-    public function deleteLeft():Void {
+    public function deleteRight():Void {
         ln().shiftLeft( column );
-        back();
     }
 
     /**
       * delete the character to the right of [this] cursor
       */
-    public function deleteRight():Void {
-        column -= 1;
-        deleteLeft();
+    public function deleteLeft():Void {
+        back();
+        deleteRight();
     }
 
     /**
@@ -599,8 +615,36 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
     /**
       * move forward by one cell
       */
-    private inline function advance():Void { move(null, 1); }
-    private inline function back():Void move(null, -1);
+    private inline function advance():Void {
+        ++column;
+        _check();
+    }
+
+    /**
+      * move backward by one cell
+      */
+    private inline function back():Void {
+        --column;
+        _check();
+    }
+
+    public function right(n: Int = 1):CharacterMatrixViewBufferCursor {
+        column = sanx(column + n);
+        return this;
+    }
+
+    public function left(n: Int = 1):CharacterMatrixViewBufferCursor {
+        return right(-n);
+    }
+
+    public function down(n: Int = 1):CharacterMatrixViewBufferCursor {
+        line = sany(line + n);
+        return this;
+    }
+
+    public function up(n: Int = 1):CharacterMatrixViewBufferCursor {
+        return down( -n );
+    }
 
     /**
       * move to the given Point<Int>
@@ -667,16 +711,55 @@ class CharacterMatrixViewBufferCursor implements CharacterMatrixViewAccessor {
 
 /* === Computed Instance Fields === */
 
+    // reference to the character-matrix 'buffer' object
     public var buffer(get, never):CharacterMatrixViewBuffer;
     private inline function get_buffer() return tty.buffer;
 
+    // the color that will display as the background for any content written onto the buffer by [this] cursor
+    public var bgColor(get, set):Null<Color>;
+    private inline function get_bgColor() return styles.bg;
+    private inline function set_bgColor(v) return (styles.bg = v);
+
+    // the color with which the text (if any) will be displayed
+    public var textColor(get, set):Null<Color>;
+    private inline function get_textColor() return styles.fg;
+    private inline function set_textColor(v) return (styles.fg = v);
+
+    // whether content written to the buffer by [this] Cursor will be displayed as emboldened
+    public var bold(get, set):Null<Bool>;
+    private inline function get_bold() return styles.bold;
+    private inline function set_bold(v) return (styles.bold = v);
+
+    // whether content written to the buffer by [this] Cursor will be displayed as underlined
+    public var underline(get, set):Null<Bool>;
+    private inline function get_underline() return styles.underline;
+    private inline function set_underline(v) return (styles.underline = v);
+
 /* === Instance Fields === */
 
+    // reference to the char-matrix to which [this] cursor is attached
     public var tty: CharacterMatrixView;
+
+    // the vertical (y, row, line, etc.) offset of [this] cursor
     public var line(default, null): Int;
+
+    // the horizontal (x, col, cell) offset of [this] cursor
     public var column(default, null): Int;
 
-    private var styles: Null<CharacterMatrixViewStyle>;
     // stack used to store past positions in the buffer that [this] cursor has 'occupied'
     private var savedIndices: Stack<Int>;
+
+    // stack used to store past iterations of the [styles] object, so that changes made can simply and reliably be undone
+    private var savedStyles: Stack<CellStyleDecl>;
+
+    // object used to store the styling info to be applied to all char-cells that are written to by [this] cursor
+    private var styles: CellStyleDecl;
+    //private var styles: Null<CharacterMatrixViewStyle>;
 }
+
+typedef CellStyleDecl = {
+    ?fg: Color,
+    ?bg: Color,
+    ?bold: Bool,
+    ?underline: Bool
+};
