@@ -138,4 +138,16 @@ class CharacterMatrixViewMacros {
             }
         });
     }
+
+    /**
+      * fancy macro-method used by [_assign]
+      */
+    public static macro function _a<T>(b:ExprOf<Bool>, x:ExprOf<T>, y:ExprOf<T>):ExprOf<Null<T>> {
+        return macro ({
+            if (!$b || ($b && $y != null)) {
+                $x = $y;
+            }
+            else null;
+        });
+    }
 }
