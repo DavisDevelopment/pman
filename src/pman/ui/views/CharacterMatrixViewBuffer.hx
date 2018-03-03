@@ -134,14 +134,17 @@ class CharacterMatrixViewBuffer implements CharacterMatrixViewAccessor {
     /**
       * swap two lines' positions
       */
-    public inline function swapLines(y1:Int, y2:Int):Void {
+    public function swapLines(y1:Int, y2:Int):Void {
         var tmp = lines[y1];
         if (tmp == null) {
             throw 'Error';
         }
         else {
-            moveLine(lines[y2], y1);
-            moveLine(tmp, y2);
+            var tl = [lines[y1], lines[y2]];
+            var ty = [tl[0].y, tl[1].y];
+            ty.reverse();
+            setLineIndex(tl[0], ty[0]);
+            setLineIndex(tl[1], ty[1]);
         }
     }
 
