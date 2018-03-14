@@ -141,6 +141,8 @@ class TrackData {
         starred = d.starred;
         rating = d.rating;
         description = d.description;
+        channel = d.channel;
+        contentRating = d.contentRating;
         attrs = null;
 
         // if [d] has an 'attrs' property, pull that onto [this]
@@ -359,6 +361,10 @@ class TrackData {
         });
         return row;
     }
+
+    /**
+      * encode an attribute value
+      */
     private function _encodeAttrVal(value: Dynamic):Dynamic {
         //TODO actually encode values
         return value;
