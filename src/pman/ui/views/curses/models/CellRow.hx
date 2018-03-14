@@ -13,6 +13,7 @@ import haxe.ds.Vector;
 import haxe.macro.Expr;
 
 import pman.ds.FixedLengthArray as FlArray;
+import pman.ui.views.curses.models.Cell;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -42,9 +43,11 @@ class CellRow <T:Cell> extends EventDispatcher {
         length = len;
         index = null;
         firstCell = null;
+        nextRow = null;
         _updated = false;
         _updatedAll = false;
         _updatedCells = new Array();
+        grid = null;
 
         // [= EVENTS =]
         addSignals([
@@ -61,6 +64,20 @@ class CellRow <T:Cell> extends EventDispatcher {
     }
 
 /* === Instance Methods === */
+
+    /**
+      * get the cell at [x]
+      */
+    public function getCell(x: Int):Null<T> {
+        return d[x];
+    }
+
+    /**
+      * write data onto the cell at [x]
+      */
+    public function setCell(x:Int, cell:Either<T, CellDecl>):Void {
+        getCell( x ).write(cast cell);
+    }
 
     /**
       * reassign the size [length] of [this] row
@@ -195,7 +212,9 @@ class CellRow <T:Cell> extends EventDispatcher {
     public var length(default, null): Int;
     public var index(default, null): Null<Int>;
     public var firstCell(default, null): Null<T>;
+    public var nextRow: Null<CellRow<Cell>>;
     public var d(default, null): FlArray<T>;
+    public var grid:Null<CellGrid<Cell, CellRow<Cell>>>;
 
     private var _updated: Bool;
     private var _updatedAll: Bool;
