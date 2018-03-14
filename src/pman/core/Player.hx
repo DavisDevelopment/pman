@@ -11,6 +11,7 @@ import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
 import tannus.math.Random;
+import tannus.graphics.Color;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -33,6 +34,8 @@ import pman.media.*;
 import pman.media.info.*;
 import pman.media.info.Mark;
 import pman.ui.*;
+import pman.ui.views.curses.models.*;
+import pman.ui.views.curses.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 import pman.ds.*;
@@ -122,10 +125,92 @@ class Player extends EventDispatcher {
 	        if (error != null) {
 	            throw error;
             }
+            else {
+                //_test_tty(stage);
+                _test_curses( stage );
+            }
 	    });
 	}
 
+	/**
+	  * test the 'curses' shit
+	  */
+	private function _test_curses(stage: Stage):Void {
+	    var grid = new CellGrid(100, 100);
+	    var gridView = new CellGridView( grid );
+
+	    function attachGridView() {
+	        view.addSibling( gridView );
+	    }
+
+	    window.expose('grid', grid);
+	    window.expose('gridView', gridView);
+	    window.expose('renderGrid', attachGridView);
+	}
+
+    /**
+      * test the character matrix class
+      */
+	private function _test_tty(stage: Stage):Void {
+	    // create the character-matrix view
+	    var matrix = new pman.ui.views.CharacterMatrixView({
+            width: 200,
+            height: 200,
+            fontFamily: 'SourceCodePro',
+            fontSize: 10,
+            fontSizeUnit: 'px',
+            foregroundColor: '#1ADD1A',
+            backgroundColor: '#2F2B2B',
+            autoBuild: false
 	    });
+		//matrix.calculateSize(view.mediaRect.floor());
+		matrix.calculateSize( stage.rect );
+	    matrix.init();
+
+        // expose the matrix into the global scope
+	    window.expose('matrix', matrix);
+	    window.expose('mc', matrix.cursor);
+        echo( matrix );
+
+        // get a reference to the cursor
+        var c = matrix.cursor;
+        c.write('| Betty, get my urinal.');
+        c.nextLine();
+        c.write('| I really need, boo');
+        c.nextLine();
+        c.write('| I hope you get it soon');
+        c.nextLine();
+
+        c.etch(function(c) {
+            var boldred ={
+                fg: new Color(255, 0, 0),
+                bold: true
+            };
+
+            //c.etch(fn(_.write('[== ')), boldred)
+            c.write('[== ', null, null, boldred);
+            c.write('this should now be the last line of text');
+            c.write(' ==]', null, null, boldred);
+        });
+
+        c.nextLine();
+        c.clearLine(null, null, null, '=');
+
+        /**
+          * test rapid manipulation of the matrix in real time
+          */
+        function realTimeTests() {
+            //
+        }
+        window.expose('matrixRealTimeTest', realTimeTests);
+
+        function attachR() {
+            var ttyr = new pman.ui.views.CharacterMatrixViewRenderer( matrix );
+            matrix.attachRenderer( ttyr );
+            view.addSibling( ttyr );
+        }
+        window.expose('renderMatrix', attachR);
+        //wait(5000, attachR);
 	}
 
 	/**
