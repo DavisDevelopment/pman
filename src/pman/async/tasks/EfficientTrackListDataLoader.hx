@@ -227,7 +227,10 @@ class EfficientTrackListDataLoader extends Task1 {
       * create new TrackData for the given Track
       */
     private function create_new_data(track:Track, pushes:Array<VoidAsync>, submit:Cb<TrackData>):Void {
-        data = new TrackData( track );
+        data = new TrackData(track, Create({
+            initial: {},
+            current: {}
+        }));
         load_media_metadata(track, function(?error, ?meta) {
             if (error != null) {
                 return submit(error, null);
@@ -361,15 +364,22 @@ class EfficientTrackListDataLoader extends Task1 {
       */
     private function pull_raw(row:MediaRow, data:TrackData, done:VoidCb) {
         cache.get().unless(done.raise()).then(function(info) {
-            data.pullSource(row, src_decl(), done, db, info);
+            data.pullSource(row, src_decl(data), done, db, info);
         });
     }
 
     /**
       * get the MediaDataSourceDecl for [properties]
       */
-    private inline function src_decl():MediaDataSourceDecl {
-        return TrackData.getMediaDataSourceDeclFromPropertyList( properties );
+    private function src_decl(data: TrackData):MediaDataSourceDecl {
+        trace( data.source );
+        trace( properties );
+        if (data.source.match(Create(_))) {
+            return Complete;
+        }
+        var decl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
+        trace( decl );
+        return decl;
     }
 
     /**
