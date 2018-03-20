@@ -12,6 +12,7 @@ import pman.media.*;
 import pman.edb.*;
 import pman.bg.db.*;
 import pman.async.*;
+import pman.bg.media.MediaDataSource;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -44,6 +45,7 @@ class EfficientTrackListDataLoader extends Task1 {
         this.missingData = new Array();
         this.treg = new Dict();
         this.writes = new Array(); 
+        this.properties = TrackData._all_.copy();
     }
 
 /* === Instance Methods === */
@@ -86,6 +88,28 @@ class EfficientTrackListDataLoader extends Task1 {
         rlp.unless(function( error ) {
             complete( error );
         });
+    }
+
+    /**
+      * set the value of [this]'s "properties" property
+      */
+    public function setPropertyList(names: Array<String>):EfficientTrackListDataLoader {
+        this.properties = names;
+        return this;
+    }
+
+    /**
+      * get [this]'s property list
+      */
+    public function getPropertyList():Array<String> {
+        return properties;
+    }
+
+    /**
+      * [this] will now load only the 'inline' properties for TrackData
+      */
+    public function onlyInlineProperties():EfficientTrackListDataLoader {
+        return setPropertyList(TrackData._inline_.copy());
     }
 
     /**
@@ -337,8 +361,15 @@ class EfficientTrackListDataLoader extends Task1 {
       */
     private function pull_raw(row:MediaRow, data:TrackData, done:VoidCb) {
         cache.get().unless(done.raise()).then(function(info) {
-            data.pullRaw(row, done, db, info);
+            data.pullSource(row, src_decl(), done, db, info);
         });
+    }
+
+    /**
+      * get the MediaDataSourceDecl for [properties]
+      */
+    private inline function src_decl():MediaDataSourceDecl {
+        return TrackData.getMediaDataSourceDeclFromPropertyList( properties );
     }
 
     /**
@@ -397,4 +428,5 @@ class EfficientTrackListDataLoader extends Task1 {
     private var track: Null<Track>;
     private var data: Null<TrackData>;
     private var cache: TrackBatchCache;
+    private var properties: Array<String>;
 }

@@ -12,6 +12,7 @@ import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.async.*;
 import pman.media.info.*;
+import pman.bg.media.MediaDataSource;
 
 import haxe.Unserializer;
 
@@ -32,6 +33,7 @@ using pman.async.VoidAsyncs;
 using pman.bg.DictTools;
 
 @:access( pman.media.Track )
+@:access( pman.media.TrackData2 )
 class LoadTrackData extends Task2<TrackData> {
     /* Constructor Function */
     public function new(track:Track, db:PManDatabase):Void {
@@ -40,11 +42,20 @@ class LoadTrackData extends Task2<TrackData> {
         this.track = track;
         this.db = db;
         this.store = db.mediaStore;
+        this.properties = TrackData._all_.copy();
         this.data  = new TrackData( track );
         this.cache = new TrackBatchCache( db );
     }
 
 /* === Instance Methods === */
+
+    /**
+      * set [this]'s property list
+      */
+    public inline function setPropertyList(props: Array<String>):LoadTrackData {
+        properties = props;
+        return this;
+    }
 
     /**
       * execute [this] Task
@@ -124,13 +135,18 @@ class LoadTrackData extends Task2<TrackData> {
       * create new TrackData
       */
     private function create_new(done : VoidCb):Void {
-        data = new TrackData( track );
+        data = new TrackData(track, Create({
+            initial: {},
+            current: {}
+        }));
+
         loadMediaMetadata(function(?error, ?meta) {
             if (error != null) {
                 return done( error );
             }
             else {
                 data.meta = meta;
+                trace( data.meta );
                 push_data_to_db( done );
             }
         });
@@ -140,7 +156,10 @@ class LoadTrackData extends Task2<TrackData> {
       * push some data to the database
       */
     private function push_data_to_db(done : VoidCb):Void {
-        var raw = data.toRaw();
+        // create the MediaRow object
+        var raw:MediaRow = data.toRaw();
+
+        // push it to the database
         store.insertRow(raw, function(?error, ?row) {
             if (error != null) {
                 return done( error );
@@ -191,8 +210,19 @@ class LoadTrackData extends Task2<TrackData> {
       */
     private function pull_raw(row:MediaRow, data:TrackData, done:VoidCb):Void {
         cache.get().unless(done.raise()).then(function(info) {
-            data.pullRaw(row, done, db, info);
+            data.pullSource(row, src_decl(), done, db, info);
+            //data.pullRaw(row, done, db, info);
         });
+    }
+
+    /**
+      * get the MediaDataSourceDecl for [properties]
+      */
+    private function src_decl():MediaDataSourceDecl {
+        if (data.source.match(Create(_))) {
+            return Complete;
+        }
+        return TrackData.getMediaDataSourceDeclFromPropertyList( properties );
     }
 
 /* === Instance Fields === */
@@ -200,6 +230,7 @@ class LoadTrackData extends Task2<TrackData> {
     public var track : Track;
     public var db : PManDatabase;
     public var store : MediaStore;
+    public var properties: Array<String>;
     public var data : Null<TrackData>;
     public var cache: TrackBatchCache;
 }
