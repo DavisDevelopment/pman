@@ -8,6 +8,7 @@ import pman.bg.media.MediaRow;
 enum MediaDataSource {
     Empty;
     Partial(properties:Array<String>, data:MediaDataSourceState);
+    Create(state: MediaDataSourceState);
     Complete(row: MediaDataSourceState);
 }
 
