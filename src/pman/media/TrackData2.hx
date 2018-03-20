@@ -59,6 +59,7 @@ class TrackData2 {
         sourceChange = new Signal();
         rs = new OnceSignal();
         source = src;
+        dsource = Complete;
 
         __bind();
 
@@ -871,14 +872,21 @@ class TrackData2 {
       */
     @:native('a')
     public static function getMediaDataSourceDeclFromPropertyList(properties: Array<String>):MediaDataSourceDecl {
+        properties = organizePropertyList( properties );
+
         if (properties.empty()) {
             return MediaDataSourceDecl.Empty;
         }
-        else if (properties.all.fn(_all_.has( _ ))) {
+        else if (properties.length == _all_.length) {
+            for (i in 0..._all_.length) {
+                if (properties[i] != _all_[i]) {
+                    return MediaDataSourceDecl.Partial( properties );
+                }
+            }
             return MediaDataSourceDecl.Complete;
         }
         else {
-            return MediaDataSourceDecl.Partial(organizePropertyList( properties ));
+            return MediaDataSourceDecl.Partial( properties );
         }
     }
 
@@ -931,9 +939,15 @@ class TrackData2 {
         var res = (source = newSource);
         sourceChange.call( delta );
         if (!rs.isReady()) {
-            switch ( delta ) {
-                case {previous: null|Empty, current:current} if (current != null && current != Empty):
+            switch ([delta.previous, delta.current]) {
+                //case {previous: null|Empty, current:current} if (current != null && current != Empty):
+                case [null|Empty, current] if (current != null && current != Empty):
                     rs.announce();
+                    trace('READY');
+
+                case [Partial(_,_)|Create(_)|Complete(_), Empty]:
+                    trace('TrackData has been emptied');
+                    throw 'Aww, dat not right, sha';
 
                 default:
                     null;
