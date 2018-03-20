@@ -22,6 +22,7 @@ import pman.bg.media.*;
 import pman.bg.media.MediaRow;
 import pman.bg.media.MediaData;
 import pman.bg.media.Media;
+import pman.bg.media.MediaDataDelta;
 
 using StringTools;
 using tannus.ds.StringUtils;
