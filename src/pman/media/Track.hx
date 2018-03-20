@@ -17,6 +17,7 @@ import pman.db.*;
 import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.bg.media.MediaFeature;
+import pman.bg.media.MediaDataSource;
 import pman.ui.pl.TrackView;
 import pman.media.info.Mark;
 import pman.media.info.*;
@@ -25,6 +26,7 @@ import pman.async.tasks.*;
 
 import haxe.Serializer;
 import haxe.Unserializer;
+import haxe.extern.EitherType as Either;
 
 import electron.*;
 import electron.Shell;
@@ -32,6 +34,8 @@ import electron.Tools.defer;
 import Slambda.fn;
 import tannus.math.TMath.*;
 import pman.Globals.*;
+
+import pman.media.TrackData2 as TrackData;
 
 using StringTools;
 using tannus.ds.StringUtils;
