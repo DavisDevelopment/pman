@@ -127,7 +127,7 @@ class TrackData2 {
 
             // complete data
             case Complete( data ), Create( data ), Partial(_, data):
-                return _buildMediaRow(_dataRowFromState( data.current ));
+                return _buildMediaRow(_dataRow());
         }
     }
 
@@ -170,6 +170,55 @@ class TrackData2 {
         if (o.meta != null) {
             row.meta = o.meta.toRaw();
         }
+
+        return row;
+    }
+
+    /**
+      * data row
+      */
+    private function _dataRow():MediaDataRow {
+        var o:Dynamic = getSourceData( source );
+        if (o != null)
+            o = o.row;
+        if (o != null)
+            o = o.data;
+        if (o == null)
+            o = {};
+        var d:Null<MediaDataRow> = o;
+        var row:MediaDataRow = {
+            views: nullOr(views, d.views),
+            starred: nullOr(starred, d.starred),
+            channel: nullOr(channel, d.channel),
+            rating: nullOr(rating, d.rating),
+            contentRating: nullOr(contentRating, d.contentRating),
+            description: nullOr(description, d.description),
+            marks: [],
+            tags: [],
+            actors: [],
+            attrs: null,
+            meta: null
+        };
+
+        if (meta != null) {
+            row.meta = meta.toRaw();
+        }
+
+        if (attrs != null) {
+            row.attrs = attrs.toAnon();
+        }
+
+        if (marks != null) {
+            row.marks = marks.map.fn(_.toJson());
+        }
+
+        if (tags != null)
+            row.tags = tags.map.fn(_.name);
+
+        if (actors != null)
+            row.actors = actors.map.fn(_.name);
+
+        trace( row );
 
         return row;
     }
