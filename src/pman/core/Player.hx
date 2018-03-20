@@ -1044,45 +1044,53 @@ class Player extends EventDispatcher {
 
 			// update the database regarding the Track that has just come into focus
 			var ms = app.db.mediaStore;
-			newTrack.editData(function(data, done) {
-			    // increment the 'views'
-			    if (getStatus().match( Playing )) {
-			        data.views++;
-			        done = done.wrap(function(f, ?error) {
-			            defer( newTrack.updateView );
-			            f( error );
-			        });
-			    }
+			function dostuff() {
+                newTrack.editData(function(data, done) {
+                    // increment the 'views'
+                    if (getStatus().match( Playing )) {
+                        data.views++;
+                        done = done.wrap(function(f, ?error) {
+                            defer( newTrack.updateView );
+                            f( error );
+                        });
+                    }
 
-                // get previous playback progress (if available)
-                var lastTime:Null<Float> = data.getLastTime();
+                    // get previous playback progress (if available)
+                    var lastTime:Null<Float> = data.getLastTime();
 
-                // if playback progress was retrieved
-                if (lastTime != null) {
-                    defer(function() {
-                        // seek to it
-                        currentTime = lastTime;
+                    // if playback progress was retrieved
+                    if (lastTime != null) {
+                        defer(function() {
+                            // seek to it
+                            currentTime = lastTime;
 
-                        // fire the TrackReady event
-                        session.trackReady.call( newTrack );
-                    });
-                }
+                            // fire the TrackReady event
+                            session.trackReady.call( newTrack );
+                        });
+                    }
 
-                // declare complete
-                done();
-			});
+                    // declare complete
+                    done();
+                });
+			}
+
+			dostuff();
 
 			if (!getStatus().match( Playing )) {
 			    once('play', untyped function() {
 			        if (track == newTrack) {
-			            newTrack.editData(function(data, done) {
-			                data.views++;
-							//defer(newTrack.updateView.join(done.void()));
-			                defer(function() {
-			                    newTrack.updateView();
-			                    done();
-			                });
-			            });
+			            function iv() {
+                            newTrack.editData(function(data, done) {
+                                data.views++;
+                                //defer(newTrack.updateView.join(done.void()));
+                                defer(function() {
+                                    newTrack.updateView();
+                                    done();
+                                });
+                            });
+                        }
+
+                        iv();
 			        }
 			    });
 			}
