@@ -69,3 +69,13 @@ typedef RawExtMediaData = {
     actors: Array<String>,
     ?attrs: Dynamic
 }
+
+typedef NullableRawBaseMediaData = {
+    ?views: Int,
+    ?starred: Bool,
+    ?meta: MediaMetadata,
+    ?rating: Float,
+    ?contentRating: String,
+    ?channel: String,
+    ?description: String
+};
