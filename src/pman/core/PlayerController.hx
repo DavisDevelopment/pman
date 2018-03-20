@@ -244,7 +244,7 @@ class PlayerController {
                 if (player.currentTime >= player.durationTime) {
                     return true;
                 }
-                else if (player.track.data != null) {
+                else if (player.track.dataCheck()) {
                     var endTime = player.track.data.getEndTime();
                     if (endTime != null && player.currentTime >= endTime) {
                         return true;
