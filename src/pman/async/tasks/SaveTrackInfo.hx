@@ -66,21 +66,25 @@ class SaveTrackInfo extends Task1 {
       */
     private function edit_data(done : VoidCb):Void {
         track.editData(function(data, next) {
+            inline function has(name: String):Bool {
+                return (data.checkProperty(name) && Reflect.hasField(delta, name));
+            }
+
             // create list to hold sub-tasks
             var steps:Array<VoidAsync> = new Array();
 
             // handle synchronous changes
             steps.push(function(end) {
-                if (delta.channel != null)
+                if (has('channel'))
                     data.channel = delta.channel.current;
 
-                if (delta.contentRating != null)
+                if (has('contentRating'))
                     data.contentRating = delta.contentRating.current;
 
-                if (delta.rating != null)
+                if (has('rating'))
                     data.rating = delta.rating.current;
 
-                if (delta.description != null)
+                if (has('description'))
                     data.description = delta.description.current;
 
                 end();
@@ -88,7 +92,7 @@ class SaveTrackInfo extends Task1 {
 
             // handle tags
             steps.push(function(end) {
-                if (delta.tags != null) {
+                if (has('tags')) {
                     var newTags = delta.tags.current;
                     data.tags = new Array();
                     for (t in newTags) {
@@ -100,7 +104,7 @@ class SaveTrackInfo extends Task1 {
 
             // handle Actors
             steps.push(function(end) {
-                if (delta.actors != null) {
+                if (has('actors')) {
                     if (delta.actors.current != null) {
                         var newActors = delta.actors.current;
                         data.writeActors(newActors, function(?error, ?al) {
