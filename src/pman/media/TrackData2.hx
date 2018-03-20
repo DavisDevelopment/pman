@@ -906,17 +906,35 @@ class TrackData2 {
 /* === Static Fields === */
 
     // list of all property names for [this]
+    //public static var _all_:Array<String> = {[
+        //'views', 'starred', 'rating', 'description',
+        //'attrs', 'marks', 'tags', 'actors', 'channel',
+        //'contentRating', 'meta'
+    //];};
     public static var _all_:Array<String> = {[
-        'views', 'starred', 'rating', 'description',
-        'attrs', 'marks', 'tags', 'actors', 'channel',
-        'contentRating', 'meta'
+        "actors",
+        "attrs",
+        "channel",
+        "contentRating",
+        "description",
+        "marks",
+        "meta",
+        "rating",
+        "starred",
+        "tags",
+        "views"
     ];};
 
     // list of all properties that are stored in the database "as-is" (meaning that they're not stored in separate tables)
     public static var _inline_:Array<String> = {[
-        'views', 'starred', 'rating', 'description',
-        'channel', 'contentRating', 'meta', 'marks',
-        'attrs'
+        'attrs',
+        'channel',
+        'contentRating',
+        'description',
+        'marks',
+        'meta',
+        'rating',
+        'starred'
     ];};
 
     // list of all mapped property's names
