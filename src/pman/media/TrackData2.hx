@@ -275,10 +275,23 @@ class TrackData2 {
 
         // push [this] to the database
         step(function(next: VoidCb) {
-            var prom = db.media.putRow(toRaw());
-            prom.then(function(row: MediaRow) {
-                pullSource(row, dsource, next);
-            }, next.raise());
+            var newRow:MediaRow = toRaw();
+            if (newRow != null) {
+                trace( newRow );
+                var prom = db.media.putRow( newRow );
+                prom.then(function(row: MediaRow) {
+                    trace( row );
+                    pullSource(row, dsource, next.wrap(function(_next, ?error) {
+                        if (error != null) {
+                            _next( error );
+                        }
+                        else {
+                            trace(getSourceData(source));
+                            _next();
+                        }
+                    }));
+                }, next.raise());
+            }
         });
 
         steps.series( complete );
