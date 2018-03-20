@@ -8,6 +8,7 @@ import electron.Shell;
 
 import pman.core.*;
 import pman.media.*;
+import pman.media.TrackData2;
 import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.async.*;
@@ -209,20 +210,38 @@ class LoadTrackData extends Task2<TrackData> {
       * pull raw
       */
     private function pull_raw(row:MediaRow, data:TrackData, done:VoidCb):Void {
-        cache.get().unless(done.raise()).then(function(info) {
-            data.pullSource(row, src_decl(), done, db, info);
-            //data.pullRaw(row, done, db, info);
-        });
+        datcache(function(cache, next:VoidCb) {
+            data.pullSource(
+                row, src_decl( data ),
+                next, db, cache
+            );
+        }, done);
+    }
+
+    /**
+      * shorthand method for loading cache
+      */
+    private function datcache(f:DataCache->VoidCb->Void, done:VoidCb):Void {
+        cache.get().then(function(info) {
+            f(info, done);
+        }, done.raise());
     }
 
     /**
       * get the MediaDataSourceDecl for [properties]
       */
-    private function src_decl():MediaDataSourceDecl {
+    private function src_decl(data: TrackData):MediaDataSourceDecl {
+        trace( data.source );
+        trace( properties );
+
+        // result is [Complete] if [Create(_)]
         if (data.source.match(Create(_))) {
             return Complete;
         }
-        return TrackData.getMediaDataSourceDeclFromPropertyList( properties );
+        
+        var decl:MediaDataSourceDecl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
+        trace( decl );
+        return decl;
     }
 
 /* === Instance Fields === */
