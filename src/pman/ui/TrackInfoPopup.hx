@@ -61,10 +61,14 @@ class TrackInfoPopup extends Dialog {
 
         tmacros = {
             tags: function(resolve:Dynamic) {
-                return track.data.tags.map.fn( _.name ).join(', ');
+                if (track.dataCheck('tags'))
+                    return track.data.tags.map.fn( _.name ).join(', ');
+                else return '';
             },
             stars: function(resolve : Dynamic) {
-                return track.data.actors.map.fn( _.name ).join(', ');
+                if (track.dataCheck('actors'))
+                    return track.data.actors.map.fn( _.name ).join(', ');
+                else return '';
             }
         };
 
