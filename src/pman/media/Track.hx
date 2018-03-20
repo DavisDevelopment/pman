@@ -573,7 +573,9 @@ class Track extends EventDispatcher implements IComparable<Track> {
                 return complete( error );
             }
             else if (data != null) {
-                data.edit(action, complete, save);
+                data.onReady(function() {
+                    data.edit(action, complete, save);
+                });
             }
             else {
                 complete('Error: No TrackData loaded');
