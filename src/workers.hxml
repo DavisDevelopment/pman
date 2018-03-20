@@ -24,10 +24,10 @@
 --each
 #--next
 
--main pman.bg.BgTest
--D worker
--D hscriptPos
--js ../dist/scripts/bgdb.worker.js
+#-main pman.bg.BgTest
+#-D worker
+#-D hscriptPos
+#-js ../dist/scripts/bgdb.worker.js
 
 #-main pman.ww.workers.TrackDataLoader
 #-D worker

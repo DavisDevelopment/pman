@@ -1,6 +1,6 @@
 {
   "name": "pman",
-  "version": "0.8.2",
+  "version": "0.8.5",
   "description": "Cross-Platform Media Player/Manager",
   "repository": "http://github.com/DavisDevelopment/pman",
   "homepage": "http://github.com/DavisDevelopment/pman",
@@ -20,29 +20,36 @@
     "music",
     "player",
     "manager",
+    "editor",
+    "browser",
     "playlist",
+    "queue",
     "pls",
     "xspf",
     "m3u",
     "mp4",
     "mp3",
+    "webm",
     "bplayer",
+    "electron",
+    "haxe",
+    "tannus",
     "cross-platform"
   ],
-  "dead_dependencies": {
-  },
+  "dead_dependencies": {},
   "dependencies": {
     "auto-launch": "^5.0.5",
-    "fluent-ffmpeg": "^2.1.0",
+    "cheerio": "^1.0.0-rc.2",
+    "chromecast-api": "^0.2.5",
+    "express": "^4.16.3",
+    "fluent-ffmpeg": "^2.1.2",
     "jsmediatags": "^3.8.1",
     "local-ip": "^1.0.1",
-    "localforage": "^1.5.2",
+    "localforage": "^1.6.0",
     "natural": "^0.5.4",
     "nedb": "^1.8.0",
-    "underscore": "^1.8.3",
-    "chromecast-api": "0.2.5",
-    "express": "^4.15.2",
-    "send-seekable": "^1.0.4"
+    "send-seekable": "^1.0.4",
+    "underscore": "^1.8.3"
   },
   "devDependencies": {
     "ajv": "^6.0.0",
@@ -52,15 +59,13 @@
     "coffeescript": "^1.12.5",
     "electron": "1.6.2",
     "electron-builder": "^16.8.4",
-    "electron-devtools-installer": "^2.1.0",
-    "electron-installer-windows": "^0.2.0",
+    "electron-devtools-installer": "^2.2.3",
+    "electron-installer-debian": "^0.5.2",
     "electron-packager": "^8.7.2",
-    "electron-winstaller": "^2.6.3",
-    "less": "^2.7.2",
+    "electron-winstaller": "^2.6.4",
+    "less": "^2.7.3",
     "prompt": "^1.0.0",
     "uglify-js": "^2.8.22"
   },
-  "optionalDependencies": {
-    "electron-installer-debian": "^0.5.2"
-  }
+  "optionalDependencies": {}
 }
