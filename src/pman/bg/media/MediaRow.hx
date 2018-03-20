@@ -40,7 +40,7 @@ typedef MediaDataRow = {
     //tags: Array<String>,
     //actors: Array<String>,
     //meta: Null<MediaMetadataRow>
-}
+};
 
 typedef MediaMetadataRow = {
     duration : Float,
@@ -79,3 +79,4 @@ typedef NullableRawBaseMediaData = {
     ?channel: String,
     ?description: String
 };
+
