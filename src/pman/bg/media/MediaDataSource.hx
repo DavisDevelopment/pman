@@ -18,7 +18,7 @@ enum MediaDataSourceDecl {
 }
 
 typedef MediaDataSourceState = {
-    row: MediaRow,
+    ?row: MediaRow,
     initial: NullableMediaDataState,
     current: NullableMediaDataState
 };
