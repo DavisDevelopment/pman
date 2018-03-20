@@ -14,7 +14,6 @@
 -lib actuate
 -lib format
 -lib hxnodejs
-#-lib electron
 
 -D tannus
 -D node
@@ -41,4 +40,4 @@
 -D main_process
 -js ../dist/scripts/background.js
 
---next
+#--next
