@@ -261,6 +261,37 @@ class Track extends EventDispatcher implements IComparable<Track> {
     }
 
     /**
+      * perform some check on [data]
+      */
+    public function dataCheck(?checks: Either<String, Array<String>>):Bool {
+        if (data != null && !data.isEmpty()) {
+            if (checks != null) {
+                var props:Array<String> = new Array();
+                if ((checks is String)) {
+                    props.push(cast checks);
+                }
+                else if ((checks is Array<String>)) {
+                    props = props.concat(cast checks);
+                }
+                var tmp = props.copy();
+                props = [];
+                for (x in props) {
+                    if (x.has(',')) {
+                        props = props.concat(x.split(',').filter.fn(_.hasContent()));
+                    }
+                }
+                return data.checkProps( props );
+            }
+            else {
+                return data.isReady();
+            }
+        }
+        else {
+            return false;
+        }
+    }
+
+    /**
       * update [this]'s view, if it exists
       */
     public inline function updateView():Void {
