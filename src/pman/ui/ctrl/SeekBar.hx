@@ -317,7 +317,8 @@ class SeekBar extends Ent {
       */
     private function getMarkViewTypes():Array<MarkViewType> {
         var types:Array<MarkViewType> = new Array();
-        if (player.track != null && player.track.data != null) {
+
+        if (player.track != null && player.track.dataCheck()) {
             var marks = player.track.data.marks;
             var markTimes:Array<Float> = new Array();
             for (m in marks) if (m.type.match(Named(_))) {
@@ -409,7 +410,7 @@ class SeekBar extends Ent {
         __updateViewed( stage );
 
         // rebuild the mark views when the track's marks array changes
-        if (player.track != null && player.track.data != null) {
+        if (player.track != null && player.track.dataCheck()) {
             // track's current marks
             var marks = player.track.data.marks;
             if (_lfml != null) {
