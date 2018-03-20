@@ -19,6 +19,8 @@ import pman.media.info.*;
 import pman.bg.media.Mark;
 import pman.bg.media.Tag;
 import pman.bg.media.MediaRow;
+import pman.bg.media.MediaDataSource;
+import pman.media.TrackData2;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -40,7 +42,9 @@ using pman.async.VoidAsyncs;
 using pman.bg.DictTools;
 using tannus.FunctionTools;
 
-class TrackData {
+typedef TrackData = pman.media.TrackData2;
+
+class OldTrackData {
     /* Constructor Function */
     public function new(track : Track):Void {
         this.track = track;
@@ -676,13 +680,13 @@ class TrackData {
     /**
       * edit [this] TrackData object
       */
-    public function edit(action:TrackData->VoidCb->Void, done:VoidCb, _save:Bool=true):Void {
-        var steps:Array<VoidAsync> = [action.bind(this, _)];
-        if ( _save ) {
-            steps.push(untyped save.bind(_, null));
-        }
-        steps.series( done );
-    }
+    //public function edit(action:TrackData->VoidCb->Void, done:VoidCb, _save:Bool=true):Void {
+        //var steps:Array<VoidAsync> = [action.bind(this, _)];
+        //if ( _save ) {
+            //steps.push(untyped save.bind(_, null));
+        //}
+        //steps.series( done );
+    //}
 
 /* === Instance Fields === */
 
@@ -702,9 +706,7 @@ class TrackData {
     public var contentRating : Null<String>;
 
     public var meta : Null<MediaMetadata>;
+
+    private var source: Null<MediaDataSource>;
 }
 
-typedef DataCache = {
-    actors: Dict<String, Actor>,
-    tags: Dict<String, Tag>
-};
