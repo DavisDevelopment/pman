@@ -782,7 +782,7 @@ class TrackData2 {
     /**
       * get the underlying object from the given [src]
       */
-    private function getSourceData(src: MediaDataSource):Null<MediaDataSourceState> {
+    public function getSourceData(src: MediaDataSource):Null<MediaDataSourceState> {
         switch ( src ) {
             case Partial(_, data), Complete(data), Create(data):
                 return data;
