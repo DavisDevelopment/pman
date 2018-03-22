@@ -88,6 +88,12 @@ class Mark {
         return type.match(Named(_)|Scene(_, _));
     }
 
+    public function equals(other: Mark):Bool {
+        return (this == other || (
+            (time == other.time && type.equals(other.type))
+        ));
+    }
+
     public function format(all: Array<Mark>):Null<String> {
         var text = getName();
         if (!text.hasContent())
