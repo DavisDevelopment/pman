@@ -50,6 +50,13 @@ class Tag implements tannus.ds.IComparable<Tag> {
     }
 
     /**
+      * check for equality
+      */
+    public function equals(other: Tag):Bool {
+        return (name == other.name);
+    }
+
+    /**
       * compare [this] to [other]
       */
     public function compareTo(other: Tag):Int {
