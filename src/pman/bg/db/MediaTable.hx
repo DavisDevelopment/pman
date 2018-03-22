@@ -11,6 +11,7 @@ import tannus.sys.FileSystem as Fs;
 
 import edis.libs.nedb.*;
 import edis.storage.db.*;
+import edis.storage.db.Modification;
 import edis.core.Prerequisites;
 
 import Slambda.fn;
@@ -241,6 +242,115 @@ class MediaTable extends Table {
         else {
             return Promise.resolve(untyped row);
         }
+    }
+
+    /**
+      * modify the row pointed to by [id] based on [delta]
+      */
+    public function applyDelta(id:String, delta:MediaDataRowDelta, ?done:Cb<MediaRow>):Promise<MediaRow> {
+        // query-function to get row by id
+        function querie(q: Query) {
+            return q.eq('_id', id);
+        }
+
+        // Modification instance compiled from [delta]
+        var deltaMod:Modification = compileRowDelta( delta );
+
+        // apply [deltaMod]
+        return mutate(querie, deltaMod, {
+            multi: false,
+            insert: false
+        }, done);
+    }
+
+    /**
+      * 'compiles' [delta] into a Modification object that can be executed on the database
+      */
+    public function compileRowDelta(delta: MediaDataRowDelta):Modification {
+        // compute fieldNames
+        function pn(x: String):String {
+            return 'data.$x';
+        }
+        
+        /**
+          * private "build" function used to create the Modification object
+          */
+        function build(mod: Modification) {
+            /**
+              * assigns new value to specified field based on given Delta
+              */
+            inline function betty(n:String, ?d:Delta<Dynamic>) {
+                if (d != null) {
+                    mod = mod.set(pn(n), d.current);
+                }
+            }
+
+            /**
+              * performs modifications on a field based on the given ArrayDelta object
+              */
+            inline function merlin<T>(n:String, ?a:ArrayDelta<T,Dynamic>) {
+                if (a != null) {
+                    // create arrays to hold 'push' and 'pull' operands
+                    var adds:Array<T> = [], deletes:Array<T> = [];
+
+                    // parse delta-tokens
+                    for (itm in a.items) {
+                        switch ( itm ) {
+                            case AdiAppend(x):
+                                adds.push( x );
+
+                            case AdiRemove(x):
+                                deletes.push( x );
+
+                            default:
+                                trace(itm + '');
+                        }
+                    }
+
+                    // add pushes to update-object
+                    if (adds.hasContent()) {
+                        mod = mod.pushMany(pn(n), adds);
+                    }
+
+                    // add pulls to update-object
+                    if (deletes.hasContent()) {
+                        mod = mod.pull(pn(n), mod.opv(function(ops: Operators) {
+                            return ops.has( deletes );
+                        }));
+                    }
+                }
+            }
+
+            betty('channel', delta.channel);
+            betty('contentRating', delta.contentRating);
+            betty('description', delta.description);
+            betty('rating', delta.rating);
+            betty('starred', delta.starred);
+            betty('views', delta.views);
+            betty('meta', delta.meta);
+            betty('marks', delta.marks);
+
+            merlin('tags', delta.tags);
+            merlin('actors', delta.actors);
+
+            // apply the DictDelta tokens to the JSON-object as-is
+            if (delta.attrs != null) {
+                for (itm in delta.attrs) {
+                    switch ( itm ) {
+                        case DdiAdd(k, v):
+                            mod = mod.set(pn('attrs.$k'), v);
+
+                        case DdiRemove(k):
+                            mod = mod.unset(k);
+
+                        default:
+                            trace(itm+'');
+                    }
+                }
+            }
+        }
+
+        return Modification.mb( build );
     }
 
 /* === Media Methods === */
