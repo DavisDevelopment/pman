@@ -285,6 +285,19 @@ class TrackData2 {
             step(function(next: VoidCb) {
                 var tagNames:Array<String> = tags.map.fn( _.name );
                 db.tags.cogRows( tagNames ).then(function(x) next(), next.raise());
+    /**
+      * save [this] by writing the data as a whole onto the database
+      */
+    private function _writeall(db:PManDatabase, done:VoidCb):Void {
+        var newRow:MediaRow = toRaw();
+        if (newRow != null) {
+            db.media.putRow(newRow, function(?error, ?row:MediaRow) {
+                if (error != null) {
+                    done( error );
+                }
+                else {
+                    pullSource(row, dsource, done);
+                }
             });
         }
         
