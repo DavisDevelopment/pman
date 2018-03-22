@@ -810,6 +810,12 @@ class TrackData2 {
     }
 
     /**
+      * get the 
+      */
+    public function getSelfDelta():Null<MediaDataDelta> {
+        return trackDataDelta();
+    }
+
       * property binding
       */
     private function __bind():Void {
