@@ -123,6 +123,17 @@ class TrackData2 {
     }
 
     /**
+      * retrieve source data
+      */
+    private function _loadSource(row:MediaRow, properties:Array<String>, ?db:PManDatabase, ?cache:DataCache):Promise<MediaDataSource> {
+        return Promise.create({
+            var task = new TrackDataPullRaw(this, {
+                db: db,
+                cache: cache,
+                row: row,
+                properties: properties.copy()
+            });
+            return cast task.pull();
         });
     }
 
