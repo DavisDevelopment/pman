@@ -27,7 +27,8 @@ typedef MediaDataDelta = {
     ?contentRating: Delta<String>,
     ?channel: Delta<String>,
     ?description: Delta<String>,
-    ?marks: ArrayDelta<Mark, Delta<Mark>>,
+    //?marks: ArrayDelta<Mark, Delta<Mark>>,
+    ?marks: Delta<Array<Mark>>,
     ?tags: ArrayDelta<Tag, Delta<Tag>>,
     ?actors: ArrayDelta<Actor, Delta<Actor>>,
     ?attrs: DictDelta,
@@ -47,7 +48,8 @@ typedef MediaDataRowDelta = {
     ?contentRating: Delta<String>,
     ?channel: Delta<String>,
     ?description: Delta<String>,
-    ?marks: ArrayDelta<Dynamic, Delta<Dynamic>>,
+    //?marks: ArrayDelta<Dynamic, Delta<Dynamic>>,
+    ?marks: Delta<Array<Dynamic>>,
     ?tags: ArrayDelta<String, Delta<String>>,
     ?actors: ArrayDelta<String, Delta<String>>,
     ?attrs: DictDelta,
@@ -62,12 +64,14 @@ enum DictDeltaItem {
     DdiAlter(key:String, value:Delta<Dynamic>);
 }
 
-typedef ArrayDelta<TItem, TDelta> = Array<ArrayDeltaItem<TItem, TDelta>>;
+typedef ArrayDelta<TItem, TDelta> = {
+    items: Array<ArrayDeltaItem<TItem, TDelta>>,
+    src: Array<TItem>
+};
 
 enum ArrayDeltaItem<TItem, TDelta> {
     AdiAlter(item:TItem, delta:TDelta);
     AdiAppend(item: TItem);
     AdiRemove(item: TItem);
-    AdiMove(item:TItem, index:Int);
     AdiInsert(item:TItem, index:Int);
 }
