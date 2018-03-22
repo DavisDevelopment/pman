@@ -277,14 +277,14 @@ class TrackData2 {
             db = PManDatabase.get();
 
         // create a list of steps
-        var steps:Array<VoidAsync> = new Array();
-        inline function step(f: VoidAsync) steps.push( f );
+        var steps:Array<VoidAsync> = [
+            _prepush.bind(db, _),
+            _writeall.bind(db, _)
+        ];
 
-        // push [tags]
-        if (checkProperty('tags')) {
-            step(function(next: VoidCb) {
-                var tagNames:Array<String> = tags.map.fn( _.name );
-                db.tags.cogRows( tagNames ).then(function(x) next(), next.raise());
+        steps.series( complete );
+    }
+
     /**
       * save [this] by writing the data as a whole onto the database
       */
@@ -300,36 +300,38 @@ class TrackData2 {
                 }
             });
         }
-        
-        // push [actors]
-        if (checkProperty('actors')) {
-            step(function(next) {
-                db.actors.cogRowsFromNames(actors.map.fn(_.name)).then(x->next(), next.raise());
-            });
+        else {
+            done();
         }
+    }
 
-        // push [this] to the database
-        step(function(next: VoidCb) {
-            var newRow:MediaRow = toRaw();
-            if (newRow != null) {
-                trace( newRow );
-                var prom = db.media.putRow( newRow );
-                prom.then(function(row: MediaRow) {
-                    trace( row );
-                    pullSource(row, dsource, next.wrap(function(_next, ?error) {
-                        if (error != null) {
-                            _next( error );
-                        }
-                        else {
-                            trace(getSourceData(source));
-                            _next();
-                        }
-                    }));
-                }, next.raise());
+    /**
+      * save tags and actors to the database
+      */
+    private function _prepush(db:PManDatabase, done:VoidCb):Void {
+        if (checkPropsAny(['actors', 'tags'])) {
+            var steps:Array<VoidAsync> = new Array();
+
+            // push [tags]
+            if (checkProperty('tags')) {
+                steps.push(function(next: VoidCb) {
+                    var tagNames:Array<String> = tags.map.fn( _.name );
+                    db.tags.cogRows( tagNames ).then(function(x) next(), next.raise());
+                });
             }
-        });
 
-        steps.series( complete );
+            // push [actors]
+            if (checkProperty('actors')) {
+                steps.push(function(next) {
+                    db.actors.cogRowsFromNames(actors.map.fn(_.name)).then(x->next(), next.raise());
+                });
+            }
+
+            steps.series( done );
+        }
+        else {
+            done();
+        }
     }
 
     /**
