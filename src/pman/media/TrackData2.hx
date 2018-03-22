@@ -497,6 +497,24 @@ class TrackData2 {
     }
 
     /**
+      * detach a Tag from [this]
+      */
+    public function removeTag(tag: EitherType<String, Tag>):Bool {
+        au( 'tags' );
+        for (t in tags) {
+            if ((tag is String) && t.name == tag) {
+                tags.remove( t );
+                return true;
+            }
+            else if ((tag is Tag) && (tag : Tag).equals( t )) {
+                tags.remove( t );
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
       * attach a Tag to [this] as a String
       */
     public function addTag(tagName : String):Tag {
