@@ -21,6 +21,7 @@ import pman.bg.media.Mark;
 import pman.bg.media.Tag;
 import pman.bg.media.MediaRow;
 import pman.bg.media.MediaDataSource;
+import pman.bg.media.MediaDataDelta;
 import pman.async.tasks.TrackDataPullRaw;
 
 import haxe.Serializer;
@@ -40,12 +41,13 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
-using pman.media.MediaTools;
 using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
 using pman.bg.DictTools;
 using tannus.FunctionTools;
 using tannus.html.JSTools;
+using pman.media.MediaTools;
+using pman.media.TrackDataDeltaTools;
 
 class TrackData2 {
     /* Constructor Function */
