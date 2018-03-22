@@ -115,6 +115,14 @@ class TrackData2 {
             this.source = src;
 
             done();
+    /**
+      * 'rebase' [this] TrackData 
+      */
+    public function _rebase(src: MediaDataSource):Void {
+        this.source = src;
+    }
+
+    /**
         });
     }
 
