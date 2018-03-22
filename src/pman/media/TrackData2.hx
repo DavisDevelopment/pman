@@ -750,18 +750,14 @@ class TrackData2 {
     /**
       * check the given list of properties
       */
-    public function checkProps(props: Array<String>):Bool {
+    public function checkProps(props:Array<String>, all:Bool=true):Bool {
         if (props.empty() || isEmpty()) {
             return false;
         }
 
-        for (property in props) {
-            if (!checkProperty( property )) {
-                return false;
-            }
-        }
-        return true;
+        return (all ? props.all : props.any)(prop -> checkProperty( prop ));
     }
+    public inline function checkPropsAny(props: Array<String>):Bool return checkProps(props, false);
 
     /**
       * get the property-list from the given [src]
