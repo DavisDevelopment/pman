@@ -816,6 +816,22 @@ class TrackData2 {
         return trackDataDelta();
     }
 
+    /**
+      * get the delta for the database entry itself
+      */
+    public function getDataRowDelta():Null<MediaDataRowDelta> {
+        var mdd:Null<MediaDataDelta> = getSelfDelta();
+        trace( mdd );
+        if (mdd == null) {
+            return null;
+        }
+        else {
+            var mdrd = mdd.toRowDelta();
+            trace( mdrd );
+            return mdrd;
+        }
+    }
+
       * property binding
       */
     private function __bind():Void {
