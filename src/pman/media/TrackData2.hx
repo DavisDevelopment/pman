@@ -721,6 +721,13 @@ class TrackData2 {
     }
 
     /**
+      * check for existence of a set of properties
+      */
+    public function hasOwnPropertySet(props:Array<String>, all:Bool=true):Bool {
+        return (all ? props.all : props.any)(prop -> hasOwnProperty( prop ));
+    }
+
+    /**
       * check the given property
       */
     public function checkProperty(property:String, ?checks:Array<pman.tools.ValueCheck>):Bool {
