@@ -99,22 +99,21 @@ class TrackData2 {
     public function pullSource(row:MediaRow, src:MediaDataSourceDecl, done:VoidCb, ?db:PManDatabase, ?cache:DataCache):Void {
         dsource = src;
 
-        // create task
-        var task = new TrackDataPullRaw(this, {
-            db: db,
-            cache: cache,
-            row: row,
-            properties: (switch ( src ) {
+        _loadSource(row,
+            (switch ( src ) {
                 case Partial(names): names;
-                case Complete: _all_.copy();
+                case Complete: _all_;
                 case Empty: [];
-            })
-        });
-
-        task.pull().unless(done.raise()).then(function(src: MediaDataSource) {
-            this.source = src;
+            }),
+            db, cache
+        )
+        .then(function(src: MediaDataSource) {
+            _rebase( src );
 
             done();
+        }, done.raise());
+    }
+
     /**
       * 'rebase' [this] TrackData 
       */
