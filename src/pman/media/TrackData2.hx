@@ -781,6 +781,83 @@ class TrackData2 {
     }
 
     /**
+      * get the value of [attrs]'s [attribute] field
+      */
+    public function getAttr<T>(attribute:String, ?default_val:T):Null<T> {
+        au();
+        if (hasOwnProperty('attrs')) {
+            if (attrs == null) {
+                return null;
+            }
+            else {
+                return nullOr(attrs[attribute], default_val);
+            }
+        }
+        else {
+            throw ErrInvalidAccess('attrs');
+        }
+    }
+
+    /**
+      * set the value of an attribute [attrs]
+      */
+    public function setAttr<T>(attribute:String, value:T):T {
+        au();
+        if (hasOwnProperty('attrs')) {
+            if (attrs == null) {
+                attrs = new Dict();
+            }
+            return attrs.set(attribute, value);
+        }
+        else {
+            throw ErrInvalidAccess('attrs');
+        }
+    }
+
+    /**
+      * check for existence of an attribute of the given name
+      */
+    public function hasAttr(attribute: String):Bool {
+        au();
+        if (hasOwnProperty('attrs')) {
+            if (attrs != null)
+                return attrs.exists( attribute );
+            else return false;
+        }
+        else throw ErrInvalidAccess('attrs');
+    }
+
+    /**
+      * delete an attribute
+      */
+    public function removeAttr(attribute: String):Bool {
+        au();
+        if (hasOwnProperty('attrs')) {
+            return (attrs != null ? attrs.remove(attribute) : false);
+        }
+        else throw ErrInvalidAccess('attrs');
+    }
+
+    /**
+      * getter/setter method for attributes
+      */
+    public function attr(a:Dynamic, ?b:Dynamic):Dynamic {
+        if ((a is String)) {
+            return
+            if (b != null)
+                setAttr(cast a, b);
+            else
+                getAttr(cast a);
+        }
+        else if (Reflect.isObject( a )) {
+            for (n in Reflect.fields( a )) {
+                setAttr(n, Reflect.field(a, n));
+            }
+        }
+        return null;
+    }
+
+    /**
       * push an Actor onto [this]
       */
     public function pushActor(name:String, done:Cb<Actor>):Void {
