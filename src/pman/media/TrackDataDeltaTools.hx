@@ -72,7 +72,7 @@ class TrackDataDeltaTools {
                         default: null;
                     }
                 }).compact(),
-                src: d.actors.src.map( _.name )
+                src: d.actors.src.map.fn( _.name )
             };
         }
 
