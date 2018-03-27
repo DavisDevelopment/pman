@@ -51,7 +51,9 @@ class TrackDataPullRaw extends Task1 {
         this.data = {
             row: row,
             initial: {},
-            current: {}
+            current: {
+
+            }
         };
     }
 
@@ -80,6 +82,7 @@ class TrackDataPullRaw extends Task1 {
     override function execute(done: VoidCb):Void {
         // build list of tasks
         var steps:Array<VoidAsync> = [
+            ensure_cache,
             pull_sync_fields,
             pull_meta,
             pull_marks,
@@ -91,6 +94,21 @@ class TrackDataPullRaw extends Task1 {
 
         // execute those tasks
         steps.series( done );
+    }
+
+    /**
+      * ensure that [cache] exists before data loading
+      */
+    private function ensure_cache(next: VoidCb):Void {
+        if (cache != null) {
+            next();
+        }
+        else {
+            TrackBatchCache.create().then(function(cache) {
+                this.cache = cache;
+                next();
+            }, next.raise());
+        }
     }
 
     /**
@@ -200,6 +218,7 @@ class TrackDataPullRaw extends Task1 {
             var actors = new Array();
             // if there's none to pull, just skip this step
             if (d.actors == null || d.actors.length == 0) {
+                oc.actors = new Array();
                 next();
             }
             // otherwise,
@@ -225,9 +244,7 @@ class TrackDataPullRaw extends Task1 {
                     next();
                 }
                 else {
-                    t.writeActors(d.actors, function(?error, ?al) {
-                        next( error );
-                    });
+                    next('Error: Cache missing');
                 }
             }
         }
