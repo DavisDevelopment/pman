@@ -71,8 +71,6 @@ class Background {
       * stop the background script
       */
 	public function close():Void {
-		//if (server != null)
-            //server.close();
 	    App.quit();
 	}
 
@@ -87,8 +85,10 @@ class Background {
 	  * open a new Player window
 	  */
 	public function openPlayerWindow(?cb : BrowserWindow -> Void):Int {
-	    // create new hidden BrowserWindow
+	    // create the icon for the Window
 	    var icon = NativeImage.createFromPath(ap('assets/icon64.png').toString());
+
+	    // create new hidden BrowserWindow
 		var win:BrowserWindow = new BrowserWindow({
 			show: false,
 			width: 640,
@@ -108,25 +108,39 @@ class Background {
                 ].join(',')
 			}
 		});
+
 		// load the html file onto that BrowserWindow
 		var dir:Path = ap( 'pages/index.html' );
 	    #if (release || compress)
 	        dir = ap('pages/index.min.html');
 	    #end
 		win.loadURL( 'file://$dir' );
+
+		// assign the icon
 		win.setIcon( icon );
+
+		// add [win] to the list of PlayerWindows
 		playerWindows.push( win );
 		
 		// wait for the window to be ready
 		win.once('ready-to-show', function() {
+		    // show the window
 			win.show();
+
+			// maximize the window
 			win.maximize();
+
+			// shift focus to the window
 			win.focus();
+
+			// open devtools panel
 		    #if !release
 			win.webContents.openDevTools({
                 mode: 'bottom'
 			});
 		    #end
+
+		    // announce completion
 			defer(function() {
                 if (cb != null) {
                     cb( win );
