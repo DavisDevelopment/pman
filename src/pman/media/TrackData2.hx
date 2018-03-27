@@ -967,13 +967,17 @@ class TrackData2 {
     /**
       * check the given property
       */
-    public function checkProperty(property:String, ?checks:Array<pman.tools.ValueCheck>):Bool {
+    public function checkProperty(property:String, ?dv:Dynamic):Bool {
         // check that property is even declared to exist
         if (hasOwnProperty( property )) {
             // get the value of the property
             var value:Dynamic = getProp( property );
             if (value != null) {
                 return true;
+            }
+            else if (dv != null) {
+                setProp(property, dv);
+                return checkProperty( property );
             }
             else {
                 return false;
@@ -999,7 +1003,7 @@ class TrackData2 {
     /**
       * get the property-list from the given [src]
       */
-    public function getPropertyNames(src: MediaDataSource):Array<String> {
+    public function getPropertyNames(?src: MediaDataSource):Array<String> {
         if (src == null) {
             src = source;
         }
@@ -1019,7 +1023,11 @@ class TrackData2 {
     /**
       * get the underlying object from the given [src]
       */
-    public function getSourceData(src: MediaDataSource):Null<MediaDataSourceState> {
+    public function getSourceData(?src: MediaDataSource):Null<MediaDataSourceState> {
+        if (src == null) {
+            src = source;
+        }
+
         switch ( src ) {
             case Partial(_, data), Complete(data), Create(data):
                 return data;
@@ -1099,6 +1107,42 @@ class TrackData2 {
     }
 
     /**
+      * fill in null-properties with default values
+      */
+    private function _fillDefaults():Void {
+        inline function dv(n:String, v:Dynamic) {
+            if (hasOwnProperty( n ) && getProp( n ) == null) {
+                setProp(n, v);
+            }
+        }
+
+        dv('views', 0);
+        dv('starred', false);
+        dv('channel', null);
+        dv('rating', null);
+        dv('contentRating', 'NR');
+        dv('description', null);
+
+        dv('attrs', null);
+        dv('meta', null);
+        dv('marks', new Array());
+        dv('tags', new Array());
+        dv('actors', new Array());
+    }
+
+    private function _default(prop: String):Null<Dynamic> {
+        var values:Map<String, Dynamic> = [
+            'views' => 0,
+            'starred' => false,
+            'contentRating' => 'NR',
+            'tags' => [],
+            'marks' => [],
+            'actors' => []
+        ];
+        return values[prop];
+    }
+
+    /**
       * get a property value
       */
     private function getPropertyValue<T>(property:String, source:MediaDataSource):Null<T> {
@@ -1107,7 +1151,8 @@ class TrackData2 {
             case Partial(names, data):
                 // if [property] is a field of [this] partial data
                 if (names.has( property )) {
-                    return fieldGet(data.current, property);
+                    //return fieldGet(data.current, property);
+                    return data.current.fieldGet( property );
                 }
                 else {
                     return null;
@@ -1115,7 +1160,7 @@ class TrackData2 {
 
             // complete data
             case Complete( data ), Create( data ):
-                return fieldGet(data.current, property);
+                return data.current.fieldGet( property );
 
             // no data
             case Empty:
@@ -1143,12 +1188,12 @@ class TrackData2 {
 
             // complete data
             case Complete( data ), Create( data ):
-                return fieldSet(data.current, property, value);
+                return data.current.fieldSet(property, value);
 
             // partial data
             case Partial(names, data):
                 if (names.has( property )) {
-                    return fieldSet(data.current, property, value);
+                    return data.current.fieldSet(property, value);
                 }
                 else {
                     return null;
@@ -1163,21 +1208,6 @@ class TrackData2 {
         if (source == null)
             throw 'No [source]';
         return setPropertyValue(name, value, this.source);
-    }
-
-    /**
-      * get a property of an object
-      */
-    private static inline function fieldGet<O,T>(o:O, prop:String):Null<T> {
-        return Reflect.field(o, prop);
-    }
-
-    /**
-      * set a property of an object
-      */
-    private static inline function fieldSet<O,T>(o:O, prop:String, value:T):T {
-        Reflect.setField(o, prop, value);
-        return fieldGet(o, prop);
     }
 
 /* === Static Methods === */
@@ -1240,14 +1270,13 @@ class TrackData2 {
       * properly organize a property-list
       */
     @:native('c')
-    private static function organizePropertyList(names: Array<String>):Array<String> {
-        var result = names.filter(name -> name.hasContent());
-        result.sort(untyped Reflect.compare);
-        return result;
-    }
+    private static function organizePropertyList(names: Array<String>):Array<String> return names.propList();
 
 /* === Instance Methods === */
 
+    /**
+      * the [source] property
+      */
     public var source(default, set): MediaDataSource;
     private function set_source(newSource: MediaDataSource) {
         var delta:Delta<MediaDataSource> = new Delta(newSource, source);
@@ -1258,10 +1287,8 @@ class TrackData2 {
                 //case {previous: null|Empty, current:current} if (current != null && current != Empty):
                 case [null|Empty, current] if (current != null && current != Empty):
                     rs.announce();
-                    trace('READY');
 
                 case [Partial(_,_)|Create(_)|Complete(_), Empty]:
-                    trace('TrackData has been emptied');
                     throw 'Aww, dat not right, sha';
 
                 default:
@@ -1273,25 +1300,31 @@ class TrackData2 {
 
 /* === Instance Fields === */
 
+    // the Track object to which [this] is attached
     public var track: Track;
 
+    // the 'id' for [this]'s media object
     public var media_id : Null<String>;
+
     public var views : Int;
     public var starred : Bool;
     public var rating : Null<Float>;
     public var description : Null<String>;
     public var attrs : Dict<String, Dynamic>;
     public var marks : Array<Mark>;
-    //public var tags : Array<String>;
     public var tags: Array<Tag>;
     public var actors : Array<Actor>;
     public var channel : Null<String>;
     public var contentRating : Null<String>;
     public var meta : Null<MediaMetadata>;
 
+    // the MediaDataSourceDecl value
     public var dsource(default, null): MediaDataSourceDecl;
 
+    // event for when the value of [source] changes
     private var sourceChange: Signal<Delta<MediaDataSource>>;
+
+    // event for when [this] is ready
     private var rs: OnceSignal;
 
 /* === Static Fields === */
@@ -1325,7 +1358,8 @@ class TrackData2 {
         'marks',
         'meta',
         'rating',
-        'starred'
+        'starred',
+        'views'
     ];};
 
     // list of all mapped property's names
@@ -1340,6 +1374,6 @@ typedef DataCache = {
 };
 
 // TrackData-specific errors
-private enum TrackDataError {
+enum TrackDataError {
     ErrInvalidAccess(?property: String);
 }
