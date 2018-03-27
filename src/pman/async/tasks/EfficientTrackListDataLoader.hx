@@ -45,7 +45,8 @@ class EfficientTrackListDataLoader extends Task1 {
         this.missingData = new Array();
         this.treg = new Dict();
         this.writes = new Array(); 
-        this.properties = TrackData._all_.copy();
+        //this.properties = TrackData._all_.copy();
+        this.properties = TrackData._inline_.copy();
     }
 
 /* === Instance Methods === */
@@ -372,13 +373,10 @@ class EfficientTrackListDataLoader extends Task1 {
       * get the MediaDataSourceDecl for [properties]
       */
     private function src_decl(data: TrackData):MediaDataSourceDecl {
-        trace( data.source );
-        trace( properties );
         if (data.source.match(Create(_))) {
             return Complete;
         }
         var decl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
-        trace( decl );
         return decl;
     }
 

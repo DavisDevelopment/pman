@@ -43,7 +43,9 @@ class LoadTrackData extends Task2<TrackData> {
         this.track = track;
         this.db = db;
         this.store = db.mediaStore;
-        this.properties = TrackData._all_.copy();
+
+        // load in only the properties that can be parsed asynchronously
+        this.properties = TrackData._inline_.copy();
         this.data  = new TrackData( track );
         this.cache = new TrackBatchCache( db );
     }
