@@ -48,6 +48,7 @@ using tannus.FunctionTools;
 using tannus.html.JSTools;
 using pman.media.MediaTools;
 using pman.media.TrackDataDeltaTools;
+using pman.media.TrackDataTools;
 
 class TrackData2 {
     /* Constructor Function */
@@ -119,6 +120,12 @@ class TrackData2 {
       */
     public function _rebase(src: MediaDataSource):Void {
         this.source = src;
+        this.dsource = (switch ( src ) {
+            case Empty: Empty;
+            case Complete(_): Complete;
+            case Create(_): Complete;
+            case Partial(names, _): Partial( names );
+        });
     }
 
     /**
