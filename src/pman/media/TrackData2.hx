@@ -129,6 +129,21 @@ class TrackData2 {
     }
 
     /**
+    /**
+      * reduce [this]'s properties to the given list
+      */
+    public function curtail(props: Array<String>):TrackData {
+        // transform [props] into the list of fields to delete
+        var cpl = getPropertyNames();
+        props = cpl.without(props.intersection( cpl ));
+
+        // delete them
+        unset( props );
+
+        return this;
+    }
+
+    /**
       * remove all fields in [props] from [this] data
       */
     public function unset(props: Array<String>):Void {
