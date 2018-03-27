@@ -706,7 +706,7 @@ class TrackData2 {
       * attach an Actor object to [this]
       */
     public function attachActor(actor : Actor):Void {
-        au('tags');
+        au('actors');
         if (!hasActor( actor.name )) {
             actors.push( actor );
         }
@@ -770,7 +770,8 @@ class TrackData2 {
       */
     public function removeActor(name : String):Void {
         au('actors');
-        var actor = oreselectActor('[name="$name"]');
+        //var actor = oreselectActor('[name="$name"]');
+        var actor = selectActor(fn(_.name == name));
         if (actor == null) {
             return ;
         }
