@@ -130,6 +130,37 @@ class TrackData2 {
 
     /**
     /**
+    /**
+      * expand [this]'s properties to include [props]
+      */
+    public function expand(props:Array<String>, done:VoidCb):Void {
+        // skip if [props] is empty
+        if (props.empty()) {
+            return done();
+        }
+
+        // ensure that [props] contains only the names of properties that ARE NOT currently mounted
+        props = organizePropertyList(props.without(getPropertyNames()));
+
+        switch ( source ) {
+            case Create(d), Complete(d), Partial(_, d):
+                if (d.row != null) {
+                    _loadSource(d.row, props)
+                        .unless(done.raise())
+                        .then(function(ps: MediaDataSource) {
+                            _rebase(source.extend( ps ));
+
+                            done();
+                        });
+                }
+                else done('No row to work with');
+
+            case Empty:
+                throw 'Error: Cannot "expand" from an Empty TrackData; must perform standard load first';
+        }
+    }
+
+    /**
       * reduce [this]'s properties to the given list
       */
     public function curtail(props: Array<String>):TrackData {
