@@ -129,6 +129,12 @@ class TrackData2 {
     }
 
     /**
+      * resample [this]'s properties to the full property list
+      */
+    public function fill(?done: VoidCb):Void {
+        resample(_all_.copy(), done);
+    }
+
     /**
     /**
       * expand [this]'s properties to include [props]
