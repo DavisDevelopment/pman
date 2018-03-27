@@ -383,9 +383,29 @@ class TrackData2 {
     }
 
     /**
-      * push [this] TrackData to the database
+      * save [this] data in the database
       */
     public function save(?complete:VoidCb, ?db:PManDatabase):Void {
+        // compute appropriate 'write' function 
+        var writef = (switch ( source ) {
+            // if the data is complete, just save all of it (for now)
+            case Complete(_), Create(_): _writeall;
+
+            // if data is partial, save the changes that have been made to the data we have
+            case Partial(_, _): _writedmg;
+
+            // bitch about attempts to save null data
+            case Empty:
+                throw 'Cannot save empty TrackData to database';
+        });
+
+        _sync_(writef, complete, db);
+    }
+
+    /**
+      * push [this] TrackData to the database
+      */
+    public function _sync_(write:PManDatabase->VoidCb->Void, ?complete:VoidCb, ?db:PManDatabase):Void {
         // ensure that [complete] isn't null
         if (complete == null)
             complete = VoidCb.noop;
@@ -397,10 +417,30 @@ class TrackData2 {
         // create a list of steps
         var steps:Array<VoidAsync> = [
             _prepush.bind(db, _),
-            _writeall.bind(db, _)
+            write.bind(db, _)
         ];
 
         steps.series( complete );
+    }
+
+    /**
+      * save [this] by writing to the database all of the changes that have been made locally since the last write
+      */
+    private function _writedmg(db:PManDatabase, done:VoidCb):Void {
+        var dmg = getDataRowDelta();
+        if (dmg != null) {
+            db.media.applyDelta(media_id, dmg, function(?error, ?row:MediaRow) {
+                if (error != null) {
+                    done( error );
+                }
+                else {
+                    pullSource(row, dsource, done.wrap(function(_done, ?error) {
+                        _done( error );
+                    }));
+                }
+            });
+        }
+        else done();
     }
 
     /**
