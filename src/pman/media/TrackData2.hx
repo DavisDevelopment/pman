@@ -129,6 +129,41 @@ class TrackData2 {
     }
 
     /**
+      * remove all fields in [props] from [this] data
+      */
+    public function unset(props: Array<String>):Void {
+        if (isEmpty()) return ;
+        // get only the items in [props] that refer to actual properties of [this]
+        props = organizePropertyList( props ).filter.fn(hasOwnProperty(_));
+        var myProps:Array<String> = getPropertyNames( source );
+        myProps = organizePropertyList(myProps.without( props ));
+        if (myProps.empty()) {
+            return _rebase(Empty);
+        }
+
+        switch ( source ) {
+            case Complete( data ), Create( data ):
+                data = data.cloneState();
+                data.initial.deleteFields( props );
+                data.current.deleteFields( props );
+                return _rebase(Partial(myProps, data));
+
+            case Partial(a, data):
+                data = data.cloneState();
+                data.initial.deleteFields( props );
+                data.current.deleteFields( props );
+                for (x in props) {
+                    a.remove( x );
+                }
+                return _rebase(Partial(myProps, data));
+
+            case Empty:
+                //... wut?
+                throw 'Error: Cannot perform "unset" on Empty';
+        }
+    }
+
+    /**
       * retrieve source data
       */
     private function _loadSource(row:MediaRow, properties:Array<String>, ?db:PManDatabase, ?cache:DataCache):Promise<MediaDataSource> {
