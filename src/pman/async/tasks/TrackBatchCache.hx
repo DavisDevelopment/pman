@@ -184,6 +184,10 @@ class TrackBatchCache extends Task1 {
         );
     }
 
+    public static function create(?callback:Cb<TrackBatchCacheContent>):Promise<TrackBatchCacheContent> {
+        return (new TrackBatchCache(PManDatabase.get())).get( callback );
+    }
+
 /* === Instance Fields === */
 
     public var db: PManDatabase;
