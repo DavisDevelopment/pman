@@ -1077,6 +1077,7 @@ class TrackData2 {
         }
     }
 
+    /**
       * property binding
       */
     private function __bind():Void {

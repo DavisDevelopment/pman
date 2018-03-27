@@ -93,13 +93,22 @@ class MediaRenderer extends Ent {
 	  */
 	public function dispose():Void {
 		delete();
+
+		for (c in components) {
+		    _deleteComponent( c );
+		}
 	}
 
+    /**
+      * attach a MediaRendererComponent to [this]
+      */
 	public function _addComponent(c: MediaRendererComponent):Void {
 	    components.push( c );
-		//c.renderer = this;
 	}
 
+    /**
+      * remove a MediaRendererComponent from [this]
+      */
 	public function _deleteComponent(c: MediaRendererComponent):Void {
 	    components.remove( c );
 	    c.renderer = null;
