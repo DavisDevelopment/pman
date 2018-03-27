@@ -136,6 +136,31 @@ class TrackData2 {
     }
 
     /**
+      * reassign [this]'s property list
+      */
+    public function resample(properties:Array<String>, ?done:VoidCb):Void {
+        if (done == null) {
+            done = VoidCb.noop;
+        }
+
+        var newProps = organizePropertyList(properties);
+        var curProps = organizePropertyList(getPropertyNames());
+
+        var rm = [], mk = [];
+        for (n in _all_) {
+            // current source has [n] property, but [newProps] does not
+            if (curProps.has( n ) && !newProps.has( n )) {
+                rm.push( n );
+            }
+            else if (newProps.has( n ) && !curProps.has( n )) {
+                mk.push( n );
+            }
+        }
+
+        unset( rm );
+        expand(mk, done);
+    }
+
     /**
       * expand [this]'s properties to include [props]
       */
