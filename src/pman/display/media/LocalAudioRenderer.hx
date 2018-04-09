@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 import tannus.node.*;
 
 import gryffin.core.*;
@@ -31,6 +32,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 /**
   * class used for rendering the view associated with audio media being played to the local device
@@ -48,9 +50,9 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
       */
     override function render(stage:Stage, c:Ctx):Void {
         super.render(stage, c);
-        if (visualizer != null) {
-            visualizer.render(stage, c);
-        }
+        //if (visualizer != null) {
+            //visualizer.render(stage, c);
+        //}
     }
 
     /**
@@ -72,9 +74,9 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
             
             underlay.setRect( aar );
         }
-        if (visualizer != null) {
-            visualizer.update( stage );
-        }
+        //if (visualizer != null) {
+            //visualizer.update( stage );
+        //}
     }
 
     /**
@@ -87,11 +89,17 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
     /**
       * when [this] gets attached
       */
-    override function onAttached(pv : PlayerView):Void {
+    override function onAttached(pv:PlayerView, done:VoidCb):Void {
         this.pv = pv;
+        super.onAttached(pv, done);
 
-        // create and attach a visualizer
-        var av:AudioVisualizer = (switch ( database.configInfo.visualizer ) {
+        defer(function() {
+            _maybe_load_albumart( pv.player.track );
+        });
+    }
+
+    override function _createAudioVisualizer():Null<AudioVisualizer> {
+        return (switch ( database.configInfo.visualizer ) {
             case 'spectograph':
                 cast new SpectographVisualizer(cast this);
 
@@ -101,23 +109,19 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
             default:
                 cast new BarsVisualizer(cast this);
         });
-        attachVisualizer(av, function() {
-            visualizer.player = pv.player;
-        });
-        defer(function() {
-            _maybe_load_albumart( pv.player.track );
-        });
     }
+
+    override function _shouldShowAudioVisualizer():Bool return true;
 
     /**
       * when [this] gets detached
       */
-    override function onDetached(pv : PlayerView):Void {
-        detachVisualizer(function() {
-            if (underlay != null) {
-                underlay.destroy();
-            }
-        });
+    override function onDetached(pv:PlayerView, done:VoidCb):Void {
+        super.onDetached(pv, function(?error) {
+		    if (underlay != null)
+		        underlay.destroy();
+		    done( error );
+		});
     }
 
     // set up event listeners that may lead to getting album art
