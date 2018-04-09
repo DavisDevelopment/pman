@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.File;
 import tannus.sys.Path;
+import tannus.async.*;
 
 import gryffin.media.MediaObject;
 import gryffin.display.Video;
@@ -23,6 +24,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.bg.DictTools;
+using tannus.async.Asyncs;
 
 /**
   * MediaProvider for Media derived from media on the user's local filesystem
