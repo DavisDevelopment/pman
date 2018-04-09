@@ -7,6 +7,7 @@ import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
 import tannus.math.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -20,6 +21,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 /**
   * base-class for all media controllers that make use of a MediaObject
@@ -69,9 +71,11 @@ class LocalMediaObjectMediaDriver <T : MediaObject> extends MediaDriver {
 	override function getRateChangeSignal():Signal<Delta<Float>> return m.onratechange;
 
 	// dispose of [this]'s memory allocations
-	override function dispose():Void {
+	override function dispose(done: VoidCb):Void {
 		// dump the mediaObject
 		mediaObject.destroy();
+
+		return done();
 	}
 
 	override function hasMediaObject():Bool return true;
