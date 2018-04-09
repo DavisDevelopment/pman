@@ -29,6 +29,7 @@ import js.html.Console;
 import edis.Globals as Eg;
 import tannus.math.TMath.*;
 import edis.Globals.*;
+import Slambda.fn;
 
 import haxe.extern.EitherType;
 
@@ -37,6 +38,8 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using tannus.async.Asyncs;
 
 class Globals {
 /* === Functions === */
@@ -65,6 +68,48 @@ class Globals {
       */
     public static function animFrame(frame : EitherType<Void->Void, Float->Void>):Void {
         window.requestAnimationFrame(untyped frame);
+    }
+
+    /*
+       EXAMPLE:
+       ----
+       vsequence(function(add, done) {
+          add(...);
+          //...some interesting stuff
+          done(<optional error argument>);
+       });
+    */
+    public static function vsequence(builder:(VoidAsync->Void)->VoidCb->Void, done:VoidCb):Void {
+        valist(builder, fn(_1.series(_2)), done);
+    }
+
+    public static function vbatch(builder:(VoidAsync->Void)->VoidCb->Void, done:VoidCb):Void {
+        valist(builder, fn(_1.parallel(_2)), done);
+    }
+
+    /**
+      * build and execute a list of VoidAsync tasks
+      */
+    public static function valist(builder:(VoidAsync->Void)->VoidCb->Void, executor:Array<VoidAsync>->VoidCb->Void, callback:VoidCb):Void {
+        var steps:Array<VoidAsync> = new Array();
+        function add(va: VoidAsync) {
+            steps.push( va );
+        }
+        builder(add, function(?error) {
+            if (error != null) {
+                callback( error );
+            }
+            else {
+                executor(steps, callback);
+            }
+        });
+    }
+
+    /**
+      * convert the given synchronous function to an asynchronous one
+      */
+    public static inline function asyncify(f: Void->Void):VoidAsync {
+        return (f.toAsync());
     }
 
     /**
