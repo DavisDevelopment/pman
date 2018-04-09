@@ -6,6 +6,7 @@ import tannus.geom2.*;
 import tannus.sys.*;
 import tannus.graphics.Color;
 import tannus.html.Win;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -26,6 +27,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 class SpectographVisualizer extends AudioVisualizer {
     /* Constructor Function */
@@ -39,13 +41,16 @@ class SpectographVisualizer extends AudioVisualizer {
 
 /* === Instance Methods === */
 
-    override function attached(done : Void->Void):Void {
-        super.attached(function() {
+    /**
+      * when [this] is attached to the Media
+      */
+    override function attached(done : VoidCb):Void {
+        super.attached(done.wrap(function(_, ?error) {
             fftSize = 512;
             smoothing = 0.00;
 
-            done();
-        });
+            _(error);
+        }));
     }
 
     /**

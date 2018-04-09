@@ -7,6 +7,7 @@ import tannus.sys.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
 import tannus.html.Win;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -28,6 +29,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 class BarsVisualizer extends AudioVisualizer {
     /* Constructor Function */
@@ -105,23 +107,7 @@ class BarsVisualizer extends AudioVisualizer {
     /**
       * override that [build_tree] method
       */
-    override function build_tree(done: Void->Void):Void {
-        /*
-        mr.audioManager.treeBuilders = [function(m : AudioManager) {
-            var c = this.context = m.context;
-            source = m.source;
-            destination = m.destination;
-
-            analyzer = c.createAnalyser();
-
-            source.connect( analyzer );
-            analyzer.connect( destination );
-
-            config(1024, 0.65);
-        }];
-        mr.audioManager.buildTree( done );
-        */
-
+    override function build_tree(done: VoidCb):Void {
         var vizNode = mr.audioManager.createNode({
             init: function(self: Fapn) {
                 var m = self.pipeline;
