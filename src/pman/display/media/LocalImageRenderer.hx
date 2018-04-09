@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -22,6 +23,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 class LocalImageRenderer extends MediaRenderer {
     /* Constructor Function */
@@ -65,21 +67,27 @@ class LocalImageRenderer extends MediaRenderer {
 		return min((dest.width / src.width), (dest.height / src.height));
 	}
 
-    override function dispose():Void {
-        super.dispose();
-
+    /**
+      * deallocate [this] from memory entirely
+      */
+    override function dispose(cb: VoidCb):Void {
+        if (i != null) {
+            @:privateAccess i.img.remove();
+        }
         i = null;
+        super.dispose( cb );
     }
 
-    override function onAttached(pv: PlayerView):Void {
-        super.onAttached( pv );
-
+    override function onAttached(pv:PlayerView, cb:VoidCb):Void {
         this.pv = pv;
+
+        super.onAttached(pv, cb);
     }
 
-    override function onDetached(pv: PlayerView):Void {
-        super.onDetached( pv );
+    override function onDetached(pv: PlayerView, cb:VoidCb):Void {
         pv = null;
+
+        super.onDetached(pv, cb);
     }
 
 /* === Instance Fields === */
