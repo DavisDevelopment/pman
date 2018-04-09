@@ -7,6 +7,7 @@ import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
 import tannus.math.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -21,6 +22,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Async;
 
 class LocalImageMediaDriver extends MediaDriver {
     /* Constructor Function */
@@ -41,10 +43,10 @@ class LocalImageMediaDriver extends MediaDriver {
         return sig;
     }
 
-    override function dispose():Void {
-        super.dispose();
-
+    override function dispose(cb: VoidCb):Void {
         i = null;
+
+        super.dispose( cb );
     }
 
 /* === Instance Fields === */
