@@ -19,6 +19,7 @@ import Slambda.fn;
 import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
+import pman.GlobalMacros.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -41,6 +42,9 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 
 		_av = null;
 		audioManager = new AudioPipeline(untyped this);
+        audioEq = new AudioEqualizer();
+
+        _req(next -> _addComponents([audioManager, audioEq], next));
 	}
 
 /* === Instance Methods === */
@@ -48,96 +52,134 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	/**
 	  * unlink and deallocate [this]'s memory
 	  */
-	override function dispose():Void {
-		super.dispose();
-
-		audioManager.deactivate();
-		m.destroy();
+	override function dispose(callback: VoidCb):Void {
+		super.dispose( callback );
 	}
 
     /**
       * when [this] is attached to player view
       */
-	override function onAttached(pv : PlayerView):Void {
-	    buildAudioPipeline(function(?error) {
-	        if (error != null)
-	            report( error );
-	    });
-	}
+    override function onAttached(pv:PlayerView, done:VoidCb):Void {
+        vsequence(function(add, exec) {
+            add(_superOnAttached.bind(pv, _));
+            add( linkAudioVisualizer );
+
+            exec();
+        }, done);
+    }
+    private function _superOnAttached(pv:PlayerView, cb:VoidCb):Void {
+        super.onAttached(pv, cb);
+    }
 
     /**
       * when [this] is detached from player view
       */
-	override function onDetached(pv : PlayerView):Void {
-	    super.onDetached( pv );
+	override function onDetached(pv:PlayerView, done:VoidCb):Void {
+	    audioManager = null;
+	    audioEq = null;
+	    _av = null;
+
+	    super.onDetached(pv, done);
 	}
 
 	/**
 	  * attach a visualizer to [this]
 	  */
-	public function attachVisualizer(v:AudioVisualizer, done:Void->Void):Void {
+	public function attachVisualizer(v:AudioVisualizer, ?done:VoidCb):Void {
+	    v.player = player;
+	    if (done == null)
+	        done = VoidCb.noop;
+	    _addComponent(v, function(?error) {
+	        visualizer = v;
+	        done( error );
+	    });
+	}
+
+	/**
+	  * handle the linking of the audio-visualizer
+	  */
+	private function linkAudioVisualizer(done: VoidCb):Void {
+	    vsequence(function(add, exec) {
+	        if (_shouldShowAudioVisualizer()) {
+	            var av = _createAudioVisualizer();
+	            if (av != null) {
+	                add(cast attachVisualizer.bind(av, _));
+	            }
+	        }
+
+	        exec();
+	    }, done);
+	}
+
+    /**
+      * create AudioVisualizer instance to be attached to [this]
+      */
+    public function _createAudioVisualizer():Null<AudioVisualizer> {
+        return null;
+    }
+
+    /**
+      * compute whether to render the AudioVisualizer or not
+      */
+    public function _shouldShowAudioVisualizer():Bool {
+        return false;
+    }
+
+    /*
+	public function attachVisualizer_(v:AudioVisualizer, done:Void->Void):Void {
 	    done = done.wrap(function(f) {
-	        _addComponent(new AudioEqualizer());
-	        _attach_components( pman.Globals.player.view );
-	        f();
-	    })
-	    .wrap(function(f) {
 	        defer( f );
 	    });
 
         var steps:Array<VoidAsync> = [];
         inline function step(a: VoidAsync) steps.push( a );
 
-        //step(fn(destroyAudioPipeline( _ )));
+        // detach the audio visualizer
         step(fn(detachVisualizer(_.void())));
 
-        if (audioManager == null || !audioManager.active) {
-            step(fn(buildAudioPipeline( _ )));
-        }
+        // build the audio pipeline
+        //if (audioManager == null || !audioManager.active) {
+            //step(fn(buildAudioPipeline( _ )));
+        //}
         
-        step(fn(v.attached(_.void())));
+        // 'attach' the given visualizer
         step(function(next) {
             visualizer = v;
             visualizer.player = player;
 
             next();
         });
+        step(fn(v.attached(_.void())));
 
-        steps.series(function(?error) {
-            if (error != null) {
-                report( error );
-            }
-            else {
-                done();
-            }
-        });
-
-        /*
-	    detachVisualizer(function() {
-	        audioManager.activate(function() {
-                v.attached(function() {
-                    visualizer = v;
-
-                    // kick shit off
+        // execute the steps
+        whenAttached(function() {
+            steps.series(function(?error) {
+                if (error != null) {
+                    report( error );
+                }
+                else {
                     done();
-                });
-
+                }
             });
-	    });
-	    */
+        });
 	}
-	private function _attach_components(pv: PlayerView):Void {
-	    super.onAttached( pv );
+	*/
+
+	/**
+	  * attach components to [this]
+	  */
+	private function _attach_components(pv:PlayerView, done:VoidCb):Void {
+	    super.onAttached(pv, done);
 	}
 
 	/**
 	  * detach the current visualizer
 	  */
-	public function detachVisualizer(done : Void->Void):Void {
+	public function detachVisualizer(done : VoidCb):Void {
 	    if (visualizer != null) {
-	        visualizer.detached(function() {
+	        visualizer.detached(function(?error) {
 	            visualizer = null;
-	            done();
+	            done( error );
 	        });
 	    }
         else {
@@ -145,42 +187,31 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
         }
 	}
 
-    private var bapCount:Int = 0;
+    /**
+      * build out the AudioPipeline for [this]
+      */
 	public function buildAudioPipeline(done: VoidCb):Void {
-	    audioManager.activate(function() {
-			//defer(done.void());
-
-	        ++bapCount;
-            if (bapCount == 2) {
-				//throw 'Called Twice. What the fuck';
-	        }
-            else {
-                window.console.error('Betty, why');
-            }
-
-            /*
-	        if (bapCount == 1) {
-	            throw 'Called. Oh yai';
-	        }
-            else if (bapCount == 2) {
-	            throw 'Called Twice. What the fuck';
-	        }
-            else if (bapCount == 3) {
-                throw 'Get the urinal';
-            }
-            */
-            done();
+	    throw 'cheeks';
+	    audioManager.activate(function(?error) {
+            done( error );
 	    });
-		//throw 'build-audio-pipeline';
 	}
 
+    /**
+      * destroy the Audio Pipeline
+      */
 	public function destroyAudioPipeline(done: VoidCb):Void {
-	    audioManager.deactivate(done.void());
+	    throw 'cheeks';
+	    audioManager.deactivate( done );
 	}
 
-	override function _addComponent(c: MediaRendererComponent):Void {
-	    super._addComponent( c );
+    /**
+      * add a MediaRendererComponent to [this]
+      */
+	override function _addComponent(c:MediaRendererComponent, done:VoidCb):Void {
 	    c.renderer = cast this;
+	    c.player = player;
+	    super._addComponent(c, done);
 	}
 
 /* === Computed Instance Fields === */
@@ -209,4 +240,5 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 
     public var _av : Null<AudioVisualizer>;
     public var audioManager : AudioPipeline;
+    public var audioEq: AudioEqualizer;
 }
