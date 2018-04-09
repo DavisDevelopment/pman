@@ -7,6 +7,7 @@ import tannus.sys.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
 import tannus.html.Win;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -31,6 +32,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 class VideoAudioVisualizer extends AudioVisualizer {
     /* Constructor Function */
@@ -225,7 +227,7 @@ class VideoAudioVisualizer extends AudioVisualizer {
     /**
       * build the audio-pipeline node that will feed us our audio data
       */
-    override function build_tree(done: Void->Void):Void {
+    override function build_tree(done: VoidCb):Void {
         var vizNode = mr.audioManager.createNode({
             init: function(self: Fapn) {
                 var c = self.pipeline.context;
