@@ -2,12 +2,14 @@ package pman;
 
 import haxe.macro.Expr;
 import haxe.macro.Context;
+import haxe.macro.Compiler;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using haxe.macro.ExprTools;
+using haxe.macro.PositionTools;
 using tannus.macro.MacroTools;
 
 class GlobalMacros {
@@ -150,4 +152,35 @@ class GlobalMacros {
             }
         });
     }
+
+    /**
+      * utility method for creating a Void->Void method
+      */
+    public static macro function void(body: Expr):ExprOf<Void->Void> {
+        return func([], body, Context.currentPos());
+    }
+
+    /**
+      * roughly equivalent to CoffeeScript's "do {expr}" operator
+      */
+    public static macro function doo(block: Expr) {
+        var funcExpr:Expr = func([], block, Context.currentPos());
+        return (macro (${funcExpr}()));
+    }
+
+#if macro
+
+    private static function func(params:Array<String>, body:Expr, pos:Position):Expr {
+        var ps:String = params.join(', ');
+        return parse('(function(${ps}) {
+            _BODY_;
+        })', pos).replace(macro _BODY_, body);
+    }
+
+    private static function parse(s:String, pos:Position):Expr {
+        return Context.parse(s, pos);
+    }
+
+#end
 }
+
