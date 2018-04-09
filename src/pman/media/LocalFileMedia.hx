@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.File;
 import tannus.sys.Path;
+import tannus.async.*;
 
 import gryffin.media.MediaObject;
 import gryffin.display.Video;
@@ -24,6 +25,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.bg.DictTools;
+using tannus.async.Asyncs;
 
 class LocalFileMedia extends Media {
 	/* Constructor Function */
@@ -41,10 +43,12 @@ class LocalFileMedia extends Media {
 	/**
 	  * deallocate memory
 	  */
-	override function dispose():Void {
-		super.dispose();
+	override function dispose(cb: VoidCb):Void {
+		super.dispose(cb.wrap(function(_, ?err) {
+            file = null;
 
-		file = null;
+            _( err );
+		}));
 	}
 
 	/**
