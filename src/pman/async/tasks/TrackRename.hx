@@ -227,7 +227,7 @@ class TrackRename extends Task1 {
     private function reattach_track(done : VoidCb):Void {
         defer(function() {
             if ( focused ) {
-                track.session.focus(track, done.void());
+                track.session.focus(track, done);
             }
             else defer(done.void());
         });
