@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -28,6 +29,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.html.JSTools;
+using tannus.async.Asyncs;
 
 class MediaRendererComponent {
     /* Constructor Function */
@@ -54,16 +56,33 @@ class MediaRendererComponent {
     /**
       * called when [this] gets attached to the media renderer
       */
-    public function attached(done : Void->Void):Void {
+    public function attached(done : VoidCb):Void {
         this.player = pman.Globals.player;
+        _attached = true;
         done();
     }
 
     /**
       * called when [this] gets detached from the media renderer
       */
-    public function detached(done : Void->Void):Void {
-        defer( done );
+    public function detached(done : VoidCb):Void {
+        _attached = false;
+        renderer = null;
+        done();
+    }
+
+    /**
+      * check whether [this] is attached to a renderer
+      */
+    public inline function isAttached():Bool {
+        return _attached;
+    }
+
+    /**
+      * check whether [this] is attached to [renderer]
+      */
+    public inline function isAttachedTo(renderer: MediaRenderer):Bool {
+        return (isAttached() && (this.renderer == renderer) && renderer.components.has( this ));
     }
 
 /* === Computed Instance Fields === */
@@ -89,6 +108,8 @@ class MediaRendererComponent {
     public var renderer : Mor;
     public var player : Null<Player> = null;
     public var viewport : Rect<Float>;
+
+    private var _attached:Bool = false;
 }
 
 private typedef Mor = Lmor<MediaObject>;
