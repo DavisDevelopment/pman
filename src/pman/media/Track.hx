@@ -116,42 +116,67 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	/**
 	  * deallocate the m,d,r fields
 	  */
-	public function deallocate():Void {
-		if (media != null)
-			media.dispose();
-		if (driver != null)
-			driver.dispose();
-		if (renderer != null)
-			renderer.dispose();
+	public function deallocate(done: VoidCb):Void {
+	    vbatch(function(add, exec) {
+            if (media != null)
+                add( media.dispose );
+
+            if (driver != null)
+                add( driver.dispose );
+
+            if (renderer != null)
+                add( renderer.dispose );
+        }, done);
 	}
 
 	/**
 	  * load the mediaContext data onto [this] Track
 	  */
-	public function mount(callback : Null<Dynamic> -> Void):Void {
-		this.loadTrackMediaState(function(error : Null<Dynamic>):Void {
-			if (error != null) {
-				deallocate();
-				nullify();
-			}
-            else {
-                if (hasFeature( PlayEvent )) {
-                    var ps = driver.getPlaySignal();
-                    ps.on(function() {
-                        player.dispatch('play', null);
-                    });
+	public function mount(done: VoidCb):Void {
+	    vsequence(function(add, exec) {
+			//add(next -> loadTrackMediaState());
+			add(fn(f => loadTrackMediaState(f.wrap(function(_, ?error) {
+			    if (error != null) {
+			        dismount( VoidCb.noop );
+			    }
+                else {
+                    if (hasFeature(PlayEvent)) {
+                        var ps = driver.getPlaySignal();
+                        ps.on(function() {
+                            player.dispatch('play', null);
+                        });
+                    }
                 }
-            }
-			callback( error );
-		});
+                _( error );
+			}))));
+			//TODO seems like there should be more to do here..
+			exec();
+	    }, done);
+		//this.loadTrackMediaState(function(error : Null<Dynamic>):Void {
+			//if (error != null) {
+				//deallocate();
+				//nullify();
+			//}
+            //else {
+                //if (hasFeature( PlayEvent )) {
+                    //var ps = driver.getPlaySignal();
+                    //ps.on(function() {
+                        //player.dispatch('play', null);
+                    //});
+                //}
+            //}
+			//callback( error );
+		//});
 	}
 
 	/**
 	  * the inverse effect of 'mount'
 	  */
-	public inline function dismount():Void {
-		deallocate();
-		nullify();
+	public function dismount(done: VoidCb):Void {
+		deallocate(done.wrap(function(f, ?e) {
+		    nullify();
+		    f( e );
+		}));
 	}
 
 	/**

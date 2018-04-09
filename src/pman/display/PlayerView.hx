@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.events.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -19,11 +20,17 @@ import pman.ui.hud.*;
 import pman.ui.tabs.*;
 import pman.ui.statusbar.*;
 
+import edis.Globals.*;
+import pman.Globals.*;
+import pman.GlobalMacros.*;
+
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using tannus.async.Asyncs;
 
 class PlayerView extends Ent {
 	/* Constructor Function */
@@ -94,35 +101,61 @@ class PlayerView extends Ent {
 	/**
 	  * detach the current renderer from [this] view, and deallocate its memory
 	  */
-	public function detachRenderer():Void {
-		// if [this] view even has media
-		if (currentMediaRenderer != null) {
-			// alert the renderer that it is being detached
-			currentMediaRenderer.onDetached( this );
-			// deallocate that media
-			currentMediaRenderer.dispose();
+	public function detachRenderer(done: VoidCb):Void {
+	    vsequence(function(step, exec) {
+            // if [this] view even has media
+            if (currentMediaRenderer != null) {
+                // alert the renderer that it is being detached
+                step(next -> currentMediaRenderer.onDetached(this, function(?error) {
+                    if (error != null) {
+                        report( error );
+                    }
+                    next( error );
+                }));
 
-			// unlink it from [this] Object
-			currentMediaRenderer = null;
-		}
+                // deallocate that media
+                step(next -> currentMediaRenderer.dispose(next));
+
+                // handle synchronous tasks
+                step((function() {
+                    // unlink it from [this] Object
+                    currentMediaRenderer = null;
+
+                }).toAsync());
+            }
+
+            exec();
+        }, done);
 	}
 
 	/**
 	  * attach the given renderer to [this] view
 	  */
-	public function attachRenderer(mr : MediaRenderer):Void {
-		// if [mr] isn't already attached to [this] view
-		if (mr != currentMediaRenderer) {
-			// if [this] view already has an attached renderer
-			if (currentMediaRenderer != null) {
-				// unlink it
-				detachRenderer();
-			}
+	public function attachRenderer(mr:MediaRenderer, done:VoidCb):Void {
+	    vsequence(function(step, exec) {
+            // if [mr] isn't already attached to [this] view
+            if (mr != currentMediaRenderer) {
+                // if [this] view already has an attached renderer
+                if (currentMediaRenderer != null) {
+                    // unlink it
+                    step( detachRenderer );
+                }
 
-			// now link the new one
-			currentMediaRenderer = mr;
-			currentMediaRenderer.onAttached( this );
-		}
+                step(function(_) {
+                    // now link the new one
+                    currentMediaRenderer = mr;
+                    currentMediaRenderer.onAttached(this, function(?error) {
+                        if (error != null) {
+                            return _(error);
+                        }
+                        
+                        _();
+                    });
+                });
+            }
+
+            defer(exec.void());
+        }, done);
 	}
 
 /* === Gryffin Methods === */

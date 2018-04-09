@@ -7,6 +7,7 @@ import tannus.sys.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
 import tannus.html.Win;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -33,6 +34,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.html.JSTools;
+using tannus.async.Asyncs;
 
 class AudioEqualizer extends MediaRendererComponent {
     /* Constructor Function */
@@ -42,8 +44,15 @@ class AudioEqualizer extends MediaRendererComponent {
 
 /* === Instance Methods === */
 
-    override function attached(done: Void->Void):Void {
-        super.attached(function() {
+    /**
+      * when [this] is attached to the Media
+      */
+    override function attached(done: VoidCb):Void {
+        super.attached(function(?error) {
+            if (error != null) {
+                return done( error );
+            }
+
             inline function bq(c:AudioContext, type:BiquadFilterType, frequency:Float, gain:Float):AudioBiquadFilter {
                 var n = c.createBiquadFilter();
                 n.type = type;
@@ -128,6 +137,16 @@ class AudioEqualizer extends MediaRendererComponent {
         });
     }
 
+    /**
+      * detach [this]
+      */
+    override function detached(done: VoidCb):Void {
+        done();
+    }
+
+    /**
+      * expose some equalizer-related properties into the global scope
+      */
     private function _expose():Void {
         var export = window.expose.bind(_, _);
         var exposed:Dynamic = {};

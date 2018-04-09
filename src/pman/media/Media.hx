@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.Path;
 import tannus.http.Url;
+import tannus.async.*;
 
 import gryffin.media.MediaObject;
 
@@ -11,13 +12,16 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.bg.media.MediaFeature;
 
-import foundation.Tools.defer;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.FunctionTools;
+using tannus.async.Asyncs;
 
 /**
   * an Object that represents the data for a piece of playable Media,
@@ -66,11 +70,12 @@ class Media {
 	/**
 	  * disassemble data structures and deallocate memory
 	  */
-	public function dispose():Void {
+	public function dispose(cb: VoidCb):Void {
 		_ready.signal.clear();
 		_ready = null;
 		src = null;
 		provider = null;
+		cb();
 	}
 
 	/**

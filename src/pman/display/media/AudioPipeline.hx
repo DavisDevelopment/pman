@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -18,6 +19,7 @@ import pman.display.media.LocalMediaObjectRenderer in Lmor;
 import Std.*;
 import tannus.math.TMath.*;
 import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -27,13 +29,16 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.html.JSTools;
 using tannus.FunctionTools;
+using tannus.async.Asyncs;
 
 /*
    class used to represent the flow of audio data through a pipeline
 */
-class AudioPipeline {
+class AudioPipeline extends MediaRendererComponent {
     /* Constructor Function */
     public function new(renderer : LocalMediaObjectRenderer<MediaObject>):Void {
+        super();
+
         this.renderer = renderer;
         active = false;
         treeBuilders = new Array();
@@ -43,10 +48,35 @@ class AudioPipeline {
 /* === Instance Methods === */
 
     /**
+      * when [this] is attached to the MediaRenderer
+      */
+    override function attached(done: VoidCb):Void {
+        activate( done );
+    }
+
+    /**
+      * when [this] it detached from the MediaRenderer
+      */
+    override function detached(done: VoidCb):Void {
+        trace('deactivating AudioPipeline..');
+        deactivate(function(?error) {
+            trace('detach complete');
+            done( error );
+        });
+    }
+
+    /**
       * Activate [this]
       */
-    public function activate(?done : Void->Void):Void {
-        if (done == null) done = (function() null);
+    public function activate(?done : VoidCb):Void {
+        if (done == null) {
+            done = VoidCb.noop;
+        }
+
+        done = done.wrap(function(_, ?error) {
+            trace('AudioPipeline activate!');
+            _( error );
+        });
 
         if ( !active ) {
             buildit(function() {
@@ -65,43 +95,23 @@ class AudioPipeline {
     /**
       * Deactivate [this]
       */
-    public function deactivate(?done : Void->Void):Void {
-        if (done == null)
-            done = (function() null);
+    public function deactivate(?done : VoidCb):Void {
+        if (done == null) {
+            done = VoidCb.noop;
+        }
 
-        done = done.wrap(function(_) {
+        done = done.wrap(function(_, ?error) {
             active = false;
             _closing = false;
             context = null;
-            trace('deactivate() finished');
-            _();
+            deallocate();
+            trace('AudioPipeline deallocation');
+            _( error );
         });
+        trace( done );
 
-        if ( !_closing ) {
-            _closing = true;
-
-            try {
-                if (context != null) {
-                    context.close(function() {
-                        active = false;
-                        _closing = false;
-                        context = null;
-                        source.disconnect();
-                        source = null;
-                        destination = null;
-
-                        done();
-                    });
-                }
-                else {
-                    //defer(function() if (done != null) done());
-                    done();
-                }
-            }
-            catch (error : Dynamic) {
-                //defer(function() if (done != null) done());
-                done();
-            }
+        if (context != null) {
+            context.close( done );
         }
         else {
             done();
@@ -112,8 +122,9 @@ class AudioPipeline {
       * build out the AudioNode tree
       */
     @:access( pman.display.media.LocalMediaObjectRenderer )
-    public function buildTree(done : Void->Void):Void {
+    public function buildTree(done : VoidCb):Void {
         var prepare = ((context != null) ? context.close : defer);
+
         prepare(function() {
             context = new AudioContext();
             source = context.createSource(untyped renderer.mediaObject);
@@ -125,8 +136,39 @@ class AudioPipeline {
                 f( this );
             }
 
-            defer( done );
+            defer(done.void());
         });
+    }
+
+    /**
+      * rebuild the node-tree structure
+      */
+    public function rebuildit(done: Void->Void):Void {
+        if (context == null) {
+            return buildit( done );
+        }
+
+        try {
+            source.disconnect();
+        }
+        catch (error: Dynamic) {
+            null;
+        }
+
+        source = context.createSource(untyped renderer.mediaObject);
+        destination = context.destination;
+        srcNode = new SourceAudioPipelineNode( this );
+        srcNode.init();
+        destNode = new DestAudioPipelineNode( this );
+        destNode.init();
+        currentNode = srcNode;
+        for (node in nodeList) {
+            node.init();
+
+            connectNodes(currentNode, node);
+            currentNode = node;
+        }
+        connectNodes(currentNode, destNode);
     }
 
     /**
@@ -134,7 +176,10 @@ class AudioPipeline {
       */
     public function buildit(done: Void->Void):Void {
         //var prepare = ((context != null) ? context.close : defer);
-        var mumps = (function() trace('middleware'));
+        var mumps:Void->Void = (function() {
+            return ;
+        });
+
         function prepare(f: Void->Void) {
             if (context != null) {
                 context.close( f );
@@ -185,10 +230,31 @@ class AudioPipeline {
     /**
       * rebuild the tree
       */
-    public function rebuildTree(done : Void->Void):Void {
-        deactivate(function() {
-            activate( done );
+    public function rebuildTree(done : VoidCb):Void {
+        deactivate(function(?error) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                activate( done );
+            }
         });
+    }
+
+    /**
+      * garbage-collect [thise] object
+      */
+    public function deallocate():Void {
+        source = null;
+        destination = null;
+        srcNode = null;
+        destNode = null;
+        currentNode = null;
+        treeBuilders = [];
+        for (node in nodeList) {
+            node.disconnect();
+        }
+        nodeList = [];
     }
 
     /**
@@ -196,6 +262,15 @@ class AudioPipeline {
       */
     public inline function createNode(options: FAPDef):FunctionalAudioPipelineNode {
         return new FunctionalAudioPipelineNode(this, options);
+    }
+
+    /**
+      * append the given list of nodes
+      */
+    public function appendNodes(nodes: Array<AudioPipelineNode>):Void {
+        for (node in nodes) {
+            appendNode( node );
+        }
     }
 
     /**
@@ -247,7 +322,7 @@ class AudioPipeline {
 
 /* === Instance Fields === */
 
-    public var renderer : LocalMediaObjectRenderer<MediaObject>;
+    //public var renderer : LocalMediaObjectRenderer<MediaObject>;
     public var context : AudioContext;
     public var source : AudioSource;
     public var destination : AudioDestination;
@@ -295,6 +370,14 @@ class AudioPipelineNode {
                 oNode.connect(nextNode.iNode, [i]);
             }
         }
+    }
+
+    /**
+      * disconnect [this] Node
+      */
+    public function disconnect():Void {
+        iNode.disconnect();
+        oNode.disconnect();
     }
 
     /**

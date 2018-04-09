@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.events.*;
 import tannus.math.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -16,6 +17,9 @@ import pman.bg.media.MediaFeature;
 import pman.media.PlaybackCommand;
 import pman.Errors.*; 
 
+import edis.Globals.*;
+import pman.Globals.*;
+
 import tannus.media.Duration;
 import tannus.media.TimeRange;
 import tannus.media.TimeRanges;
@@ -25,6 +29,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 /**
   * class that receives playback commands and executes them
@@ -40,8 +45,10 @@ class MediaDriver {
 	/**
 	  * attach [this] to a Player
 	  */
-	public function attach(player : Player):Void {
+	public function attach(player:Player, done:VoidCb):Void {
 		this.player = player;
+
+		done();
 	}
 
 	/**
@@ -51,12 +58,16 @@ class MediaDriver {
 		switch ( cmd ) {
 			case PCPlay:
 				play();
+
 			case PCPause:
 				pause();
+
 			case PCTogglePlayback:
 				togglePlayback();
+
 			case PCStop:
 				stop();
+
 			case PCTime(time, rel):
 				if (rel == null || !rel) {
 					setCurrentTime( time );
@@ -64,6 +75,7 @@ class MediaDriver {
 				else {
 					setCurrentTime(getCurrentTime() + time);
 				}
+
 			case PCSpeed(speed, rel):
 				if (rel == null || !rel) {
 					setPlaybackRate( speed );
@@ -85,8 +97,8 @@ class MediaDriver {
 	/**
 	  * deallocate fields and memory used by [this] object
 	  */
-	public function dispose():Void {
-		return ;
+	public function dispose(cb: VoidCb):Void {
+		return cb();
 	}
 
 	/**

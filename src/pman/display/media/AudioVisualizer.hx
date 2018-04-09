@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -26,10 +27,13 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.html.JSTools;
+using tannus.async.Asyncs;
 
-class AudioVisualizer {
+class AudioVisualizer extends MediaRendererComponent {
     /* Constructor Function */
     public function new(r : Mor):Void {
+        super();
+
         renderer = r;
         viewport = new Rect();
     }
@@ -39,29 +43,43 @@ class AudioVisualizer {
     /**
       * render visualization
       */
-    public function render(stage:Stage, c:Ctx):Void {
+    override function render(stage:Stage, c:Ctx):Void {
         //TODO
     }
 
     /**
       * update data associated with visualization
       */
-    public function update(stage : Stage):Void {
+    override function update(stage : Stage):Void {
         viewport = player.view.rect;
     }
 
     /**
       * called when [this] gets attached to the media renderer
       */
-    public function attached(done : Void->Void):Void {
-        build_tree( done );
+    override function attached(done : VoidCb):Void {
+        super.attached(function(?error) {
+            if (error != null)
+                return done( error );
+            else {
+                build_tree( done );
+            }
+        });
     }
 
     /**
       * called when [this] gets detached from the media renderer
       */
-    public function detached(done : Void->Void):Void {
-        defer( done );
+    override function detached(done : VoidCb):Void {
+        context = null;
+        source = null;
+        destination = null;
+        splitter = null;
+        merger = null;
+        leftAnalyser = null;
+        rightAnalyser = null;
+
+        super.detached( done );
     }
 
 	/**
@@ -75,30 +93,7 @@ class AudioVisualizer {
     /**
       * build out the audio analysis tree
       */
-    private function build_tree(done : Void->Void):Void {
-        /*
-        mr.audioManager.treeBuilders = [function(m : AudioManager):Void {
-            var c = context = m.context;
-            source = m.source;
-            destination = m.destination;
-
-            splitter = c.createChannelSplitter( 2 );
-            merger = c.createChannelMerger( 2 );
-            leftAnalyser = c.createAnalyser();
-            rightAnalyser = c.createAnalyser();
-
-            source.connect( splitter );
-            splitter.connect(leftAnalyser, [0]);
-            splitter.connect(rightAnalyser, [1]);
-            leftAnalyser.connect(merger, [0, 0]);
-            rightAnalyser.connect(merger, [0, 1]);
-            merger.connect( destination );
-
-            config();
-        }];
-        mr.audioManager.buildTree( done );
-        */
-
+    private function build_tree(done : VoidCb):Void {
         var vizNode = mr.audioManager.createNode({
             init: function(self: Fapn) {
                 var m = self.pipeline;
@@ -126,21 +121,21 @@ class AudioVisualizer {
 
 /* === Computed Instance Fields === */
 
-    public var controller(get, never):MediaController;
-    private inline function get_controller():MediaController return renderer.mediaController;
+    //public var controller(get, never):MediaController;
+    //private inline function get_controller():MediaController return renderer.mediaController;
 
-    public var mediaObject(get, never):MediaObject;
-    @:access( pman.display.media.LocalMediaObjectRenderer )
-    private inline function get_mediaObject():MediaObject return untyped renderer.mediaObject;
+    //public var mediaObject(get, never):MediaObject;
+    //@:access( pman.display.media.LocalMediaObjectRenderer )
+    //private inline function get_mediaObject():MediaObject return untyped renderer.mediaObject;
 
-    private var mo(get, never):MediaObject;
-    private inline function get_mo():MediaObject return mediaObject;
+    //private var mo(get, never):MediaObject;
+    //private inline function get_mo():MediaObject return mediaObject;
 
-    private var mc(get, never):MediaController;
-    private inline function get_mc():MediaController return controller;
+    //private var mc(get, never):MediaController;
+    //private inline function get_mc():MediaController return controller;
 
-    private var mr(get, never):Mor;
-    private inline function get_mr():Mor return renderer;
+    //private var mr(get, never):Mor;
+    //private inline function get_mr():Mor return renderer;
 
     public var fftSize(get, set):Int;
 	private function get_fftSize():Int return leftAnalyser.fftSize;
@@ -158,9 +153,9 @@ class AudioVisualizer {
 
 /* === Instance Fields === */
 
-    public var renderer : Mor;
-    public var player : Null<Player> = null;
-    public var viewport : Rect<Float>;
+    //public var renderer : Mor;
+    //public var player : Null<Player> = null;
+    //public var viewport : Rect<Float>;
 
     public var context : AudioContext;
     public var source : AudioSource;

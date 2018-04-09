@@ -23,6 +23,7 @@ import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
 import pman.core.PlaybackTarget;
 import pman.async.*;
+import tannus.async.*;
 
 import pman.Globals.*;
 import pman.Globals.*;
@@ -39,7 +40,9 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 using tannus.math.RandomTools;
-using pman.async.VoidAsyncs;
+using tannus.async.Asyncs;
+using tannus.FunctionTools;
+using tannus.html.JSTools;
 
 /**
   * Object used to represent the current media Playback context
@@ -107,34 +110,59 @@ class PlayerSession {
 	  * add a Media item onto the queue
 	  */
 	private function plpush(track : Track):Void {
-	    (shuffle?playlist.shuffledPush:playlist.push)( track );
+		//(shuffle ? playlist.shuffledPush : playlist.push)( track );
+	    playlist.callprop((shuffle ? 'shuffledPush' : 'push'), [track]);
 	}
 
 	/**
 	  * mount the given Track, and switch focus to it
 	  */
-	public function focus(track:Track, ?done:Void->Void):Void {
+	public function focus(track:Track, ?done:VoidCb):Void {
+	    // ensure that [done] is non-null
+	    if (done == null)
+	        done = VoidCb.noop;
+
+	    // define var for previously focused track
 		var prev:Null<Track> = focusedTrack;
+
+		// create object to describe the change of focus
 		var pre_delta:Delta<Null<Track>> = new Delta(track, prev);
+
+		// fire off signal for change in focus
 		trackChanging.call( pre_delta );
+
+		// create list to hold asynchronous actions
+		var steps:Array<VoidAsync> = new Array();
+
+		// defocus ("blur") the current track
 		if (focusedTrack != null && focusedTrack.isMounted()) {
 			blur( focusedTrack );
 		}
-		_mountIfNecessary(track, function() {
+
+        // draw focus to ("mount") [track]
+		_mountIfNecessary(track, function(?error) {
 			focusedTrack = track;
-			player.view.attachRenderer( track.renderer );
-			var post_delta:Delta<Null<Track>> = new Delta(focusedTrack, prev);
-			trackChanged.call( post_delta );
-			if (done != null) {
-				done();
-			}
+			player.view.attachRenderer(track.renderer, function(?error) {
+			    if (error != null) {
+			        done( error );
+			    }
+                else {
+                    var post_delta:Delta<Null<Track>> = new Delta(focusedTrack, prev);
+                    trackChanged.call( post_delta );
+                    done();
+                }
+            });
 		});
 	}
 
 	/**
 	  * dismount the given Track, and shift focus off of it
 	  */
-	public function blur(?track : Track):Void {
+	public function blur(?track:Track, ?done:VoidCb):Void {
+	    if (done == null)
+	        done = VoidCb.noop;
+
+	    vsequence(function(push, exec) {
 		// if [track] is not explicitly provided
 		if (track == null) {
 			// default to [focusedTrack]
@@ -144,30 +172,35 @@ class PlayerSession {
 			// if [focusedTrack] is null
 			else {
 				// then I guess we're done?
-				return ;
+				return exec();
 			}
 		}
 
 		// if [track] is already unmounted, then it cannot be focused, and thus cannot be blurred
 		if (!track.isMounted()) {
-			throw 'Error: Track is not mounted, and thus cannot be blurred';
+			return exec('Error: Track is not mounted, and thus cannot be blurred');
 		}
 
+        // announce immenent change in focus
 		var pre_delta = new Delta(null, track);
 		trackChanging.call( pre_delta );
 
 		// dismount the Track
-		track.dismount();
+		push( track.dismount );
 
 		// unlink the Track
 		if (track == focusedTrack) {
-			player.view.detachRenderer();
+
+			push( player.view.detachRenderer );
 			tab.blurredTrack = focusedTrack;
 			focusedTrack = null;
 
-			var post_delta = new Delta(null, track);
-			trackChanged.call( post_delta );
+            push(function() {
+                var post_delta = new Delta(null, track);
+                trackChanged.call( post_delta );
+            }.toAsync());
 		}
+        }, done);
 	}
 
 	/**
@@ -175,12 +208,12 @@ class PlayerSession {
 	  * or simply invokes [done] as soon as the current callStack has finished,
 	  * if [track] is already mounted
 	  */
-	private function _mountIfNecessary(track:Track, done:Void->Void):Void {
+	private function _mountIfNecessary(track:Track, done:VoidCb):Void {
 		if (track.isMounted()) {
-			defer( done );
+			defer(done.void());
 		}
 		else {
-			track.mount(function(error : Null<Dynamic>):Void {
+			track.mount(function(?error):Void {
 				if (error != null) {
 					report( error );
 					throw error;
@@ -200,10 +233,19 @@ class PlayerSession {
 	    cb = fill_lcbo( cb );
 
 		// shift focus to [t]
-		focus(t, function() {
-			if (cb.attached != null) {
+		focus(t, function(?error) {
+		    if (error != null) {
+		        if (cb.error != null) {
+                    return cb.error( error );
+                }
+                else {
+                    throw error;
+                }
+		    }
+            else if (cb.attached != null) {
 				defer( cb.attached );
 			}
+
 			var d = focusedTrack.driver;
 			if (cb.manipulate != null && t.hasFeature(LoadedMetadataEvent)) {
 				// loaded metadata event

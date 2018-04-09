@@ -9,7 +9,8 @@ import gryffin.display.*;
 import gryffin.audio.Audio;
 
 import Slambda.fn;
-import foundation.Tools.defer;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import electron.ext.NativeImage;
 
@@ -94,18 +95,22 @@ class MediaTools {
 	  * given a Track object, loads the [media, driver, renderer] fields onto that Track
 	  */
 	@:access( pman.media.Track )
-	public static function loadTrackMediaState(track:Track, callback:Null<Dynamic>->Void):Void {
+	public static function loadTrackMediaState(track:Track, callback:VoidCb):Void {
 		var rethrow = fn([error] => callback( error ));
-		track.provider.getMedia().unless( rethrow ).then(function(media : Media) {
-			track.media = media;
-			media.getDriver().unless( rethrow ).then(function(driver : MediaDriver) {
-				track.driver = driver;
-				media.getRenderer( driver ).unless( rethrow ).then(function(renderer : MediaRenderer) {
-					track.renderer = renderer;
-					callback( null );
-				});
-			});
-		});
+		function ph<T>(p:Promise<T>, h:T->Void) {
+		    p.unless( rethrow ).then( h );
+		}
+
+        ph(track.provider.getMedia(), function(m) {
+            track.media = m;
+            ph(m.getDriver(), function(d) {
+                track.driver = d;
+                ph(m.getRenderer(d), function(r) {
+                    track.renderer = r;
+                    callback();
+                });
+            });
+        });
 	}
 
 	/**

@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.events.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -12,13 +13,15 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
 
-import foundation.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 @:allow( pman.core.PlayerSession )
 @:allow( pman.core.Player )
@@ -36,35 +39,54 @@ class PlayerMediaContext {
 	/**
 	  * set the current state
 	  */
-	public function set(info : MediaContextInfo):Void {
-		// store current state
-		var prev = get();
+	public function set(info:MediaContextInfo, done:VoidCb):Void {
+        // store current state
+        var prev = get();
+	    vsequence(function(add, exec) {
+            // disassemble if necessary
+            if (allValuesPresent()) {
+                add(disassemble.bind(_, false));
+            }
 
-		// disassemble if necessary
-		if (allValuesPresent()) {
-			disassemble( false );
-		}
+            // assign state
+            if (_validateInfo( info )) {
+                add(function(next) {
+                    mediaProvider = info.mediaProvider;
+                    media = info.media;
+                    mediaDriver = info.mediaDriver;
+                    mediaRenderer = info.mediaRenderer;
 
-		// assign state
-		if (_validateInfo( info )) {
-			mediaProvider = info.mediaProvider;
-			media = info.media;
-			mediaDriver = info.mediaDriver;
-			mediaRenderer = info.mediaRenderer;
+                    next();
+                });
 
-			// if [this] now has media
-			if (allValuesPresent()) {
-				// attach that media's renderer to the Player's view
-				view.attachRenderer( mediaRenderer );
-			}
-			// if [this] had media, but no longer does
-			else if (prev.allValuesPresent()) {
-				view.detachRenderer();
-			}
-		}
+                add(function(next) {
+                    vsequence(function(push, run) {
+                        // if [this] now has media
+                        if (allValuesPresent()) {
+                            // attach that media's renderer to the Player's view
+                            push(view.attachRenderer.bind(mediaRenderer, _));
+                        }
+                        // if [this] had media, but no longer does
+                        else if (prev.allValuesPresent()) {
+                            push( view.detachRenderer );
+                        }
 
-		// report change
-		_changed(prev, get());
+                        run();
+                    }, next);
+                });
+            }
+
+            // report change
+            exec();
+        }, done.wrap(function(_, ?error) {
+            if (error != null) {
+                _( error );
+            }
+            else {
+                _changed(prev, get());
+                _();
+            }
+        }));
 	}
 
 	/**
@@ -83,18 +105,32 @@ class PlayerMediaContext {
 	/**
 	  * disassemble, and nullify data state
 	  */
-	public function disassemble(report : Bool = true):Void {
-		_polarize();
-		var prev = get();
+	public function disassemble(done:VoidCb, report:Bool=true):Void {
+        _polarize();
+        var prev = get();
+	    vsequence(function(add, exec) {
+            if (allValuesPresent()) {
+                add( media.dispose );
+                add(function(next) {
+                    mediaDriver.stop();
+                    next();
+                });
 
-		if (allValuesPresent()) {
-			media.dispose();
-			mediaDriver.stop();
+                _nullify();
+            }
 
-			_nullify();
-		}
-		if ( report )
-			_changed(prev, get());
+            exec();
+        }, done.wrap(function(_, ?error) {
+            if (error != null) {
+                _( error );
+            }
+            else {
+                if ( report ) {
+                    _changed(prev, get());
+                }
+                _();
+            }
+        }));
 	}
 
 	/**
