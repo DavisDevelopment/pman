@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.geom2.*;
 import tannus.sys.*;
+import tannus.async.*;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -28,6 +29,7 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.graphics.ColorTools;
+using tannus.async.Asyncs;
 
 /*
    Renderer for video media
@@ -147,39 +149,43 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	/**
 	  * when [this] gets attached to the view
 	  */
-	override function onAttached(pv : PlayerView):Void {
-		super.onAttached( pv );
-		
-		if (this.pv == null) {
-			this.pv = pv;
-			vr = pv.mediaRect;
-		}
+	override function onAttached(pv:PlayerView, done:VoidCb):Void {
+		super.onAttached(pv, function(?error) {
+		    if (error != null) {
+		        return done( error );
+		    }
 
-		if ( prefs.directRender ) {
-            underlay = new VideoUnderlay( v );
-            underlay.appendTo( 'body' );
-        }
+            if (this.pv == null) {
+                this.pv = pv;
+                vr = pv.mediaRect;
+            }
 
-        if ( player.conf.videoShowVisualizer ) {
-            //var visualizer = new SpectographVisualizer(cast this);
-            //var visualizer = new BarsVisualizer(cast this);
-            var visualizer = new VideoAudioVisualizer(cast this);
-            attachVisualizer(visualizer, function() {
-                //
-            });
-        }
+            if ( prefs.directRender ) {
+                underlay = new VideoUnderlay( v );
+                underlay.appendTo( 'body' );
+            }
+
+            if ( player.conf.videoShowVisualizer ) {
+                //var visualizer = new SpectographVisualizer(cast this);
+                //var visualizer = new BarsVisualizer(cast this);
+                var visualizer = new VideoAudioVisualizer(cast this);
+                attachVisualizer(visualizer, done);
+            }
+            else {
+                done();
+            }
+        });
 	}
 
 	/**
 	  * when [this] gets detached from the view
 	  */
-	override function onDetached(pv : PlayerView):Void {
-		super.onDetached( pv );
-
-		detachVisualizer(function() {
-            if (underlay != null)
-                underlay.destroy();
-        });
+	override function onDetached(pv:PlayerView, done:VoidCb):Void {
+		super.onDetached(pv, function(?error) {
+		    if (underlay != null)
+		        underlay.destroy();
+		    done( error );
+		});
 	}
 
 	/**
@@ -191,8 +197,9 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 	        underlay = null;
 	    }
 
-	    detachVisualizer(function() {
-	        return ;
+	    detachVisualizer(function(?error) {
+	        if (error!=null)
+	            report( error );
 	    });
 	}
 
