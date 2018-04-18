@@ -132,7 +132,15 @@ class TrackData2 {
       * resample [this]'s properties to the full property list
       */
     public function fill(?done: VoidCb):Void {
-        resample(_all_.copy(), done);
+        switch ( source ) {
+            case Complete(_), Create(_):
+                if (done != null) {
+                    done();
+                }
+
+            default:
+                resample(_all_.copy(), done);
+        }
     }
 
     /**
