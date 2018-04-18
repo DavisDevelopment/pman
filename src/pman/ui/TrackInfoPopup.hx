@@ -314,17 +314,23 @@ class TrackInfoPopup extends Dialog {
       */
     private function save():Void {
         trace(getFormValue());
-        // compute delta
-        var delta = getFormValueDelta();
-        // create task to save changes
-        var saver = new SaveTrackInfo(track, delta);
-        // execute that task
-        saver.run(function(?error) {
+        track.fillData(function(?error) {
             if (error != null) {
-                report( error );
+                throw error;
             }
-            close();
-            destroy();
+
+            // compute delta
+            var delta = getFormValueDelta();
+            // create task to save changes
+            var saver = new SaveTrackInfo(track, delta);
+            // execute that task
+            saver.run(function(?error) {
+                if (error != null) {
+                    report( error );
+                }
+                close();
+                destroy();
+            });
         });
     }
 
