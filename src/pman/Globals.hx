@@ -8,6 +8,7 @@ import tannus.TSys as Sys;
 import tannus.async.*; 
 import tannus.html.Win;
 import tannus.html.Element;
+import tannus.async.Promise;
 
 #if renderer_process
 
@@ -110,6 +111,18 @@ class Globals {
       */
     public static inline function asyncify(f: Void->Void):VoidAsync {
         return (f.toAsync());
+    }
+
+    public static function promise<T>(x: PromiseResolution<T>):Promise<T> {
+        return new Promise(function(yield, raise) {
+            return Promise._settle(x, yield, raise);
+        });
+    }
+
+    public static function promiseError<T>(x: Dynamic):Promise<T> {
+        return new Promise(function(yield, raise) {
+            return defer(function() raise( x ));
+        });
     }
 
     /**
