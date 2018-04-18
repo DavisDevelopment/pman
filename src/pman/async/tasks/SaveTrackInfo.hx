@@ -44,7 +44,11 @@ class SaveTrackInfo extends Task1 {
       * execute [this] Task
       */
     override function execute(done : VoidCb):Void {
-        [rename_track, edit_data].series( done );
+        [ensure_full_data, rename_track, edit_data].series( done );
+    }
+
+    private function ensure_full_data(done: VoidCb):Void {
+        track.fillData( done );
     }
 
     /**
