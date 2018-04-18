@@ -100,6 +100,10 @@ class Paths {
     public static function pictures():Path return library(Pictures);
     public static function videos():Path return library(Videos);
     public static function music():Path return library(Music);
+    public static function desktop():Path {
+        return subhome('Desktop');
+    }
+
     public static function getLibraryPath(library: Int):Path {
         return Paths.library(Library.createByIndex(library));
     }
