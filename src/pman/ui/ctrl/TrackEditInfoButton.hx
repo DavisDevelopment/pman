@@ -54,7 +54,6 @@ class TrackEditInfoButton extends TrackControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-	    var popup = new TrackInfoPopup( track );
-	    popup.open();
+	    @:privateAccess track._edit();
 	}
 }
