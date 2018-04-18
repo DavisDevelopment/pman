@@ -19,6 +19,7 @@ import pman.media.MediaType;
 import pman.bg.media.MediaFeature;
 import pman.bg.media.MediaDataSource;
 import pman.ui.pl.TrackView;
+import pman.ui.*;
 import pman.media.info.Mark;
 import pman.media.info.*;
 import pman.async.*;
@@ -152,21 +153,6 @@ class Track extends EventDispatcher implements IComparable<Track> {
 			//TODO seems like there should be more to do here..
 			exec();
 	    }, done);
-		//this.loadTrackMediaState(function(error : Null<Dynamic>):Void {
-			//if (error != null) {
-				//deallocate();
-				//nullify();
-			//}
-            //else {
-                //if (hasFeature( PlayEvent )) {
-                    //var ps = driver.getPlaySignal();
-                    //ps.on(function() {
-                        //player.dispatch('play', null);
-                    //});
-                //}
-            //}
-			//callback( error );
-		//});
 	}
 
 	/**
@@ -433,6 +419,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
                 }
             });
 
+            mt.push({
+                label: 'Edit Info',
+                click: function(i, w, e) {
+                    _edit();
+                }
+            });
+
             (function() {
                 // utility function for adding a single track (this one) to a saved playlist
                 function add2(n : String) {
@@ -580,6 +573,28 @@ class Track extends EventDispatcher implements IComparable<Track> {
         });
     }
 
+    /**
+      * open prompt to edit [this] Track
+      */
+    private function _edit(?done:VoidCb):Void {
+        if (done == null) {
+            done = VoidCb.noop;
+        }
+
+        vsequence(function(add, exec) {
+            add( fillData );
+            add(function(next) {
+                defer(function() {
+                    var editor = new TrackInfoPopup( this );
+                    editor.open();
+                    editor.once('close', untyped function() {
+                        next();
+                    });
+                });
+            });
+        }, done);
+    }
+
 /* === TrackData Methods === */
 
     /**
@@ -604,6 +619,20 @@ class Track extends EventDispatcher implements IComparable<Track> {
             }
             else {
                 complete('Error: No TrackData loaded');
+            }
+        });
+    }
+
+    /**
+      * ensure data has all fields
+      */
+    public function fillData(done: VoidCb):Void {
+        getData(function(?error, ?data:TrackData) {
+            if (error != null) {
+                done( error );
+            }
+            else {
+                data.fill( done );
             }
         });
     }
