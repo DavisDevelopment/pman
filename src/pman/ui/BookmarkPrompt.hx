@@ -7,6 +7,7 @@ import tannus.ds.*;
 import tannus.html.Element;
 import tannus.events.*;
 import tannus.events.Key;
+import tannus.async.*;
 
 import pman.core.*;
 import pman.bg.media.Mark;
@@ -19,6 +20,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
+using tannus.async.Asyncs;
 
 @:expose
 class BookmarkPrompt extends PromptBox {
@@ -50,39 +52,68 @@ class BookmarkPrompt extends PromptBox {
       */
     public function readMark(callback: Null<Mark>->Void):Void {
         open();
-        readLine(function(line: String) {
-            if (mtype == null)
-                mtype = PMTNamed;
+        prepHistory(function(?error) {
+            readLine(function(line: String) {
+                if (mtype == null)
+                    mtype = PMTNamed;
 
-            var time:Float = player.currentTime;
-            var type:MarkType;
-            switch ( mtype ) {
-                case PMTNamed:
-                    type = MarkType.Named( line );
-                case PMTStartTime:
-                    type = MarkType.Begin;
-                case PMTEndTime:
-                    type = MarkType.End;
-                case PMTScene:
-                    var t = player.track;
-                    var st:SceneMarkType = SceneMarkType.SceneBegin;
-                    if (t != null && t.data != null && t.data.marks != null) {
-                        for (m in t.data.marks) {
-                            if (m.type.match(Scene(SceneBegin, line))) {
-                                st = SceneEnd;
-                                break;
+                var time:Float = player.currentTime;
+                var type:MarkType;
+                switch ( mtype ) {
+                    case PMTNamed:
+                        type = MarkType.Named( line );
+                    case PMTStartTime:
+                        type = MarkType.Begin;
+                    case PMTEndTime:
+                        type = MarkType.End;
+                    case PMTScene:
+                        var t = player.track;
+                        var st:SceneMarkType = SceneMarkType.SceneBegin;
+                        if (t != null && t.data != null && t.data.marks != null) {
+                            for (m in t.data.marks) {
+                                if (m.type.match(Scene(SceneBegin, line))) {
+                                    st = SceneEnd;
+                                    break;
+                                }
                             }
                         }
-                    }
-                    type = MarkType.Scene(st, line);
-                default:
-                    type = MarkType.Named(line);
-            }
+                        type = MarkType.Scene(st, line);
+                    default:
+                        type = MarkType.Named(line);
+                }
 
-            var mark:Mark = new Mark(type, time);
-            callback( mark );
+                var mark:Mark = new Mark(type, time);
+                callback( mark );
+            });
+            focus();
         });
-        focus();
+    }
+
+    /**
+      * ensure that [history] is ready to be used
+      */
+    private function prepHistory(done: VoidCb):Void {
+        if (history.empty() && player.track != null && player.track.data != null) {
+            var entries = [];
+            for (mark in player.track.data.marks) {
+                if (mark.type.match(Named(_))) {
+                    entries.push( mark );
+                }
+            }
+            entries.sort(function(a, b) {
+                return Reflect.compare(a.time, b.time);
+            });
+            for (m in entries) {
+                switch ( m.type ) {
+                    case Named(name):
+                        history.push( name );
+
+                    default:
+                        null;
+                }
+            }
+        }
+        done();
     }
 
     override function __listen():Void {
