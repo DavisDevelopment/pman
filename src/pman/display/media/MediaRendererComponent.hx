@@ -35,6 +35,7 @@ class MediaRendererComponent {
     /* Constructor Function */
     public function new():Void {
         viewport = new Rect();
+        _attachedEvent = new OnceSignal();
     }
 
 /* === Instance Methods === */
@@ -79,6 +80,25 @@ class MediaRendererComponent {
     }
 
     /**
+      * announce that [this] has been successfully attached to something
+      */
+    public inline function announceAttached():Void {
+        _attachedEvent.announce();
+    }
+
+    /**
+      * ensure that when [action] is invoked, [this] has been attached
+      */
+    public function whenAttached(action: Void->Void):Void {
+        if (_attached && _attachedEvent.isReady()) {
+            action();
+        }
+        else {
+            _attachedEvent.on( action );
+        }
+    }
+
+    /**
       * check whether [this] is attached to [renderer]
       */
     public inline function isAttachedTo(renderer: MediaRenderer):Bool {
@@ -110,6 +130,7 @@ class MediaRendererComponent {
     public var viewport : Rect<Float>;
 
     private var _attached:Bool = false;
+    private var _attachedEvent:OnceSignal;
 }
 
 private typedef Mor = Lmor<MediaObject>;
