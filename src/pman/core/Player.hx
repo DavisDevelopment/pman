@@ -43,11 +43,15 @@ import pman.async.*;
 import pman.async.tasks.*;
 import pman.pmbash.Interp as PMBashInterp;
 
+//== [TESTING IMPORTS]
+import pman.sys.FSWFilter;
+
 import Slambda.fn;
 import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
 import haxe.extern.EitherType;
+import haxe.Constraints.Function;
 
 using DateTools;
 using StringTools;
@@ -128,8 +132,54 @@ class Player extends EventDispatcher {
             else {
                 //_test_tty(stage);
                 _test_curses( stage );
+                _test_fsw();
             }
 	    });
+	}
+
+	private function _test_fsw():Void {
+        inline function reg(mk: Function):PRegEx {
+	        var pr:PRegEx = new PRegEx();
+	        var ret:Dynamic = mk( pr );
+	        if (ret != null && (ret is PRegEx)) {
+	            pr = cast ret;
+	        }
+	        return pr;
+	    }
+	    inline function pm(f: Function) {
+	        return FSWFileFilter.PathMatch(reg(f).toRegEx());
+	    }
+
+	    var fsw = new pman.sys.FileSystemWalker({
+            roots: [
+                Paths.videos(),
+                Paths.desktop().plusString('phfeed')
+            ]
+	    });
+
+        var count:Int = 0;
+	    fsw
+	    .addFileFilter(pm(function(r: PRegEx) {
+	        return r.anything(true, false).then('.').then('mp4').endOfLine(true);
+	    }))
+	    .onFileChunkProcess(function(files) {
+	        count += files.length;
+
+	    });
+
+        window.expose('fsw', fsw);
+	    window.expose('runFSW', function() {
+            fsw.start(function(?error) {
+                if (error != null) {
+                    report( error );
+                }
+                else {
+                    trace('$count files were processed');
+                }
+            });
+        });
+
+	    trace( fsw );
 	}
 
 	/**
