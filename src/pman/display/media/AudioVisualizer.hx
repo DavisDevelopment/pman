@@ -59,8 +59,9 @@ class AudioVisualizer extends MediaRendererComponent {
       */
     override function attached(done : VoidCb):Void {
         super.attached(function(?error) {
-            if (error != null)
-                return done( error );
+            if (error != null) {
+                done( error );
+            }
             else {
                 build_tree( done );
             }

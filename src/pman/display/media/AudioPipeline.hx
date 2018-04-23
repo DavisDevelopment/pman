@@ -73,9 +73,16 @@ class AudioPipeline extends MediaRendererComponent {
             done = VoidCb.noop;
         }
 
+        // override [done]
         done = done.wrap(function(_, ?error) {
-            trace('AudioPipeline activate!');
-            _( error );
+            if (error != null) {
+                _( error );
+            }
+            else {
+                defer(() -> announceAttached());
+                _();
+            }
+            //_( error );
         });
 
         if ( !active ) {
@@ -88,8 +95,6 @@ class AudioPipeline extends MediaRendererComponent {
         else {
             throw 'Error: Cannot reactivate an active AudioPipeline';
         }
-
-        done();
     }
 
     /**
@@ -191,9 +196,7 @@ class AudioPipeline extends MediaRendererComponent {
 
         mumps
         .join(function() {
-            trace('create audio context');
             context = new AudioContext();
-            trace('audio context created');
             
             try {
                 source.disconnect();
@@ -208,6 +211,7 @@ class AudioPipeline extends MediaRendererComponent {
 
             srcNode = new SourceAudioPipelineNode( this );
             srcNode.init();
+
             destNode = new DestAudioPipelineNode( this );
             destNode.init();
             currentNode = srcNode;

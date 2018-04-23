@@ -108,7 +108,7 @@ class BarsVisualizer extends AudioVisualizer {
       * override that [build_tree] method
       */
     override function build_tree(done: VoidCb):Void {
-        var vizNode = mr.audioManager.createNode({
+        var vizNode = (mr.audioManager.createNode({
             init: function(self: Fapn) {
                 var m = self.pipeline;
                 var c = context = m.context;
@@ -121,7 +121,8 @@ class BarsVisualizer extends AudioVisualizer {
 
                 config(1024 * 2, 0.75);
             } 
-        });
+        }));
+        
         mr.audioManager.prependNode( vizNode );
         done();
     }

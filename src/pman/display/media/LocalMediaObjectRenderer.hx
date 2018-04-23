@@ -44,7 +44,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 		audioManager = new AudioPipeline(untyped this);
         audioEq = new AudioEqualizer();
 
-        _req(next -> _addComponents([audioManager, audioEq], next));
+        //_req(next -> _addComponents([audioManager, audioEq], next));
 	}
 
 /* === Instance Methods === */
@@ -62,6 +62,12 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
     override function onAttached(pv:PlayerView, done:VoidCb):Void {
         vsequence(function(add, exec) {
             add(_superOnAttached.bind(pv, _));
+            add(function(next) {
+                _addComponents([
+                    audioManager,
+                    audioEq
+                ], next);
+            });
             add( linkAudioVisualizer );
 
             exec();
@@ -89,6 +95,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	    v.player = player;
 	    if (done == null)
 	        done = VoidCb.noop;
+
 	    _addComponent(v, function(?error) {
 	        visualizer = v;
 	        done( error );
@@ -101,13 +108,18 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
 	private function linkAudioVisualizer(done: VoidCb):Void {
 	    vsequence(function(add, exec) {
 	        if (_shouldShowAudioVisualizer()) {
-	            var av = _createAudioVisualizer();
+	            var av:AudioVisualizer = _createAudioVisualizer();
+
 	            if (av != null) {
-	                add(cast attachVisualizer.bind(av, _));
+	                add(function(next) {
+                        attachVisualizer(av, next);
+	                });
+					//add(cast attachVisualizer.bind(av, _));
 	            }
 	        }
 
-	        exec();
+			//defer(() -> exec());
+			exec();
 	    }, done);
 	}
 
