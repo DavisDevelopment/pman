@@ -136,6 +136,7 @@ class BPlayerMain extends Application {
 
                 //bgdbTest();
                 //test_edis_streams();
+                test_bdc();
             });
         });
 
@@ -145,12 +146,18 @@ class BPlayerMain extends Application {
 
         // request launch info from background
         defer(function() {
-            trace('requesting launch info..');
             ic.send('GetLaunchInfo', null, null, function(launchInfo) {
-                trace( launchInfo );
                 _provideLaunchInfo( launchInfo );
             });
         });
+	}
+
+	private function test_bdc() {
+	    var binData:ByteArray = Ct.readFile('./testbdc.dat');
+	    binData.bigEndian = !binData.bigEndian;
+	    trace( binData );
+	    var parsed = edis.format.bdc.Reader.run({}, binData);
+	    trace( parsed );
 	}
 
 	/**
