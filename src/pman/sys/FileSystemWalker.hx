@@ -14,6 +14,7 @@ import edis.Globals.*;
 
 import pman.sys.FSWFilter;
 
+import haxe.Json;
 import haxe.Serializer;
 import haxe.Unserializer;
 import haxe.extern.EitherType;
@@ -34,15 +35,23 @@ class FileSystemWalker {
     /* Constructor Function */
     public function new(options: FileSystemWalkerOptions):Void {
         paths = new Array();
-        queue = new Array();
-        pqueue = new Array();
-        plqueue = new Array();
+        queue = new Chunks(maxChunkLength);
+        pqueue = new Chunks(maxChunkLength);
         fs = nullOr(options.fs, FileSystem.node());
         filters = new Array();
         fileFilters = new Array();
         directoryFilters = new Array();
         events = {
-            processFile: new Signal()
+            start: new VoidSignal(),
+            end: new VoidSignal(),
+            processStart: new VoidSignal(),
+            processEnd: new VoidSignal(),
+            processFile: new Signal(),
+            processFileChunk: new Signal(),
+            processStep: new VoidSignal(),
+            walkStep: new Signal(),
+            walkStart: new VoidSignal(),
+            walkEnd: new VoidSignal(),
         };
 
         if (options.filters != null) {
@@ -75,28 +84,119 @@ class FileSystemWalker {
 
 /* === Instance Methods === */
 
+    /**
+      * begin execution for [this] FileSystemWalker
+      */
     public function start(complete: VoidCb):Void {
-        [
-            queuePaths.bind(paths, _),
-            step
-        ].series( complete );
+        // create value that is thrown as error when total completion is achieved
+        var finished = [true];
+
+        var steps:Array<VoidAsync> = [
+            walk.bind(finished, _),
+            process.bind(finished, _)
+        ];
+
+        steps.series(function(?error) {
+            if (error != null) {
+                complete( error );
+            }
+            else {
+                trace( pqueue );
+                complete();
+            }
+        });
+    }
+
+    /**
+      * process all entries that were queued for processing in the walk procedure
+      */
+    public function process(?finishedToken:Dynamic, complete:VoidCb):Void {
+        if (finishedToken == null) {
+            finishedToken = [true];
+        }
+
+        processStep(finishedToken, complete);
+    }
+
+    private function processStep(finishedToken:Dynamic, done:VoidCb):Void {
+        var chunk = pqueue.shift();
+        if (chunk.empty()) {
+            done( finishedToken );
+        }
+        else {
+            handleFileChunk(function(?error) {
+                if (error != null) {
+                    done( error );
+                }
+                else {
+                    defer(processStep.bind(finishedToken, done));
+                }
+            });
+        }
+    }
+
+    /**
+      * attempt to process a set of files if there are enough queued
+      */
+    private function processPartial(done: VoidCb):Void {
+        var chunk = pqueue.shift();
+        trace('partial', chunk);
+        if ((chunk.hasContent() && chunk.length >= pqueue.maxLength) || (chunk.hasContent() && gatherFilesComplete)) {
+            handleFileChunk(chunk, done);
+        }
+        else {
+            defer(done.void());
+        }
+    }
+
+    /**
+      * perform the 'walk' part of the procedures
+      */
+    public function walk(?finishedToken:Dynamic, complete:VoidCb):Void {
+        if (finishedToken == null) {
+            finishedToken = [true];
+        }
+
+        // queue up root paths
+        queuePaths(paths, function(?error) {
+            // if that failed, error out
+            if (error != null) {
+                complete( error );
+            }
+            // otherwise..
+            else {
+                // begin the step cycle
+                walkStep(finishedToken, function(?error) {
+                    if (error != null) {
+                        if (error == finishedToken) {
+                            gatherFilesComplete = true;
+                            complete();
+                        }
+                        else {
+                            complete( error );
+                        }
+                    }
+                    else {
+                        complete();
+                    }
+                });
+            }
+        });
     }
 
     /**
       * method that handles one iteration of the walking algorithm
       */
-    private function step(done: VoidCb):Void {
-        var finished = [true];
+    private function walkStep(finishedToken:Dynamic, done:VoidCb):Void {
         defer(function() {
             // build parallel-executing list of asynchronous tasks
             vbatch(function(add, exec) {
                 // get the current 'chunk' of entries
-                var chunk = _shift();
-                trace( chunk );
+                var chunk = queue.shift();
 
                 // we're done if there is no next chunk
-                if (chunk.empty()) {
-                    return exec( finished );
+                if (chunk == null || chunk.empty()) {
+                    return exec( finishedToken );
                 }
                 // as long as there is a next chunk
                 else {
@@ -113,17 +213,21 @@ class FileSystemWalker {
             }, 
             function(?error) {
                 if (error != null) {
-                    if (error == finished) {
-                        done();
-                    }
-                    else {
-                        done( error );
-                    }
+                    done( error );
                 }
                 else {
+                    // schedule next step
                     defer(function() {
-                        step( done );
+                        processPartial(function(?error) {
+                            if (error != null) {
+                                done( error );
+                            }
+                            else {
+                                defer(walkStep.bind(finishedToken, done));
+                            }
+                        });
                     });
+                    //defer(walkStep.bind(finishedToken, done));
                 }
             });
         });
@@ -150,18 +254,35 @@ class FileSystemWalker {
         return this;
     }
 
+    /**
+      * add a File-specific filter
+      */
     public function addFileFilter(filter: FSWFileFilter):FileSystemWalker {
         fileFilters.push( filter );
         return this;
     }
 
+    /**
+      * add a Directory-specific filter
+      */
     public function addDirFilter(filter: FSWDirectoryFilter):FileSystemWalker {
         directoryFilters.push( filter );
         return this;
     }
 
+    /**
+      * handle the 'fileProcess' event
+      */
     public function onFileProcess(f: File->Void):FileSystemWalker {
         events.processFile.on( f );
+        return this;
+    }
+
+    /**
+      * handle the 'fileChunkProcess' event
+      */
+    public function onFileChunkProcess(f: Array<File>->Void):FileSystemWalker {
+        events.processFileChunk.on( f );
         return this;
     }
 
@@ -175,55 +296,95 @@ class FileSystemWalker {
                 shouldProcessFile( file )
                 .nope(done.void())
                 .yep(function() {
-                    processFile(file, done);
+                    //handleFile(file, done);
+                    pqueue.push( file );
+                    done();
                 })
                 .unless(done.raise());
 
+            // Directory Entry
             case ETDirectory( dir ):
                 shouldVisitDirectory( dir )
                 .nope(done.void())
                 .yep(function() {
-                    trace('should visit folder');
                     visitDirectory(dir, done);
                 })
                 .unless(done.raise());
         }
-        trace( entry );
     }
 
     /**
-      * extract desired data from file
+      * handle a File instance
+      */
+    private function handleFile(file:File, done:VoidCb):Void {
+        pqueue.push( file );
+
+        // one could imagine that there could be some need for additional logic and whatnot here..
+        processFile(file, done);
+    }
+
+    /**
+      * handle a list of Files
+      */
+    private function handleFileChunk(?chunk:Array<File>, done:VoidCb):Void {
+        if (pqueue.empty()) {
+            return done();
+        }
+        else {
+            if (chunk == null) {
+                chunk = pqueue.shift();
+            }
+            if (chunk.hasContent()) {
+                processFileChunk(chunk, done);
+            }
+            else {
+                done();
+            }
+        }
+    }
+
+    /**
+      * perform desired processing on File instance
       */
     private function processFile(file:File, done:VoidCb):Void {
-        defer(function() {
-            events.processFile.call( file );
+        events.processFile.call( file );
+        done();
+    }
 
-            done();
-        });
+    /**
+      * process a list of files
+      */
+    private function processFileChunk(chunk:Array<File>, done:VoidCb):Void {
+        events.processFileChunk.call( chunk );
+        vbatch(function(add, exec) {
+            for (x in chunk) {
+                add(processFile.bind(x, _));
+            }
+
+            defer(function() {
+                exec();
+            });
+        }, done);
     }
 
     /**
       * load and queue up all entries in [dir]
       */
     private function visitDirectory(dir:Directory, done:VoidCb):Void {
-        dir.entries(function(?error, ?entries:Array<Entry>) {
-            if (error != null) {
-                done( error );
+        dir.entries()
+        .then(function(entries: Array<Entry>) {
+            trace(entries.map.fn(_.path.toString()));
+            for (e in entries) {
+                queue.push(e.wrapped());
             }
-            else if (!entries.empty()) {
-                trace(entries.map.fn(_.path.toString()));
-                //_unshifts(entries.map(x -> x.wrapped()));
-                for (e in entries) {
-                    _push(e.wrapped());
-                }
-                defer(done.void());
-            }
-            else {
-                done('Error: No data');
-            }
-        });
+            defer(done.void());
+        })
+        .unless(done.raise());
     }
 
+    /**
+      * check whether the given File should be processed
+      */
     private function shouldProcessFile(file:File):BoolPromise {
         return Promise.create({
             var fail = {v:false};
@@ -314,15 +475,18 @@ class FileSystemWalker {
     private function queuePath(path:Path, done:VoidCb):Void {
         fs.get( path ).transform(entry -> entry.wrapped()).then(function(entry: Wet) {
             defer(function() {
-                _push( entry );
+                queue.push( entry );
                 defer(done.void());
             });
         }, done.raise());
     }
 
+    /**
+      * add an Entry to the queue
+      */
     private function queueEntry(entry:Entry, done:VoidCb):Void {
         defer(function() {
-            _push(entry.wrapped());
+            queue.push(entry.wrapped());
             defer(done.void());
         });
     }
@@ -384,33 +548,133 @@ class FileSystemWalker {
         });
     }
 
-    private function _push(entry:Wet):Void {
-        var chunk:Array<Wet> = queue.last();
-        if (chunk == null) {
-            queue.push(chunk = new Array());
+/* === Static Methods === */
+
+    private static function _cache_file(fs:FileSystem, path:Path, done:VoidCb):Void {
+        function onError(error: Dynamic) {
+            done( error );
         }
-        else if (chunk.length >= maxChunkLength) {
-            queue.push(chunk = new Array());
+
+        function nonExistent() {
+            fs.write(path, '{}', done);
         }
-        chunk.push( entry );
+
+        function existsButEmpty() {
+            fs.write(path, '{}', done);
+        }
+
+        function existsButBroken(brokenData:ByteArray) {
+            var brokenPath:Path = path.directory.plusString(path.basename + '_BROKENDATA' + path.extension);
+            var newData:ByteArray = ByteArray.ofString('{}');
+            vsequence(function(add, exec) {
+                add(cast fs.write.bind(brokenPath, brokenData, _));
+                add(cast fs.write.bind(path, newData, _));
+
+                exec();
+            }, 
+            function(?error) {
+                if (error != null) {
+                    onError( error );
+                }
+                else {
+                    done();
+                }
+            });
+        }
+
+        function exists() {
+            fs.read( path ).then(function(data: ByteArray) {
+                if (data.length == 0) {
+                    existsButEmpty();
+                }
+                else {
+                    try {
+                        var dat:Dynamic = Json.parse(data.toString());
+                        if (Reflect.isObject( dat ) && !(dat is Array<Dynamic>)) {
+                            //
+                        }
+                        else {
+                            existsButBroken( data );
+                        }
+                    }
+                    catch (error: Dynamic) {
+                        existsButBroken( data );
+                    }
+                }
+            }, onError);
+        }
+
+        fs.exists( path ).nope( nonExistent ).yep( exists );
     }
 
-    private function _unshift(entry:Wet):Void {
-        var chunk:Array<Wet> = queue[0];
-        if (chunk == null || chunk.length >= maxChunkLength) {
-            queue.unshift(chunk = new Array());
-        }
-        chunk.push( entry );
+    private static function read_cache_raw(fs:FileSystem, path:Path):Promise<JsonFileSystemWalkerCache> {
+        return new Promise(function(accept, reject) {
+            _cache_file(fs, path, function(?error) {
+                if (error != null) {
+                    return reject( error );
+                }
+                else {
+                    fs.read( path ).then(function(data: ByteArray) {
+                        try {
+                            var d:Dynamic = Json.parse(data.toString());
+                            if (Reflect.isObject( d )) {
+                                return accept(untyped d);
+                            }
+                            else {
+                                return reject('TypeError: Invalid cache data');
+                            }
+                        }
+                        catch (error: Dynamic) {
+                            reject( error );
+                        }
+                    }, reject);
+                }
+            });
+        });
     }
 
-    private function _unshifts(entries:Array<Wet>):Void {
-        for (entry in entries) {
-            _unshift( entry );
-        }
+    private static function read_cache(fs:FileSystem, path:Path):Promise<FileSystemWalkerCache> {
+        return read_cache_raw(fs, path).transform( cache_cook );
     }
 
-    private inline function _shift():Array<Wet> {
-        return queue.shift();
+    private static function cache_cook(raw: JsonFileSystemWalkerCache):FileSystemWalkerCache {
+        var cache = new FileSystemWalkerCache();
+        var raw:Anon<EitherType<Bool, JsonFileSystemWalkerCache>> = raw;
+        var item:EitherType<Bool, JsonFileSystemWalkerCache>, path:Path;
+        
+        for (key in raw.keys()) {
+            path = Path.fromString( key );
+            item = raw[key];
+
+            if ((item is Bool)) {
+                cache[path] = FSWCFile;
+            }
+            else {
+                cache[path] = FSWCDirectory(cache_cook_sub(path, cast item));
+            }
+        }
+
+        return cache;
+    }
+
+    private static function cache_cook_sub(root:Path, raw:JsonFileSystemWalkerCache):FileSystemWalkerSubCache {
+        var sub = new FileSystemWalkerSubCache();
+        var raw:Anon<EitherType<Bool, JsonFileSystemWalkerCache>> = raw;
+        var item:EitherType<Bool, JsonFileSystemWalkerCache>, path:Path;
+
+        for (key in raw.keys()) {
+            path = root.plusString( key );
+            item = raw[key];
+
+            if ((item is Bool)) {
+                sub[path] = FSWCFile;
+            }
+            else {
+                sub[path] = FSWCDirectory(cache_cook_sub(path, cast item));
+            }
+        }
+
+        return sub;
     }
 
 /* === Instance Fields === */
@@ -422,9 +686,9 @@ class FileSystemWalker {
     
     private var events: FileSystemWalkerEvents;
     private var paths: Array<Path>;
-    private var queue: Array<Array<Wet>>;
-    private var pqueue: Array<Array<File>>;
-    private var plqueue: Array<File>;
+    private var queue: Chunks<Wet>;
+    private var pqueue: Chunks<File>;
+    private var gatherFilesComplete:Bool = false;
     
     private var maxChunkLength:Int = 10;
 }
@@ -432,9 +696,29 @@ class FileSystemWalker {
 typedef FileSystemWalkerOptions = {
     ?fs: FileSystem,
     ?filters: EitherType<Array<FSWFilter>, {file:Array<FSWFileFilter>, directory:Array<FSWDirectoryFilter>}>,
+    ?chunkSize: Int,
+    ?cacheFile: Path,
     roots: Array<Path>
 };
 
 typedef FileSystemWalkerEvents = {
-    processFile: Signal<File>
+    start: VoidSignal,
+    end: VoidSignal,
+    processFile: Signal<File>,
+    processFileChunk: Signal<Array<File>>,
+    processStep: VoidSignal,
+    processStart: VoidSignal,
+    processEnd: VoidSignal,
+    walkStart: VoidSignal,
+    walkEnd: VoidSignal,
+    walkStep: Signal<Array<Wet>>,
 };
+
+private typedef FileSystemWalkerCache = Dict<Path, FSWCEntry>;
+private typedef FileSystemWalkerSubCache = Map<String, FSWCEntry>;
+private enum FSWCEntry {
+    FSWCFile;
+    FSWCDirectory(data: FileSystemWalkerSubCache);
+}
+
+private typedef JsonFileSystemWalkerCache = Dynamic<EitherType<Bool, JsonFileSystemWalkerCache>>;
