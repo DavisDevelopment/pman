@@ -10,6 +10,7 @@ import edis.concurrency.WorkerPacket;
 import haxe.extern.EitherType;
 import haxe.Constraints.Function;
 import electron.*;
+import edis.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -135,8 +136,7 @@ class BaseIpcCommands {
                 packet = packet.decode();
 
                 if (packet.type.startsWith( WorkerPacket.REPLYPREFIX )) {
-                    trace('REPLY');
-                    trace( packet );
+                    echo( packet );
                     return _onReply( packet );
                 }
 
@@ -144,7 +144,7 @@ class BaseIpcCommands {
                 _pb.dispatch(ipacket.type, ipacket);
             }
             else {
-                trace( data );
+                echo( data );
             }
         });
 
