@@ -189,7 +189,7 @@ class TrackData2 {
                         .then(function(ps: MediaDataSource) {
                             _rebase(source.extend( ps ));
 
-                            done();
+                            defer(done.void());
                         });
                 }
                 else done('No row to work with');
@@ -395,12 +395,14 @@ class TrackData2 {
       */
     public function save(?complete:VoidCb, ?db:PManDatabase):Void {
         // compute appropriate 'write' function 
-        var writef = (switch ( source ) {
+        var writef:PManDatabase->VoidCb->Void = (switch ( source ) {
             // if the data is complete, just save all of it (for now)
-            case Complete(_), Create(_): _writeall;
+            case Complete(_), Create(_):
+                _writeall;
 
             // if data is partial, save the changes that have been made to the data we have
-            case Partial(_, _): _writedmg;
+            case Partial(_, _): 
+                _writedmg;
 
             // bitch about attempts to save null data
             case Empty:
@@ -1161,7 +1163,8 @@ class TrackData2 {
                 // if [property] is a field of [this] partial data
                 if (names.has( property )) {
                     //return fieldGet(data.current, property);
-                    return data.current.fieldGet( property );
+                    //return data.current.fieldGet( property );
+                    return either(data.current.fieldGet(property), _default(property));
                 }
                 else {
                     return null;
@@ -1169,7 +1172,8 @@ class TrackData2 {
 
             // complete data
             case Complete( data ), Create( data ):
-                return data.current.fieldGet( property );
+                return either(data.current.fieldGet(property), _default(property));
+                //return data.current.fieldGet( property );
 
             // no data
             case Empty:
@@ -1217,6 +1221,20 @@ class TrackData2 {
         if (source == null)
             throw 'No [source]';
         return setPropertyValue(name, value, this.source);
+    }
+
+    private static inline function either<T>(x:Null<T>, y:Null<T>):Null<T> {
+        return 
+            if (x != null) x;
+            else y;
+    }
+    private static function any<T>(opts: Array<Null<T>>):Null<T> {
+        return either(opts.shift(), {
+            if (opts.length > 1)
+                any( opts );
+            else
+                opts[0];
+        });
     }
 
 /* === Static Methods === */
