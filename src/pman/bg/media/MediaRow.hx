@@ -8,6 +8,7 @@ import tannus.sys.Path;
 import tannus.http.Url;
 
 import pman.bg.media.MediaSource;
+import pman.bg.media.TypedMediaMetadata;
 
 import Slambda.fn;
 import haxe.extern.EitherType;
@@ -61,14 +62,14 @@ typedef RawBaseMediaData = {
     ?contentRating: String,
     ?channel: String,
     ?description: String
-}
+};
 
 typedef RawExtMediaData = {
     marks: Array<Dynamic>,
     tags: Array<String>,
     actors: Array<String>,
     ?attrs: Dynamic
-}
+};
 
 typedef NullableRawBaseMediaData = {
     ?views: Int,
