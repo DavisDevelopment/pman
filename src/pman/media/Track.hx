@@ -600,7 +600,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * shorthand method to edit the TrackData for [this] Track
       */
-    public function editData(action:TrackData->VoidCb->Void, ?complete:VoidCb, ?save:Bool):Void {
+    public function editData(action:TrackData->VoidCb->Void, ?complete:VoidCb, ?save:Bool, ?reqProps:Array<String>):Void {
         if (complete == null) {
             complete = (function(?error) {
                 if (error != null)
@@ -608,19 +608,41 @@ class Track extends EventDispatcher implements IComparable<Track> {
             });
         }
 
-        getData(function(?error, ?data:TrackData) {
-            if (error != null) {
-                return complete( error );
-            }
-            else if (data != null) {
-                data.onReady(function() {
-                    data.edit(action, complete, save);
+        vsequence(function(add, exec) {
+            var data: TrackData;
+            add(function(next) {
+                getData(function(?err, ?dat) {
+                    if (err != null) {
+                        return next( err );
+                    }
+                    else {
+                        data = dat;
+                        data.onReady(next.void());
+                    }
                 });
-            }
-            else {
-                complete('Error: No TrackData loaded');
-            }
-        });
+            });
+            add(function(next) {
+                if (reqProps.hasContent()) {
+                    data.resample(data.getPropertyNames().concat(reqProps), function(?error) {
+                        if (error != null) {
+                            return next( error );
+                        }
+                        else {
+                            //...
+                            next();
+                        }
+                    });
+                }
+                else {
+                    next();
+                }
+            });
+            add(function(next) {
+                data.edit(action, next, save);
+            });
+
+            defer(function() exec());
+        }, complete);
     }
 
     /**
@@ -690,12 +712,13 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * toggle the value of [this]'s starred property
       */
-    public function toggleStarred(?done : Cb<Bool>):Void {
+    public function toggleStarred(?done: VoidCb):Void {
         if (done == null)
-            done = Cb.noop;
-        done = done.wrap(function(f, ?error, ?value) {
+            done = VoidCb.noop;
+
+        done = done.wrap(function(_, ?error) {
             defer( updateView );
-            f(error, value);
+            _(error);
         });
 
         var val:Bool = false;
@@ -705,17 +728,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
             next();
         }, 
         function(?error) {
-            if (error != null) {
-                if (done != null)
-                    return done(error, null);
-                else
-                    return report( error );
-            }
-            else {
-                if (done != null) {
-                    done(null, val);
-                }
-            }
+            done( error );
         });
     }
 
