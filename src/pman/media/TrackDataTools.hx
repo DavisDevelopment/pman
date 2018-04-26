@@ -28,6 +28,7 @@ using tannus.ds.ArrayTools;
 using tannus.ds.IteratorTools;
 using tannus.ds.SortingTools;
 using tannus.FunctionTools;
+using tannus.ds.AnonTools;
 using tannus.math.TMath;
 using pman.bg.URITools;
 using pman.bg.PathTools;
@@ -79,12 +80,16 @@ class TdiTools {
         );
     }
 
+
     @:generic
-    public static function uniques<T:DictKey>(items: Array<T>):Array<T> {
+    public static function toSet<T:DictKey>(items: Array<T>):Set<T> {
         var set:Set<T> = new Set();
         set.pushMany( items );
-        return set.toArray();
+        return set;
     }
+
+    @:generic
+    public static function uniques<T:DictKey>(items: Array<T>):Array<T> return toSet(items).toArray();
     private static function uniqs(a: Array<String>):Array<String> return uniques( a );
 
     /**
@@ -159,6 +164,7 @@ class NmdsTools {
       * shallowly copy the non-null fields from [y] onto [x], then return [x]
       */
     public static function extend(x:NullableMediaDataState, y:NullableMediaDataState):NullableMediaDataState {
+        //echo(untyped ['NullableMediaDataState.extend', x.deepCopy());
         var v: Dynamic;
         var names:Array<String> = fields( y );
         for (name in names) {
@@ -167,9 +173,13 @@ class NmdsTools {
                 O.fieldSet(x, name, v);
             }
         }
+        //echo( x );
         return x;
     }
 
+    /**
+      create and return a deep copy of [d]
+     **/
     public static function clone(d:NullableMediaDataState, depth:Int=1):NullableMediaDataState {
         depth = depth.clamp(0, 2);
         

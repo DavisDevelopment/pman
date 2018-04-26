@@ -179,12 +179,12 @@ class TrackData2 {
         }
 
         // ensure that [props] contains only the names of properties that ARE NOT currently mounted
-        props = organizePropertyList(props.without(getPropertyNames()));
+        var nm2 = props.toSet().without(getPropertyNames().toSet()).toArray().propList();
 
         switch ( source ) {
             case Create(d), Complete(d), Partial(_, d):
                 if (d.row != null) {
-                    _loadSource(d.row, props)
+                    _loadSource(d.row, nm2)
                         .unless(done.raise())
                         .then(function(ps: MediaDataSource) {
                             _rebase(source.extend( ps ));

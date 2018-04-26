@@ -16,6 +16,7 @@ import pman.media.TrackData2;
 import Slambda.fn;
 import haxe.extern.EitherType;
 import tannus.math.TMath.*;
+import tannus.ds.AnonTools.deepCopy;
 import edis.Globals.*;
 import pman.Globals.*;
 
@@ -25,6 +26,7 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.ds.IteratorTools;
 using tannus.ds.SortingTools;
+using tannus.ds.AnonTools;
 using tannus.FunctionTools;
 using pman.bg.URITools;
 using pman.bg.PathTools;
@@ -33,49 +35,39 @@ using pman.media.MediaTools;
 
 class TrackDataDeltaTools {
     /**
-      * convert the given MediaDataDelta into a MediaDataRowDelta
-      */
+      convert the given MediaDataDelta into a MediaDataRowDelta
+     **/
     public static function toRowDelta(d: MediaDataDelta):MediaDataRowDelta {
-        inline function has(n: String) return Reflect.hasField(d, n);
-        var rd:MediaDataRowDelta = Reflect.callMethod(_, _.pick, (untyped [d]).concat( TrackData._inline_ ));
+        // check for property
+        inline function has(n: String):Bool 
+            return Reflect.hasField(d, n);
 
+        /* create deep-clone of all data held in [d] */
+        //var rd:MediaDataRowDelta = Reflect.callMethod(_, _.pick, (untyped [d]).concat( TrackData._inline_ ));
+        var rd:MediaDataRowDelta = _.mapObject(d, (val:Dynamic, key:String) -> deepCopy(val, true));
+
+        /* then redefine the properties that have a different type than the cloned data */
+
+        // transform `d.marks` into cloneable JSON objects
         if (has('marks')) {
-            //if (d.marks != null && d.marks.items.hasContent()) {
-                //rd.marks = d.marks.src.map.fn(_.toJson());
-            //}
-            //else {
-                //Reflect.deleteField(rd, 'marks');
-            //}
             var jsom = fn(_.toJson());
             rd.marks = new Delta(d.marks.current.map(jsom), d.marks.previous.map(jsom));
         }
 
+        // copy data from `d.tags` into new array
         if (has('tags')) {
-            rd.tags = {
-                items: d.tags.items.map(function(item) {
-                    return switch ( item ) {
-                        case AdiAppend( t ): AdiAppend( t.name );
-                        case AdiRemove( t ): AdiRemove( t.name );
-                        default: null;
-                    }
-                }).compact(),
-                src: d.tags.src.map.fn( _.name )
-            };
+            rd.tags = d.tags.deepCopy( true );
         }
 
+        // copy data from `d.actors` into new array
         if (has('actors')) {
-            rd.actors = {
-                items: d.actors.items.map(function(item) {
-                    return switch ( item ) {
-                        case AdiAppend( t ): AdiAppend( t.name );
-                        case AdiRemove( t ): AdiRemove( t.name );
-                        default: null;
-                    }
-                }).compact(),
-                src: d.actors.src.map.fn( _.name )
-            };
+            rd.actors = d.actors.deepCopy( true );
         }
 
+        /**
+          convert `d.meta` into a `Delta<A, B>` of the cloneable
+          JSON objects created from mapping `_.toRaw()` across both its values
+         **/
         if (has('meta')) {
             rd.meta = new Delta(d.meta.current.toRaw(), d.meta.previous.toRaw());
         }
@@ -186,12 +178,16 @@ class TrackDataDeltaTools {
 
         // [tags]
         if (has('tags') && cur.tags != null && old.tags != null) {
-            delta.tags = ArrayDeltaTools.deltaFrom(cur.tags, old.tags, null, ((x, y) -> x.equals( y )));
+            //delta.tags = ArrayDeltaTools.deltaFrom(cur.tags, old.tags, null, ((x, y) -> x.equals( y )));
+            var f = fn(_.name);
+            delta.tags = new Delta(cur.tags.map(f), old.tags.map(f));
         }
 
         // [actors]
         if (has('actors') && cur.actors != null && old.actors != null) {
-            delta.actors = ArrayDeltaTools.deltaFrom(cur.actors, old.actors, null, ((x, y) -> x.equals( y )));
+            //delta.actors = ArrayDeltaTools.deltaFrom(cur.actors, old.actors, null, ((x, y) -> x.equals( y )));
+            var f = fn(_.name);
+            delta.actors = new Delta(cur.actors.map(f), old.actors.map(f));
         }
 
         return delta;

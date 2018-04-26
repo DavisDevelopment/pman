@@ -29,8 +29,10 @@ typedef MediaDataDelta = {
     ?description: Delta<String>,
     //?marks: ArrayDelta<Mark, Delta<Mark>>,
     ?marks: Delta<Array<Mark>>,
-    ?tags: ArrayDelta<Tag, Delta<Tag>>,
-    ?actors: ArrayDelta<Actor, Delta<Actor>>,
+    //?tags: ArrayDelta<String, Delta<String>>,
+    //?actors: ArrayDelta<String, Delta<String>>,
+    ?tags: Delta<Array<String>>,
+    ?actors: Delta<Array<String>>,
     ?attrs: DictDelta,
     ?meta: Delta<MediaMetadata>
 };
@@ -50,8 +52,10 @@ typedef MediaDataRowDelta = {
     ?description: Delta<String>,
     //?marks: ArrayDelta<Dynamic, Delta<Dynamic>>,
     ?marks: Delta<Array<Dynamic>>,
-    ?tags: ArrayDelta<String, Delta<String>>,
-    ?actors: ArrayDelta<String, Delta<String>>,
+    //?tags: ArrayDelta<String, Delta<String>>,
+    //?actors: ArrayDelta<String, Delta<String>>,
+    ?tags: Delta<Array<String>>,
+    ?actors: Delta<Array<String>>,
     ?attrs: DictDelta,
     ?meta: Delta<MediaMetadataRow>
 };

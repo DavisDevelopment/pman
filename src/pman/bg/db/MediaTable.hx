@@ -288,6 +288,7 @@ class MediaTable extends Table {
             /**
               * performs modifications on a field based on the given ArrayDelta object
               */
+            /*
             inline function merlin<T>(n:String, ?a:ArrayDelta<T,Dynamic>) {
                 if (a != null) {
                     // create arrays to hold 'push' and 'pull' operands
@@ -320,6 +321,7 @@ class MediaTable extends Table {
                     }
                 }
             }
+            */
 
             betty('channel', delta.channel);
             betty('contentRating', delta.contentRating);
@@ -330,8 +332,8 @@ class MediaTable extends Table {
             betty('meta', delta.meta);
             betty('marks', delta.marks);
 
-            merlin('tags', delta.tags);
-            merlin('actors', delta.actors);
+            betty('tags', delta.tags);
+            betty('actors', delta.actors);
 
             // apply the DictDelta tokens to the JSON-object as-is
             if (delta.attrs != null) {
