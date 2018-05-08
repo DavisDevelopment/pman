@@ -60,6 +60,14 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
       * when [this] is attached to player view
       */
     override function onAttached(pv:PlayerView, done:VoidCb):Void {
+        if (audioManager == null) {
+            audioManager = new AudioPipeline(untyped this);
+        }
+
+        if (audioEq == null) {
+            audioEq = new AudioEqualizer();
+        }
+
         vsequence(function(add, exec) {
             add(_superOnAttached.bind(pv, _));
             add(function(next) {
@@ -73,6 +81,7 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
             exec();
         }, done);
     }
+
     private function _superOnAttached(pv:PlayerView, cb:VoidCb):Void {
         super.onAttached(pv, cb);
     }
@@ -81,9 +90,9 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
       * when [this] is detached from player view
       */
 	override function onDetached(pv:PlayerView, done:VoidCb):Void {
-	    audioManager = null;
-	    audioEq = null;
-	    _av = null;
+		//audioManager = null;
+		//audioEq = null;
+		//_av = null;
 
 	    super.onDetached(pv, done);
 	}
@@ -221,6 +230,10 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
       * add a MediaRendererComponent to [this]
       */
 	override function _addComponent(c:MediaRendererComponent, done:VoidCb):Void {
+	    if (c == null) {
+	        throw 'Error: RendererComponent cannot be null';
+	    }
+
 	    c.renderer = cast this;
 	    c.player = player;
 	    super._addComponent(c, done);

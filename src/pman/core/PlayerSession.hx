@@ -200,6 +200,8 @@ class PlayerSession {
                 trackChanged.call( post_delta );
             }.toAsync());
 		}
+
+		exec();
         }, done);
 	}
 

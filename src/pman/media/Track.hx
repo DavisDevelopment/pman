@@ -127,7 +127,11 @@ class Track extends EventDispatcher implements IComparable<Track> {
 
             if (renderer != null)
                 add( renderer.dispose );
-        }, done);
+
+            exec();
+        }, done.wrap(function(_, ?error) {
+            _( error );
+        }));
 	}
 
 	/**

@@ -198,7 +198,7 @@ class MediaRenderer extends Ent {
       * attach a list of components
       */
 	private function attachComponents(a:Array<MediaRendererComponent>, done:VoidCb):Void {
-	    a.map.fn(_.attached.bind()).series( done );
+	    a.compact().map.fn(_.attached.bind()).series( done );
 	}
 
     /**
