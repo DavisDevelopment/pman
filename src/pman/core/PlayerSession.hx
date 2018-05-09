@@ -718,7 +718,7 @@ class PlayerSession {
 	    switch (delta.toPair()) {
             case [PTThisDevice, PTChromecast( cc )]:
                 if (focusedTrack != null) {
-                    focusedTrack.driver = new ChromecastMediaDriver( cc );
+                    //focusedTrack.driver = new ChromecastMediaDriver( cc );
                 }
 
             case [PTChromecast(_), PTThisDevice]:
