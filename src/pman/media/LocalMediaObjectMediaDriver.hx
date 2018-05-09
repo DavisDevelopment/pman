@@ -52,6 +52,7 @@ class LocalMediaObjectMediaDriver <T : MediaObject> extends MediaDriver {
 	override function getMuted():Bool return m.muted;
 	override function getVolume():Float return m.volume;
 	override function getEnded():Bool return m.ended;
+
 	override function setSource(v:String):Void m.src = v;
 	override function setCurrentTime(v:Float):Void m.currentTime = v;
 	override function setPlaybackRate(v:Float):Void m.playbackRate = v;

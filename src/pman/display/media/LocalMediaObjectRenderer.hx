@@ -90,9 +90,9 @@ class LocalMediaObjectRenderer <T : MediaObject> extends MediaRenderer {
       * when [this] is detached from player view
       */
 	override function onDetached(pv:PlayerView, done:VoidCb):Void {
-		//audioManager = null;
-		//audioEq = null;
-		//_av = null;
+        audioManager = null;
+        audioEq = null;
+        _av = null;
 
 	    super.onDetached(pv, done);
 	}
