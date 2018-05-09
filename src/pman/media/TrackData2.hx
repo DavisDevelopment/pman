@@ -165,6 +165,17 @@ class TrackData2 {
             }
         }
 
+        /**
+          debug info
+         **/
+        /*
+        echo({
+            all: _all_.copy(),
+            push: mk.copy(),
+            pop: rm.copy()
+        });
+        */
+
         unset( rm );
         expand(mk, done);
     }
@@ -179,7 +190,10 @@ class TrackData2 {
         }
 
         // ensure that [props] contains only the names of properties that ARE NOT currently mounted
+        var nm = organizePropertyList(props.without(getPropertyNames()));
+        //trace('[attempt #1]', nm);
         var nm2 = props.toSet().without(getPropertyNames().toSet()).toArray().propList();
+        //trace('[attempt #2]', nm2);
 
         switch ( source ) {
             case Create(d), Complete(d), Partial(_, d):
@@ -366,8 +380,6 @@ class TrackData2 {
         if (actors != null)
             row.actors = actors.map.fn(_.name);
 
-        trace( row );
-
         return row;
     }
 
@@ -438,6 +450,10 @@ class TrackData2 {
       */
     private function _writedmg(db:PManDatabase, done:VoidCb):Void {
         var dmg = getDataRowDelta();
+
+        echo('-- data row delta --');
+        echo( dmg );
+
         if (dmg != null) {
             db.media.applyDelta(media_id, dmg, function(?error, ?row:MediaRow) {
                 if (error != null) {
@@ -464,6 +480,7 @@ class TrackData2 {
                     done( error );
                 }
                 else {
+                    echo( row );
                     pullSource(row, dsource, done);
                 }
             });
@@ -1076,13 +1093,13 @@ class TrackData2 {
       */
     public function getDataRowDelta():Null<MediaDataRowDelta> {
         var mdd:Null<MediaDataDelta> = getSelfDelta();
-        trace( mdd );
+        //trace( mdd );
         if (mdd == null) {
             return null;
         }
         else {
             var mdrd = mdd.toRowDelta();
-            trace( mdrd );
+            //trace( mdrd );
             return mdrd;
         }
     }
