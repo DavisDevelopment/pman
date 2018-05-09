@@ -110,6 +110,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 			vr.centerX = viewport.centerX;
 			vr.centerY = viewport.centerY;
 
+			vr = cast vr.floor();
+
 			if (underlay != null) {
 			    underlay.setRect( vr );
 			}
