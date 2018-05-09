@@ -423,6 +423,11 @@ class TrackData2 {
                 throw 'Cannot save empty TrackData to database';
         });
 
+        complete = complete.nn().wrap(function(_, ?error) {
+            trace('TrackData.save complete. ' + (error != null ? 'failure' : 'success'));
+            _( error );
+        }).toss().timeout(8000, 'TrackData.save');
+
         _sync_(writef, complete, db);
     }
 
