@@ -164,6 +164,11 @@ class PlayerController {
             mediaPlaybackRate = pp.speed;
             mediaMuted = pp.muted;
 
+            // update the MediaDriver
+            if (session.mediaDriver != null) {
+                session.mediaDriver.tick();
+            }
+
             // get currentStatus
             if (isEnded()) {
                 // check the 'repeat' setting

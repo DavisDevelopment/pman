@@ -51,6 +51,13 @@ class MediaDriver {
 		done();
 	}
 
+    /**
+      per-frame logic
+     **/
+	public function tick():Void {
+	    //
+	}
+
 	/**
 	  * execute the given command
 	  */
