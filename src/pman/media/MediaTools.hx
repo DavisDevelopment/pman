@@ -94,6 +94,7 @@ class MediaTools {
 	/**
 	  * given a Track object, loads the [media, driver, renderer] fields onto that Track
 	  */
+	/*
 	@:access( pman.media.Track )
 	public static function loadTrackMediaState(track:Track, callback:VoidCb):Void {
 		var rethrow = fn([error] => callback( error ));
@@ -112,6 +113,7 @@ class MediaTools {
             });
         });
 	}
+	*/
 
 	/**
 	  * get underlying media object from the given MediaObject
