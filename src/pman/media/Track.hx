@@ -612,14 +612,18 @@ class Track extends EventDispatcher implements IComparable<Track> {
         vsequence(function(add, exec) {
             add( fillData );
             add(function(next) {
+                trace('fillData completed');
                 defer(function() {
                     var editor = new TrackInfoPopup( this );
                     editor.open();
                     editor.once('close', untyped function() {
+                        trace('Betty, poop dew');
                         next();
                     });
                 });
             });
+
+            exec();
         }, done);
     }
 
