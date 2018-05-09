@@ -24,6 +24,7 @@ import pman.media.info.Mark;
 import pman.media.info.*;
 import pman.async.*;
 import pman.async.tasks.*;
+import pman.events.EventEmitter;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -48,7 +49,8 @@ using tannus.ds.SortingTools;
 using tannus.math.TMath;
 using pman.bg.URITools;
 
-using pman.async.VoidAsyncs;
+//using pman.async.VoidAsyncs;
+using tannus.async.Asyncs;
 
 /**
   * pman.media.Track -- object that centralizes media playback state
@@ -926,4 +928,210 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	public static function fromUrl(url : String):Track {
 		return new Track(cast new HttpAddressMediaProvider( url ));
 	}
+}
+
+/**
+  purpose of class
+ **/
+class TrackMediaState extends EventEmitter {
+    /* Constructor Function */
+    public function new(m:Media, d:MediaDriver, r:MediaRenderer):Void {
+        super();
+
+        media = m;
+        driver = d;
+        renderer = r;
+
+        addSignal('change:media', new Signal2<Media, Media>());
+        addSignal('change:driver', new Signal2<MediaDriver, MediaDriver>());
+        addSignal('change:renderer', new Signal2<MediaRenderer, MediaRenderer>());
+    }
+
+/* === Instance Methods === */
+
+    /**
+      deallocate and deactivate [this] MediaState
+     **/
+    public function deallocate(done: VoidCb):Void {
+        vbatch(function(add, exec) {
+            add( media.dispose );
+            add( driver.dispose );
+            add( renderer.dispose );
+            exec();
+        }, done);
+    }
+
+    /**
+      nullify all of [this]'s fields
+     **/
+    public inline function nullify():Void {
+        media = null;
+        driver = null;
+        renderer = null;
+    }
+
+    /**
+      reassign [this]'s fields
+     **/
+    public function set(?m:Media, ?d:MediaDriver, ?r:MediaRenderer, ?rebuild:{?media:Bool,?renderer:Bool,?driver:Bool}, ?done:VoidCb):Void {
+        done = ensureVcb( done );
+        if (rebuild == null)
+            rebuild = {};
+        vsequence(function(add, exec) {
+            if (m != null) {
+                add(setMedia.bind(m, rebuild.media, _));
+            }
+            if (d != null) {
+                add(setDriver.bind(d, rebuild.driver, _));
+            }
+            if (r != null) {
+                add(function(next) {
+                    setRenderer( r );
+                    next();
+                });
+            }
+            exec();
+        }, done);
+    }
+
+    public function setMedia(m:Media, rebuild:Bool=false, ?callback:VoidCb):Void {
+        /* assign the field value */
+        beforeAfter(
+            Getter.create(media),
+            function() {
+                media = m;
+            },
+            a -> a.with([x, y], dispatch('change:media', x, y))
+        );
+
+        /* handle the callback */
+        callback = ensureVcb( callback );
+
+        if ( rebuild ) {
+            var rethrow = callback.raise();
+            ph(media.getDriver(), rethrow, function(dr) {
+                driver = dr;
+                ph(media.getRenderer(driver), rethrow, function(re) {
+                    renderer = re;
+                    callback();
+                });
+            });
+        }
+        else {
+            callback();
+        }
+    }
+
+    /**
+      reassign [this]'s [driver] field
+     **/
+    public function setDriver(d:MediaDriver, rebuild:Bool=false, ?callback:VoidCb):Void {
+        beforeAfter(
+            Getter.create(driver),
+            function() {
+                driver = d;
+            },
+            a -> a.with([x, y], dispatch('change:driver', x, y))
+        );
+        callback = ensureVcb( callback );
+
+        if ( rebuild ) {
+            var rethrow = callback.raise();
+            ph(media.getRenderer( driver ), rethrow, function(re) {
+                renderer = re;
+
+                callback();
+            });
+        }
+        else {
+            callback();
+        }
+    }
+
+    /**
+      reassign [this]'s [renderer] field
+     **/
+    public function setRenderer(r: MediaRenderer):Void {
+        beforeAfter(
+            Getter.create(renderer),
+            function() {
+                renderer = r;
+            },
+            a -> a.with([x, y], dispatch('change:renderer', x, y))
+        );
+    }
+
+    /**
+      utility method used to simplify calculating deltas
+     **/
+    private static function beforeAfter<T>(v:Getter<T>, f:Void->Void, ?df:Array<T>->Void):Array<T> {
+        var a:Array<T> = [v.get()];
+        f();
+        a.push(v.get());
+        if (df != null) {
+            df( a );
+        }
+        return a;
+    }
+
+    private static function calc_delta<T>(v:Getter<T>, f:Void->Void, ?df:Delta<T>->Void):Delta<T> {
+        var a = beforeAfter(v, f);
+        var d = a.with([from_, to_], new Delta(to_, from_));
+        if (df != null) {
+            df( d );
+        }
+        return d;
+    }
+
+    private function onDelta2<T>(name:String, f:Delta<T>->Void):Void {
+        on(name, function(a:T, b:T) {
+            f(new Delta(b, a));
+        });
+    }
+
+	/**
+	  * load [this]'s state
+	  */
+	public static function loadMediaState(provider:MediaProvider, ?callback:Cb<TrackMediaState>):Promise<TrackMediaState> {
+	    return new Promise(function(accept, reject) {
+            var m:Media, d:MediaDriver, r:MediaRenderer;
+            ph(provider.getMedia(), reject, function(me) {
+                m = me;
+                ph(m.getDriver(), reject, function(dr) {
+                    d = dr;
+                    ph(m.getRenderer(d), reject, function(re) {
+                        r = re;
+
+                        accept(new TrackMediaState(m, d, r));
+                    });
+                });
+            });
+        }).toAsync( callback );
+	}
+
+    /**
+      utility method for dealing with promises
+     **/
+	private static inline function ph<T>(p:Promise<T>, rethrow:Dynamic->Void, handler:T->Void):Promise<T> {
+	    return p.then(handler, rethrow);
+	}
+
+	private static function ensureVcb(?callback: VoidCb):VoidCb {
+        if (callback == null) {
+            callback = VoidCb.noop;
+        }
+        callback = callback.wrap(function(_, ?error) {
+            if (error != null) {
+                report( error );
+            }
+            _( error );
+        });
+        return callback;
+	}
+
+/* === Instance Fields === */
+
+    public var media(default, null): Media;
+    public var driver(default, null): MediaDriver;
+    public var renderer(default, null): MediaRenderer;
 }
