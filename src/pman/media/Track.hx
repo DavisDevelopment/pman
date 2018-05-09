@@ -63,9 +63,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
 
 		provider = p;
 
-		media = null;
-		driver = null;
-		renderer = null;
+        state = null;
 
 		_dataLoaded = new Signal();
 
@@ -107,39 +105,45 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	    return provider.getURI();
     }
 
+    /**
+      assign the media state's components
+     **/
+    public function patchMediaState(?m:Media, ?d:MediaDriver, ?r:MediaRenderer, ?rebuild:{?media:Bool,?renderer:Bool,?driver:Bool}, ?done:VoidCb):Void {
+        if (!isMounted()) {
+            throw 'Error: Track not mounted; cannot patch state';
+        }
+        else {
+            state.set(m, d, r, rebuild, done);
+        }
+    }
+
 	/**
 	  * nullify the m,d,r fields
 	  */
 	public inline function nullify():Void {
-		media = null;
-		driver = null;
-		renderer = null;
+	    if (state != null) {
+	        state.nullify();
+	        state = null;
+	    }
 	}
 
 	/**
 	  * deallocate the m,d,r fields
 	  */
 	public function deallocate(done: VoidCb):Void {
-	    vbatch(function(add, exec) {
-            if (media != null)
-                add( media.dispose );
-
-            if (driver != null)
-                add( driver.dispose );
-
-            if (renderer != null)
-                add( renderer.dispose );
-
-            exec();
-        }, done.wrap(function(_, ?error) {
-            _( error );
-        }));
+	    if (state != null) {
+	        state.deallocate( done );
+	    }
+        else {
+            done();
+        }
 	}
 
 	/**
 	  * load the mediaContext data onto [this] Track
 	  */
 	public function mount(done: VoidCb):Void {
+	    /*
 	    vsequence(function(add, exec) {
 			//add(next -> loadTrackMediaState());
 			add(fn(f => loadTrackMediaState(f.wrap(function(_, ?error) {
@@ -159,6 +163,24 @@ class Track extends EventDispatcher implements IComparable<Track> {
 			//TODO seems like there should be more to do here..
 			exec();
 	    }, done);
+	    */
+
+	    TrackMediaState.loadMediaState(provider, function(?error, ?state) {
+	        if (error != null) {
+	            dismount( VoidCb.noop );
+	            done( error );
+	        }
+            else {
+                this.state = state;
+                if (hasFeature(PlayEvent)) {
+                    var ps = driver.getPlaySignal();
+                    ps.on(function() {
+                        player.dispatch('play', null);
+                    });
+                }
+                done();
+            }
+	    });
 	}
 
 	/**
@@ -175,7 +197,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	  * check whether [this] Track is mounted
 	  */
 	public inline function isMounted():Bool {
-		return (media != null && driver != null && renderer != null);
+	    return (state != null);
 	}
 
 	/**
@@ -692,7 +714,6 @@ class Track extends EventDispatcher implements IComparable<Track> {
     public function isRealFile():Bool {
         var path:Null<Path> = getFsPath();
         if (path != null) {
-            echo(path+'');
             return FileSystem.exists(path + '');
         }
         else return false;
@@ -779,7 +800,6 @@ class Track extends EventDispatcher implements IComparable<Track> {
             var uri:String = ('file://${paths[0]}');
             Image.load(uri, function( img ) {
                 img.ready.once(function() {
-                    trace('IMAGE READY MOTHERFUCKER');
                     defer(function() {
                         var canvas = img.toCanvas();
                         @:privateAccess img.img.remove();
@@ -903,15 +923,27 @@ class Track extends EventDispatcher implements IComparable<Track> {
         //else return provider.features;
 	}
 
+    public var media(get, never): Null<Media>;
+    private inline function get_media() return (state != null ? state.media : null);
+
+    public var renderer(get, never): Null<MediaRenderer>;
+    private inline function get_renderer() return (state != null ? state.renderer : null);
+
+    public var driver(get, never): Null<MediaDriver>;
+    private inline function get_driver() return (state != null ? state.driver : null);
+	//public var driver(default, null): Null<MediaDriver>;
+	//public var renderer(default, null): Null<MediaRenderer>;
+
 /* === Instance Fields === */
 
 	public var provider : MediaProvider;
 	public var mediaId:Null<String> = null;
 	public var data(default, null):Null<TrackData> = null;
 
-	public var media(default, null): Null<Media>;
-	public var driver(default, null): Null<MediaDriver>;
-	public var renderer(default, null): Null<MediaRenderer>;
+	//public var media(default, null): Null<Media>;
+	//public var driver(default, null): Null<MediaDriver>;
+	//public var renderer(default, null): Null<MediaRenderer>;
+	public var state(default, null): Null<TrackMediaState>;
 
 	private var _ready : Bool = false;
 	private var _loadingData : Bool = false;
