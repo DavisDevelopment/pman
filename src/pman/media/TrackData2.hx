@@ -436,20 +436,18 @@ class TrackData2 {
       */
     public function _sync_(write:PManDatabase->VoidCb->Void, ?complete:VoidCb, ?db:PManDatabase):Void {
         // ensure that [complete] isn't null
-        if (complete == null)
-            complete = VoidCb.noop;
+        complete = complete.nn();
 
         // ensure that [db] isn't null
         if (db == null)
             db = PManDatabase.get();
 
-        // create a list of steps
-        var steps:Array<VoidAsync> = [
-            _prepush.bind(db, _),
-            write.bind(db, _)
-        ];
+        vsequence(function(add, exec) {
+            add(_prepush.bind(db, _));
+            add(write.bind(db, _));
 
-        steps.series( complete );
+            exec();
+        }, complete);
     }
 
     /**
