@@ -36,8 +36,14 @@ using pman.bg.DictTools;
 using pman.media.MediaTools;
 using tannus.html.JSTools;
 
+@:keep
+@:expose("$tdtools")
 class TrackDataTools {
-    //
+    public static var _type:Class<TrackData2> = {TrackData2;};
+    public static var internal:Class<TdiTools> = {TdiTools;};
+    public static var mediaDataSource:Class<MdsTools> = {MdsTools;};
+    public static var nullableMediaDataSource:Class<NmdsTools> = {NmdsTools;};
+    public static var mediaRow:Class<MediaRowTools> = {MediaRowTools;};
 }
 
 @:allow( pman.media.TrackData2 )
@@ -169,6 +175,13 @@ class NmdsTools {
         var names:Array<String> = fields( y );
         for (name in names) {
             v = O.fieldGet(y, name);
+            echo({
+                property: name,
+                values: [O.fieldGet(x, name), O.fieldGet(y, name)],
+                yHas: hasField(y, name),
+                xHas: hasField(x, name)
+            });
+            
             if (v != null) {
                 O.fieldSet(x, name, v);
             }

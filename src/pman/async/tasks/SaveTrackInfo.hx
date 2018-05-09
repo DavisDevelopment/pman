@@ -12,6 +12,7 @@ import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.async.*;
 import pman.media.info.*;
+import edis.Globals.*;
 import pman.Globals.*;
 
 import Std.*;
@@ -44,9 +45,16 @@ class SaveTrackInfo extends Task1 {
       * execute [this] Task
       */
     override function execute(done : VoidCb):Void {
-        [ensure_full_data, rename_track, edit_data].series( done );
+        [
+            ensure_full_data,
+            rename_track,
+            save_data
+        ].series( done );
     }
 
+    /**
+      ensure that the TrackData can be worked with
+     **/
     private function ensure_full_data(done: VoidCb):Void {
         track.fillData( done );
     }
@@ -68,34 +76,33 @@ class SaveTrackInfo extends Task1 {
     /**
       * do the stuff
       */
-    private function edit_data(done : VoidCb):Void {
-        track.editData(function(data, next) {
-            inline function has(name: String):Bool {
-                return (data.checkProperty(name) && Reflect.hasField(delta, name));
-            }
+    private function save_data(done : VoidCb):Void {
+        track.editData(edit_data, done, true);
+    }
 
-            // create list to hold sub-tasks
-            var steps:Array<VoidAsync> = new Array();
-
-            // handle synchronous changes
-            steps.push(function(end) {
-                if (has('channel'))
+    private function edit_data(data:TrackData2, done:VoidCb):Void {
+        inline function has(name: String):Bool {
+            return Reflect.hasField(delta, name);
+        }
+        vsequence(function(add, exec) {
+            add(function(next) {
+                if (has( 'channel' ))
                     data.channel = delta.channel.current;
 
-                if (has('contentRating'))
+                if (has( 'contentRating' ))
                     data.contentRating = delta.contentRating.current;
 
-                if (has('rating'))
+                if (has( 'rating' ))
                     data.rating = delta.rating.current;
 
-                if (has('description'))
+                if (has( 'description' ))
                     data.description = delta.description.current;
 
-                end();
+                next();
             });
 
             // handle tags
-            steps.push(function(end) {
+            add(function(end) {
                 if (has('tags')) {
                     var newTags = delta.tags.current;
                     data.tags = new Array();
@@ -107,7 +114,7 @@ class SaveTrackInfo extends Task1 {
             });
 
             // handle Actors
-            steps.push(function(end) {
+            add(function(end) {
                 if (has('actors')) {
                     if (delta.actors.current != null) {
                         var newActors = delta.actors.current;
@@ -124,12 +131,8 @@ class SaveTrackInfo extends Task1 {
                 }
             });
 
-            // run those sub-tasks
-            steps.series( next );
-
-        }, function(?error) {
-            done( error );
-        });
+            exec();
+        }, done);
     }
 
 /* === Instance Fields === */

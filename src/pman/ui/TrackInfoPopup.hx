@@ -96,9 +96,11 @@ class TrackInfoPopup extends Dialog {
         kbc.registerModeHandler('track-info', function(event) {
             return ;
         });
+
         on('open', untyped function() {
             kbc.mode = 'track-info';
         });
+
         on('close', untyped function() {
             kbc.mode = 'default';
         });
