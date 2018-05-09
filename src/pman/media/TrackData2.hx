@@ -281,16 +281,18 @@ class TrackData2 {
       * convert [this] TrackData to a MediaRow
       */
     public function toRaw():Null<MediaRow> {
+        var raw:Null<MediaRow> = null;
         switch ( source ) {
             // empty data
             case Empty:
                 throw 'Error: Cannot export empty TrackData to MediaRow';
-                return null;
+                //return null;
 
             // complete data
             case Complete( data ), Create( data ), Partial(_, data):
-                return _buildMediaRow(_dataRow());
+                raw = _buildMediaRow(_dataRow());
         }
+        return echo( raw );
     }
 
     /**
