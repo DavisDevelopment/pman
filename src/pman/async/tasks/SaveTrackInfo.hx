@@ -82,23 +82,34 @@ class SaveTrackInfo extends Task1 {
 
     private function edit_data(data:TrackData2, done:VoidCb):Void {
         inline function has(name: String):Bool {
-            return Reflect.hasField(delta, name);
+            return (
+                Reflect.hasField(delta, name) &&
+                ((Reflect.field(delta, name) : Delta<Dynamic>).with([cur, pre], (
+                    (cur != null || pre != null) && (cur != pre)
+                )))
+            );
         }
+
         vsequence(function(add, exec) {
+            /* atomic-value properties */
             add(function(next) {
+                /* [channel] property */
                 if (has( 'channel' ))
                     data.channel = delta.channel.current;
 
+                /* [contentRating] property */
                 if (has( 'contentRating' ))
                     data.contentRating = delta.contentRating.current;
 
+                /* [rating] property */
                 if (has( 'rating' ))
                     data.rating = delta.rating.current;
 
+                /* [description] property */
                 if (has( 'description' ))
                     data.description = delta.description.current;
 
-                next();
+                defer(next.void());
             });
 
             // handle tags

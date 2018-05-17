@@ -61,14 +61,14 @@ class TrackInfoPopup extends Dialog {
 
         tmacros = {
             tags: function(resolve:Dynamic) {
-                if (track.dataCheck('tags'))
+                //if (track.dataCheck('tags'))
                     return track.data.tags.map.fn( _.name ).join(', ');
-                else return '';
+                //else return '';
             },
             stars: function(resolve : Dynamic) {
-                if (track.dataCheck('actors'))
+                //if (track.dataCheck('actors'))
                     return track.data.actors.map.fn( _.name ).join(', ');
-                else return '';
+                //else return '';
             }
         };
 
@@ -268,7 +268,9 @@ class TrackInfoPopup extends Dialog {
     public function getFormValueDelta():TrackInfoFormValueDelta {
         var v = getFormValue();
         var d = track.data;
+
         var delta:TrackInfoFormValueDelta = {};
+
         if (track.title != v.title) {
             delta.title = new Delta(v.title, track.title);
         }
@@ -315,7 +317,8 @@ class TrackInfoPopup extends Dialog {
       * save the value of [this] form
       */
     private function save():Void {
-        trace(getFormValue());
+        echo(getFormValue());
+        echo(getFormValueDelta());
         track.fillData(function(?error) {
             if (error != null) {
                 throw error;

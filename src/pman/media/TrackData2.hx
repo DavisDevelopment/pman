@@ -977,6 +977,12 @@ class TrackData2 {
       * check for existence of a property
       */
     public function hasOwnProperty(prop: String):Bool {
+        return switch dsource {
+            case Empty: false;
+            case Complete: _all_.has( prop );
+            case Partial(names): names.has( prop );
+        };
+
         switch ( source ) {
             case Empty:
                 return false;
@@ -987,6 +993,16 @@ class TrackData2 {
             case Partial(names, _):
                 return names.has( prop );
         }
+    }
+
+    /**
+      list out all properties, mapped to whether [hasOwnProperty] returns true for them
+     **/
+    public inline function dir() {
+        trace([
+            for (prop in _all_)
+                prop => hasOwnProperty( prop )
+        ].toDict().toAnon());
     }
 
     /**
@@ -1151,12 +1167,12 @@ class TrackData2 {
 
         dv('views', 0);
         dv('starred', false);
-        dv('channel', null);
-        dv('rating', null);
+        dv('channel', '');
+        dv('rating', -1.0);
         dv('contentRating', 'NR');
-        dv('description', null);
+        dv('description', '');
 
-        dv('attrs', null);
+        dv('attrs', new Dict<String, Dynamic>());
         dv('meta', null);
         dv('marks', new Array());
         dv('tags', new Array());

@@ -44,7 +44,8 @@ class TrackDataDeltaTools {
 
         /* create deep-clone of all data held in [d] */
         //var rd:MediaDataRowDelta = Reflect.callMethod(_, _.pick, (untyped [d]).concat( TrackData._inline_ ));
-        var rd:MediaDataRowDelta = _.mapObject(d, (val:Dynamic, key:String) -> deepCopy(val, true));
+        var rd:MediaDataRowDelta = (d.deepCopy( true ) : Dynamic);
+        trace( rd );
 
         /* then redefine the properties that have a different type than the cloned data */
 
@@ -91,8 +92,8 @@ class TrackDataDeltaTools {
             if (state.initial != null && state.current != null) {
                 return dataStateDelta(
                     state.current,
-                    state.initial,
-                    fn(name => data.checkProperty(name))
+                    state.initial
+                    //fn(name => data.checkProperty(name))
                 );
             }
             else {
@@ -108,7 +109,7 @@ class TrackDataDeltaTools {
         // ensure that [has] exists
         if (has == null) {
             has = (function(s: String):Bool {
-                return (Reflect.hasField(cur, s) && Reflect.hasField(old, s));
+                return (Reflect.hasField(cur, s) || Reflect.hasField(old, s));
             });
         }
 
