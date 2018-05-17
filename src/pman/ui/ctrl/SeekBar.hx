@@ -197,98 +197,123 @@ class SeekBar extends Ent {
     }
 
     /**
+      jump forward along marked times
+     **/
+    //@:access( pman.ui.ctrl.SeekBarMarkViewTooltipPanel )
+    private function _markJump(?state: MarkJumpState):Void {
+        var jump_to:Float = null;
+        _mjfdecl(function(ctime, times) {
+            var time:Float, ltime:Float = null;
+            for (i in 0...times.length) {
+                time = times[i];
+                // time is greater than ctime
+                if (time > ctime) {
+                    jump_to = time;
+                    return ;
+                }
+                else continue;
+            }
+            jump_to = 0.0;
+        }, state);
+        player.currentTime = jump_to;
+    }
+
+    /**
+      jump backwards
+     **/
+    private function _markJumpBack(?state: MarkJumpState):Void {
+        var jump_to:Float = null;
+        _mjfdecl(function(ctime, times) {
+            var time:Float, ltime:Float = null, i:Int = times.length;
+            while (--i >= 0) {
+                time = times[i];
+                if (ctime > time) {
+                    jump_to = time;
+                    return ;
+                }
+                else continue;
+            }
+            jump_to = times[times.length - 1];
+        }, state);
+        player.currentTime = jump_to;
+    }
+
+    /**
+      functional basis for bookmark-jumping systems
+     **/
+    @:access( pman.ui.ctrl.SeekBarMarkViewTooltipPanel )
+    private function _mjfdecl(f:Float->Array<Float>->Void, ?state:MarkJumpState):Void {
+        if (!markViewPanel.hasAnyMarks()) {
+            return ;
+        }
+
+        state = mjstate( state );
+
+        f(state.ctime, state.times);
+    }
+
+    /**
+      compute the mark-jump state
+     **/
+    @:access( pman.ui.ctrl.SeekBarMarkViewTooltipPanel )
+    public function mjstate(?state: MarkJumpState):MarkJumpState {
+        var ctime:Float = (state != null ? state.ctime : player.currentTime);
+        var times:Null<Array<Float>> = (state != null ? state.times : null);
+        if (times == null) {
+            if (!markViewPanel.hasAnyMarks()) {
+                times = [];
+            }
+            else if (markViewPanel.hasOpenTooltipGroup()) {
+                times = markViewPanel.currentlyOpenGroup.members.map(function(x: SeekBarMarkViewTooltip) {
+                    var mk = x.markView.mark;
+                    if (mk != null && mk.type.match(Named(_))) {
+                        return mk.time;
+                    }
+                    else {
+                        return null;
+                    }
+                }).compact().isort( Reflect.compare );
+            }
+            else {
+                times = orderedTimes( true );
+            }
+        }
+        return {ctime: ctime, times: times};
+    }
+
+    /**
       * jump between marks relative to the current time
       */
-    @:access( pman.ui.ctrl.SeekBarMarkViewTooltipPanel )
-    public function relativeMarkJump(d:Int):Void {
-        if (d == 0 || !markViewPanel.hasAnyMarks()) {
-            return ;
+    public function relativeMarkJump(d:Int, ?state:MarkJumpState):Void {
+        inline function repeat(f) {
+            for (i in 0...d.abs())
+                f( null );
         }
 
-        // get the current time
-        var ctime = player.currentTime;
-        // list of time positions of bookmarks
-        var times:Array<Float> = [];
-
-        // if there is a group open
-        if (markViewPanel.hasOpenTooltipGroup()) {
-            times = markViewPanel.currentlyOpenGroup.members.map(function(x: SeekBarMarkViewTooltip) {
-                var mk = x.markView.mark;
-                if (mk != null && mk.type.match(Named(_))) {
-                    return mk.time;
-                }
-                else {
-                    return null;
-                }
-            }).compact();
-        }
-        // we are looking at a list of groups
-        else {
-            var types = getMarkViewTypes();
-            times = types.mapfilter(fn(_.match(MarkViewType.MTReal(_))), function(type: MarkViewType) {
-                return (switch ( type ) {
-                    case MTReal(m): m.time;
-                    case _: null;
-                });
-            }).compact();
-        }
-
-        // if there are no bookmarks
-        if (times.empty() || times.length == 1) {
+        if (d == 0) {
             return ;
         }
         else {
-            // last time and next time
-            var ltime:Float = -1, ntime:Float = -1;
-            // iterate over all times
-            for (time in times) {
-                //if that's the time we're at
-                if (time == ctime) {
-                    // and we're navigating back
-                    if (d < 0 && ltime != -1) {
-                        // jump back
-                        player.currentTime = time;
-                        return ;
-                    }
-                    // otherwise, just set variable
-                    ltime = time;
-                }
-                // [time] is before [ctime]
-                else if (time < ctime) {
-                    ltime = time;
-                }
-                // [time] is after [ctime]
-                else if (time > ctime) {
-                    // then that's the next time
-                    ntime = time;
-                    // so, if we're navigating forward
-                    if (d > 0) {
-                        // we can just do that now
-                        player.currentTime = ntime;
-                        return ;
-                    }
-                    // or if we're navigating backward
-                    else if (d < 0) {
-                        // go to the last time that was before ctime
-                        player.currentTime = ltime;
-                        return ;
-                    }
-                }
-            }
-
-           return ; 
+            repeat(d > 0 ? _markJump : _markJumpBack);
         }
     }
 
     /**
       * show gallery of snapshots and other images from [this] media
       */
-    private function showImageGallery():Void {
+    public function showImageGallery():Void {
         if (!player.track.type.equals(MTVideo)) {
             return ;
         }
 
         trace('SeekBar: Image Gallery');
+    }
+
+    /**
+      get a list of times correlated with marks for [this] instance
+     **/
+    private function orderedTimes(realOnly:Bool=false):Array<Float> {
+        return markTypeTimes(getMarkViewTypes(realOnly), Reflect.compare);
     }
 
     /**
@@ -315,7 +340,7 @@ class SeekBar extends Ent {
     /**
       * obtain list of MarkViewType values
       */
-    private function getMarkViewTypes():Array<MarkViewType> {
+    private function getMarkViewTypes(realOnly:Bool=false):Array<MarkViewType> {
         var types:Array<MarkViewType> = new Array();
 
         if (player.track != null && player.track.dataCheck()) {
@@ -327,32 +352,47 @@ class SeekBar extends Ent {
                     markTimes.push( m.time );
             }
 
-            var bundle = player.track.getBundle();
-            var ssitems = bundle.getAllSnapshots();
-            var times:Array<Float> = new Array();
-            for (item in ssitems) {
-                var time = item.getTime();
-                if (time != null && !inFloats(time, times))
-                    times.push( time );
-            }
-            for (time in times) {
-                types.push(MarkViewType.MTSnapshot( time ));
+            if ( !realOnly ) {
+                var bundle = player.track.getBundle();
+                var ssitems = bundle.getAllSnapshots();
+                var times:Array<Float> = new Array();
+                for (item in ssitems) {
+                    var time = item.getTime();
+                    if (time != null && !inFloats(time, times))
+                        times.push( time );
+                }
+                for (time in times) {
+                    types.push(MarkViewType.MTSnapshot( time ));
+                }
             }
         }
 
-        // get type time
-        function typetime(t : MarkViewType):Float {
-            return switch (t) {
-                case MarkViewType.MTReal(m): m.time;
-                case MarkViewType.MTSnapshot(time): time;
-            };
-        }
+        // sort them shits
         haxe.ds.ArraySort.sort(types, function(x, y) {
             return Reflect.compare(typetime(x), typetime(y));
         });
+
         return types;
     }
 
+    // get type time
+    private static inline function typetime(t : MarkViewType):Float {
+        return (switch (t) {
+            case MarkViewType.MTReal(m): m.time;
+            case MarkViewType.MTSnapshot(time): time;
+        });
+    }
+
+    /**
+      get an ordered Array of the times correlated with marks
+     **/
+    private static function markTypeTimes(types:Array<MarkViewType>, sorter:Float->Float->Int):Array<Float> {
+        return types.map( typetime ).isort( sorter );
+    }
+
+    /**
+      determine if [n] is present in [i]
+     **/
     private function inFloats(n:Float, i:Iterable<Float>, threshold:Float=1.0):Bool {
         for (x in i) {
             if (n.almostEquals(x, threshold))
@@ -860,4 +900,9 @@ typedef HotKey = {
     //key: Key,
     char: Byte,
     shift: Bool
+};
+
+typedef MarkJumpState = {
+    ctime: Float,
+    times: Array<Float>
 };
