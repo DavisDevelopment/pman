@@ -212,7 +212,6 @@ class SeekBarMarkViewTooltipGroup extends Ent {
                 r.height = t.height;
                 r.centerX = centerX;
                 r.y = yy;
-                trace(r + '');
 
                 yy += (r.h - 2);
             }
