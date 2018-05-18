@@ -4,11 +4,12 @@ import foundation.*;
 
 import tannus.ds.*;
 import tannus.io.*;
-import tannus.media.Duration;
+//import tannus.media.Duration;
 import tannus.async.*;
 import tannus.html.Element;
 import tannus.events.*;
 import tannus.events.Key;
+import tannus.math.Time;
 
 import pman.core.*;
 import pman.Globals.*;
@@ -39,19 +40,20 @@ class TimeJumpPrompt extends PromptBox {
     /**
       * set [this]'s value by time
       */
-    public function setTime(time : Duration):Void {
+    public function setTime(time : Time):Void {
         value = time.toString();
     }
 
     /**
       * get [this]'s value as a time
       */
-    public function getTime():Duration {
+    public function getTime():Time {
         try {
-            return Duration.fromString( value );
+            //return Duration.fromString( value );
+            return Time.fromString(value.remove('+').remove('-'));
         }
         catch (error : Dynamic) {
-            return Duration.fromFloat( player.currentTime );
+            return Time.fromFloat( player.currentTime );
         }
     }
 
@@ -150,7 +152,6 @@ class TimeJumpPrompt extends PromptBox {
             before = segs.before(segment).map.fn(getSegmentText(_));
         }
         if (index < (segs.length - 1)) {
-            //after = [for (i in (index + 1)...(segs.length - 1)) getSegmentText(i, segs)];
             after = segs.after(segment).map.fn(getSegmentText(_));
         }
         var resultPieces = [];
@@ -170,7 +171,6 @@ class TimeJumpPrompt extends PromptBox {
         if (segs == null)
             segs = segments();
         var index:Int = indexOfSegment(segment, segs);
-        trace( index );
         return setSegmentTextByIndex(index, segmentText, segs);
     }
 
@@ -308,6 +308,7 @@ class TimeJumpPrompt extends PromptBox {
                 event.preventDefault();
                 modCaretSegmentValue( -1 );
 
+            /* plus key */
             case Equals if ( event.shiftKey ):
                 var index = getCaretSegmentIndex();
                 if (index == 0) {
@@ -328,8 +329,16 @@ class TimeJumpPrompt extends PromptBox {
     public function readTime(player:Player, ?done:VoidCb):Void {
         open();
         setTime( player.currentTime );
-        once('time', function(time : Duration) {
-            player.currentTime = time.toFloat();
+        once('time', function(type : TimeJumpType) {
+            switch type {
+                case TTAbsolute( time ):
+                    player.currentTime = time.toFloat();
+
+                case TTRelative( time ):
+                    player.currentTime += time.toFloat();
+            }
+
+            // hide this view
             el.plugin('hide', untyped [
                 'drop',
                 null,
@@ -352,12 +361,30 @@ class TimeJumpPrompt extends PromptBox {
       * check that [this]'s value is valid input
       */
     public function isValidInput():Bool {
-        try {
-            var time = Duration.fromString( value );
-            trace( time );
-            return true;
+        var pattern:EReg = ~/(?:[+-]*)((?:\d|\.)+:?)+/;
+        var text:String = value;
+        if (pattern.match( text )) {
+            try {
+                var jump = parse();
+
+                inline function isValidTimeFloat(time: Float):Bool {
+                    return (time.isFinite() && !time.isNaN());
+                }
+
+                inline function isValidTime(time: Time):Bool {
+                    return (time != null && isValidTimeFloat(time.toFloat()));
+                }
+
+                return (switch jump {
+                    case TTAbsolute(time), TTRelative(time): isValidTime( time );
+                    case _: false;
+                });
+            }
+            catch (error: Dynamic) {
+                return false;
+            }
         }
-        catch (error : Dynamic) {
+        else {
             return false;
         }
     }
@@ -367,7 +394,10 @@ class TimeJumpPrompt extends PromptBox {
       */
     public function attemptSubmit():Void {
         if (isValidInput()) {
-            dispatch('time', getTime());
+            //dispatch('time', getTime());
+            var type = parse();
+            trace( type );
+            dispatch('time', type);
         }
         else {
             select();
@@ -375,8 +405,42 @@ class TimeJumpPrompt extends PromptBox {
         }
     }
 
+    /**
+      lightly parse [this]'s input
+     **/
+    private function parse():TimeJumpType {
+        var s:String = value;
+        var rel:Bool = false, plus:Bool = false;
+
+        if (s.startsWith('+')) {
+            rel = true;
+            plus = true;
+            s = s.after('+');
+        }
+        else if (s.startsWith('-')) {
+            rel = true;
+            s = s.after('-');
+        }
+
+        var time:Time = Time.fromString( s );
+        var seconds:Float = time.toFloat();
+        if (rel && !plus) {
+            seconds = -seconds;
+        }
+
+        return (rel ? TimeJumpType.TTRelative : TimeJumpType.TTAbsolute)(Time.fromFloat( seconds ));
+    }
+
 /* === Instance Fields === */
 
 }
 
-typedef SegmentBound = {x:Int, y:Int};
+enum TimeJumpType {
+    TTAbsolute(time: Time);
+    TTRelative(time: Time);
+}
+
+private typedef SegmentBound = {
+    x: Int,
+    y: Int
+};
