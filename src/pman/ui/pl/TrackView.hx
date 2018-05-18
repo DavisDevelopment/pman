@@ -145,7 +145,7 @@ class TrackView extends Pane {
 	private function onLeftClick(event : MouseEvent):Void {
 		event.cancel();
 
-        if (event.ctrlKey || list.anySelected()) {
+        if ( event.ctrlKey ) {
             selected = !selected;
         }
         else {
@@ -162,13 +162,13 @@ class TrackView extends Pane {
 		event.cancel();
 
         if ( selected ) {
-            list.getTrackSelection().buildMenu(function(template) {
-                var menu:Menu = template;
-                menu.popup();
-            });
+            //list.getTrackSelection().buildMenu(function(template) {
+                //var menu:Menu = template;
+                //menu.popup();
+            //});
         }
         else {
-            list.selectTracks.fn(x => false);
+            //list.selectTracks.fn(x => false);
             track.buildMenu(function( template ) {
                 var menu:Menu = template;
                 menu.popup();

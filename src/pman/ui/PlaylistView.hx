@@ -38,18 +38,14 @@ class PlaylistView extends Pane {
 	public function new(p : Player):Void {
 		super();
 
-		addClasses(['right-panel', 'playlist']);
+		addClasses([
+		    'right-panel',
+		    'playlist'
+		]);
 
 		player = p;
 		tracks = new Array();
 		_tc = new Map();
-
-        if ( false ) {
-            var kc:KeyboardCommands = player.app.keyboardCommands;
-            if (!kc.hasModeHandler( 'playlist:sidebar' )) {
-                kc.registerModeHandler('playlist:sidebar', keycom);
-            }
-        }
 
         __bind();
 		build();
@@ -89,14 +85,9 @@ class PlaylistView extends Pane {
 	public function close():Void {
 	    // emit 'close' event
 		dispatch('close', null);
+
 		// un-bind event listeners
 		unbind();
-
-		//var kc = player.app.keyboardCommands;
-		//kc.mode = 'default';
-
-		// ensure that no tracks are 'select'ed
-	    deselectAll();
 
 	    // detach [this] widget from the DOM
 		detach();
@@ -238,26 +229,10 @@ class PlaylistView extends Pane {
 	}
 
 	/**
-	  * tear down the track list
-	  */
-	@:deprecated
-	private function undoTrackList(?done : Void->Void):Void {
-	    list.empty();
-	    tracks = new Array();
-
-		if (done != null) {
-		    defer( done );
-		}
-	}
-
-	/**
 	  * rebuild the TrackList
 	  */
 	public function rebuildTracks(?done : Void->Void):Void {
 		searchResultsMode = false;
-		//undoTrackList(function() {
-			//buildTrackList( done );
-		//});
 		rebuildList(playlist.array());
 		if (done != null) {
 		    done();
@@ -564,114 +539,6 @@ class PlaylistView extends Pane {
 	}
 
 	/**
-	  * "select" a set of TrackViews
-	  */
-	@:deprecated
-	public function selectTracks(f : TrackView -> Bool):Null<TrackSelection> {
-	    // create [list] to hold results
-	    var list:Array<TrackView> = new Array();
-	    // iterate over [tracks]
-	    for (t in tracks) {
-	        // assign whether it is 'selected' based on the return-value of [f], and if it's selected
-	        if (t.selected = f( t )) {
-	            // add it to [list]
-	            list.push( t );
-	        }
-	    }
-
-        // if [list] has anything in it (if any TrackViews were selected)
-	    if (list.hasContent()) {
-	        // build a TrackSelection from [list]
-	        return new TrackSelection(playlist, list.map.fn(_.track));
-	    }
-        return null;
-	}
-
-	/**
-	  * apply a pre-constructed selection
-	  */
-	@:deprecated
-	public function applySelection(selection : TrackSelection):Void {
-	    selectTracks.fn(selection.has( _.track ));
-	}
-
-	/**
-	  * select all tracks
-	  */
-	@:deprecated
-	public function selectAll():Null<TrackSelection> {
-	    return selectTracks.fn(tv=>true);
-	}
-
-	/**
-	  * deselect all tracks
-	  */
-	@:deprecated
-	public function deselectAll():Null<TrackSelection> {
-	    return selectTracks.fn(tv=>false);
-	}
-
-	/**
-	  * check if any Tracks are selected
-	  */
-	@:deprecated
-	public function anySelected():Bool {
-	    return tracks.any.fn( _.selected );
-	}
-
-	/**
-	  * get the list of TrackViews that are selected
-	  */
-	@:deprecated
-	public function getSelectedTrackViews():Array<TrackView> {
-	    return tracks.filter.fn(_.selected);
-	}
-
-	/**
-	  * get the list of Tracks that are selected
-	  */
-	@:deprecated
-	public function getSelectedTracks():Array<Track> {
-	    return getSelectedTrackViews().map.fn( _.track );
-	}
-
-	/**
-	  * get the current Track selection
-	  */
-	@:deprecated
-	public function getTrackSelection():Maybe<TrackSelection> {
-	    var selectedTracks = getSelectedTracks();
-	    if (selectedTracks.length > 0) {
-	        return new TrackSelection(playlist, selectedTracks);
-	    }
-        else return null;
-	}
-
-    /**
-      * get the first Track in the list of selected Tracks
-      */
-    @:deprecated
-	public function getFirstSelectedTrack():Null<Track> {
-	    return getTrackSelection().ternary(_.get( 0 ), null);
-	}
-
-    /**
-      * get the last Track in the list of selected tracks
-      */
-    @:deprecated
-	public function getLastSelectedTrack():Null<Track> {
-	    return getTrackSelection().ternary(_.get(_.length - 1), null);
-	}
-
-	/**
-	  * set the 'focused' state of [this] playlist view
-	  */
-	public inline function setFocused(value : Bool):Bool {
-	    var ret = (focused = value);
-	    return ret;
-	}
-
-	/**
 	  * 'lock'ing [this] view prevents it from rebuilding itself in response to every change made to the playlist
 	  * mainly designed to be used prior to actions that will trigger many changes to the playlist in rapid succession
 	  */
@@ -691,89 +558,6 @@ class PlaylistView extends Pane {
       * check whether [this] view is locked
       */
 	public inline function isLocked():Bool return _locked;
-
-    /**
-      * handle incoming keyboard input when playlistview is open
-      */
-	private function keycom(event : KeyboardEvent):Void {
-	    var kc:KeyboardCommands = player.app.keyboardCommands;
-
-	    if ( isOpen ) {
-	        trace('plkeycom: ${event.key.name}');
-
-	        switch ( event.key ) {
-	            // stop selecting
-                case Esc:
-                    event.cancel();
-                    deselectAll();
-
-                //
-                case Enter:
-                    if (anySelected()) {
-                        var sel = getTrackSelection();
-                        if (sel.length == 1) {
-                            player.openTrack(sel.get(0));
-                            viewFor(sel.get(0)).selected = false;
-                        }
-                        else {
-                            sel.invert().remove();
-                        }
-                    }
-
-                case Down if (event.noMods || event.shiftKey):
-                    var expand:Bool = event.shiftKey;
-                    var sel = getTrackSelection();
-                    if (sel == null && tracks.length > 0) {
-                        //tracks[0].selected = true;
-                        viewFor( player.track ).selected = true;
-                    }
-                    else {
-                        var lastTrack = sel.get(sel.length - 1);
-                        lastTrack = playlist[playlist.indexOf( lastTrack ) + 1];
-                        if (lastTrack == null)
-                            lastTrack = playlist[0];
-                        var view = viewFor( lastTrack );
-                        if (!expand)
-                            deselectAll();
-                        if (view != null) {
-                            view.selected = true;
-                        }
-                    }
-
-                case Up if (event.noMods || event.shiftKey):
-                    var expand:Bool = event.shiftKey;
-                    var sel = getTrackSelection();
-                    if (sel == null && tracks.length > 0) {
-                        //tracks[tracks.length - 1].selected = true;
-                        viewFor( player.track ).selected = true;
-                    }
-                    else {
-                        var firstTrack = sel.get( 0 );
-                        firstTrack = playlist[playlist.indexOf( firstTrack ) - 1];
-                        if (firstTrack == null)
-                            firstTrack = playlist[playlist.length - 1];
-                        var view = viewFor( firstTrack );
-                        if (!expand)
-                            deselectAll();
-                        if (view != null) {
-                            view.selected = true;
-                        }
-                    }
-
-                // select all
-                case LetterA if (event.ctrlKey || event.metaKey):
-                    event.preventDefault();
-                    untyped __js__('document.getSelection().empty()');
-                    selectAll();
-
-                default:
-                    kc.handleDefault( event );
-	        }
-	    }
-        else {
-            kc.handleDefault( event );
-        }
-	}
 
 /* === Computed Instance Fields === */
 
