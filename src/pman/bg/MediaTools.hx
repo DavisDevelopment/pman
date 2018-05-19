@@ -81,7 +81,6 @@ class UriTools {
 
         // define inline function for handling Path's
         function handleFsPath(uri: String):Void {
-            trace( uri );
             switch (URIUtils.os()) {
                 // Damn Win32 path structure
                 case 'Windows':
