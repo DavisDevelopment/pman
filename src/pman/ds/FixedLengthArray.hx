@@ -184,6 +184,13 @@ class CFixedLengthArray<T> {
         return res;
     }
 
+    /**
+      convert [this] to an Array
+     **/
+    public function toArray():Array<T> {
+        return [for (x in this) x];
+    }
+
 /* === Static Methods === */
 
     public static function fromArray<T>(a: Array<T>):FixedLengthArray<T> {
