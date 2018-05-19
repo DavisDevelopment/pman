@@ -140,11 +140,20 @@ class Player extends EventDispatcher {
 	  * test the 'curses' shit
 	  */
 	private function _test_curses(stage: Stage):Void {
+	    /* prepare grid */
 	    var grid = new CellGrid(100, 100);
+	    grid.fontFamily = 'SourceCodePro';
+	    grid.fontSize = 10;
+	    grid.fontSizeUnit = 'px';
+	    grid.fg = '#1ADD1A';
+	    grid.bg = '#2F2B2B';
+
+        /* create grid view */
 	    var gridView = new CellGridView( grid );
 
+        /* attach view to stage */
 	    function attachGridView() {
-	        view.addSibling( gridView );
+	        stage.addChild( gridView );
 	    }
 
 	    window.expose('grid', grid);
