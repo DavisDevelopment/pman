@@ -17,7 +17,8 @@ import pman.ui.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import motion.Actuate;
 import motion.easing.*;
@@ -35,14 +36,29 @@ class ToggleableItem extends TextualHUDItem {
 
         tb.fontFamily = 'Ubuntu';
         tb.fontSize = 25;
+        toggleFields = [];
 
-        toggleFields = [
-            new ToggleField(this, 'muted', 'change:muted', Getter.create(player.muted?'yes':'no')),
-            new ToggleField(this, 'shuffle', 'change:shuffle', Getter.create(player.shuffle?'yes':'no')),
-            new ToggleField(this, 'speed', 'change:speed', Getter.create(round(player.playbackRate*100)+'%')),
-            new ToggleField(this, 'volume', 'change:volume', Getter.create(round(player.volume * 100)+'%')),
-            new ToggleField(this, 'scale', 'change:scale', Getter.create(round(player.scale * 100)+'%'))
-        ];
+        inline function make(a:String, b:String, c:Getter<Dynamic>) {
+            return new ToggleField(this, a, b, c);
+        }
+
+        inline function add(a:String, b:String, c:Getter<Dynamic>) {
+            toggleFields.push(make(a, b, c));
+        }
+        inline function addc(a:String, b:Getter<Dynamic>) {
+            add(a, 'change:$a', b);
+        }
+
+            //new ToggleField(this, 'muted', 'change:muted', Getter.create(player.muted?'yes':'no')),
+            //new ToggleField(this, 'shuffle', 'change:shuffle', Getter.create(player.shuffle?'yes':'no')),
+            //new ToggleField(this, 'speed', 'change:speed', Getter.create(round(player.playbackRate*100)+'%')),
+            //new ToggleField(this, 'volume', 'change:volume', Getter.create(round(player.volume * 100)+'%')),
+            //new ToggleField(this, 'scale', 'change:scale', Getter.create(round(player.scale * 100)+'%'))
+
+        addc('muted', Getter.create(player.muted ? 'yes' : 'no'));
+        addc('shuffle', Getter.create(player.shuffle ? 'yes' : 'no'));
+        addc('speed', Getter.create(round(player.playbackRate * 100) + '%'));
+        addc('volume', Getter.create(round(player.volume * 100) + '%'));
     }
 
 /* === Instance Methods === */
@@ -108,12 +124,11 @@ class ToggleableItem extends TextualHUDItem {
     private var mrf : Null<ToggleField>=null;
 }
 
+/**
+  represents a property that should display on HUD when changed
+ **/
 private class ToggleField {
-    private var i : ToggleableItem;
-    public var event : String;
-    public var name : String;
-    public var ref : Getter<Dynamic>;
-
+    /* Constructor Function */
     public function new(i:ToggleableItem, name:String, event:String, ref:Getter<Dynamic>):Void {
         this.i = i;
         this.name = name;
@@ -125,6 +140,11 @@ private class ToggleField {
       * get the time that has elapsed since the last occurrence of [this]
       */
     public function since():Float {
-        return (now - (i.player.getMostRecentOccurrenceTime( event )).ternary(_.getTime(), 0));
+        return (now() - (player.getMostRecentOccurrenceTime( event )).ternary(_.getTime(), 0));
     }
+
+    private var i : ToggleableItem;
+    public var event : String;
+    public var name : String;
+    public var ref : Getter<Dynamic>;
 }

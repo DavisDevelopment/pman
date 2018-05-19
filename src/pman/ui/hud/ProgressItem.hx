@@ -17,7 +17,8 @@ import pman.ui.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import motion.Actuate;
 import motion.easing.*;
@@ -103,7 +104,7 @@ class ProgressItem extends PlayerHUDItem {
             return false;
         }
         else {
-            return ((now - mrs.getTime()) <= duration);
+            return ((now() - mrs.getTime()) <= duration);
         }
     }
 }

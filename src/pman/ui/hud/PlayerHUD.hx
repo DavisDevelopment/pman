@@ -16,7 +16,9 @@ import pman.ui.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import motion.Actuate;
 import motion.easing.*;
@@ -27,6 +29,9 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
+/**
+  the Player's "heads-up display" for when the controls are hidden
+ **/
 class PlayerHUD extends Ent {
     /* Constructor Function */
     public function new(p : PlayerView):Void {
@@ -72,9 +77,18 @@ class PlayerHUD extends Ent {
       * calculate [this]'s geometry
       */
     override function calculateGeometry(r : Rect<Float>):Void {
-        var pvr:Rect<Float> = playerView.rect, pvmr:Rect<Float> = playerView.mediaRect;
-        //rect = playerView.rect.clone();
-        rect.set(pvr.x, pvmr.y, pvr.w, pvmr.h);
+        var pvr:Rect<Float> = playerView.rect;
+        var pvmr:Rect<Float> = playerView.mediaRect;
+        if (pvmr == null) {
+            pvmr = pvr;
+        }
+
+        if (pvr != null && pvmr != null) {
+            rect.set(
+                pvr.x, pvmr.y,
+                pvr.w, pvmr.h
+            );
+        }
 
         super.calculateGeometry( r );
     }

@@ -98,19 +98,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 		super.update( stage );
 
 		if (pv != null) {
-			var videoSize:Rect<Float> = ovr;
-			var viewport:Rect<Float> = pv.rect.clone();
-			var scale:Float = (marScale(ovr, pv.rect) * pv.player.scale);
-
-			// scale the video-rect
-			vr.width = (videoSize.width * scale);
-			vr.height = (videoSize.height * scale);
-
-			// center the video-rect
-			vr.centerX = viewport.centerX;
-			vr.centerY = viewport.centerY;
-
-			vr = cast vr.floor();
+		    calc_vr();
 
 			if (underlay != null) {
 			    underlay.setRect( vr );
@@ -139,6 +127,43 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
                 underlay = null;
             }
         }
+	}
+
+	private function calc_vr():Void {
+        var vidr:Rect<Float> = ovr;
+        var vpr:Rect<Float> = pv.rect;
+        var scale:Float = (marScale(ovr, pv.rect) * pv.player.scale);
+        if (scale == null || !scale.isFinite() || scale.isNaN()) {
+            scale = 1.0;
+        }
+
+        pullvr();
+
+        // scale the video-rect
+        vr.width = (vidr.width * scale);
+        vr.height = (vidr.height * scale);
+
+        // center the video-rect
+        vr.centerX = vpr.centerX;
+        vr.centerY = vpr.centerY;
+
+        vr = cast vr.floor();
+        pushvr();
+
+        if (!vr.isSanitary()) {
+            throw 'aww, dont do dat, sha';
+        }
+	}
+	private function pullvr() {
+	    if (pv != null) {
+	        if (vr == null) vr = new Rect();
+	        vr.pull( pv.mediaRect );
+	    }
+	}
+	private function pushvr() {
+	    if (pv != null && vr != null) {
+	        pv.mediaRect.pull( vr );
+	    }
 	}
 
 	/**
