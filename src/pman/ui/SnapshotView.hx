@@ -18,7 +18,9 @@ import pman.display.media.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+//import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import motion.Actuate;
 import motion.easing.*;
@@ -29,6 +31,9 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 
+/**
+  view used to display a preview of a snapshot
+ **/
 class SnapshotView extends Ent {
     /* Constructor Function */
     public function new(player:Player, path:Path, duration:Float=1500):Void {
@@ -38,6 +43,7 @@ class SnapshotView extends Ent {
         this.path = path;
         image = Image.load('file://' + path);
         this.duration = duration;
+        this.priority = -5;
 
         var iconSize:Int = 20;
         if (icons == null) {
@@ -57,12 +63,12 @@ class SnapshotView extends Ent {
         calculateGeometry( player.view.rect );
 
         if (lastTime == null) {
-            lastTime = now;
+            lastTime = now();
         }
         else {
             var mp:Maybe<Point<Float>> = null;
             hovered = (mp = stage.getMousePosition()).ternary(containsPoint(_), false);
-            if (!hovered && (now - lastTime) >= duration) {
+            if (!hovered && (now() - lastTime) >= duration) {
                 delete();
             }
             else if ( hovered ) {
