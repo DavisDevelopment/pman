@@ -36,7 +36,14 @@
     "tannus",
     "cross-platform"
   ],
-  "dead_dependencies": {},
+  "unused_dependencies": [
+      "cheerio",
+      "chromecast-api",
+      "express",
+      "local-ip",
+      "natural",
+      "send-seekable"
+  ],
   "dependencies": {
     "auto-launch": "^5.0.5",
     "cheerio": "^1.0.0-rc.2",
