@@ -92,30 +92,6 @@ class MediaTools {
     }
 
 	/**
-	  * given a Track object, loads the [media, driver, renderer] fields onto that Track
-	  */
-	/*
-	@:access( pman.media.Track )
-	public static function loadTrackMediaState(track:Track, callback:VoidCb):Void {
-		var rethrow = fn([error] => callback( error ));
-		function ph<T>(p:Promise<T>, h:T->Void) {
-		    p.unless( rethrow ).then( h );
-		}
-
-        ph(track.provider.getMedia(), function(m) {
-            track.media = m;
-            ph(m.getDriver(), function(d) {
-                track.driver = d;
-                ph(m.getRenderer(d), function(r) {
-                    track.renderer = r;
-                    callback();
-                });
-            });
-        });
-	}
-	*/
-
-	/**
 	  * get underlying media object from the given MediaObject
 	  */
 	@:access( gryffin.display.Video )
