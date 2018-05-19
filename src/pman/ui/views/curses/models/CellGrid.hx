@@ -33,6 +33,9 @@ using tannus.macro.MacroTools;
 using tannus.html.JSTools;
 #end
 
+/**
+  class modelling a grid of cells
+ **/
 class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
     /* Constructor Function */
     public function new(w:Int, h:Int):Void {
@@ -46,14 +49,27 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
         _updatedStyle = false;
         _updatedRows = new Array();
 
-        fg = new Color(0, 0, 0);
-        bg = new Color(255, 255, 255);
-        bold = false;
-        underline = false;
-        fontFamily = 'monospace';
-        fontSize = 10.0;
-        fontSizeUnit = 'pt';
+        // style properties
+        style = {
+            fg: new Color(0, 0, 0),
+            bg: new Color(255, 255, 255),
+            bold: false,
+            underline: false,
+            fontFamily: 'monospace',
+            fontSize: 10.0,
+            fontSizeUnit: 'pt'
+        };
+        _initStyleProperties();
 
+        //fg = new Color(0, 0, 0);
+        //bg = new Color(255, 255, 255);
+        //bold = false;
+        //underline = false;
+        //fontFamily = 'monospace';
+        //fontSize = 10.0;
+        //fontSizeUnit = 'pt';
+
+        // setter stuff
         inline function prop(name:String) {
             defineSetter(name, setStyleProperty.bind(name, _));
         }
@@ -137,6 +153,7 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
         for (i in 0...height) {
             rows[i] = _buildRow();
             rows[i].grid = cast this;
+            rows[i].index = i;
 
             if (i == 0) {
                 firstRow = rows[i];
@@ -174,8 +191,26 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
     }
 
     /**
-      * repair the linked-list structure
-      */
+      set [this]'s state such that no changes are flagged
+     **/
+    public function reconcile():Void {
+        for (row in _updatedRows) {
+            row.reconcile();
+        }
+        _updatedRows = [];
+        _updated = false;
+    }
+
+    /**
+      set [this]'s state such that no changes are flagged to styles
+     **/
+    public function reconcileStyles():Void {
+        _updatedStyle = false;
+    }
+
+    /**
+      repair the list-linking of the rows
+     **/
     public function _repairRowListLinking():Void {
         for (i in 0...height) {
             rows[i].nextRow = null;
@@ -189,14 +224,34 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
     }
 
     /**
-      * style-property setter
-      */
+      set the value of a property of [style]
+     **/
     private function setStyleProperty<T>(property:String, newValue:T):T {
-        var val:Null<T> = this.nativeArrayGet( property );
+        var val:Null<T> = getStyleProperty( property );
         if (val != newValue) {
             _updatedStyle = true;
         }
-        return nativeArraySet(property, newValue);
+        return style.nativeArraySet(property, newValue);
+    }
+
+    /**
+      get the value of a property of [style]
+     **/
+    private function getStyleProperty<T>(property: String):Null<T> {
+        return style.nativeArrayGet( property );
+    }
+
+    /**
+      extend [this] to have all the properties that [style] has, and point those properties to [style]
+     **/
+    private function _initStyleProperties():Void {
+        var props:Array<String> = 'bg,fg,bold,underline,fontFamily,fontSize,fontSizeUnit'.split(',');
+        for (prop in props) {
+            defineProperty(prop, {
+                get: getStyleProperty.bind(prop),
+                set: setStyleProperty.bind(prop, _)
+            });
+        }
     }
 
     /**
@@ -216,11 +271,17 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
 
 /* === Instance Fields === */
 
+    /* the number of cells per row */
     public var width(default, null): Int;
+
+    /* the number of rows */
     public var height(default, null): Int;
+
+    /* reference to the first row */
     public var firstRow(default, null): Null<TRow>;
+
+    /* the array of rows */
     public var rows(default, null): FlArray<TRow>;
-    //public var style: GridStyleDecl;
 
     /* == Style Fields == */
     public var fg: Color;
@@ -230,6 +291,9 @@ class CellGrid <TCell:Cell, TRow:CellRow<TCell>> extends EventDispatcher {
     public var fontFamily: String;
     public var fontSize: Float;
     public var fontSizeUnit: String;
+    private var style: GridStyle;
+
+    /* == State Fields == */
 
     private var _updated: Bool;
     private var _updatedStyle: Bool;
@@ -244,4 +308,14 @@ typedef GridStyleDecl = {
     ?fontFamily: String,
     ?fontSize: Float,
     ?fontSizeUnit: String
+};
+
+typedef GridStyle = {
+    fg: Color,
+    bg: Color,
+    bold: Bool,
+    underline: Bool,
+    fontFamily: String,
+    fontSize: Float,
+    fontSizeUnit: String
 };

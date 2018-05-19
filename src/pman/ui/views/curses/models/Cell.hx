@@ -35,18 +35,16 @@ using tannus.html.JSTools;
 class Cell {
     /* Constructor Function */
     public function new(?c:Char, ?fg:Color, ?bg:Color, ?bold:Bool, ?underline:Bool, ?invisible:Bool):Void {
-        this.c = null;
-        this.fg = null;
-        this.bg = null;
-        this.bold = null;
-        this.underline = null;
-        this.invisible = null;
+        this.index = null;
+        this.state = new CellState();
+        _bindProps();
 
-        // bind setters
-        var props = ['c', 'fg', 'bg', 'bold', 'underline', 'invisible'];
-        for (prop in props) {
-            defineSetter(prop, _prop_set.bind(prop, _));
-        }
+        //this.c = null;
+        //this.fg = null;
+        //this.bg = null;
+        //this.bold = null;
+        //this.underline = null;
+        //this.invisible = null;
 
         // build state
         mod(c, fg, bg, bold, underline, invisible);
@@ -124,14 +122,47 @@ class Cell {
 #end
 
     /**
+      get an object representation of [this] Cell's styling
+     **/
+    public function getStyleState():CellStyleDecl {
+        return {
+            bg: nullOr(bg, row.grid.bg),
+            fg: nullOr(fg, row.grid.fg),
+            underline: nullOr(underline, row.grid.underline, false),
+            bold: nullOr(bold, row.grid.bold, false),
+            invisible: nullOr(invisible, false)
+        };
+    }
+
+    /**
       * assign a property value, and automagically flag as 'changed' if appropriate
       */
-    private function _prop_set(name:String, value:Dynamic):Dynamic {
-        if (this.nativeArrayGet( name ) != value) {
-            this.nativeArraySet(name, value);
-            _changed = true;
+    private function _setProp<T>(name:String, value:T):T {
+        var val = _getProp( name );
+        if (val != value) {
+            touch();
         }
-        return value;
+        return state.nativeArraySet(name, value);
+    }
+
+    /**
+      get the value of a property of [state]
+     **/
+    private function _getProp<T>(name: String):Null<T> {
+        return state.nativeArrayGet( name );
+    }
+
+    /**
+      bind properties from [state] onto [this]
+     **/
+    private function _bindProps() {
+        var props = 'c,fg,bg,bold,underline,invisible'.split(',');
+        for (prop in props) {
+            defineProperty(prop, {
+                get: _getProp.bind(prop),
+                set: _setProp.bind(prop, _)
+            });
+        }
     }
 
     /**
@@ -150,7 +181,20 @@ class Cell {
     public function touch() setChanged( true );
     public function untouch() setChanged( false );
 
+    /**
+      bubble 'changed' status up hierarchy
+     **/
+    public function bubble():Void {
+        if (hasChanged() && row != null) {
+            row.alt(cast this);
+            row.bubble();
+        }
+    }
+
 /* === Instance Fields === */
+
+    /* the index of [this] Cell in [row] */
+    public var index: Null<Int>;
 
     public var c:Null<Char>;
     public var fg:Null<Color>;
@@ -158,6 +202,7 @@ class Cell {
     public var bold:Null<Bool>;
     public var underline:Null<Bool>;
     public var invisible:Null<Bool>;
+    private var state: CellState;
     
     public var nextCell(default, null): Null<Cell>;
     public var row(default, null): Null<CellRow<Cell>>;
@@ -165,4 +210,46 @@ class Cell {
     private var _changed:Bool = false;
 }
 
-typedef CellDecl = {?c:Char, ?fg:Color, ?bg:Color, ?bold:Bool, ?underline:Bool, ?invisible:Bool};
+typedef CellDecl = {
+    ?c:Char,
+    ?fg:Color,
+    ?bg:Color,
+    ?bold:Bool,
+    ?underline:Bool,
+    ?invisible:Bool
+};
+
+typedef CellStyleDecl = {
+    ?fg: Color,
+    ?bg: Color,
+    ?bold: Bool,
+    ?underline: Bool,
+    ?invisible: Bool
+};
+
+class CellState {
+    /* Constructor Function */
+    public function new():Void {
+        defaults();
+    }
+
+/* === Instance Methods === */
+
+    public function defaults():Void {
+        c = null;
+        fg = null;
+        bg = null;
+        bold = null;
+        underline = null;
+        invisible = false;
+    }
+
+/* === Instance Fields === */
+
+    public var c: Null<Char>;
+    public var fg: Null<Color>;
+    public var bg: Null<Color>;
+    public var bold: Null<Bool>;
+    public var underline: Null<Bool>;
+    public var invisible: Bool;
+}

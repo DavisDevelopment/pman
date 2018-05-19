@@ -6,6 +6,7 @@ import tannus.geom2.*;
 import tannus.sys.*;
 import tannus.graphics.Color;
 import tannus.math.Percent;
+import tannus.internal.CompileTime as Ct;
 import tannus.async.*;
 
 import haxe.extern.EitherType as Either;
@@ -18,6 +19,7 @@ import gryffin.display.*;
 import pman.ds.FixedLengthArray as FlArray;
 import pman.core.Ent;
 import pman.ui.views.curses.models.*;
+import pman.ui.views.curses.models.Cell;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -49,6 +51,8 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
         this.canvas = new Canvas();
         this.priority = -10;
         this.rect = new Rect();
+
+        _reports = new Array();
     }
 
 /* === Instance Methods === */
@@ -60,6 +64,7 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
         super.init( stage );
 
         calculateCharMetrics();
+        calculateGeometry(cast rect);
     }
 
     /**
@@ -68,7 +73,26 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
     override function update(stage: Stage):Void {
         super.update( stage );
 
-        //TODO
+        // performance stuff
+        _cyclePerfInfo();
+
+        // calculate cell metrics
+        if (charMetrics == null || grid.hasChangedStyles()) {
+            calculateCharMetrics();
+        }
+
+        // calculate content area
+        if (grid.hasChanged()) {
+            calculateGeometry(cast rect);
+        }
+        
+        // performance stuff
+        if (_reportStartTime == null) {
+            _startPerfReport();
+        }
+        else if ((now() - _reportStartTime) >= 1000) {
+            _cyclePerfReport();
+        }
     }
 
     /**
@@ -79,24 +103,50 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
 
         if (grid.hasChangedStyles()) {
             //TODO
+
+            grid.reconcileStyles();
         }
-        else if (grid.hasChanged()) {
+        
+        if (grid.hasChanged()) {
             //TODO
+
+            _paint();
+            grid.reconcile();
+        }
+        else if ( needsRepaint ) {
+            _paint( true );
+
+            needsRepaint = false;
         }
 
         c.drawComponent(canvas, 0, 0, canvas.width, canvas.height, x, y, w, h);
     }
 
     /**
+      check whether [p] is inside of [this]'s content rectangle
+     **/
+    override function containsPoint(p: Point<Float>):Bool {
+        return rect.containsPoint( p );
+    }
+
+    /**
       * calculate [this]'s total geometry
       */
     override function calculateGeometry(r: Rect<Float>):Void {
+        var d = [w, h];
+
         if (charMetrics == null) {
             return ;
         }
         else {
             w = (charMetrics.width * grid.width);
             h = (charMetrics.height * grid.height);
+        }
+
+        if (w != d[0] || h != d[1]) {
+            canvas.resize(w, h);
+
+            needsRepaint = true;
         }
     }
 
@@ -108,7 +158,6 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
         var line:String = allChars.slice(0, -4);
         var letter:String = 'A';
 
-        //ctx.font = '${fontStyle.size.value}${fontStyle.size.unit} ${fontStyle.family}';
         ctx.font = '${grid.fontSize}${grid.fontSizeUnit} ${grid.fontFamily}';
         ctx.textAlign = 'start';
         ctx.textBaseline = 'top';
@@ -122,25 +171,189 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
     }
 
     /**
+      paint [grid] onto [canvas]
+     **/
+    private function _paint(all:Bool = false):Void {
+        /* define variables */
+        var c:Ctx = ctx;
+        var rows:Array<TRow> = all ? fla(grid.rows) : grid.getChangedRows();
+        if (rows.empty()) return ;
+        var cells:Array<TCell>, cr:Rect<Int>, cs:CellStyleDecl;
+
+        var totalPaintTime:Float = _timef(function() {
+            // for each row
+            for (row in rows) {
+                // get cells that need redrawing
+                cells = all ? fla(row.getCells()) : row.getChangedCells();
+
+                // for each cell that needs redrawing
+                for (cell in cells) {
+                    prtime(_timef(function() {
+                        // get [cell]'s rectangle
+                        cr = cellRect( cell );
+
+                        // get [cell]'s styling
+                        cs = cell.getStyleState();
+
+                        /* draw the background */
+                        c.fillStyle = cs.bg;
+                        c.fillRect(cr.x, cr.y, cr.w, cr.h);
+
+                        // if [cell] is not flagged as invisible, and has a non-whitespace character
+                        if (!cell.invisible && cell.c != null) {
+                            // apply (font) styling
+                            applyStyles(c, cell);
+
+                            // draw the character
+                            c.fillText(cell.c, cr.x, cr.y, cr.width);
+                            trace('drew char');
+                        }
+
+                        // announce update
+                        prupdate();
+                    }));
+                }
+            }
+        });
+
+        trace('repaint took ${totalPaintTime}ms');
+    }
+    private static inline function fla<T>(a: FlArray<T>):Array<T> {
+        return a.toArray();
+    }
+
+    /**
+      get the Rect<Int> corresponding with the given Cell
+     **/
+    private function cellRect(cell: TCell):Rect<Int> {
+        var pos = cellKey( cell ), cm = charMetrics;
+        return new Rect(
+            (cm.width * pos[0]),
+            (cm.height * pos[1]),
+            cm.width,
+            cm.height
+        );
+    }
+
+    /**
+      get [x, y] pair of indices for the given cell
+     **/
+    private inline function cellKey(cell: TCell):Array<Int> {
+        return [cell.index, cell.row.index];
+    }
+
+    /**
      * get the string for the font style
      */
-    private function fontString(?cell: TCell):String {
+    private function fontString(?cell:TCell, ?state:CellStyleDecl):String {
         var chunks:Array<String> = new Array();
-        if (nullOr(cell.bold, grid.bold))  {
-            chunks.push( 'bold' );
+        inline function add(s) {
+            chunks.push( s );
         }
-        chunks.push('${grid.fontSize}${grid.fontSizeUnit}');
-        chunks.push( grid.fontFamily );
-        return chunks.join(' ');
+
+        state = styleDecl(cell, state);
+
+        if (nullOr(state.bold, false))  {
+            add('bold ');
+        }
+
+        add('' + grid.fontSize);
+        add( grid.fontSizeUnit );
+        add(' ');
+        add( grid.fontFamily );
+        return chunks.join('');
     }
 
     /**
       * apply the necessary styling to the given rendering context
       */
-    private function applyStyles(c:Ctx, ?cell:TCell):Void {
-        c.font = fontString( cell );
+    private function applyStyles(c:Ctx, ?cell:TCell, ?state:CellStyleDecl):Void {
+        state = styleDecl(cell, state);
+        
+        c.font = fontString(cell, state);
         c.textAlign = 'start';
         c.textBaseline = 'top';
+        c.fillStyle = state.fg;
+    }
+
+    private function styleDecl(?cell:TCell, ?style:CellStyleDecl):CellStyleDecl {
+        if (style == null) {
+            if (cell != null) {
+                style = cell.getStyleState();
+            }
+            else {
+                style = gridCellStyleDecl();
+            }
+        }
+        return style;
+    }
+    private function gridCellStyleDecl():CellStyleDecl {
+        return {
+            fg: grid.fg,
+            bg: grid.bg,
+            bold: grid.bold,
+            underline: grid.underline,
+        };
+    }
+
+    private function _cyclePerfInfo() {
+        if (_perfInfo != null) {
+            _perfInfo.avg_time = _perfInfo.times.average();
+            _currentReportData.add( _perfInfo );
+        }
+        _perfInfo = {
+            updates: 0,
+            times: [],
+            avg_time: 0.0
+        };
+    }
+    private inline function prupdate() _perfInfo.updates++;
+    private inline function prtime(n: Float) _perfInfo.times.push( n );
+
+    private function _startPerfReport() {
+        _reportStartTime = now();
+        _currentReportData = new List();
+    }
+
+    private function _cyclePerfReport() {
+        if (_currentReportData != null) {
+            var report = _perfReport();
+            if (report == null) {
+                return ;
+            }
+
+            if (_reports.length >= 30) {
+                _reports.shift();
+            }
+            _reports.push( report );
+        }
+        _startPerfReport();
+    }
+
+    private function _perfReport():Null<PerfReport> {
+        if (_currentReportData != null) {
+            var report:PerfReport = {
+                updates: 0,
+                avg_update_time: 0
+            };
+            var avgs = [];
+            for (x in _currentReportData) {
+                report.updates += x.updates;
+                avgs.push( x.avg_time );
+            }
+            report.avg_update_time = avgs.average();
+            return report;
+        }
+        return null;
+    }
+
+    /**
+      measure how long it takes [f] to execute
+     **/
+    private static inline function _timef(f: Void->Void):Float {
+        var start:Float = now();
+        f();
+        return (now() - start);
     }
 
 /* === Computed Instance Fields === */
@@ -173,10 +386,35 @@ class CellGridView <TCell:Cell, TRow:CellRow<TCell>, TGrid:CellGrid<TCell, TRow>
     public var grid: TGrid;
     public var canvas: Canvas;
     public var charMetrics: Null<Area<Int>>;
+
     public var rect: Rect<Int>;
+
+    private var needsRepaint: Bool = true;
+
+    /* == Performance Properties == */
+    private var _reportStartTime: Null<Float> = null;
+    private var _currentReportData: List<PerfInfo>;
+    private var _perfInfo: PerfInfo;
+    private var _reports: Array<PerfReport>;
 
 /* === Static Vars === */
 
     /* a String containing all valid characters */
     private static var allChars: String = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz`~!@#$%^&*()_+-=[]{}\\|;:\'\"<>,./?\t\n\r ';
 }
+
+/**
+  used to store performance info
+ **/
+private typedef PerfReport = {
+    var updates: Int;
+    var avg_update_time: Float;
+}
+
+private typedef PerfInfo = {
+    // Cell updates
+    var updates: Int;
+    var times: Array<Float>;
+    var avg_time: Float;
+};
+

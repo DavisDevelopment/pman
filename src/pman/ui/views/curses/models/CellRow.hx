@@ -33,6 +33,7 @@ using tannus.macro.MacroTools;
 using tannus.html.JSTools;
 #end
 
+@:allow( pman.ui.views.curses.models.CellGrid )
 class CellRow <T:Cell> extends EventDispatcher {
     /* Constructor Function */
     public function new(len: Int):Void {
@@ -92,6 +93,13 @@ class CellRow <T:Cell> extends EventDispatcher {
     }
 
     /**
+      get a reference to [d]
+     **/
+    public inline function getCells():FlArray<T> {
+        return d;
+    }
+
+    /**
       * build out the structure of [this] Row
       */
     private function _build():Void {
@@ -100,6 +108,7 @@ class CellRow <T:Cell> extends EventDispatcher {
         for (x in 0...length) {
             d[x] = _createCell();
             d[x].row = cast this;
+            d[x].index = x;
 
             if (x == 0) {
                 firstCell = d[x];
@@ -181,7 +190,7 @@ class CellRow <T:Cell> extends EventDispatcher {
       * announce that some unspecified change has been made to 
       * [this] structure that will necessitate some renderer or grid-level processing event
       */
-    private function alt(?cell:T, ?all:Bool):Void {
+    public function alt(?cell:T, ?all:Bool):Void {
         _updated = true;
         if (all != null) {
             _updatedAll = all;
@@ -197,14 +206,35 @@ class CellRow <T:Cell> extends EventDispatcher {
       * called by the grid once updates have been made to the
       * view in response to changes made to the model (#MvcFtw)
       */
-    private function reconcile():Void {
+    public function reconcile():Void {
         _updated = false;
-        var uc = (_updatedAll ? d.array() : _updatedCells);
+        var uc = (_updatedAll ? d.toArray() : _updatedCells);
         _updatedAll = false;
         _updatedCells = [];
+
         dispatch('reconcile', {
             cells: uc
         });
+    }
+
+    /**
+      bubble [this]'s changed-status up the hierarchy
+     **/
+    public function bubble():Void {
+        if (hasChanged() && grid != null) {
+            grid.alt(cast this);
+        }
+    }
+
+    public function getChangedCells():Array<T> {
+        return _updatedCells;
+    }
+
+    /**
+      check whether [this] has changed
+     **/
+    public function hasChanged():Bool {
+        return (_updatedAll || (_updated && _updatedCells.hasContent()));
     }
 
 /* === Instance Fields === */
