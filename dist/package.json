@@ -37,24 +37,26 @@
     "cross-platform"
   ],
   "unused_dependencies": [
-      "cheerio",
-      "chromecast-api",
-      "express",
-      "local-ip",
-      "natural",
-      "send-seekable"
+    "cheerio",
+    "chromecast-api",
+    "express",
+    "local-ip",
+    "natural",
+    "send-seekable",
+    "discovery"
   ],
   "dependencies": {
     "auto-launch": "latest",
     "cheerio": "^1.0.0-rc.2",
     "chromecast-api": "latest",
+    "discovery": "^1.1.0",
     "express": "^4.16.3",
-    "fluent-ffmpeg": "latest",
+    "fluent-ffmpeg": "^2.1.2",
     "jsmediatags": "latest",
     "local-ip": "^1.0.1",
     "localforage": "latest",
     "natural": "^0.5.4",
-    "nedb": "latest",
+    "nedb": "^1.8.0",
     "send-seekable": "^1.0.4",
     "underscore": "^1.8.3"
   },
