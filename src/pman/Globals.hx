@@ -235,6 +235,18 @@ class Globals {
         return _platform;
     }
 
+    public static var osIsWindows(get, never): Bool;
+    private static inline function get_osIsWindows() return (platform == 'Windows');
+
+    public static var osIsLinux(get, never): Bool;
+    private static inline function get_osIsLinux() return (platform == 'Linux');
+
+    public static var osIsDarwin(get, never): Bool;
+    private static inline function get_osIsDarwin() return (platform == 'Linux');
+
+    public static var osIsNix(get, never): Bool;
+    private static inline function get_osIsNix() return (osIsLinux || osIsDarwin);
+
 /* === Variables === */
 
     private static var _platform : Null<String> = null;
