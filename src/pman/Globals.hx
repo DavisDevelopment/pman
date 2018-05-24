@@ -21,7 +21,7 @@ import pman.db.AppDir;
 import pman.edb.*;
 import pman.edb.PManDatabase;
 import pman.display.ColorScheme;
-
+import pman.events.KeyboardControls;
 
 #end
 
@@ -57,6 +57,15 @@ class Globals {
       */
     public static inline function wait(ms:Int, f:Void->Void) {
         Eg.wait(ms, f);
+    }
+
+    /**
+      schedules [f] to be called [time_ms] milliseconds after 'createTimeout' is called
+      NOTE: returns the function that cancels it
+     **/
+    public static function createTimout(time_ms:Int, f:Void->Void):Void->Void {
+        var _id = window.setTimeout(f, time_ms);
+        return window.clearTimeout.bind( _id );
     }
 
     /**
@@ -167,6 +176,9 @@ class Globals {
 
     public static var bpmain(get, never):BPlayerMain;
     private static inline function get_bpmain() return BPlayerMain.instance;
+
+    public static var kbCtrl(get, never):KeyboardControls;
+    private static inline function get_kbCtrl() return bpmain.keyboardControls;
 
     public static var player(get, never):Player;
     private static inline function get_player() return bpmain.player;
