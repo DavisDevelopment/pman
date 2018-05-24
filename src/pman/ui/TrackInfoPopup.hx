@@ -92,17 +92,20 @@ class TrackInfoPopup extends Dialog {
             save();
         });
 
-        var kbc = bpmain.keyboardCommands;
-        kbc.registerModeHandler('track-info', function(event) {
-            return ;
-        });
+        var kbc = bpmain.keyboardControls;
+        var kbmode:String = kbc.mode;
+        //kbc.mode = 'noop';
+        //kbc.registerModeHandler('track-info', function(event) {
+            //return ;
+        //});
 
         on('open', untyped function() {
-            kbc.mode = 'track-info';
+            kbmode = kbc.mode;
+            kbc.mode = 'noop';
         });
 
         on('close', untyped function() {
-            kbc.mode = 'default';
+            kbc.mode = kbmode;
         });
     }
 
