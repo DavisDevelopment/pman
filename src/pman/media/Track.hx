@@ -584,9 +584,9 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * move [this] Track to Trash (delete it)
       */
-    private function _delete(?done : Void->Void):Void {
+    private function _delete(?done : VoidCb):Void {
         if (done == null)
-            done = (function() null);
+            done = done.nn();
 
         var name = title;
         var tdel = new TrackDelete(this, main.db.mediaStore);
