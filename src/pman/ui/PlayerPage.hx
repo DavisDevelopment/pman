@@ -53,7 +53,12 @@ class PlayerPage extends Page {
 		var win = body.application.win;
 		var canvas = win.document.createCanvasElement();
 		append(new Element( canvas ));
-		stage = new Stage( canvas );
+
+		stage = new Stage(canvas, {
+            capture_events: {
+                keyboard: false
+            }
+		});
 		stage.fill();
 
         player.view.stage = stage;
