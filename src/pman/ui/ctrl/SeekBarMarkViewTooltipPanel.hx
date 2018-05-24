@@ -7,7 +7,8 @@ import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
 import tannus.math.Percent;
-import tannus.events.*;
+import tannus.events.MouseEvent;
+import pman.events.KeyboardEvent;
 import tannus.events.Key;
 
 import gryffin.core.*;
