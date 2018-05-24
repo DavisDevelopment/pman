@@ -27,13 +27,16 @@ import pman.media.info.Mark;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
+import pman.events.*;
 import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 import pman.ui.ctrl.SeekBar;
 
 import motion.Actuate;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+//import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -348,7 +351,9 @@ class SeekBarMarkViewTooltip extends Ent {
         bar.controls.unlockUiVisibility();
         bar.bmnav = false;
         player.currentTime = markView.time;
-        @:privateAccess player.app.keyboardCommands._nextKeyDown = [];
+
+        //@:privateAccess player.app.keyboardCommands._nextKeyDown = [];
+        kbCtrl.clearNextKeyNet(KeyDown);
     }
 
     private static inline function dbl<T:Float>(x: T):T return (x * 2);
