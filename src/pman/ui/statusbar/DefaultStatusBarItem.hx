@@ -16,7 +16,9 @@ import pman.display.media.*;
 import pman.ui.ctrl.*;
 
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+//import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 import motion.Actuate;
 import motion.easing.*;
