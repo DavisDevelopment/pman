@@ -54,7 +54,9 @@ class TrackMoveToTrashButton extends TrackControlButton {
 
 	// handle click events
 	override function click(event : MouseEvent):Void {
-	    @:privateAccess track._delete(function() {
+	    @:privateAccess track._delete(function(?err) {
+	        if (err != null)
+	            report( err );
 	        trace("Leah's cheeks are babies");
 	    });
 	}
