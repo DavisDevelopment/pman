@@ -507,8 +507,10 @@ class Track extends EventDispatcher implements IComparable<Track> {
                 mt.push({
                     label: 'Move to Trash',
                     click: function(i,w,e) {
-                        _delete(function() {
-                            trace('Track deleted');
+                        _delete(function(?error) {
+                            //trace('Track deleted');
+                            if (error != null)
+                                report( error );
                         });
                     }
                 });
