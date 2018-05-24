@@ -7,8 +7,9 @@ import tannus.events.*;
 import tannus.media.Duration;
 import tannus.graphics.Color;
 import tannus.math.Percent;
-import tannus.events.*;
+import tannus.events.MouseEvent;
 import tannus.events.Key;
+import pman.events.KeyboardEvent;
 
 import gryffin.core.*;
 import gryffin.display.*;
@@ -31,7 +32,9 @@ import pman.async.SeekbarPreviewThumbnailLoader as ThumbLoader;
 
 import Slambda.fn;
 import tannus.math.TMath.*;
-import gryffin.Tools.*;
+//import gryffin.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -54,7 +57,7 @@ class SeekBar extends Ent {
         viewed = new Rect();
         hoverLocation = null;
         hovered = false;
-        lhct = now;
+        lhct = now();
 
         thumb = new ThumbPreviewBox( this );
         markViewPanel = new SeekBarMarkViewTooltipPanel( this );
@@ -93,20 +96,20 @@ class SeekBar extends Ent {
             bmnav = true;
             playerView.controls.lockUiVisibility();
             playerView.controls.showUi();
-            player.app.keyboardCommands.nextKeyDown( bmnavHandler );
+
+            //player.app.keyboardCommands.nextKeyDown( bmnavHandler );
+            kbCtrl.nextKeyDown( bmnavHandler );
         }
     }
 
     /**
       * cancel a bookmark-navigation in progress
       */
-    public inline function abortBookmarkNavigation():Void {
+    public function abortBookmarkNavigation():Void {
         if ( bmnav ) {
             playerView.controls.unlockUiVisibility();
-            var kbc = player.app.keyboardCommands;
-            if (@:privateAccess !kbc._nextKeyDown.empty()) {
-                kbc.unNextKeyDown();
-            }
+
+            kbCtrl.clearNextKeyNet(KeyDown);
             bmnav = false;
             dispatch('bmnav:abort', this);
         }
@@ -115,12 +118,15 @@ class SeekBar extends Ent {
     /**
       * the bookmark-navigation handler
       */
-    private function bmnavHandler(event : KeyboardEvent):Void {
+    private function bmnavHandler(mode, event:KeyboardEvent):Void {
         // handle the last keydown event captured after bookmark-navigation is completed
         if ( !bmnav ) {
             playerView.controls.unlockUiVisibility();
-            player.app.keyboardCommands.unNextKeyDown();
-            return defer(player.app.keyboardCommands.handleDefault.bind( event ));
+            kbCtrl.clearNextKeyNet(KeyDown);
+
+            return defer(function() {
+                kbCtrl.giveEvent(event, 'default');
+            });
         }
 
         switch ( event.key ) {
@@ -150,34 +156,23 @@ class SeekBar extends Ent {
         }
 
         markViewPanel.handle_bmnav( event );
+
         if ( bmnav ) {
-            defer(function() {
-                player.app.keyboardCommands.nextKeyDown( bmnavHandler );
-            });
+            //defer(function() {
+                kbCtrl.nextKeyDown( bmnavHandler );
+            //});
         }
         else {
             playerView.controls.unlockUiVisibility();
         }
-
-        /*
-        for (mv in markViews) {
-            var hkey = mv.hotKey();
-            if (hkey != null && hkey.key == event.key && hkey.shift == event.shiftKey) {
-                mv.tooltip.activate();
-                player.currentTime = mv.time;
-                break;
-            }
-        }
-        bmnav = false;
-        playerView.controls.unlockUiVisibility();
-        */
     }
 
     /**
       * schedule the 'capture' of the next keydown event for bm-navigation
       */
-    private function bmcn():Void {
-        defer(player.app.keyboardCommands.nextKeyDown.bind(bmnavHandler.bind(_)));
+    private inline function bmcn():Void {
+        //defer(player.app.keyboardCommands.nextKeyDown.bind(bmnavHandler.bind(_)));
+        kbCtrl.nextKeyDown( bmnavHandler );
     }
 
     /**
@@ -421,10 +416,10 @@ class SeekBar extends Ent {
         if (hovered && hoverLocation != null) {
             var hoverStatusChanged:Bool = (!lastHovered || (lastHoverLocation == null || !hoverLocation.equals( lastHoverLocation )));
             if ( hoverStatusChanged ) {
-                lhct = now;
+                lhct = now();
             }
             else {
-                var sinceLast:Float = (now - lhct);
+                var sinceLast:Float = (now() - lhct);
                 // if the last hover-status change was more than 2.5sec ago, and no thumbnail is currently being loaded
                 if (sinceLast > 800 && !loadingThumbnail) {
                     // if there is already a thumbnail loaded, and it was loaded more recently than the last hover-status change
@@ -601,7 +596,7 @@ class SeekBar extends Ent {
                     cp.then(function( canvas ) {
                         thumbnail = {
                             image: canvas,
-                            loadedAt: now
+                            loadedAt: now()
                         };
                         loadingThumbnail = false;
                     });
