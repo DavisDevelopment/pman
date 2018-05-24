@@ -233,17 +233,13 @@ class KeyboardControls {
             case LetterS:
                 /* when <shift> key is pressed with S */
                 if ( event.shiftKey ) {
+                    player.snapshot();
+                }
+                else if ( event.noMods ) {
                     /* net the next KeyDown event */
                     enterModeSubcategory('S')
                     .nextKeyDown(function(m, event) {
-                        /* when S is pressed alone */
-                        if (m.isTimedOut()) {
-                            null;
-                        }
-                        /* if we've captured the next key */
-                        else {
-                            s_cmd(m, event);
-                        }
+                        s_cmd(m, event);
                     });
                 }
 
