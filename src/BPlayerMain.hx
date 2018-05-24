@@ -128,8 +128,10 @@ class BPlayerMain extends Application {
 
             // await readiness of the Player
             playerPage.onPlayerReady(function(p : Player) {
-                keyboardCommands = new KeyboardCommands( this );
-                keyboardCommands.bind();
+                keyboardControls = new KeyboardControls();
+                keyboardControls.bind();
+                //keyboardCommands = new KeyboardCommands( this );
+                //keyboardCommands.bind();
 
                 dragManager = new DragDropManager( this );
                 dragManager.init();
@@ -456,7 +458,8 @@ class BPlayerMain extends Application {
     public var engine : Engine;
 	public var playerPage : Null<PlayerPage>;
 	public var browserWindow : BrowserWindow;
-	public var keyboardCommands : KeyboardCommands;
+	//public var keyboardCommands : KeyboardCommands;
+	public var keyboardControls : KeyboardControls;
 	//public var appDir : AppDir;
 	//public var db : PManDatabase;
 	public var dragManager : DragDropManager;
