@@ -56,6 +56,7 @@ class KeyboardControls {
         modeHandlers = new Map();
         //sequence_map = new Array();
         nextCount = 1;
+        cnku = new Set();
 
         var dm = createMode('default', {
             down: defaultKeyDown,
@@ -102,6 +103,7 @@ class KeyboardControls {
             /* create mark */
             case LetterM:
                 player.addBookmark();
+                cancelNextKeyUp(LetterM);
 
             case _:
                 return ;
@@ -467,7 +469,21 @@ class KeyboardControls {
       the default event listener for 'keyup' events
      **/
     private function defaultKeyUp(m:KbCtrlModeHandler, event:KeyboardEvent):Void {
-        return ;
+        if (cnku.exists( event.key )) {
+            event.preventDefault();
+            cnku.remove( event.key );
+        }
+        else {
+            //
+        }
+    }
+
+    /**
+      schedule the .preventDefault() of the next 'keyup' event of a given type
+     **/
+    private function cancelNextKeyUp(key: Key):KeyboardControls {
+        cnku.push( key );
+        return this;
     }
 
     private function numkey(n:Int, e:KeyboardEvent) {
@@ -665,6 +681,7 @@ class KeyboardControls {
     var nextCountLocked: Bool = false;
 
     var controlModeSubcategory:Null<String> = null;
+    var cnku:Set<Key>;
 
     public var mode: String;
 
