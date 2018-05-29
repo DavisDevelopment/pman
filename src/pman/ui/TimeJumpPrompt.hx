@@ -10,9 +10,12 @@ import tannus.html.Element;
 import tannus.events.*;
 import tannus.events.Key;
 import tannus.math.Time;
+import tannus.math.Percent;
 
 import pman.core.*;
 import pman.Globals.*;
+import pman.format.time.TimeExpr;
+import pman.format.time.TimeParser;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -22,7 +25,12 @@ using tannus.ds.StringUtils;
 using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
+using tannus.FunctionTools;
+using tannus.ds.AnonTools;
 
+/**
+  models the dialog box used for time-jumps
+ **/
 class TimeJumpPrompt extends PromptBox {
     /* Constructor Function */
     public function new():Void {
@@ -329,6 +337,7 @@ class TimeJumpPrompt extends PromptBox {
     public function readTime(player:Player, ?done:VoidCb):Void {
         open();
         setTime( player.currentTime );
+        /*
         once('time', function(type : TimeJumpType) {
             switch type {
                 case TTAbsolute( time ):
@@ -336,6 +345,34 @@ class TimeJumpPrompt extends PromptBox {
 
                 case TTRelative( time ):
                     player.currentTime += time.toFloat();
+            }
+        */
+        once('time', function(expr: TimeExpr) {
+            //trace(''+ expr);
+            switch expr {
+                case ETime(time):
+                    player.currentTime = time.toFloat();
+
+                case EPercent(perc):
+                    player.currentTime = perc.of( player.durationTime );
+
+                case ERel(op, expr):
+                    var seconds:Float = switch expr {
+                        case ETime(time): time.totalSeconds;
+                        case EPercent(perc): perc.of( player.durationTime );
+                        case _: 0.0;
+                    };
+                    switch op {
+                        case Minus:
+                            seconds = -seconds;
+
+                        case _:
+                            null;
+                    }
+                    player.currentTime += seconds;
+
+                case _:
+                    throw '$expr not supported';
             }
 
             // hide this view
@@ -361,43 +398,26 @@ class TimeJumpPrompt extends PromptBox {
       * check that [this]'s value is valid input
       */
     public function isValidInput():Bool {
-        var pattern:EReg = ~/(?:[+-]*)((?:\d|\.)+:?)+/;
-        var text:String = value;
-        if (pattern.match( text )) {
-            try {
-                var jump = parse();
-
-                inline function isValidTimeFloat(time: Float):Bool {
-                    return (time.isFinite() && !time.isNaN());
-                }
-
-                inline function isValidTime(time: Time):Bool {
-                    return (time != null && isValidTimeFloat(time.toFloat()));
-                }
-
-                return (switch jump {
-                    case TTAbsolute(time), TTRelative(time): isValidTime( time );
-                    case _: false;
-                });
-            }
-            catch (error: Dynamic) {
-                return false;
-            }
-        }
-        else {
-            return false;
-        }
+        return true;
     }
 
     /**
       * the user has just attempted to 'submit'
       */
     public function attemptSubmit():Void {
-        if (isValidInput()) {
+        //if (isValidInput()) {
+        if ( true ) {
             //dispatch('time', getTime());
-            var type = parse();
-            trace( type );
-            dispatch('time', type);
+            //var type = parse();
+            //trace( type );
+            //try {
+                var expr = TimeParser.run( value );
+                dispatch('time', expr);
+            //}
+            //catch (err: Dynamic) {
+                //report( err );
+                //close();
+            //}
         }
         else {
             select();
@@ -405,39 +425,8 @@ class TimeJumpPrompt extends PromptBox {
         }
     }
 
-    /**
-      lightly parse [this]'s input
-     **/
-    private function parse():TimeJumpType {
-        var s:String = value;
-        var rel:Bool = false, plus:Bool = false;
-
-        if (s.startsWith('+')) {
-            rel = true;
-            plus = true;
-            s = s.after('+');
-        }
-        else if (s.startsWith('-')) {
-            rel = true;
-            s = s.after('-');
-        }
-
-        var time:Time = Time.fromString( s );
-        var seconds:Float = time.toFloat();
-        if (rel && !plus) {
-            seconds = -seconds;
-        }
-
-        return (rel ? TimeJumpType.TTRelative : TimeJumpType.TTAbsolute)(Time.fromFloat( seconds ));
-    }
-
 /* === Instance Fields === */
 
-}
-
-enum TimeJumpType {
-    TTAbsolute(time: Time);
-    TTRelative(time: Time);
 }
 
 private typedef SegmentBound = {
