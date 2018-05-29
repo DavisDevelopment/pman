@@ -651,18 +651,11 @@ class Player extends EventDispatcher {
 	  * capture snapshot of media
 	  */
 	public function snapshot(?done : VoidCb):Void {
-	    // create a callback if none was provided
-		if (done == null) {
-		    // create a new [done] callback
-			done = (function(?error: Dynamic) {
-				if (error != null)
-				    report( error );
-			});
-		}
+	    done = done.nn().toss();
 
 		// return out if media isn't video
 	    if (!track.type.match(MTVideo)) {
-	        return ;
+	        return done();
 	    }
 
         // get the Track's bundle
