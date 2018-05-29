@@ -6,27 +6,31 @@ import tannus.geom.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
 import tannus.math.*;
+import tannus.async.*;
 
 import gryffin.display.Image;
 
-import pman.async.*;
 import pman.async.tasks.*;
 import pman.media.info.BundleItemType;
 import pman.bg.media.Dimensions;
 
 import tannus.math.TMath.*;
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 import Slambda.fn;
 
 using tannus.math.TMath;
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.ds.IteratorTools;
-using pman.async.Asyncs;
+using tannus.async.Asyncs;
 
+/**
+  generally models assets stored in a particular media-item's "bundle" folder
+ **/
 class BundleItem {
     /* Constructor Function */
     public function new(bundle:Bundle, name:String):Void {
@@ -52,8 +56,8 @@ class BundleItem {
     }
 
     /**
-      * get [this] item's dimensions
-      */
+      get [this] item's dimensions
+     **/
     public function getDimensions():Dimensions {
         return switch ( type ) {
             case Thumbnail( size ), Snapshot(_, size): size;
@@ -61,8 +65,8 @@ class BundleItem {
     }
 
     /**
-      * get [this] item's time
-      */
+      get [this] item's time (if applicable)
+     **/
     public function getTime():Maybe<Float> {
         return switch ( type ) {
             case Snapshot(time, _): time;
