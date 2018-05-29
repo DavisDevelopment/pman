@@ -2,31 +2,36 @@ package pman.media.info;
 
 import tannus.io.*;
 import tannus.ds.*;
-import tannus.ds.promises.*;
-import tannus.geom.*;
-import tannus.sys.*;
-import tannus.sys.FileSystem as Fs;
+//import tannus.ds.promises.*;
 import tannus.math.*;
+import tannus.geom.*;
+import tannus.sys.Path;
+import tannus.sys.FileSystem as Fs;
+import tannus.async.*;
+import tannus.async.promises.*;
 
 import gryffin.display.Image;
 
-import pman.async.*;
 import pman.async.tasks.*;
 import pman.media.info.BundleItemType;
 import pman.bg.media.Dimensions;
 
 import haxe.Json;
+import haxe.Serializer;
+import haxe.Unserializer;
 
 import tannus.math.TMath.*;
-import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 import Slambda.fn;
 
 using tannus.math.TMath;
+using Slambda;
+using tannus.ds.AnonTools;
+using tannus.FunctionTools;
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
 using tannus.ds.ArrayTools;
-using Slambda;
 using tannus.ds.IteratorTools;
 
 class Bundle {
@@ -45,9 +50,10 @@ class Bundle {
 /* === Instance Methods === */
 
     /**
-      * get a snapshot item
-      */
+      get a snapshot item, and optionally create it if necessary
+     **/
     public function getSnapshot(time:Float, ?size:String):Promise<BundleItem> {
+        /* default size to 100% */
         if (size == null) {
             size = '100%';
         }
@@ -74,8 +80,8 @@ class Bundle {
     }
 
     /**
-      * get an Array of snapshots
-      */
+      get a list of snapshots
+     **/
     public function getMultipleSnapshots(times:Array<Float>, ?size:String):ArrayPromise<BundleItem> {
         if (size == null) {
             size = '10%';
@@ -170,10 +176,6 @@ class Bundle {
         var dim = sizeDimensions( size );
         return path.plusString('s${dim.toString()}@$time.png');
     }
-
-    /**
-      * get path to individual preview
-      */
 
     /**
       * watch [this] Bundle for changes made to its contents
