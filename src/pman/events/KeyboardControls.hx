@@ -457,8 +457,12 @@ class KeyboardControls {
 	    }
 	    return (1.0 / 30.0);
 	}
+
+	/**
+	  calculate the amount of time by which to move for the given Keyboard event
+	 **/
 	function frameTimeDelta(e: KeyboardEvent):Float {
-	    return (frameTimeCoefficient() * flushNextCount() * (e.altKey ? -1 : 0));
+	    return (frameTimeCoefficient() * flushNextCount() * (e.altKey ? -1 : 1));
 	}
 
     /**
