@@ -814,7 +814,7 @@ class Player extends EventDispatcher {
 	public function promptForAddresses(callback : Array<String> -> Void):Void {
 		prompt('Enter Address:', 'http://www.website.com/path/to/video.mp4', function(text : String) {
 			text = text.trim();
-			var url:Url = new Url( text );
+			var url:Url = Url.fromString( text );
 			url = _map_address( url );
 			callback([url]);
 		});
