@@ -7,6 +7,7 @@ import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
 import tannus.math.*;
 import tannus.async.*;
+import tannus.http.Url;
 
 import gryffin.display.Image;
 
@@ -108,6 +109,13 @@ class BundleItem {
     }
 
     /**
+      get a Url object for [this] BundleItem
+     **/
+    public function getUrl():Url {
+        return Url.fromString(getURI());
+    }
+
+    /**
       * load an Image from [this] BundleItem
       */
     @:access( gryffin.display.Image )
@@ -126,9 +134,19 @@ class BundleItem {
         return img;
     }
 
+    /**
+      check whether [this] BundleItem refers to an Image file
+     **/
+    public function isImageItem():Bool {
+        return type.match(Thumbnail(_)|Snapshot(_));
+    }
+
 /* === Instance Fields === */
 
     public var bundle : Bundle;
     public var name : String;
     public var type : BundleItemType;
+
+    var _path: Null<Path> = null;
+    var _uri: Null<Url> = null;
 }
