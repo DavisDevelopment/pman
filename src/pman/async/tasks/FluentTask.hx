@@ -7,6 +7,7 @@ import tannus.sys.FileSystem as Fs;
 import tannus.geom2.Area;
 import tannus.async.*;
 import tannus.node.Buffer;
+import tannus.Nil;
 
 import ffmpeg.Fluent;
 
@@ -23,6 +24,9 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using tannus.async.Asyncs;
 
+/**
+  base-class for classes using fluent-ffmpeg heavily
+ **/
 class FluentTask extends Task1 {
     /* Constructor Function */
     public function new():Void {
