@@ -14,6 +14,7 @@ import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.ctrl.*;
+import pman.ui.views.*;
 
 import tannus.math.TMath.*;
 //import gryffin.Tools.*;
@@ -33,6 +34,8 @@ class DefaultStatusBarItem extends StatusBarItem {
     /* Constructor Function */
     public function new():Void {
         super();
+
+        tbv = new TextBoxView({});
 
         duration = -1;
         tb = new TextBox();
@@ -133,6 +136,8 @@ class DefaultStatusBarItem extends StatusBarItem {
     }
 
 /* === Instance Fields === */
+
+    var tbv: TextBoxView;
 
     // single TextBox for rendering simple text information
     private var tb : TextBox;
