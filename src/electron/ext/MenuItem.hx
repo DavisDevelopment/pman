@@ -32,7 +32,7 @@ typedef MenuItemOptions = {
 	?enabled : Bool,
 	?visible : Bool,
 	?checked : Bool,
-	?submenu : EitherType<Array<MenuItemOptions>, Menu>,
+	?submenu : EitherType<Array<MenuItemOptions>, EitherType<Menu, MenuItem>>,
 	?id : String,
 	?position : String
 };

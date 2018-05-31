@@ -18,8 +18,8 @@ extern class Menu {
 
 	public function new():Void;
 
-	@:overload(function(x:Float, y:Float):Void {})
-	public function popup(?window:BrowserWindow, ?x:Float, ?y:Float):Void;
+	//@:overload(function(x:Float, y:Float):Void {})
+	public function popup(options: {?x:Float,?y:Float,?window:BrowserWindow}):Void;
 	public function append(item : MenuItem):Void;
 	public function insert(pos:Int, item:MenuItem):Void;
 
