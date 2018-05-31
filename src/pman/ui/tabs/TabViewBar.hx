@@ -399,7 +399,10 @@ class TabViewBar extends Ent {
             var pos = event.position;
             buildMenu(function(?error, ?menu) {
                 if (menu != null) {
-                    menu.toMenu().popup(pos.x, pos.y);
+                    menu.toMenu().popup({
+                        x: pos.x,
+                        y: pos.y
+                    });
                 }
             });
         }

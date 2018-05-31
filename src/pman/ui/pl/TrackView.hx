@@ -18,6 +18,7 @@ import vex.core.*;
 
 import electron.ext.*;
 import electron.ext.Dialog;
+//import electron.main.Menu;
 
 import pman.core.*;
 import pman.media.*;
@@ -170,8 +171,8 @@ class TrackView extends Pane {
         else {
             //list.selectTracks.fn(x => false);
             track.buildMenu(function( template ) {
-                var menu:Menu = template;
-                menu.popup();
+                var menu:Menu = Menu.buildFromTemplate(template);
+                menu.popup({});
             });
         }
 	}

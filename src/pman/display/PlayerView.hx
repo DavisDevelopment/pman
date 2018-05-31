@@ -12,6 +12,7 @@ import gryffin.display.*;
 import electron.Tools.*;
 import electron.MenuTemplate;
 import electron.ext.Menu;
+//import electron.main.Menu;
 
 import pman.core.*;
 import pman.display.media.*;
@@ -245,7 +246,10 @@ class PlayerView extends Ent {
         var p = event.position;
         player.buildMenu(function( template ) {
             var menu:Menu = template;
-            menu.popup(p.x, p.y);
+            menu.popup({
+                x: p.x,
+                y: p.y
+            });
         });
     }
 

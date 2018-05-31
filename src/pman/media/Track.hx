@@ -32,7 +32,7 @@ import haxe.extern.EitherType as Either;
 
 import electron.*;
 import electron.Shell;
-import electron.Tools.defer;
+//import electron.Tools.defer;
 import Slambda.fn;
 import tannus.math.TMath.*;
 import pman.Globals.*;
@@ -461,7 +461,7 @@ class Track extends EventDispatcher implements IComparable<Track> {
                         sl.push(this);
                     });
                 }
-                var spli:MenuTemplate = [];
+                var spli:MenuTemplate = new MenuTemplate([]);
                 for (name in main.appDir.allSavedPlaylistNames()) {
                     spli.push({
                         label: name,

@@ -316,9 +316,6 @@ class TabView extends Ent {
       * 'click' event handler
       */
     public function onClick(event : MouseEvent):Void {
-        //var ir = getInnerRect();
-        //var cir:Rectangle = new Rectangle((ir.x + ir.w - ci.width - 3.0), (ir.y + ((ir.h - ci.height) / 2)), ci.width, ci.height);
-        //if (cir.containsPoint( event.position )) {
         if ( closeHovered ) {
             close();
         }
@@ -332,10 +329,14 @@ class TabView extends Ent {
       */
     public function onRightClick(event : MouseEvent):Void {
         event.cancel();
+
         var pos = event.position;
         buildMenu(function(?error, ?menu) {
             if (menu != null) {
-                menu.toMenu().popup(pos.x, pos.y);
+                menu.toMenu().popup({
+                    x: pos.x,
+                    y: pos.y
+                });
             }
         });
     }
