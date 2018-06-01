@@ -1,4 +1,4 @@
-package pman.display.media;
+package pman.display.media.audio;
 
 import tannus.io.*;
 import tannus.ds.*;
@@ -15,6 +15,7 @@ import gryffin.audio.AudioNode;
 import pman.core.*;
 import pman.media.*;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
+import pman.display.media.audio.AudioPipelineNode;
 
 import Std.*;
 import tannus.math.TMath.*;
@@ -24,9 +25,8 @@ import pman.Globals.*;
 using tannus.math.TMath;
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
-using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.ds.ArrayTools;
 using tannus.html.JSTools;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
@@ -344,103 +344,6 @@ class AudioPipeline extends MediaRendererComponent {
 }
 
 /*
-   class used to represent a 'node' in the 'audio pipeline' 
-   as the name implies
-*/
-class AudioPipelineNode {
-    /* Constructor Function */
-    public function new(pipeline: AudioPipeline) {
-        this.iNode = null;
-        this.oNode = null;
-        this.pipeline = pipeline;
-        this.nextNode = null;
-    }
-
-/* === Instance Methods === */
-
-    /**
-      * connect [this] node to the next one in the pipeline
-      */
-    public function connect(nextNode: AudioPipelineNode):Void {
-        if (numberOfOutputs == 0 || nextNode.numberOfInputs == 0) {
-            throw 'Error: Data-flow between these two nodes is impossible';
-        }
-
-        if (numberOfOutputs == 1) {
-            oNode.connect( nextNode.iNode );
-        }
-        else {
-            for (i in 0...numberOfOutputs) {
-                oNode.connect(nextNode.iNode, [i]);
-            }
-        }
-    }
-
-    /**
-      * disconnect [this] Node
-      */
-    public function disconnect():Void {
-        iNode.disconnect();
-        oNode.disconnect();
-    }
-
-    /**
-      * initialize [this] node
-      */
-    public function init():Void {
-        this._initted = true;
-    }
-
-    public inline function isInitted():Bool return _initted;
-
-    /**
-      * set [this]'s node
-      */
-    public inline function setNode(i:Null<AudioNode<NativeAudioNode>>, ?o:Null<AudioNode<NativeAudioNode>>):Void {
-        if (o == null) {
-            o = i;
-        }
-
-        iNode = i;
-        oNode = o;
-    }
-
-    public inline function setNextNode(node: Null<AudioPipelineNode>):Void {
-        this.nextNode = node;
-
-        if (node != null)
-            node.prevNode = this;
-    }
-
-    public inline function setPrevNode(node: Null<AudioPipelineNode>):Void {
-        this.prevNode = node;
-
-        if (node != null) {
-            node.nextNode = this;
-        }
-    }
-
-
-/* === Computed Instance Fields === */
-
-    public var numberOfInputs(get, never):Int;
-    private inline function get_numberOfInputs() return (iNode != null ? iNode.numberOfInputs : 0);
-
-    public var numberOfOutputs(get, never):Int;
-    private inline function get_numberOfOutputs() return (oNode != null ? oNode.numberOfOutputs : 0);
-
-/* === Instance Fields === */
-
-    public var iNode: Null<AudioNode<NativeAudioNode>>;
-    public var oNode: Null<AudioNode<NativeAudioNode>>;
-    public var pipeline: AudioPipeline;
-    public var nextNode(default, null): Null<AudioPipelineNode>;
-    public var prevNode(default, null): Null<AudioPipelineNode>;
-
-    private var _initted:Bool = false;
-}
-
-/*
    class used to represent an AudioPipelineNode that was created functionally
 */
 class FunctionalAudioPipelineNode extends AudioPipelineNode {
@@ -491,5 +394,4 @@ class DestAudioPipelineNode extends AudioPipelineNode {
     }
 }
 
-typedef NativeAudioNode = js.html.audio.AudioNode;
 typedef Fapn = FunctionalAudioPipelineNode;
