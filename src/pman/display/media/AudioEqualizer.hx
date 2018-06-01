@@ -18,7 +18,9 @@ import gryffin.audio.AudioBiquadFilter;
 import pman.core.*;
 import pman.media.*;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
-import pman.display.media.AudioPipeline;
+//import pman.display.media.AudioPipeline;
+import pman.display.media.audio.AudioPipeline;
+import pman.display.media.audio.AudioPipelineNode;
 
 import electron.Tools.defer;
 import Std.*;
@@ -67,10 +69,16 @@ class AudioEqualizer extends MediaRendererComponent {
                 return n;
             }
 
+            /**
+              TODO:
+               document what's going on here and abstract into algorithm for splitting into an 
+               arbitrary number of frequency ranges for visualization purposes
+             **/
             var eqNode = mr.audioManager.createNode({
                 init: function(self: Fapn) {
                     var c = self.pipeline.context;
 
+                    // what are these numbers?
                     bandSplit = [360, 3600];
                     values = [100.0, 100.0, 100.0];
                     gainDb = -40.0;
@@ -126,7 +134,6 @@ class AudioEqualizer extends MediaRendererComponent {
 
                     self.setNode(cast _i, cast sum);
 
-                    trace('URINAL BETTY YEAH');
                     _expose();
                 }
             });
@@ -152,10 +159,18 @@ class AudioEqualizer extends MediaRendererComponent {
         var exposed:Dynamic = {};
         window.expose('PManEqualizer', exposed);
         exposed.defineProperties({
-            values: { get: cast Getter.create( values ) },
-            bandSplit: {get: cast Getter.create(bandSplit)},
-            setBandSplit: {value: this.setBandSplit},
-            setValues: {value: this.setValues},
+            values: {
+                get: cast Getter.create( values ) 
+            },
+            bandSplit: {
+                get: cast Getter.create(bandSplit)
+            },
+            setBandSplit: {
+                value: this.setBandSplit
+            },
+            setValues: {
+                value: this.setValues
+            },
             sync: {
                 value: (function() {
                     syncConfig();

@@ -99,6 +99,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
     }
 
     override function _createAudioVisualizer():Null<AudioVisualizer> {
+        LayeredCircleVisualizer;
         return (switch ( database.configInfo.visualizer ) {
             case 'spectograph':
                 cast new SpectographVisualizer(cast this);

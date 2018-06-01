@@ -13,7 +13,8 @@ import gryffin.audio.*;
 
 import pman.core.*;
 import pman.media.*;
-import pman.display.media.AudioPipeline;
+import pman.display.media.audio.AudioPipeline;
+import pman.display.media.audio.AudioPipelineNode;
 import pman.display.media.LocalMediaObjectRenderer as Lmor;
 
 import electron.Tools.defer;

@@ -13,7 +13,9 @@ import gryffin.media.MediaObject;
 import pman.core.*;
 import pman.media.*;
 
-import electron.Tools.defer;
+import pman.display.media.audio.AudioPipeline;
+import pman.display.media.audio.AudioPipelineNode;
+
 import Std.*;
 import Slambda.fn;
 import tannus.math.TMath.*;

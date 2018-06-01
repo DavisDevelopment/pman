@@ -18,7 +18,9 @@ import pman.core.*;
 import pman.media.*;
 import pman.display.*;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
-import pman.display.media.AudioPipeline;
+//import pman.display.media.AudioPipeline;
+import pman.display.media.audio.AudioPipeline;
+import pman.display.media.audio.AudioPipelineNode;
 
 import Std.*;
 import tannus.math.TMath.*;
