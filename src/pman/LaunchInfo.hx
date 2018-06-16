@@ -42,6 +42,17 @@ class LaunchInfo {
     }
 
     /**
+      convert [this] to a RawLaunchInfo object
+     **/
+    public inline function toRaw():RawLaunchInfo {
+        return {
+            cwd: cwd.toString(),
+            argv: argv.copy(),
+            env: env.toObject()
+        };
+    }
+
+    /**
       create a new LaunchInfo from a raw Json object
      **/
     public static inline function fromRaw(raw : RawLaunchInfo):LaunchInfo {
@@ -59,6 +70,9 @@ class LaunchInfo {
     public var argv: Array<String>;
 }
 
+/**
+  models the LaunchInfo data, in a format that can be sent over IPC
+ **/
 typedef RawLaunchInfo = {
     argv: Array<String>,
     cwd: String,
