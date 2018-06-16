@@ -67,6 +67,10 @@ class PathListConverter {
         return results;
     }
 
+    public static inline function run(paths: Array<Path>):Array<Path> {
+        return (new PathListConverter().convert( paths ));
+    }
+
 /* === Instance Fields === */
 
     public var input : Array<Path>;
