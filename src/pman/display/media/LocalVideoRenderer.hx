@@ -193,10 +193,8 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
             }
 
             if ( player.conf.videoShowVisualizer ) {
-                //var visualizer = new SpectographVisualizer(cast this);
-                //var visualizer = new BarsVisualizer(cast this);
-                var visualizer = new VideoAudioVisualizer(cast this);
-                attachVisualizer(visualizer, done);
+                //var visualizer = new VideoAudioVisualizer(cast this);
+                //attachVisualizer(visualizer, done);
             }
             else {
                 done();
