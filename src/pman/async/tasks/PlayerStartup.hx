@@ -16,6 +16,7 @@ import pman.edb.*;
 import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
+import pman.GlobalMacros.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -72,7 +73,7 @@ class PlayerStartup extends Task1 {
 
         if ( cli ) {
             cfg.restorePreviousSession = false;
-            cfg.autoSaveSession = false;
+            cfg.autoSaveSession = true;
             cfg.push();
 
             //
@@ -88,8 +89,12 @@ class PlayerStartup extends Task1 {
       * perform session-loading startup tasks
       */
     private function startup_load_session(done : VoidCb):Void {
-        var l = (player.app.db.preferences.autoRestore ? startup_load_default_session : startup_confirm_load_session);
-        l( done );        
+        if ( player.app.db.preferences.autoRestore ) {
+            startup_load_default_session( done );
+        }
+        else {
+            startup_confirm_load_session( done );
+        }
     }
 
     /**
@@ -190,8 +195,52 @@ class PlayerStartup extends Task1 {
             i = launchInfo;
         }
 
-        //TODO parse launch info more exhaustively using an ArgParser object
-        paths = absolutes(i.argv, i.cwd, i.env);
+        parseArgs(i.argv, i);
+    }
+
+    /**
+      parse out the given Argument Array
+     **/
+    function parseArgs(argv:Array<String>, ?i:LaunchInfo) {
+        if (i == null)
+            i = launchInfo;
+
+        var flagPattern:RegEx = ~/-{1,2}([\w\d]+)(?:=?(.+))$/gi;
+        var argi:Stack<String> = new Stack( argv ), arg:String;
+
+        // iteration #1
+        while (!argi.empty) {
+            arg = argi.pop();
+
+            if (flagPattern.match( arg )) {
+                var name:String = flagPattern.matched( 1 );
+                try {
+                    var value:String = flagPattern.matched( 2 );
+                    if (value.empty())
+                        throw 'empty';
+
+                    player.flag(name, value);
+                }
+                catch (err: Dynamic) {
+                    player.addFlag( name );
+                }
+            }
+            else {
+                argi.add( arg );
+                break;
+            }
+        }
+
+        var absols:Array<String> = new Array();
+
+        // iteration #2
+        while (!argi.empty) {
+            arg = argi.pop();
+
+            absols.push( arg );
+        }
+
+        paths = absolutes( absols );
     }
 
     /**

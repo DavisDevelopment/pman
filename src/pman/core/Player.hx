@@ -345,7 +345,7 @@ class Player extends EventDispatcher {
 	/**
 	  parse the given Launch Info
 	 **/
-	public inline function parseLaunchInfo(i: LaunchInfo) {
+	public function parseLaunchInfo(info: LaunchInfo):Void {
 	    //TODO
 	}
 
