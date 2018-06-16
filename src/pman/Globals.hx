@@ -177,6 +177,9 @@ class Globals {
     public static var bpmain(get, never):BPlayerMain;
     private static inline function get_bpmain() return BPlayerMain.instance;
 
+    public static var launchInfo(get, never):LaunchInfo;
+    private static inline function get_launchInfo() return bpmain.launchInfo;
+
     public static var kbCtrl(get, never):KeyboardControls;
     private static inline function get_kbCtrl() return bpmain.keyboardControls;
 
