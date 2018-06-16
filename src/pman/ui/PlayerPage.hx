@@ -40,6 +40,8 @@ class PlayerPage extends Page {
 
 		player = new Player(app, this);
 		defer( _playerCreated.announce );
+
+		parseLaunchInfo( main.launchInfo );
 	}
 
 /* === Instance Methods === */
@@ -154,9 +156,10 @@ class PlayerPage extends Page {
 	/**
 	  parse the Launch Info
 	 **/
-	function parseLaunchInfo() {
-	    var i:LaunchInfo = app.launchInfo;
-	    //
+	inline function parseLaunchInfo(i: LaunchInfo):Void {
+	    onPlayerCreated(function(player) {
+	        player.parseLaunchInfo( i );
+	    });
 	}
 
 /* === Instance Fields === */
