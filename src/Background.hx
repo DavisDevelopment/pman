@@ -36,6 +36,9 @@ using Lambda;
 using Slambda;
 using pman.bg.DictTools;
 
+/**
+  manages overarching application logic separate from renderer process
+ **/
 class Background {
 	/* Constructor Function */
 	public function new():Void {
@@ -43,7 +46,8 @@ class Background {
 		ipcCommands = new MainIpcCommands( this );
 		ipcCommands.bind();
 		appDir = new AppDir();
-		//server = new Server( this );
+
+		launchInfo = createLaunchInfo();
 		argParser = new ArgParser();
 	}
 
@@ -617,10 +621,11 @@ class Background {
 	public var appDir : AppDir;
 
 	public var tray : Null<Tray> = null;
-	//public var server : Null<Server> = null;
+
 	private var _p:Null<Path> = null;
 	private var argParser : ArgParser;
 	private var shouldOpen: Bool = true;
+	public var launchInfo: LaunchInfo;
 
 	/* === Class Methods === */
 

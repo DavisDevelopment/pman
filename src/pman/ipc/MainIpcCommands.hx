@@ -31,7 +31,9 @@ class MainIpcCommands extends BaseIpcCommands {
       * bind commands
       */
     public function bind():Void {
-        fbind('GetLaunchInfo', bg.launchInfo, true);
+        fbind('GetLaunchInfo', (function() {
+            return bg.launchInfo.toRaw();
+        }), true);
         fbind('UpdateMenu', bg.updateMenu);
         fbind('Reload', electron.ext.App.relaunch.bind(null).join(bg.close));
     }
