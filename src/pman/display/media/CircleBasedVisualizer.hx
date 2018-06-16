@@ -50,15 +50,6 @@ class CircleBasedVisualizer extends AudioVisualizer {
         super.update( stage );
     }
 
-    override function render(stage:Stage, c:Ctx):Void {
-        super.render(stage, c);
-    }
-
-    /* method which handles the collective task of rendering the 'circles' in this visualization */
-    function drawCircles(c: Ctx) {
-        //TODO
-    }
-
 /* === Instance Fields === */
 
     
@@ -66,7 +57,6 @@ class CircleBasedVisualizer extends AudioVisualizer {
 
 
 /**
-  purpose of class
  **/
 class Circle {
     /* Constructor Function */
