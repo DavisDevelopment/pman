@@ -6,6 +6,7 @@ import tannus.math.Random;
 import tannus.graphics.Color;
 import tannus.node.ChildProcess;
 import tannus.sys.*;
+import tannus.TSys as Sys;
 
 import crayon.*;
 
@@ -405,7 +406,13 @@ class BPlayerMain extends Application {
 	  * parse the given launch info
 	  */
 	public function parseLaunchInfo(info: LaunchInfo):Void {
-	    //TODO
+	    echo( info );
+	    try {
+	        Sys.setCwd( info.cwd );
+	    }
+	    catch (error: Dynamic) {
+	        //TODO
+	    }
 	}
 
 	/**
