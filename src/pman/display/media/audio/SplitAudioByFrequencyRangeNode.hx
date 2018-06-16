@@ -56,7 +56,11 @@ class SplitAudioByFrequencyRangeNode extends AudioPipelineNode {
             return rnodes[rnodes.push(rdn[range] = iso(range)) - 1];
         }
 
-        setNode(cast pipeline.context.createGain(), cast pipeline.context.createGain());
+        var ig, og;
+        ig = pipeline.context.createGain();
+        og = pipeline.context.createGain();
+
+        setNode(cast ig, cast og);
 
         if (rnodes.empty() && !ranges.empty()) {
             for (r in ranges) {
@@ -69,7 +73,15 @@ class SplitAudioByFrequencyRangeNode extends AudioPipelineNode {
       initialize our isolator nodes and patch them into the pipeline
      **/
     override function _afterConnect(next: AudioPipelineNode) {
-        var i = input(), no;
+        var i = input(), o = output(), no;
+        // disconnect [input] from [output]
+        try
+            i.disconnect( o )
+        catch (e: js.html.DOMException) {
+            null;
+        }
+
+        // connect [input] to freq-range isolators
         for (node in rnodes) {
             if (!node.isInitted())
                 node.init();
@@ -78,7 +90,12 @@ class SplitAudioByFrequencyRangeNode extends AudioPipelineNode {
             if (no == null)
                 throw 'Error: No input node defined for range-isolator node';
             i.connect( no );
+
+            // connect isolators back to [output]
+            no.connect( o );
         }
+
+        // now, the pipeline is still intact
     }
 
     public function getFrequencyRangeNodes():Array<FrequencyRangeIsolatorNode> {
