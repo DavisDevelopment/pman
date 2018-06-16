@@ -69,8 +69,8 @@ class AudioPipelineNode {
                 else 
                     for (index in 0...numberOfOutputs)
                         o.connect(i, [index]);
-            default:
-                throw 'Wtf';
+            //default:
+                //throw 'Wtf';
         }
 
         /*
