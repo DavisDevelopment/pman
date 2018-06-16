@@ -285,6 +285,9 @@ class AudioPipeline extends MediaRendererComponent {
         if (tmp == null) {
             throw 'Error: No node to attach to';
         }
+        else {
+            dis( tmp );
+        }
 
         connectNodes(tmp, node);
         connectNodes(node, destNode);
@@ -300,6 +303,8 @@ class AudioPipeline extends MediaRendererComponent {
         }
 
         var tmp = srcNode.nextNode;
+
+        dis( srcNode );
         connectNodes(srcNode, node);
         if (tmp != null) {
             connectNodes(node, tmp);
@@ -323,6 +328,14 @@ class AudioPipeline extends MediaRendererComponent {
     }
 
     private static function call(f: Void->Void):Void f();
+    inline static function dis(n: AudioPipelineNode) {
+        try {
+            n.disconnect();
+        }
+        catch (e: Dynamic) {
+            return ;
+        }
+    }
 
 /* === Instance Fields === */
 
