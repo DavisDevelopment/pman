@@ -137,22 +137,23 @@ class LayeredCircleVisualizer extends CircleBasedVisualizer {
      **/
     inline function draw_circle_type(c:Ctx, rect:Rect<Float>, d:AudioData<Int>, ?mod:DrawMod) {
         c.save();
+
         var pos = circPos( rect );
         var path = buildCirclePath(d, pos, mod);
 
         try {
-            c.fillStyle = getGradient(c, pos);
+            c.fillStyle = player.theme.secondary;
         }
         catch (e: Dynamic) {
             c.fillStyle = 'peachpuff';
         }
-        c.fill( path );
-
-        c.strokeStyle = player.theme.secondary.darken( 18 );
-        c.lineWidth = 1.0;
         c.shadowBlur = 7.0;
         c.shadowColor = '#FFF';
-        c.stroke( path );
+        c.fill( path );
+
+        //c.strokeStyle = player.theme.secondary.darken( 18 );
+        //c.lineWidth = 1.0;
+        //c.stroke( path );
 
         c.restore();
     }
