@@ -407,6 +407,7 @@ class BPlayerMain extends Application {
 	  */
 	public function parseLaunchInfo(info: LaunchInfo):Void {
 	    echo( info );
+
 	    try {
 	        Sys.setCwd( info.cwd );
 	    }

@@ -57,6 +57,7 @@ class Background {
 	 * start [this] Background script
 	 */
 	public function start():Void {
+	    /* parse command-line arguments */
         parseArgs(Sys.args());
 
         // fixed SingleInstance implementation
@@ -481,52 +482,90 @@ class Background {
       * parse command-line arguments
       */
     private function parseArgs(argv : Array<String>):Void {
-        handleSpecialArgs( argv );
+        var special:Bool = handleSpecialArgs( argv );
 
-        var spec = argParser.parse( argv );
-        trace( spec );
-        var executor = new DirectiveExecutor(clapi());
-        executor.exec( spec );
+        if ( !special ) {
+            var spec = argParser.parse( argv );
+            var executor:DirectiveExecutor = new DirectiveExecutor(clapi());
+            executor.exec( spec );
+        }
+    }
+
+    inline function setArgv(a: Array<String>):Array<String> {
+        return launchInfo.argv = a;
     }
 
     /**
       * command-line-api initialization
       */
     private function clapi():DirectiveSpec {
-        var spec = new DirectiveSpec('[toplevel]');
+        /**
+          Top-Level Spec
+         **/
+        var spec:DirectiveSpec = new DirectiveSpec('[toplevel]');
+
+        /* Flags */
         spec.flag('background-only');
+
+        /* Executor */
         spec.executor(function(c, argv, flags, params) {
             if (flags.exists('background-only')) {
                 shouldOpen = false;
-                trace('GET MY URINAL');
+                setArgv([]);
+            }
+            else {
+                setArgv( argv );
             }
         });
+
+        /**
+          "Betty" Spec
+         **/
         spec.sub('betty', function(betty) {
+            /* Flags */
             betty.flag('--urinal');
+
+            /* Executor */
             betty.executor(function(c, argv, flags, params) {
                 trace('WAEL!');
             });
         });
+
         return spec;
     }
 
     /**
       * handle special command-line arguments used during or immediately after installation
       */
-    private function handleSpecialArgs(argv: Array<String>):Void {
+    private function handleSpecialArgs(argv: Array<String>):Bool {
+        /**
+          handle debian installation
+         **/
         if (argv[0] == '--debian-install') {
             shouldOpen = false;
+
+            return true;
         }
+
+        /**
+          handle squirrel (Windows) installation
+         **/
         else if (argv.length == 2) {
-            var squirrelEvent = argv[1];
+            var squirrelEvent:String = argv[1];
             switch ( squirrelEvent ) {
                 case '--squirrel-install', '--squirrel-updated':
                     //TODO at least create a shortcut
                     close();
 
+                    return true;
+
                 default:
-                    return ;
+                    return false;
             }
+        }
+        
+        else {
+            return false;
         }
     }
 
@@ -540,15 +579,23 @@ class Background {
             trace(' -- background process ready -- ');
         #end
 
+        // update the tray menu
         updateTray();
 
+        // if not flagged otherwise, open player window
         if ( shouldOpen ) {
+            // update application menu
             updateMenu();
+
+            // open player window
             openPlayerWindow(function( bw ) {
                 //server.init();
             });
         }
 
+        /**
+          set the 'pman' application to auto-launch at startup
+         **/
         #if release
         var pmanAutoLauncher = Type.createInstance(js.Lib.require('auto-launch'), [{
             name: 'PMan'
@@ -573,8 +620,8 @@ class Background {
 	}
 
 	/**
-	  * when an attempt is made to launch a second instance of [this] application
-	  */
+	  when an attempt is made to launch [this] application while an instance is already running
+	 **/
 	private function _onSecondaryLaunch(args:Array<String>, scwd:String):Void {
 		//var info = launchInfo();
 		//ic.send(playerWindow, 'LaunchInfo', [info]);
