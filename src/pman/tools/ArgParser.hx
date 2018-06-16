@@ -64,10 +64,12 @@ class ArgParser {
     }
 
     /**
-      * handle the next arg
-      */
+      handle the next argument
+     **/
     private function parseNext():Void {
-        var c = peek();
+        var c:String = peek();
+
+        /* handle flags */
         if (isFlag( c )) {
             c = pop();
             if (c.trim() == '--') {
@@ -77,6 +79,8 @@ class ArgParser {
                 parseFlag( c );
             }
         }
+
+        /* handle commands */
         else if (isCommand( c )) {
             c = pop();
 
@@ -88,11 +92,16 @@ class ArgParser {
                 dir.addArg(dealias( c ));
             }
         }
+
+        /* handle arguments */
         else {
             expr().addArg(pop());
         }
     }
 
+    /**
+      de-alias the given identifier
+     **/
     private dynamic function dealias(s: String):String {
         for (set in aliases) {
             if (set.has( s )) {
@@ -102,6 +111,9 @@ class ArgParser {
         return s;
     }
 
+    /**
+      parse out the given flag
+     **/
     private function parseFlag(flag: String):Void {
         flag = dealias( flag );
         while (flag.startsWith('-'))
@@ -116,30 +128,41 @@ class ArgParser {
     }
 
     /**
-      * check if the given String seems to represent a command-line flag
-      */
+      check whether the given String seems to represent a command-line flag
+     **/
     private inline function isFlag(c : String):Bool {
         return c.startsWith('-');
     }
 
+    /**
+      check whether the given String seems to be a command identifier
+     **/
     private inline function isCommand(c: String):Bool return commands.has( c );
 
     private inline function peek(?d : Int):String return argv.peek( d );
     private inline function pop():String return argv.pop();
     private inline function expr():DirectiveExpr return (dir != null ? dir : top);
 
-    private function initDir(n: String):DirectiveExpr {
+    /**
+      create and return a new DirectiveExpr
+     **/
+    inline function initDir(n: String):DirectiveExpr {
         commitDir();
         return dir = new DirectiveExpr( n );
     }
 
+    /**
+      do the stuff
+     **/
     private function commitDir():Bool {
         if (dir != null) {
             top.addChild( dir );
             dir = null;
             return true;
         }
-        else return false;
+        else {
+            return false;
+        }
     }
 
 /* === Computed Instance Fields === */
@@ -157,6 +180,9 @@ class ArgParser {
     public var commands: Array<String>;
 }
 
+/**
+  an 'expression' of a command-line directive
+ **/
 class DirectiveExpr {
     public var name: String;
     public var flags: Dict<String, Dynamic>;
