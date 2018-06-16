@@ -154,6 +154,27 @@ class GlobalMacros {
     }
 
     /**
+      * if [v] passes a non-null and an optional secondary test, do [whenValid]
+      */
+    public static macro function tqm(nullableValue:Expr, whenNotNull:Expr, whenNull:Expr, rest:Array<Expr>) {
+        var test:Expr = (macro (_ != null));
+        if (rest.length > 0) {
+            test = rest.shift();
+        }
+        test = test.replace(macro _, nullableValue);
+
+        whenNotNull = whenNotNull.replace(macro _, nullableValue);
+        whenNull = whenNull.replace(macro _, nullableValue);
+
+        return (macro {
+            if ($test)
+                $whenNotNull
+            else 
+                $whenNull;
+        });
+    }
+
+    /**
       * utility method for creating a Void->Void method
       */
     public static macro function void(body: Expr):ExprOf<Void->Void> {
