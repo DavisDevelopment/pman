@@ -130,8 +130,10 @@ class Player extends EventDispatcher {
 	            throw error;
             }
             else {
-                //_test_tty(stage);
-                _test_curses( stage );
+                #if (debug || !release)
+                    //_test_tty(stage);
+                    _test_curses( stage );
+                #end
             }
 	    });
 	}
@@ -338,6 +340,13 @@ class Player extends EventDispatcher {
 
 	        });
 	    });
+	}
+
+	/**
+	  parse the given Launch Info
+	 **/
+	public inline function parseLaunchInfo(i: LaunchInfo) {
+	    //TODO
 	}
 
 	/**
