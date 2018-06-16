@@ -12,7 +12,6 @@ import gryffin.display.*;
 import gryffin.media.MediaObject;
 import gryffin.audio.*;
 
-//import pman.async.AlbumArtLoader;
 import pman.async.tasks.LoadAlbumArt;
 import pman.core.*;
 import pman.media.*;
@@ -61,7 +60,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
     override function update(stage : Stage):Void {
         super.update( stage );
 
-        if (prefs.directRender && underlay != null) {
+        if (albumArt != null) {
             var imgSize:Rect<Float> = new Rect(0.0, 0.0, albumArt.width, albumArt.height);
             var viewport:Rect<Float> = pv.rect.clone();
             var scale:Float = marScale(imgSize, viewport);
@@ -72,7 +71,13 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
             aar.centerX = viewport.centerX;
             aar.centerY = viewport.centerY;
             
-            underlay.setRect( aar );
+            if (underlay != null)
+                underlay.setRect( aar );
+            pv.mediaRect = aar.clone();
+            contentRect = aar;
+        }
+        else {
+            contentRect = pv.rect.clone();
         }
         //if (visualizer != null) {
             //visualizer.update( stage );
@@ -174,4 +179,6 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
 	
 	public var albumArt : Null<Image> = null;
 	public var underlay : Null<AlbumArtUnderlay> = null;
+
+	public var contentRect: Rect<Float>;
 }
