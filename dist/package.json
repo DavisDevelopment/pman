@@ -1,6 +1,6 @@
 {
   "name": "pman",
-  "version": "0.8.5",
+  "version": "0.8.8",
   "description": "Cross-Platform Media Player/Manager",
   "repository": "http://github.com/DavisDevelopment/pman",
   "homepage": "http://github.com/DavisDevelopment/pman",
@@ -46,9 +46,9 @@
     "discovery"
   ],
   "dependencies": {
-    "auto-launch": "latest",
+    "auto-launch": "^5.0.5",
     "cheerio": "^1.0.0-rc.2",
-    "chromecast-api": "latest",
+    "chromecast-api": "^0.2.5",
     "discovery": "^1.1.0",
     "express": "^4.16.3",
     "fluent-ffmpeg": "^2.1.2",
@@ -71,7 +71,7 @@
     "electron-devtools-installer": "latest",
     "electron-installer-debian": "latest",
     "electron-packager": "latest",
-    "electron-winstaller": "latest",
+    "electron-winstaller": "^2.6.4",
     "less": "^2.7.3",
     "prompt": "^1.0.0",
     "uglify-js": "^2.8.22"
