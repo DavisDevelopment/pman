@@ -21,9 +21,10 @@ import pman.display.media.LocalMediaObjectRenderer in Lmor;
 import pman.display.media.audio.AudioPipeline;
 import pman.display.media.audio.AudioPipelineNode;
 
-import electron.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
