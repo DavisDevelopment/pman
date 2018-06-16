@@ -172,39 +172,18 @@ class Background {
             {
                 label: 'Preferences',
                 click: function(i,w) {
-                    /* FIXME
-                    ic.send(w, 'EditPreferences');
-                    */
                     tap( 'EditPreferences' );
                 }
             },
             {
                 label: 'About',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.notify({
-                        text: 'betty',
-                        duration: 60000,
-                        color: '#28e63f',
-                        backgroundColor: '#222222',
-                        fontSize: '16pt'
-                    });
-                    */
                     browserOpen( 'https://github.com/DavisDevelopment/pman' );
                 }
             },
             {
                 label: 'Help',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.notify({
-                        text: 'you require help?\n\n\n - git gud',
-                        duration: 60000,
-                        color: '#28e63f',
-                        backgroundColor: '#222222',
-                        fontSize: '16pt'
-                    });
-                    */
                     browserOpen( 'https://github.com/DavisDevelopment/pman/wiki/Help' );
                 }
             },
@@ -238,9 +217,6 @@ class Background {
                 label: 'Open File(s)',
                 accelerator: 'CommandOrControl+O',
                 click: function(i:MenuItem, w:BrowserWindow) {
-                    /* FIXME
-                    ic.send(w, 'OpenFile');
-                    */
                     tap( 'OpenFile' );
                 }
             },
@@ -248,9 +224,6 @@ class Background {
                 label: 'Open Directory',
                 accelerator: 'CommandOrControl+F',
                 click: function(i:MenuItem, w:BrowserWindow) {
-                    /* FIXME
-                    ic.send(w, 'OpenDirectory');
-                    */
                     tap( 'OpenDirectory' );
                 }
             },
@@ -258,9 +231,6 @@ class Background {
             {
                 label: 'Save Playlist',
                 click: function(i, w:BrowserWindow) {
-                    /* FIXME
-                    ic.send(w, 'SavePlaylist');
-                    */
                     tap( 'SavePlaylist' );
                 }
             }
@@ -275,9 +245,6 @@ class Background {
                 label: 'Playlist',
                 accelerator: 'CommandOrControl+L',
                 click: function(i, w:BrowserWindow) {
-                    /* FIXME
-                    ic.send(w, 'TogglePlaylist');
-                    */
                     tap( 'TogglePlaylist' );
                 }
             },
@@ -299,18 +266,12 @@ class Background {
                 label: 'Clear',
                 accelerator: 'CommandOrControl+W',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.send(w, 'ClearPlaylist');
-                    */
                     tap( 'ClearPlaylist' );
                 }
             },
             {
                 label: 'Shuffle',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.send(w, 'ShufflePlaylist');
-                    */
                     tap( 'ShufflePlaylist' );
                 }
             },
@@ -318,9 +279,6 @@ class Background {
                 label: 'Save',
                 accelerator: 'CommandOrControl+S',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.send(w, 'SavePlaylist', [false]);
-                    */
                     call('SavePlaylist', false);
                 }
             },
@@ -328,18 +286,12 @@ class Background {
                 label: 'Save As',
                 accelerator: 'CommandOrControl+Shift+S',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.send(w, 'SavePlaylist', [true]);
-                    */
                     call('SavePlaylist', true);
                 }
             },
             {
                 label: 'Export',
                 click: function(i, w) {
-                    /* FIXME
-                    ic.send(w, 'ExportPlaylist');
-                    */
                     tap('ExportPlaylist');
                 }
             }
@@ -360,9 +312,6 @@ class Background {
                 playlistsOptions.submenu.push({
                     label: name,
                     click: function(i, w) {
-                        /* FIXME
-                        ic.send(w, 'LoadPlaylist', [name]);
-                        */
                         call('LoadPlaylist', name);
                     }
                 });
@@ -378,9 +327,6 @@ class Background {
             {
                 label: 'Take Snapshot',
                 click: function(i,w) {
-                    /* FIXME
-                    ic.send(w, 'Snapshot');
-                    */
                     tap( 'Snapshot' );
                 }
             },
@@ -388,9 +334,6 @@ class Background {
             {
                 label: 'Bookmarks',
                 click: function(i,w) {
-                    /* FIXME
-                    ic.send(w, 'EditMarks');
-                    */
                     tap( 'EditMarks' );
                 }
             },
@@ -401,9 +344,6 @@ class Background {
                 {
                     label: 'Skim Media',
                     click: function(i,w) {
-                        /* FIXME
-                        ic.send(w, 'AddComponent', untyped ['skim']);
-                        */
                         call('AddComponent', 'skim');
                     }
                 }
@@ -529,11 +469,6 @@ class Background {
       * handle signal from player window to add route to given path
       */
     public function httpServe(path : Path):String {
-        //if (server == null) {
-            //server = new Server( this );
-            //server.init();
-        //}
-        //return server.serve( path );
         return 'not today, sir';
     }
 
