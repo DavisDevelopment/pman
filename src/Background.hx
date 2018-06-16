@@ -430,18 +430,12 @@ class Background {
 	/**
 	  * Get launch info
 	  */
-	public function launchInfo():RawLaunchInfo {
+	public inline function createLaunchInfo():LaunchInfo {
 	    var cwd = Sys.getCwd();
-        //var paths = argParser.paths;
         var argv = Sys.args();
         var env = MapTools.toObject(Sys.environment());
 
-	    return {
-            cwd: cwd,
-            env: env,
-            argv: argv
-            //paths: paths.map.fn(_.toString())
-	    };
+	    return new LaunchInfo(cwd, argv, env);
 	}
 
 	/**
