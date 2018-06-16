@@ -12,7 +12,9 @@ import gryffin.display.*;
 
 import electron.ext.*;
 import electron.ext.Dialog;
-import electron.Tools.*;
+
+import edis.Globals.*;
+import pman.Globals.*;
 
 import pman.core.*;
 import pman.media.*;
@@ -68,6 +70,7 @@ class PlayerPage extends Page {
         var w = app.win;
 		w.expose('player', player);
 		w.exposeGetter('track', Getter.create(player.track));
+		w.exposeGetter('visualizer', Getter.create((untyped player.view.currentMediaRenderer)._av));
 	}
 
 	/**
@@ -146,6 +149,14 @@ class PlayerPage extends Page {
 	            f( p );
 	        });
 	    });
+	}
+
+	/**
+	  parse the Launch Info
+	 **/
+	function parseLaunchInfo() {
+	    var i:LaunchInfo = app.launchInfo;
+	    //
 	}
 
 /* === Instance Fields === */

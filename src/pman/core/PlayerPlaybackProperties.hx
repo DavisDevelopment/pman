@@ -10,6 +10,9 @@ import electron.Tools.defer;
 
 using tannus.math.TMath;
 
+/**
+  persistent playback & view-related application-state information
+ **/
 class PlayerPlaybackProperties {
 	/* Constructor Function */
 	public function new(speed:Float, volume:Float, shuffle:Bool, muted:Bool=false, ?repeat:RepeatType, scale:Float=1.0):Void {

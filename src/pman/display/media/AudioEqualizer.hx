@@ -54,6 +54,9 @@ class AudioEqualizer extends MediaRendererComponent {
             if (error != null) {
                 return done( error );
             }
+            else if ( true ) {
+                return done();
+            }
 
             inline function bq(c:AudioContext, type:BiquadFilterType, frequency:Float, gain:Float):AudioBiquadFilter {
                 var n = c.createBiquadFilter();
