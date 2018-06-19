@@ -48,6 +48,7 @@ class Preferences extends JsonFileStorage {
 
     public var autoPlay:Bool = false;
     public var autoRestore:Bool = false;
+
     public var showAlbumArt:Bool = false;
     public var showSnapshot:Bool = true;
     public var directRender:Bool = true;
