@@ -58,7 +58,8 @@
     "natural": "^0.5.4",
     "nedb": "^1.8.0",
     "send-seekable": "^1.0.4",
-    "underscore": "^1.8.3"
+    "underscore": "^1.8.3",
+    "winreg": "^1.2.4"
   },
   "devDependencies": {
     "ajv": "^6.0.0",
