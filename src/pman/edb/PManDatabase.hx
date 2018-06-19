@@ -9,6 +9,7 @@ import tannus.sys.FileSystem as Fs;
 
 import pman.Paths;
 import pman.ds.OnceSignal as ReadySignal;
+import pman.core.ApplicationState;
 import pman.Globals.*;
 
 import edis.libs.nedb.DataStore;
@@ -76,6 +77,14 @@ class PManDatabase extends Database {
             defer(function() {
                 configInfo = new ConfigInfo();
                 preferences = new Preferences();
+
+                next();
+            });
+        });
+
+        require(function(next) {
+            defer(function() {
+                appState = new ApplicationState();
 
                 next();
             });
@@ -150,6 +159,7 @@ class PManDatabase extends Database {
 
     public var configInfo : ConfigInfo;
     public var preferences : Preferences;
+    public var appState : ApplicationState;
     
     //private var rs : ReadySignal;
 }
