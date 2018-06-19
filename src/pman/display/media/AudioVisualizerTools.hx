@@ -103,6 +103,17 @@ class AVDataContainerTools {
         };
     }
 
+    public static inline function getRightChannelData(con: AVDataContainer):EAudioData {
+        return switch con {
+            case Duo(_, r)|Trio(_,_,r): AVDataValueTools.getSingleValue(r);
+            case _: throw 'Error: Right channel unavailable';
+        };
+    }
+
+    public static inline function getStereo(con: AVDataContainer):Array<EAudioData> {
+        return [getLeftChannelData(con), getRightChannelData(con)];
+    }
+
     static inline function ed1<T:Float>(x: AVDataValue):AudioData<T> return AVDataValueTools.getOnlyData( x );
 }
 
