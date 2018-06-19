@@ -3,9 +3,12 @@ package pman.events;
 import tannus.io.Signal;
 import tannus.io.Signal2;
 import tannus.io.VoidSignal;
+import tannus.async.VoidPromise;
 
 import haxe.extern.EitherType;
 import haxe.Constraints.Function;
+
+import edis.Globals.defer;
 
 using Slambda;
 using tannus.ds.ArrayTools;
@@ -19,7 +22,7 @@ class EventEmitter {
 
 /* === Instance Methods === */
 
-    private function addSignal<T:Sig>(name:String, ?signal:T):EventEmitter {
+    function addSignal<T:Sig>(name:String, ?signal:T):EventEmitter {
         var entry:EventEntry;
         if ((signal is VoidSignal)) {
             entry = Zero(cast signal);
@@ -39,11 +42,37 @@ class EventEmitter {
         return this;
     }
 
-    private inline function _getEntry(name: String):Null<EventEntry> {
+    function removeSignal(name: String):Bool {
+        var entry = _getEntry( name );
+        if (entry == null)
+            return false;
+        else {
+            switch entry {
+                case Zero(s):
+                    s.clear();
+
+                case One(s):
+                    s.clear();
+
+                case Two(s):
+                    s.clear();
+
+                case _:
+                    throw 'Error: Invalid signal type';
+            }
+            return true;
+        }
+    }
+
+    inline function hasSignal(name: String):Bool {
+        return _sigs.exists( name );
+    }
+
+    inline function _getEntry(name: String):Null<EventEntry> {
         return _sigs[name];
     }
 
-    private function _sig(name: String):Null<EventEntry> {
+    inline function _sig(name: String):Null<EventEntry> {
         if (__checkEvents && !_sigs.exists( name )) {
             throw 'Error: Event "$name" must be declared first';
         }
@@ -72,7 +101,7 @@ class EventEmitter {
         }
     }
 
-    private function _triggerEvent<A, B>(name:String, ?a:A, ?b:B):Void {
+    inline function _triggerEvent<A, B>(name:String, ?a:A, ?b:B):Void {
         switch (_sig( name )) {
             case null:
                 //
@@ -97,6 +126,20 @@ class EventEmitter {
 
     public function once<F:Function>(name:String, handler:F):Void {
         _addEventListener(name, handler, true);
+    }
+
+    public function scheduleDispatch<A,B>(name:String, ?a:A, ?b:B):VoidPromise {
+        return new VoidPromise(function(done, raise) {
+            defer(function() {
+                try {
+                    dispatch(name, a, b);
+                    done();
+                }
+                catch (err: Dynamic) {
+                    raise( err );
+                }
+            });
+        });
     }
 
 /* === Instance Fields === */
