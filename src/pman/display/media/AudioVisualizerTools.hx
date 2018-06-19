@@ -96,6 +96,13 @@ class AVDataContainerTools {
         };
     }
 
+    public static inline function getLeftChannelData(con:AVDataContainer):EAudioData {
+        return switch con {
+            case Duo(l, _)|Trio(l,_,_): AVDataValueTools.getSingleValue(l);
+            case _: throw 'Error: Left Channel unavailable';
+        };
+    }
+
     static inline function ed1<T:Float>(x: AVDataValue):AudioData<T> return AVDataValueTools.getOnlyData( x );
 }
 
