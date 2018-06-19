@@ -15,11 +15,14 @@ import gryffin.audio.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.display.media.AudioVisualizer;
 import pman.display.media.LocalMediaObjectRenderer in Lmor;
+import pman.ds.ProxyModel;
 
-import electron.Tools.defer;
 import Std.*;
 import tannus.math.TMath.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using tannus.math.TMath;
 using StringTools;
@@ -28,14 +31,18 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.async.Asyncs;
+using pman.display.media.AudioVisualizerTools;
 
+/**
+  visualizes audio data via spectogram
+ **/
 class SpectographVisualizer extends AudioVisualizer {
     /* Constructor Function */
     public function new(r):Void {
         super( r );
 
-        leftData = null;
-        rightData = null;
+        dataSpec = Trio(Mono(UInt8TimeDomain), Mono(UInt8TimeDomain), Mono(UInt8TimeDomain));
+
         colors = null;
     }
 
@@ -45,12 +52,19 @@ class SpectographVisualizer extends AudioVisualizer {
       * when [this] is attached to the Media
       */
     override function attached(done : VoidCb):Void {
-        super.attached(done.wrap(function(_, ?error) {
-            fftSize = 512;
-            smoothing = 0.00;
+        super.attached( done );
+    }
 
-            _(error);
-        }));
+    /**
+      initialize [this]
+     **/
+    override function initialize(done: VoidCb):Void {
+        config({
+            fftSize: 512,
+            smoothing: 0.0
+        });
+
+        done();
     }
 
     /**
@@ -61,11 +75,6 @@ class SpectographVisualizer extends AudioVisualizer {
 
         if (player.track.type.match( MTVideo )) {
             viewport = player.view.mediaRect;
-            //var r = viewport.clone();
-            //viewport.height = 100.0;
-            //viewport.y = (r.y + r.height - r.height);
-
-            // take on the same dimensions as the status bar
             viewport.pull( player.view.statusBar.rect );
         }
     }
@@ -73,13 +82,13 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * render [this]
       */
-    override function render(stage:Stage, c:Ctx):Void {
+    override function paint(c: Ctx):Void {
         c.save();
 
         var r = viewport;
         c.clearRect(r.x, r.y, r.w, r.h);
 
-        waveform(stage, c);
+        waveform( c );
 
         c.restore();
     }
@@ -87,67 +96,68 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * draw the waveform
       */
-    private function waveform(stage:Stage, c:Ctx):Void {
+    inline function waveform(c: Ctx):Void {
         var colors = getColors();
 
-        pullData();
+        if (vdat != null && vdat.isStereo()) {
+            var stereo = vdat.getStereo().map(ed -> ed.toByteAudioData());
+            var ldat = stereo[0], rdat = stereo[1];
 
-        if (leftData != null && rightData != null) {
             if ( solidRender ) {
-                // 
-                //drawFilledWaveformPaths(c, ['peachpuff'], [leftData, rightData], [null, {value: invert}]);
                 c.save();
                 c.globalCompositeOperation = 'lighter';
+
                 drawFilledWaveformPaths(c, [
                 {
-                    data: [leftData, leftData],
+                    data: [ldat, ldat],
                     fillStyle: colors[0],
                     mod: [null, {value: invert}]
                 },
                 {
-                    data: [rightData, rightData],
+                    data: [rdat, rdat],
                     fillStyle: colors[2],
                     mod: [{value: diminish.bind(_, 0.22)}, {value: diminishedInvert.bind(_, 0.22)}]
                 }
                 ]);
+                
                 c.restore();
             }
             else if ( doubleRender ) {
 
                 // draw the left-channel data
-                drawWaveformPath(c, 1, colors[3], leftData);
+                drawWaveformPath(c, 1, colors[3], ldat);
 
                 // draw the right channel data
-                drawWaveformPath(c, 1, colors[1], rightData, {
+                drawWaveformPath(c, 1, colors[1], rdat, {
                     value: invert
                 });
 
                 // draw the left-channel data
-                drawWaveformPath(c, 2, colors[0], leftData, {
+                drawWaveformPath(c, 2, colors[0], ldat, {
                     value: diminish.bind(_, 0.22)
                 });
 
                 // draw the right channel data
-                drawWaveformPath(c, 2, colors[2], rightData, {
+                drawWaveformPath(c, 2, colors[2], rdat, {
                     value: diminishedInvert.bind(_, 0.22)
                 });
 
                 // draw the left channel, inverted and diminished
-                drawWaveformPath(c, 1, colors[3], leftData, {
+                drawWaveformPath(c, 1, colors[3], ldat, {
                     value:  diminishedInvert.bind(_, 0.44)
                 });
 
                 // draw the right channel, diminished
-                drawWaveformPath(c, 1, colors[1], rightData, {
+                drawWaveformPath(c, 1, colors[1], rdat, {
                     value: diminish.bind(_, 0.44)
                 });
             }
             else {
                 // draw the left-channel data
-                drawWaveformPath(c, 3, colors[0], leftData);
+                drawWaveformPath(c, 3, colors[0], ldat);
 
                 // draw the right channel data
-                drawWaveformPath(c, 3, colors[2], rightData, {
+                drawWaveformPath(c, 3, colors[2], rdat, {
                     value: invert
                 });
             }
@@ -157,7 +167,7 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * divide the given AudioData into two AudioDatas
       */
-    private function split(d : AudioData<Int>):Pair<AudioData<Int>, AudioData<Int>> {
+    inline function split(d : AudioData<Int>):Pair<AudioData<Int>, AudioData<Int>> {
         var mid:Int = floor(d.length / 2);
         return new Pair(d.slice(0, mid), d.slice(mid));
     }
@@ -165,7 +175,7 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * draw waveform path
       */
-    private function drawWaveformPath(c:Ctx, lineWidth:Float, strokeStyle:Dynamic, data:AudioData<Int>, ?mod:Mod):Void {
+    inline function drawWaveformPath(c:Ctx, lineWidth:Float, strokeStyle:Dynamic, data:AudioData<Int>, ?mod:Mod):Void {
         c.beginPath();
         c.strokeStyle = strokeStyle;
         c.lineWidth = lineWidth;
@@ -176,7 +186,7 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * draw a filled waveform path
       */
-    private function drawFilledWaveformPaths(c:Ctx, paths:Array<FwpDecl>):Void {
+    inline function drawFilledWaveformPaths(c:Ctx, paths:Array<FwpDecl>):Void {
         for (w in paths) {
             c.beginPath();
             c.fillStyle = w.fillStyle;
@@ -290,18 +300,6 @@ class SpectographVisualizer extends AudioVisualizer {
 	}
 
     /**
-      * pull data
-      */
-    private function pullData():Void {
-        var shouldPull:Bool = (configChanged || player.getStatus().match(Playing));
-        if ( shouldPull ) {
-            leftData = leftAnalyser.getByteTimeDomainData();
-            rightData = rightAnalyser.getByteTimeDomainData();
-            configChanged = false;
-        }
-    }
-
-    /**
 	  * used to decrease the magnitude of the waveform by 1/3
 	  */
 	private function diminish(value:Int, amount:Float):Int {
@@ -342,8 +340,6 @@ class SpectographVisualizer extends AudioVisualizer {
 
 /* === Instance Fields === */
 
-    private var leftData:Null<AudioData<Int>>;
-    private var rightData:Null<AudioData<Int>>;
     private var colors:Null<Array<String>>;
 
     private var doubleRender:Bool = true;
@@ -362,3 +358,4 @@ typedef FwpDecl = {
     mod: Array<Null<Mod>>,
     fillStyle: Dynamic
 }
+
