@@ -103,12 +103,21 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
         });
     }
 
+    /**
+      create the AudioVisualizer instance
+     **/
     override function _createAudioVisualizer():Null<AudioVisualizer> {
-        return cast new LayeredCircleVisualizer(cast this);
-        /*
-        switch database.configInfo.visualizer
-        cases: spectograph, bars
-        */
+        //return cast new LayeredCircleVisualizer(cast this);
+        switch ( database.configInfo.visualizer ) {
+            case 'spectograph', 'bars':
+                return cast new SpectographVisualizer(cast this);
+
+            case 'circle':
+                return cast new LayeredCircleVisualizer(cast this);
+
+            default:
+                return cast new SpectographVisualizer(cast this);
+        }
     }
 
     override function _shouldShowAudioVisualizer():Bool return true;
