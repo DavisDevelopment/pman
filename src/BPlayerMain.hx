@@ -6,6 +6,7 @@ import tannus.math.Random;
 import tannus.graphics.Color;
 import tannus.node.ChildProcess;
 import tannus.sys.*;
+import tannus.internal.CompileTime in Ct;
 import tannus.TSys as Sys;
 
 import crayon.*;
@@ -13,13 +14,8 @@ import crayon.*;
 import electron.ext.*;
 import electron.ext.Dialog;
 import electron.ext.MenuItem;
-import electron.Tools.defer;
 import electron.main.WebContents;
 import electron.renderer.IpcRenderer;
-
-import edis.concurrency.*;
-import hscript.*;
-import hscript.plus.*;
 
 import pman.LaunchInfo;
 import pman.core.*;
@@ -32,10 +28,9 @@ import pman.ipc.RendererIpcCommands;
 import pman.async.*;
 
 import Std.*;
-import tannus.internal.CompileTime in Ct;
-import tannus.TSys as Sys;
 import edis.Globals.*;
 import pman.Globals.*;
+import pman.GlobalMacros.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -131,14 +126,10 @@ class BPlayerMain extends Application {
             playerPage.onPlayerReady(function(p : Player) {
                 keyboardControls = new KeyboardControls();
                 keyboardControls.bind();
-                //keyboardCommands = new KeyboardCommands( this );
-                //keyboardCommands.bind();
 
                 dragManager = new DragDropManager( this );
                 dragManager.init();
 
-                //bgdbTest();
-                //test_edis_streams();
                 test_bdc();
             });
         });
@@ -155,101 +146,25 @@ class BPlayerMain extends Application {
         });
 	}
 
+    /**
+      test the BDC (Binary Delimited-Chunk) format
+     **/
 	private function test_bdc() {
-	    var binData:ByteArray = Ct.readFile('./testbdc.dat');
-	    binData.bigEndian = !binData.bigEndian;
-	    trace( binData );
-	    var parsed = edis.format.bdc.Reader.run({}, binData);
-	    trace( parsed );
+	    function read() {
+            var binData:ByteArray = Ct.readFile('./testbdc.dat');
+            binData.bigEndian = !binData.bigEndian;
+            echo( binData );
+
+            var parsed = edis.format.bdc.Reader.run({}, binData);
+            echo( parsed );
+        }
+
+        function write() {
+            //
+        }
+
+        //TODO
 	}
-
-	/**
-	  * method to comprehensively test the [edis.storage.fs.async.FileSystem] system
-	  */
-	private function test_edis_streams():Void {
-	    var tests:Array<VoidAsync> = new Array();
-	    function test(v: VoidAsync):Void {
-	        tests.push( v );
-	    }
-
-	    var echo = ((x:Dynamic) -> window.console.log( x ));
-	    var raise = (x -> throw x);
-
-	    var fs = edis.storage.fs.async.FileSystem.node();
-	    var path:Path = Path.fromString('/home/ryan/Documents/Resume.pdf');
-	    fs.exists( path ).yep(function() {
-	        var rs = fs.createReadStream(path, {
-                start: 0,
-                end: (3 * 1024 * 1024)
-	        });
-	        rs.onReadable(function() {
-	            trace( rs.readableLength );
-				//trace(rs.read());
-	            rs.onData(function(chunk) {
-	                trace('got chunk: ${chunk.length}');
-	            });
-	        });
-	        rs.onClose(function() {
-	            trace('stream closed');
-	        });
-	        rs.onEnd(function() {
-	            trace('stream ended');
-	        });
-	    }).nope(function() {
-	        throw 'Error: BETTY';
-	    }).unless(function(error) {
-	        throw error;
-	    });
-	}
-
-    /**
-      * test background-compatible database
-      */
-	private function bgdbTest() {
-	    var test = Boss.hire_ww( 'bgdb.worker' );
-	    test.on('ready', function(packet) {
-	        trace( packet.data );
-	    });
-	    test.on('::exception::', function(packet) {
-	        report( packet.data );
-	    });
-
-	    win.expose('sendMedia', function(all:Bool=false) {
-            var ctx = {
-                command: 'media:get',
-                uris: []
-            };
-
-            if (all && player.session.playlist != null) {
-                for (t in player.session.playlist.toArray()) {
-                    ctx.uris.push( t.uri );
-                }
-            }
-            else if (player.track != null) {
-	            ctx.uris.push( player.track.uri );
-	        }
-
-            trace( ctx );
-	        test.send('exec', ctx, null, function(response) {
-	            trace("== GOT A RESPONSE ==");
-	            (untyped win.console.log)(untyped response);
-	        });
-	    });
-	}
-
-    /**
-      * test the new Scripting Engine
-      */
-    /*
-    private function test_scripting():Void {
-        var script = new ScriptState();
-        var code:String = "";//Ct.readFileAsString('res/test_script.js');
-        var result = script.executeString( code );
-        
-        win.console.log( result );
-        //result.say('I need my urinal, boo');
-    }
-    */
 
 	/**
 	  * quit this shit
