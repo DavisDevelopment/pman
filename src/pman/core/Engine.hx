@@ -6,6 +6,8 @@ import tannus.sys.Path;
 import tannus.sys.FileSystem as Fs;
 import tannus.async.*;
 
+import edis.storage.fs.async.FileSystem as AsyncFs;
+
 import pman.core.engine.*;
 import pman.edb.*;
 
@@ -24,6 +26,9 @@ class Engine {
         dialogs = new Dialogs( this );
         appDir = new AppDir();
         db = new PManDatabase();
+
+        /* this line (in theory) is that need be changed in order to have the app use a different means of data storage */
+        fileSystem = AsyncFs.node();
 
         rs = new OnceSignal();
     }
@@ -71,6 +76,16 @@ class Engine {
 
     // utility object for working with files and paths related to the application's location on the host filesystem
     public var appDir : AppDir;
+
+    /**
+      singleton FileSystem instance to be used by the application at large
+      ---
+        this should make future support of additional non-electron platforms 
+        MUCH easier, as most app functions are already generally platform-independent, 
+        and the exceptions to that are almost exclusively FileSystem-driven persistence of
+        application data
+     **/
+    public var fileSystem : AsyncFs;
 
     private var rs: OnceSignal;
 }
