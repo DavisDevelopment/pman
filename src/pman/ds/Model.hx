@@ -68,6 +68,9 @@ class Model extends EventEmitter {
         return (hasProp(key) ? setProp(key, value) : setAttr(key, value));
     }
 
+    /**
+      initialize and/or assign value to the given field
+     **/
     public function add<T>(name:String, value:T, ?options:ModelPropInitOpts<T>):T {
         if (options != null) {
             deleteAttr( name );
@@ -78,15 +81,24 @@ class Model extends EventEmitter {
         }
     }
 
+    /**
+      check for the existence of some field named [k]
+     **/
     public inline function exists(k: String):Bool {
         return (hasAttr(k) || hasProp(k));
     }
 
+    /**
+      delete field [k] from [this]
+     **/
     @:native('rm')
     public inline function delete(k: String):Bool {
         return (deleteAttr(k)||deleteProp(k));
     }
 
+    /**
+      get the value of an attribute of [this]
+     **/
     public inline function getAttr<T>(k: String):Null<T> {
         return _fields_[k];
     }
@@ -95,6 +107,9 @@ class Model extends EventEmitter {
             if (hasAttr( k ))
                 _fields_[k] = v;
             else initAttr(k, v);
+    /**
+      reassign the value of an attribute of [this]
+     **/
     }
     public inline function hasAttr(k: String):Bool {
         return _fields_.exists( k );
@@ -115,8 +130,7 @@ class Model extends EventEmitter {
     public function initProp<T>(name:String, value:T, ?options:ModelPropInitOpts<T>):ModelPropNode<T> {
         options = _fillInitOptions(options != null ? options : {});
 
-        addSignal('change:$name', new Signal2());
-        addSignal('delete:$name', new VoidSignal());
+        _init(name, value);
 
         _props_.set(name, {
             value: VNormal(value),
@@ -138,6 +152,9 @@ class Model extends EventEmitter {
         }
     }
 
+    /**
+      obtain the value of a property of [this] Model
+     **/
     public function getProp<T>(name: String):Null<T> {
         _expire( name );
         if (hasProp(name))
@@ -146,15 +163,24 @@ class Model extends EventEmitter {
             return null;
     }
 
+    /**
+      assign the value of a property of [this] Model
+     **/
     public function setProp<T>(name:String, value:T):T {
         _expire( name );
         return _mpv(addProp(name, value, null).value);
     }
 
+    /**
+      iterate over names of properties of [this] Model
+     **/
     public inline function iterProps():Iterator<String> {
         return _props_.keys();
     }
 
+    /**
+      obtain a Set<String> containing keys for all attributes and properties of [this] Model
+     **/
     public function keyset():Set<String> {
         var keys:Set<String> = new Set();
         keys.pushMany(_fields_.keys());
@@ -182,10 +208,15 @@ class Model extends EventEmitter {
         else return false;
     }
 
+    /**
+    /**
+      serializer method for [this] Model class
+     **/
     @:keep
     private function hxSerialize(s: Serializer) {
         inline function put(x: Dynamic) s.serialize( x );
 
+        /* create manifest of all fields to be serialized */
         var keys:Array<Array<String>> = [
             _fields_.keys(),
             [for (key in iterProps())
@@ -194,36 +225,50 @@ class Model extends EventEmitter {
             ]
         ];
 
+        // serialize the number of keys for each field-type respectively
         put(keys[0].length);
         put(keys[1].length);
         
+        // serialize attributes
         if (!keys[0].empty()) {
             for (key in keys[0]) {
+                // key, value
                 put( key );
                 put(getAttr( key ));
             }
         }
 
+        // serialize properties
         if (!keys[1].empty()) {
             for (key in keys[1]) {
+                // key, property-node (ModelPropNode)
                 put( key );
                 put(_props_[key]);
             }
         }
     }
 
+    /**
+      unserializer method for [this] Model class
+     **/
     @:keep
     private function hxUnserialize(u: Unserializer) {
+        // shorthand function for unserializing values
         inline function get():Dynamic return u.unserialize();
 
+        // call [_init_] (which acts, basically, as the constructor)
         _init_();
+
+        // deserialize the numbers of keys in each field-group respectively
         var len = [(get():Int), (get():Int)];
         
+        // deserialize attributes
         if (len[0] > 0) {
             for (i in 0...len[0])
                 setAttr(get(), get());
         }
 
+        // deserialize properties
         if (len[1] > 0) {
             var key:String;
             for (i in 0...len[1]) {
@@ -234,6 +279,9 @@ class Model extends EventEmitter {
         }
     }
 
+    /**
+      serialize [this] Model instance into a String
+     **/
     public function serialize():String {
         Serializer.USE_CACHE = true;
         return Serializer.run( this );
