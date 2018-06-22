@@ -61,13 +61,11 @@ class Model extends EventEmitter {
             ));
     }
 
-    public function set<T>(k:String, v:T):T {
-        if (hasAttr(k))
-            return setAttr(k, v);
-        else if (hasProp(k))
-            return setProp(k, v);
-        else
-            return setAttr(k, v);
+    /**
+      set the value of a field of [this] Model
+     **/
+    public inline function set<T>(key:String, value:T):T {
+        return (hasProp(key) ? setProp(key, value) : setAttr(key, value));
     }
 
     public function add<T>(name:String, value:T, ?options:ModelPropInitOpts<T>):T {
