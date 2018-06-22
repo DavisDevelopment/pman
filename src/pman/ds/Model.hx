@@ -47,13 +47,18 @@ class Model extends EventEmitter {
         _props_ = new Map();
     }
 
-    public function get<T>(k: String):Null<T> {
-        return
-            if (hasAttr( k ))
-                getAttr( k );
-            else if (hasProp( k ))
-                getProp( k );
-            else null;
+    /**
+      get a field of [this] Model
+      NOTE
+      uses JavaScript-specific syntactic magic to be faster and more concise
+     **/
+    public inline function get<T>(k: String):Null<T> {
+        return cast 
+            (untyped __js__(
+                '{0} || {1}', 
+                getAttr(k),
+                getProp(k)
+            ));
     }
 
     public function set<T>(k:String, v:T):T {
