@@ -35,6 +35,25 @@ class Port<T> {
     }
 }
 
+class FunctionalPort<T> extends Port<T> {
+    var i: Void->Promise<T>;
+    var o: T->VoidPromise;
+
+    public function new(r, w) {
+        super();
+        i = r;
+        o = w;
+    }
+
+    override function read(?cb: Cb<T>):Promise<T> {
+        return (i().toAsync(cb));
+    }
+
+    override function write(data:T, ?cb:VoidCb):VoidPromise {
+        return (o(data).toAsync(cb));
+    }
+}
+
 /*
    typedef describing an Object used to represent the transformation of data through a Port
 */
