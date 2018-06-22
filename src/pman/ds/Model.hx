@@ -12,16 +12,19 @@ import pman.GlobalMacros.*;
 import haxe.Serializer;
 import haxe.Unserializer;
 
+import edis.Globals.*;
+import pman.Globals.*;
+
 using tannus.math.TMath;
 using StringTools;
 using tannus.ds.StringUtils;
-using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.ds.ArrayTools;
+using tannus.ds.IteratorTools;
 using tannus.FunctionTools;
 using tannus.ds.AnonTools;
 using tannus.macro.MacroTools;
 
-//@:genericBuild(pman.ds.ModelBuilder.build())
 class Model extends EventEmitter {
     /* Constructor Function */
     public function new() {
