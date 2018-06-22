@@ -172,6 +172,9 @@ class Globals {
 
 /* === Computed Variables === */
 
+    public static var global(get, never): Dynamic<Dynamic>;
+    static inline function get_global() return js.Lib.global;
+
 #if renderer_process
 
     public static var bpmain(get, never):BPlayerMain;
@@ -230,6 +233,8 @@ class Globals {
     private static inline function get_us() return Eg.us;
 
 #end
+
+
 
     public static var platform(get, never):String;
     private static function get_platform():String {
