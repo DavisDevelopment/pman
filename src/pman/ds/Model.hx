@@ -97,32 +97,79 @@ class Model extends EventEmitter {
     }
 
     /**
+      magical wrapper method for handling the bullshit surrounding 'set' operations
+     **/
+    inline function _changeAttr<T>(key:String, f:Void->T):T {
+        var prev = getAttr(key), ret, delta;
+        //try {
+            ret = f();
+            delta = new Delta(getAttr(key), prev);
+            scheduleDispatch('change:$key', delta.previous, delta.current);
+            scheduleDispatch('change', key, delta);
+        //}
+        //catch (err: Dynamic) {
+            //TODO?
+        //}
+        return ret;
+    }
+
+    /**
+      magical wrapper method for handling the bullshit surrounding 'set' operations
+     **/
+    inline function _changeProp<T>(key:String, f:Void->T):T {
+        var prev = getProp(key), delta, ret;
+        ret = f();
+        delta = new Delta(getProp(key), prev);
+        scheduleDispatch('change:$key', delta.previous, delta.current);
+        scheduleDispatch('change', key, delta);
+        return ret;
+    }
+
+    /**
+      initialize the events associated with [k] and announce the initialization of the field
+     **/
+    inline function _init(k:String, v:Dynamic, announce:Bool=true) {
+        initFieldEvents( k );
+        if ( announce ) {
+            scheduleDispatch('create', k)
+                .then(function() {
+                    dispatch('change', k, new Delta(v, null));
+                    dispatch('change:$k', null, v);
+                }, report);
+        }
+    }
+
+    /**
       get the value of an attribute of [this]
      **/
     public inline function getAttr<T>(k: String):Null<T> {
         return _fields_[k];
     }
-    public inline function setAttr<T>(k:String, v:T):T {
-        return
-            if (hasAttr( k ))
-                _fields_[k] = v;
-            else initAttr(k, v);
+
     /**
       reassign the value of an attribute of [this]
      **/
+    public function setAttr<T>(name:String, value:T):T {
+        return _changeAttr(
+            name,
+            () -> (hasAttr( name ) ? _fields_[name] = value : initAttr(name, value))
+        );
     }
+
     public inline function hasAttr(k: String):Bool {
         return _fields_.exists( k );
     }
+
     public inline function deleteAttr(k: String):Bool {
         return _fields_.remove( k );
     }
-    public inline function initAttr<T>(k:String, v:T):T {
+
+    public function initAttr<T>(k:String, v:T):T {
         deleteProp( k );
-        addSignal('change:$k', new Signal2());
-        addSignal('delete:$k', new VoidSignal());
+        _init(k, v);
         return _fields_[k] = v;
     }
+
     public inline function iterAttrs():Iterator<String> {
         return _fields_.keys().iterator();
     }
@@ -149,6 +196,30 @@ class Model extends EventEmitter {
                 _setpv(name, VNormal(value));
             }
             return cast _props_[name];
+        }
+    }
+
+    /**
+      modify the configuration of a property stored in [_props_]
+     **/
+    public function modProp<T>(name:String, options:ModelPropInitOpts<T>) {
+        if (hasProp( name )) {
+            var node = _props_[name];
+            
+            if (options.timeout != null && (options.timeout < 0 || !options.timeout.isFinite())) {
+                Reflect.deleteField(node, 'expirationDate');
+                Reflect.deleteField(options, 'timeout');
+            }
+
+            options = _fillInitOptions( options );
+            
+            if (options.expirationDate != null) {
+                node.expirationDate = options.expirationDate;
+            }
+
+            if (options.noSave != null) {
+                node.noSave = options.noSave;
+            }
         }
     }
 
@@ -189,26 +260,49 @@ class Model extends EventEmitter {
         return keys;
     }
 
+    /**
+      Iterator<String> for of [keyset]
+     **/
     public function keys():Iterator<String> {
         return keyset().iterator();
     }
 
+    /**
+      check whether [this] Model has a property stored under the given key
+     **/
     public inline function hasProp(name:String):Bool {
         return (_props_.exists( name ) && _checkExpiry( name ));
     }
 
+    /**
+      delete the property indicated by [name]
+     **/
     public function deleteProp(name: String):Bool {
         if (hasProp(name)) {
             _props_.remove( name );
-            dispatch( 'delete:$name' );
-            dispatch('delete', name);
-            removeSignal('delete:$name');
+            deleteFieldEvents( name );
             return true;
         }
         else return false;
     }
 
     /**
+      initialize field-related event-signals
+     **/
+    inline function initFieldEvents(name: String) {
+        addSignal('change:$name', new Signal2());
+        addSignal('delete:$name', new VoidSignal());
+    }
+
+    /**
+      delete and deallocate the event-signals for the given field
+     **/
+    inline function deleteFieldEvents(name: String) {
+        dispatch('delete:$name');
+        dispatch('delete', name);
+        removeSignal('delete:$name');
+    }
+
     /**
       serializer method for [this] Model class
      **/
@@ -283,10 +377,69 @@ class Model extends EventEmitter {
       serialize [this] Model instance into a String
      **/
     public function serialize():String {
-        Serializer.USE_CACHE = true;
-        return Serializer.run( this );
+        var s:Serializer = new Serializer();
+        s.useCache = true;
+        s.serialize( this );
+        return s.toString();
     }
 
+    /**
+      create and return a snapshot of [this]'s data-state
+     **/
+    public function getData(?data_keys:Set<String>, clone:Bool=false):ModelDataState {
+        var kp = keyset_pair(data_keys);
+        var state:ModelDataState = {
+            f: new Anon(),
+            p: new Anon()
+        };
+        //state.f.assign(_fields_);
+        for (key in kp[0])
+            state.f[key] = _fields_[key];
+        for (key in kp[1]) {
+            var node = _props_[key];
+            if (clone)
+                node = node.deepCopy(true);
+            state.p[key] = node;
+        }
+        
+        return state;
+    }
+
+    /**
+      restore [this] Model to the given DataState
+     **/
+    public function putData(state: ModelDataState) {
+        //TODO
+    }
+
+    /**
+      split the given key-set into a pair of keylists, one for attributes and the other for properties
+     **/
+    function keyset_pair(?keys: Set<String>):Array<Set<String>> {
+        if (keys == null) {
+            return [
+                _sset(_fields_.keys()),
+                _sset(_props_.keys().array())
+            ];
+        }
+        else {
+            var pair = [new Set<String>(), new Set<String>()];
+            for (key in keys) {
+                if (hasProp(key)) {
+                    pair[1].push( key );
+                }
+                else {
+                    // if it's not a property, then it's assumed to be a reference to an attribute that may or may not yet exist
+                    pair[0].push( key );
+                }
+            }
+            return pair;
+        }
+    }
+
+    /**
+      remove expired properties
+     **/
     inline function _expire(name: String) {
         if (!_checkExpiry(name)) {
             deleteProp( name );
@@ -304,15 +457,24 @@ class Model extends EventEmitter {
         );
     }
 
+    /**
+      obtain reference to the ModelPropValue for the given property
+     **/
     inline function _getpv<T>(k: String):Null<ModelPropValue<T>> {
         return cast _props_[k].value;
     }
 
+    /**
+      assign the ModelPropValue to the given property
+     **/
     inline function _setpv<T>(k:String, v:ModelPropValue<T>):ModelPropValue<T> {
         return cast _props_[k].value = v;
     }
 
-    inline function _mpv<T>(v: ModelPropValue<T>):T {
+    /**
+      extract concrete value from the given ModelPropValue
+     **/
+    inline static function _mpv<T>(v: ModelPropValue<T>):T {
         return switch v {
             case null: null;
             case VNormal(x): x;
@@ -320,7 +482,16 @@ class Model extends EventEmitter {
         };
     }
 
-    inline function _fillInitOptions<T>(o: ModelPropInitOpts<Dynamic>):ModelPropInitOpts<T> {
+    static function _sset(i: Iterable<String>):Set<String> {
+        var res = new Set();
+        res.pushMany( i );
+        return res;
+    }
+
+    /**
+      fill out/correct the given ModelPropInitOpts object
+     **/
+    inline static function _fillInitOptions<T>(o: ModelPropInitOpts<Dynamic>):ModelPropInitOpts<T> {
         if (o.timeout != null) {
             o.expirationDate = Date.fromTime(Date.now().getTime() + (o.timeout * 1000));
             Reflect.deleteField(o, 'timeout');
@@ -356,3 +527,8 @@ typedef ModelPropInitOpts<T> = {
 enum ModelPropValue<T> {
     VNormal(v: T) :ModelPropValue<T>;
 }
+
+typedef ModelDataState = {
+    var f: Anon<Dynamic>;
+    var p: Anon<ModelPropNode<Dynamic>>;
+};
