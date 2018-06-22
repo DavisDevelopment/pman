@@ -97,77 +97,28 @@ class ModelBuilder {
                 //PROPERTIES;
                 trace('betty');
             }
-
-            /*
-            public inline function $get<V>(name: String):Null<V> {
-                return (d.get(name) : V);
-            }
-
-            public inline function $set<V>(k:String, v:V):V {
-                //return (d.set(k, v) : V);
-                return ((d[k] = v) : V);
-            }
-
-            public inline function $has(k: String):Bool {
-                return d.exists( k );
-            }
-
-            public inline function $del(k: String):Bool {
-                return d.remove( k );
-            }
-
-            var d: Map<String, Dynamic>;
-            */
         }
 
-        //var letters = alphabet();
         var pct:ComplexType = info.type.toComplexType();
         var pak = info.spec.toPathType(true);
         mc.pack = pak.pack;
         mc.name = (pak.sub != null ? pak.sub : pak.name);
-        //trace(mc.pack.concat([mc.name]).join('.'));
-        //var params = getComplexTypeParameters( pct );
 
-        /*
-        if (!info.spec.params.empty()) {
-            mc.params = info.spec.params.map(param -> cast {
-                name: param.name
-            });
-        }
-        */
-
-        var initExprs:Array<Expr> = new Array();
+        var initExprs:Array<Expr> = [];
         var ofields = info.spec.getFieldArray();
+        var meta:MetaAccess;
         for (field in ofields) {
+            meta = field.meta;
+
+            if (meta.has(':noModel'))
+                continue;
+
             switch field.kind {
                 case FVar(_, _):
-                    mc.fields.push({
-                        name: ('get_' + field.name),
-                        pos: Context.currentPos(),
-                        access: [AInline],
-                        kind: FFun({
-                            args: [],
-                            expr: (macro return this.$get($v{field.name})),
-                            ret: null
-                        })
-                    });
-                    mc.fields.push({
-                        name: ('set_' + field.name),
-                        pos: Context.currentPos(),
-                        access: [AInline],
-                        kind: FFun({
-                            args: [{name:'v', type:null}],
-                            expr: (macro return this.$set($v{field.name}, cast v)),
-                            ret: null
-                        })
-                    });
-                    mc.fields.push({
-                        name: field.name,
-                        pos: Context.currentPos(),
-                        access: [APublic],
-                        kind: FProp('get', 'set', field.type.toComplexType())
-                    });
-
+                    var vfl = genVarFieldsFor(field, initExprs.push);
+                    for (x in vfl)
+                        mc.fields.push(x);
+                    
                     var fe = field.expr();
                     if (fe != null) {
                         initExprs.push(macro {
@@ -244,6 +195,64 @@ class ModelBuilder {
         }
         
         return mc;
+    }
+
+    static function genVarFieldsFor(field:ClassField, appendInit:Expr->Int):Array<Field> {
+        var fields = [
+            genVarFieldGetter(field, appendInit),
+            genVarFieldSetter(field, appendInit)
+        ];
+        
+        fields.push({
+            name: field.name,
+            pos: Context.currentPos(),
+            access: [APublic],
+            kind: FProp('get', 'set', field.type.toComplexType())
+        });
+
+        return fields;
+    }
+
+    static function genVarFieldGetter(field:ClassField, appendInit:Expr->Int):Field {
+        var method:String = 'getAttr', isProperty:Bool = false;
+
+        if (field.meta.has(':noSave')) {
+            trace('[== NO-SAVE ==]');
+        }
+        
+        var getter:Field = ({
+            name: ('get_' + field.name),
+            pos: Context.currentPos(),
+            access: [AInline],
+            kind: FFun({
+                args: [],
+                expr: (macro return this.$method($v{field.name})),
+                ret: null
+            })
+        });
+
+        return getter;
+    }
+
+    static function genVarFieldSetter(field:ClassField, appendInit:Expr->Int):Field {
+        var method:String = 'setAttr', isProperty:Bool = false;
+
+        if (field.meta.has('@:noSave')) {
+            //
+        }
+
+        var setter:Field = ({
+            name: ('set_' + field.name),
+            pos: Context.currentPos(),
+            access: [AInline],
+            kind: FFun({
+                args: [{name:'v', type:null}],
+                expr: (macro return this.$method($v{field.name}, cast v)),
+                ret: null
+            })
+        });
+
+        return setter;
     }
 
     static function getInf(t: Type):Null<Inf> {
