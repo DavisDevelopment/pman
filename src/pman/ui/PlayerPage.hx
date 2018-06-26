@@ -1,5 +1,6 @@
 package pman.ui;
 
+import tannus.ds.*;
 import tannus.io.*;
 import tannus.nw.FileChooser;
 import tannus.html.Element;
@@ -70,7 +71,12 @@ class PlayerPage extends Page {
 
         // expose values globally
         var w = app.win;
+        w.expose('engine', engine);
 		w.expose('player', player);
+		w.expose('echo', (x -> w.console.log(x)));
+		var op = new ObjectPath('tannus.sys.Path.fromString');
+		op.set(w, (x -> tannus.sys.Path.fromString(Std.string(x))));
+
 		w.exposeGetter('track', Getter.create(player.track));
 		w.exposeGetter('visualizer', Getter.create((untyped player.view.currentMediaRenderer)._av));
 	}
