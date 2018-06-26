@@ -63,7 +63,7 @@ class EventEmitter {
                 case _:
                     throw 'Error: Invalid signal type';
             }
-            return true;
+            return _sigs.remove( name );
         }
     }
 
@@ -87,20 +87,18 @@ class EventEmitter {
     }
 
     private function _addEventListener<F:Function>(name:String, handler:F, once:Bool=false):Void {
-        inline function _on(s: Dynamic):Function return (once ? s.once : s.on);
-
         switch (_sig( name )) {
             case null:
                 return ;
 
             case Zero(s):
-                _on( s )( handler );
+                (once ? s.once : s.on)(untyped handler);
 
             case One(s):
-                _on(s)(cast handler);
+                s.listen(untyped handler, once);
 
             case Two(s):
-                _on(s)(cast handler);
+                s.listen(untyped handler, once);
         }
     }
 
