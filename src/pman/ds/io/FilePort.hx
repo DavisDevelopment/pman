@@ -25,6 +25,20 @@ using tannus.async.Asyncs;
 using tannus.FunctionTools;
 
 class FilePort extends FileSystemPort <ByteArray> {
+    override function initialize(?done: VoidCb):VoidPromise {
+        return new VoidPromise(function(accept, reject) {
+            fs.exists( path )
+                .then(function(doesExist) {
+                    if ( doesExist ) {
+                        accept();
+                    }
+                    else {
+                        fs.mkdirp( path ).then(accept, reject);
+                    }
+                }).unless( reject );
+        }).toAsync( done );
+    }
+
     override function read(?cb: Cb<ByteArray>):Promise<ByteArray> {
         return fs.read(path, tqm(pos, _.offset, null), tqm(pos, _.length, null)).toAsync( cb );
     }
@@ -33,6 +47,13 @@ class FilePort extends FileSystemPort <ByteArray> {
         return fs.write(path, data, cb);
     }
 
+    override function delete(?done: VoidCb):VoidPromise {
+        return fs.deleteFile(path, done);
+    }
+
+    /**
+      (re)assign the positions at which to read/write data on [this] Port
+     **/
     public function setSlice(?offset:Int, ?length:Int):FilePort {
         if (offset == null && length == null) {
             pos = null;
