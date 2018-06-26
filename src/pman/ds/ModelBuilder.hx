@@ -81,10 +81,10 @@ class ModelBuilder {
       generate implementation class
      **/
     static function createModelClass(info:Inf, pos:Position) {
-        var get = 'getAttr',
-            set = 'setAttr',
-            has = 'hasAttr',
-            del = 'deleteAttr';
+        var names:Array<String> = ['Attr', 'get', 'set', 'has', 'delete'];
+        inline function nam(index, ?suffix):String {
+            return names[index+1] + (suffix!=null?suffix:names[0]);
+        }
 
         /**
           create new class definition
