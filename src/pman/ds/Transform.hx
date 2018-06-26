@@ -113,6 +113,18 @@ class TransformSync<From, To> implements ITransformSync<From, To> {
     public static inline function asyncify<A, B>(f: A -> B):A -> Cb<B> -> Void {
         return ((a:A, cb:Cb<B>) -> cb(null, f(a)));
     }
+
+    public static inline function make<X, Y>(e:X->Y, d:Y->X):TransformSync<X, Y> {
+        return cast new FuncTransformSync(e, d);
+    }
+
+    public static inline function from<X,Y>(ts: ITransformSync<X,Y>):TransformSync<X, Y> {
+        return make(ts.encode, ts.decode);
+    }
+
+    public static inline function create<X,Y>(o: {encode:X->Y, decode:Y->X}):TransformSync<X,Y> {
+        return make(o.encode, o.decode);
+    }
 }
 
 class FuncTransformSync<From, To> extends TransformSync<From, To> {
