@@ -23,8 +23,11 @@ using tannus.ds.ArrayTools;
 using tannus.ds.IteratorTools;
 using tannus.FunctionTools;
 using tannus.ds.AnonTools;
+using tannus.async.Asyncs;
+
 using tannus.macro.MacroTools;
 
+@:expose
 class Model extends EventEmitter {
     /* Constructor Function */
     public function new() {
@@ -39,12 +42,30 @@ class Model extends EventEmitter {
       initialize fields upon construction
      **/
     function _init_() {
+        _sigs = new Map();
+        __checkEvents = true;
+
         addSignal('change', new Signal2());
         addSignal('create', new Signal());
-        addSignal('delete', new Signal());
+        addSignal('delete', new Signal2());
 
         _fields_ = {};
         _props_ = new Map();
+    }
+
+    /**
+      clear all attributes, properties, and event-signals from [this] Model
+     **/
+    public function clear() {
+        for (key in keys()) {
+            delete( key );
+        }
+
+        for (evt in _sigs.keys()) {
+            removeSignal( evt );
+        }
+        
+        _init_();
     }
 
     /**
@@ -160,8 +181,13 @@ class Model extends EventEmitter {
         return _fields_.exists( k );
     }
 
+    /**
+      delete the registry for the given attribute
+     **/
     public inline function deleteAttr(k: String):Bool {
-        return _fields_.remove( k );
+        var rem = _fields_.remove( k );
+        deleteFieldEvents( k );
+        return rem;
     }
 
     public function initAttr<T>(k:String, v:T):T {
@@ -297,7 +323,7 @@ class Model extends EventEmitter {
     /**
       delete and deallocate the event-signals for the given field
      **/
-    inline function deleteFieldEvents(name: String) {
+    function deleteFieldEvents(name: String) {
         dispatch('delete:$name');
         dispatch('delete', name);
         removeSignal('delete:$name');
@@ -312,12 +338,19 @@ class Model extends EventEmitter {
 
         /* create manifest of all fields to be serialized */
         var keys:Array<Array<String>> = [
-            _fields_.keys(),
-            [for (key in iterProps())
-                if (!_props_[key].noSave)
-                    key 
-            ]
+            //_fields_.keys(),
+            //[for (key in iterProps())
+                //if (!_props_[key].noSave)
+                    //key 
+            
+            //]
+            for (x in keyset_pair())
+                x.toArray()
         ];
+
+        // filter keys to ensure that none that won't get serialized are included in the count;
+        keys[1] = keys[1].map.fn(new Pair(_, _props_[_])).filter.fn(_.right == null || _.right.noSave || isExpired(_.right)).map.fn(_.left);
+        keys[1].sort(untyped Reflect.compare);
 
         // serialize the number of keys for each field-type respectively
         put(keys[0].length);
@@ -328,18 +361,57 @@ class Model extends EventEmitter {
             for (key in keys[0]) {
                 // key, value
                 put( key );
-                put(getAttr( key ));
+                put(_fields_[key]);
             }
         }
 
         // serialize properties
         if (!keys[1].empty()) {
+            var node: ModelPropNode<Dynamic>;
             for (key in keys[1]) {
+                // check whether 
+                node = _props_[key];
+                if (node.noSave || isExpired(node))
+                    continue;
+
                 // key, property-node (ModelPropNode)
                 put( key );
-                put(_props_[key]);
+                hxSerializePropertyNode(s, node);
             }
         }
+
+        // serialize [this]'s typename
+        try {
+            put(Type.getClassName(Type.getClass( this )));
+        }
+        catch (err: Dynamic) {
+            put(Type.getClassName(Model));
+        }
+
+        // serialize whether there are additional values
+        put( false );
+    }
+
+    /**
+      serialize a ModelPropNode object
+     **/
+    @:keep
+    function hxSerializePropertyNode(s:Serializer, node:ModelPropNode<Dynamic>) {
+        inline function put(x: Dynamic) s.serialize( x );
+        /*
+        var nv:ModelPropValue = node.value, nva = nv.getParameters();
+        put(nv.getName());
+        put( nva.length );
+        for (x in nva) {
+            put( x );
+        }
+        */
+
+        // do it, sha
+        put( node.value );
+
+        // should I serialize the order in which the properties are saved..?
+        put( node.expirationDate );
     }
 
     /**
@@ -350,6 +422,7 @@ class Model extends EventEmitter {
         // shorthand function for unserializing values
         inline function get():Dynamic return u.unserialize();
 
+        throw 'Error: hxUnserialize should not even get invoked';
         // call [_init_] (which acts, basically, as the constructor)
         _init_();
 
@@ -379,7 +452,8 @@ class Model extends EventEmitter {
     public function serialize():String {
         var s:Serializer = new Serializer();
         s.useCache = true;
-        s.serialize( this );
+        //s.serialize( this );
+        hxSerialize( s );
         return s.toString();
     }
 
@@ -406,10 +480,35 @@ class Model extends EventEmitter {
     }
 
     /**
-      restore [this] Model to the given DataState
+      write the given state onto [this] Model, as-is
      **/
     public function putData(state: ModelDataState) {
-        //TODO
+        for (key in state.f.keys()) {
+            initAttr(key, state.f[key]);
+        }
+
+        var node;
+        for (key in state.p.keys()) {
+            node = state.p[key];
+            if (node == null)
+                continue;
+            else if (isExpired(node))
+                continue;
+
+            addProp(key, _mpv(node.value), {
+                expirationDate: node.expirationDate,
+                noSave: node.noSave
+            });
+        }
+    }
+
+    /**
+      restore [this] Model to the given state
+     **/
+    public function restoreData(state: ModelDataState) {
+        clear();
+        echo( this );
+        putData( state );
     }
 
     /**
@@ -457,6 +556,14 @@ class Model extends EventEmitter {
         );
     }
 
+    static inline function isExpired<T>(node: ModelPropNode<T>):Bool {
+        return (node.expirationDate == null ? false : isMoreRecent(Date.now(), node.expirationDate));
+    }
+
+    static inline function isMoreRecent(l:Date, r:Date):Bool return (compareDates(l, r) >= 0);
+    static inline function isLessRecent(l:Date, r:Date):Bool return (compareDates(l, r) < 0);
+    static inline function compareDates(l:Date, r:Date):Int { return Reflect.compare(l.getTime(), r.getTime()); }
+
     /**
       obtain reference to the ModelPropValue for the given property
      **/
@@ -502,6 +609,70 @@ class Model extends EventEmitter {
         return o;
     }
 
+    /**
+      deserialize a new Model instance from the given String
+     **/
+    public static function deserializeStringToModel<T:Model>(s: String):Null<T> {
+        var state:ModelDataState = deserializeString( s );
+        var model:Model = Type.createEmptyInstance(Type.resolveClass( state.t ));
+        model._init_();
+        model.putData( state );
+        return cast model;
+    }
+
+    public static function deserializeToModel<T:Model>(u: Unserializer):Null<T> {
+        var state:ModelDataState = deserialize( u );
+        var model = Type.createEmptyInstance(Type.resolveClass( state.t ));
+        model._init_();
+        model.putData( state );
+        return cast model;
+    }
+
+    /**
+      do dat serializin' stuff raut der' meh sha
+      (decode a ModelDataState object from [s])
+     **/
+    @:keep
+    public static function deserialize(u: Unserializer):ModelDataState {
+        inline function val():Dynamic return u.unserialize();
+
+        var lens:Array<Int> = [val(), val()];
+        var anons:Array<Anon<Any>> = [
+            new Anon(),
+            new Anon()
+        ];
+
+        switch lens {
+            case [null|0, null|0]:
+                null;
+
+            // valid numbers that require computations
+            case [nattrs, nprops]:
+                for (i in 0...nattrs)
+                    anons[0].set((val():String), val());
+
+                for (i in 0...nprops)
+                    anons[1].set((val():String), (val() : ModelPropNode<Any>));
+
+            case _:
+                null;
+        }
+
+        var type_name:String = val();
+
+        return {
+            f: anons[0],
+            p: cast anons[1],
+            t: type_name
+        };
+    }
+
+    @:keep
+    public static function deserializeString(s: String):ModelDataState {
+        var u = new Unserializer( s );
+        return deserialize( u );
+    }
+
 /* === Computed Instance Fields === */
 /* === Instance Fields === */
 
@@ -531,4 +702,5 @@ enum ModelPropValue<T> {
 typedef ModelDataState = {
     var f: Anon<Dynamic>;
     var p: Anon<ModelPropNode<Dynamic>>;
+    @:optional var t: String;
 };
