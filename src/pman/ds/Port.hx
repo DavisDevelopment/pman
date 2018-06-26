@@ -23,8 +23,12 @@ class Port<T> {
     /* Constructor Function */
     public function new() { }
 
+    public function initialize(?callback: VoidCb):VoidPromise throw 'not implemented';
+
     public function read(?callback: Cb<T>):Promise<T> throw 'not implemented';
     public function write(data:T, ?callback:VoidCb):VoidPromise throw 'not implemented';
+    @:native('_delete')
+    public function delete(?callback: VoidCb):VoidPromise throw 'not implemented';
 
     // transform [this] Port
     public function map<O>(i:T->O, o:O->T):Port<O> {
@@ -38,11 +42,13 @@ class Port<T> {
 class FunctionalPort<T> extends Port<T> {
     var i: Void->Promise<T>;
     var o: T->VoidPromise;
+    var d: Null<Void->VoidPromise>;
 
-    public function new(r, w) {
+    public function new(r, w, ?d) {
         super();
         i = r;
         o = w;
+        this.d = d;
     }
 
     override function read(?cb: Cb<T>):Promise<T> {
@@ -51,6 +57,15 @@ class FunctionalPort<T> extends Port<T> {
 
     override function write(data:T, ?cb:VoidCb):VoidPromise {
         return (o(data).toAsync(cb));
+    }
+
+    override function delete(?cb: VoidCb):VoidPromise {
+        if (d != null) {
+            return d().toAsync( cb );
+        }
+        else {
+            return super.delete( cb );
+        }
     }
 }
 
