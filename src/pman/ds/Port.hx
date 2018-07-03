@@ -101,6 +101,14 @@ class MappedPort<I,O> extends Port<O> {
         return ip.write(m.o(o)).toAsync( cb );
     }
 
+    override function delete(?done: VoidCb):VoidPromise {
+        return ip.delete( done );
+    }
+
+    override function initialize(?done: VoidCb):VoidPromise {
+        return ip.initialize( done );
+    }
+
 /* === Instance Fields === */
 
     var ip: Port<I>;
