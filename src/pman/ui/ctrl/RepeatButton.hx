@@ -74,7 +74,7 @@ class RepeatButton extends ImagePlayerControlButton {
 
 	// get the active icon at any given time
 	override function getIcon():Null<Image> {
-		return _il[(player.repeat.equals( RepeatOff ) ? 0 : 1)];
+		return _il[(player.repeat == RepeatOff ? 0 : 1)];
 	}
 	
 	// handle click events
