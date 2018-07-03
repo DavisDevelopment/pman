@@ -157,7 +157,7 @@ class PlayerController {
         // if media is mounted
         if (session.hasMedia()) {
             // get shorthand for playback-properties
-            var pp = session.pp;
+            var pp = appState.playback;
 
             // copy over playback-properties
             mediaVolume = pp.volume;
@@ -187,7 +187,7 @@ class PlayerController {
                                 // when the next track is ready
                                 ready: function() {
                                     // if autoplay is enabled
-                                    if ( preferences.autoPlay ) {
+                                    if ( pp.autoPlay ) {
                                         // start playing
                                         player.play();
                                     }
@@ -201,7 +201,7 @@ class PlayerController {
                         repeatTrack();
 
                         // if autoplay is enabled
-                        if ( preferences.autoPlay ) {
+                        if ( pp.autoPlay ) {
                             // start playing
                             player.play();
                         }
@@ -215,7 +215,7 @@ class PlayerController {
                         repeatTrack();
 
                         // if autoplay is enabled
-                        if ( preferences.autoPlay ) {
+                        if ( pp.autoPlay ) {
                             // then start playing
                             player.play();
                         }
@@ -225,7 +225,7 @@ class PlayerController {
                         // move forward in the queue
                         player.gotoNext({
                             ready: function() {
-                                if ( preferences.autoPlay ) {
+                                if ( pp.autoPlay ) {
                                     player.play();
                                 }
                             }
@@ -345,37 +345,37 @@ class PlayerController {
      * the current volume
      */
     public var volume(get, set):Float;
-    private inline function get_volume():Float return session.pp.volume;
-    private inline function set_volume(v : Float):Float return (session.pp.volume = v);
+    private inline function get_volume():Float return appState.playback.volume;
+    private inline function set_volume(v : Float):Float return (appState.playback.volume = v);
 
     /**
      * the current playback speed
      */
     public var playbackRate(get, set):Float;
-    private inline function get_playbackRate():Float return session.pp.speed;
-    private inline function set_playbackRate(v : Float):Float return (session.pp.speed = v);
+    private inline function get_playbackRate():Float return appState.playback.speed;
+    private inline function set_playbackRate(v : Float):Float return (appState.playback.speed = v);
 
     /**
      * whether to shuffle tracks
      */
     public var shuffle(get, set):Bool;
-    private inline function get_shuffle():Bool return session.pp.shuffle;
-    private inline function set_shuffle(v : Bool):Bool return (session.pp.shuffle = v);
+    private inline function get_shuffle():Bool return appState.playback.shuffle;
+    private inline function set_shuffle(v : Bool):Bool return (appState.playback.shuffle = v);
 
     /**
      * whether media is muted
      */
     public var muted(get, set):Bool;
-    private inline function get_muted() return session.pp.muted;
-    private inline function set_muted(v) return (session.pp.muted = v);
+    private inline function get_muted() return appState.playback.muted;
+    private inline function set_muted(v) return (appState.playback.muted = v);
 
     public var repeat(get, set):RepeatType;
-    private inline function get_repeat() return session.pp.repeat;
-    private inline function set_repeat(v) return (session.pp.repeat = v);
+    private inline function get_repeat() return appState.playback.repeat;
+    private inline function set_repeat(v) return (appState.playback.repeat = v);
 
     public var scale(get, set):Float;
-    private inline function get_scale() return session.pp.scale;
-    private inline function set_scale(v) return (session.pp.scale = v);
+    private inline function get_scale() return 1.0;
+    private inline function set_scale(v) return 1.0;
 
     /**
      * whether or not the current media has ended
