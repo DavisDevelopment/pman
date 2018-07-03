@@ -57,7 +57,7 @@ class Interpreter {
       * write many variables, from any key->value data structure
       */
     private function env(vars : Dynamic):Void {
-        if ((vars is Map<String, String>)) {
+        if ((vars is haxe.ds.StringMap<Dynamic>)) {
             var sm:Map<String, String> = vars;
             for (k in sm.keys()) {
                 setenv(k, sm[k]);
