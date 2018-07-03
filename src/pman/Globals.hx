@@ -209,6 +209,8 @@ class Globals {
 
     //public static var preferences(get, never):Preferences;
     //private static inline function get_preferences() return database.preferences;
+    public static var appState(get, never): ApplicationState;
+    static inline function get_appState() return engine.db.appState;
 
     public static var window(get, never):Win;
     private static inline function get_window() return Win.current;
