@@ -109,14 +109,28 @@ class SpectographVisualizer extends AudioVisualizer {
 
                 drawFilledWaveformPaths(c, [
                 {
+                    viewport: viewport,
                     data: [ldat, ldat],
                     fillStyle: colors[0],
-                    mod: [null, {value: invert}]
+                    mod: [
+                        null,
+                        {
+                            value: invert
+                        }
+                    ]
                 },
                 {
+                    viewport: viewport,
                     data: [rdat, rdat],
                     fillStyle: colors[2],
-                    mod: [{value: diminish.bind(_, 0.22)}, {value: diminishedInvert.bind(_, 0.22)}]
+                    mod: [
+                        {
+                            value: diminish.bind(_, 0.22)
+                        },
+                        {
+                            value: diminishedInvert.bind(_, 0.22)
+                        }
+                    ]
                 }
                 ]);
                 
@@ -167,7 +181,7 @@ class SpectographVisualizer extends AudioVisualizer {
     /**
       * divide the given AudioData into two AudioDatas
       */
-    inline function split(d : AudioData<Int>):Pair<AudioData<Int>, AudioData<Int>> {
+    inline static function split(d : AudioData<Int>):Pair<AudioData<Int>, AudioData<Int>> {
         var mid:Int = floor(d.length / 2);
         return new Pair(d.slice(0, mid), d.slice(mid));
     }
@@ -176,11 +190,12 @@ class SpectographVisualizer extends AudioVisualizer {
       * draw waveform path
       */
     inline function drawWaveformPath(c:Ctx, lineWidth:Float, strokeStyle:Dynamic, data:AudioData<Int>, ?mod:Mod):Void {
-        c.beginPath();
+        var path = new Path2D();
         c.strokeStyle = strokeStyle;
         c.lineWidth = lineWidth;
-        drawAudioDataVertices(data, c, mod);
-        c.stroke();
+        //drawAudioDataVertices(viewport, data, path, mod);
+        createVertexPath(viewport, data, path, mod);
+        c.stroke( path );
     }
 
     /**
@@ -188,26 +203,47 @@ class SpectographVisualizer extends AudioVisualizer {
       */
     inline function drawFilledWaveformPaths(c:Ctx, paths:Array<FwpDecl>):Void {
         for (w in paths) {
-            c.beginPath();
-            c.fillStyle = w.fillStyle;
-            
-            drawAudioDataPairVertices(w.data, c, w.mod);
+            var path = new Path2D();
+            createVertexPathPair(w.viewport, w.data, path, w.mod);
 
-            c.closePath();
-            c.fill();
+            if (w.fillStyle != null) {
+                c.fillStyle = w.fillStyle;
+                c.fill( path );
+            }
+            if (w.strokeStyle != null) {
+                c.strokeStyle = w.strokeStyle;
+                c.stroke( path );
+            }
         }
     }
 
-	/**
-	  * draw the spectograph for the given AudioData, onto the given Ctx
-	  */
-	public function drawAudioDataVertices(data:AudioData<Int>, c:Ctx, ?mod:Mod, chained:Bool=false, reverse:Bool=false):Void {
-		var mid:Float = viewport.centerY;
-		var sliceWidth:Float = (ceil( viewport.width ) * 1.0 / data.length);
-		var offset:Float, value:Int, n:Float, x:Float=(reverse?viewport.width:0), y:Float;
-		var i:Int = (reverse ? data.length - 1 : 0);
+    /**
+      build a Path2D
+     **/
+    inline function createVertexPath(viewport:Rect<Float>, data:AudioData<Int>, c:Path2D, ?step:(x:Float, y:Float)->Void, ?mod:Mod, chained:Bool=false, reverse:Bool=false):Void {
+        _vertices(viewport, data, function(i, x, y) {
+			if (!chained && i == 0) {
+			    c.moveTo(x, y);
+			}
+            else {
+                c.lineTo(x, y);
+            }
+            if (step != null) {
+                step(x, y);
+            }
+        });
+    }
 
-		while ((reverse ? i >= 0 : i < data.length)) {
+    /**
+      function used for performing iterative tasks with path vertices
+     **/
+    inline function _vertices(viewport:Rect<Float>, data:AudioData<Int>, action:(i:Int,x:Float,y:Float)->Void, ?mod:Mod, chained:Bool=false, reverse:Bool=false):Void {
+        var mid:Float = viewport.centerY;
+        var sliceWidth:Float = (ceil(viewport.width) * 1.0 / data.length);
+        var offset:Float, value:Int, n:Float, x:Float, y:Float;
+        x = reverse ? viewport.width : 0.0;
+        var i:Int = reverse ? data.length -1 : 0;
+        while (reverse ? i >= 0 : i < data.length) {
 			offset = ((data.length / 2) - abs((data.length / 2) - i));
 			offset = (offset / (data.length / 2));
 			if (mod != null && mod.offset != null) {
@@ -216,21 +252,21 @@ class SpectographVisualizer extends AudioVisualizer {
 
 			value = data[i];
 			if (mod != null && mod.value != null) {
-				value = mod.value( value );
+			    value = mod.value( value );
 			}
-			//n = (value / 128.0);
+
 			y = (mid + (mid - ((value / 128.0) * mid)) * offset);
-			(!chained && i == 0 ? c.moveTo : c.lineTo)(x, y);
+			action(i, x, y);
 			x += ((reverse ? -1 : 1) * sliceWidth);
 			i += (reverse ? -1 : 1);
-		}
-	}
+        }
+    }
 
     /**
-      * draw a pair of AudioData<Int> vertices as a single path
-      */
-	public function drawAudioDataPairVertices(datas:Array<AudioData<Int>>, c:Ctx, mods:Array<Null<Mod>>):Void {
-	    var mid:Float = viewport.centerY;
+      full-path vertex creation
+     **/
+    inline function _vertices2(viewport:Rect<Float>, datas:Array<AudioData<Int>>, mods:Array<Null<Mod>>, action:(i:Int, x:Float,y:Float)->Void):Void {
+        var mid:Float = viewport.centerY;
 	    var data:AudioData<Int> = datas[0], mod:Null<Mod> = mods[0];
 	    var sliceWidth:Float = (ceil( viewport.width ) * 1.0 / data.length);
 	    var offset:Float, value:Int, n:Float, x:Float=0, y:Float;
@@ -249,12 +285,7 @@ class SpectographVisualizer extends AudioVisualizer {
 	        }
 
 	        y = (mid + (mid - ((value / 128.0) * mid)) * offset);
-	        if (i == 0) {
-	            c.moveTo(x, y);
-	        }
-            else {
-                c.lineTo(x, y);
-            }
+	        action(i, x, y);
 
             x += sliceWidth;
             i++;
@@ -278,31 +309,42 @@ class SpectographVisualizer extends AudioVisualizer {
 	        }
 
 	        y = (mid + (mid - ((value / 128.0) * mid)) * offset);
-            c.lineTo(x, y);
+            action(i, x, y);
 
             x -= sliceWidth;
             i--;
 	    }
-	}
+    }
+
+    inline function createVertexPathPair(viewport:Rect<Float>, datas:Array<AudioData<Int>>, c:Path2D, mods:Array<Null<Mod>>, ?step:(i:Int, x:Float, y:Float)->Void):Void {
+        _vertices2(viewport, datas, mods, function(i, x, y) {
+            if (i == 0) {
+                c.moveTo(x, y);
+            }
+            else {
+                c.lineTo(x, y);
+            }
+        });
+    }
 
 	/**
 	  * invert data
 	  */
-	private function invert(i : Int):Int {
+	private static function invert(i : Int):Int {
 	    return (255 - i);
 	}
 
     /**
       * invert and diminish data
       */
-	private function diminishedInvert(i:Int, amount:Float):Int {
+	private static function diminishedInvert(i:Int, amount:Float):Int {
 	    return invert(diminish(i, amount));
 	}
 
     /**
 	  * used to decrease the magnitude of the waveform by 1/3
 	  */
-	private function diminish(value:Int, amount:Float):Int {
+	private static function diminish(value:Int, amount:Float):Int {
 		var diff:Int = (128 - value);
 		diff = floor(diff - (amount * diff));
 		return (diff + 128);
@@ -354,8 +396,10 @@ typedef Mod = {
 };
 
 typedef FwpDecl = {
+    viewport: Rect<Float>,
     data: Array<AudioData<Int>>,
     mod: Array<Null<Mod>>,
-    fillStyle: Dynamic
+    ?strokeStyle: Dynamic,
+    ?fillStyle: Dynamic
 }
 
