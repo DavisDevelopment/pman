@@ -25,7 +25,7 @@ import pman.core.PlaybackTarget;
 import pman.async.*;
 import tannus.async.*;
 
-import pman.Globals.*;
+import edis.Globals.*;
 import pman.Globals.*;
 import Slambda.fn;
 
@@ -482,21 +482,23 @@ class PlayerSession {
 	  * save the PlaypackProperties
 	  */
 	public inline function savePlaybackSettings():Void {
-	    Fs.write(psPath(), encodePlaybackSettings());
+		//Fs.write(psPath(), encodePlaybackSettings());
+		appState.save( appState.playback );
 	}
 
 	/**
 	  * load the PlaybackProperties
 	  */
 	public function loadPlaybackSettings():Void {
-	    try {
-	        var data = Fs.read(psPath());
-	        var props = decodePlaybackSettings( data );
-	        playbackProperties.rebase( props );
-	    }
-	    catch (error : Dynamic) {
-	        return ;
-	    }
+	    appState.load(appState.playback);
+		//try {
+			//var data = Fs.read(psPath());
+			//var props = decodePlaybackSettings( data );
+			//playbackProperties.rebase( props );
+		//}
+		//catch (error : Dynamic) {
+			//return ;
+		//}
 	}
 
 	/**
@@ -613,30 +615,35 @@ class PlayerSession {
 	  * listen for events
 	  */
 	private function _listen():Void {
-	    // on any change to the playback properties
-	    playbackProperties.changed.on(function( change ) {
-	        // save the playback settings
-	        savePlaybackSettings();
+        //TODO convert this section to listening to events on the playback-config model
+         //on any change to the playback properties
+		//playbackProperties.changed.on(function( change ) {
+             //save the playback settings
+			//savePlaybackSettings();
 
-	        switch ( change ) {
-                case Volume( d ):
-                    player.dispatch('change:volume', d);
+			//switch ( change ) {
+                //case Volume( d ):
+                    //player.dispatch('change:volume', d);
 
-                case Speed( d ):
-                    player.dispatch('change:speed', d);
+                //case Speed( d ):
+                    //player.dispatch('change:speed', d);
 
-                case Shuffle( nv ):
-                    player.dispatch('change:shuffle', nv);
+                //case Shuffle( nv ):
+                    //player.dispatch('change:shuffle', nv);
 
-                case Muted( nv ):
-                    player.dispatch('change:muted', nv);
+                //case Muted( nv ):
+                    //player.dispatch('change:muted', nv);
 
-				case Repeat( nv ):
-                    player.dispatch('change:repeat', nv);
+				//case Repeat( nv ):
+                    //player.dispatch('change:repeat', nv);
 
-                case Scale( d ):
-                    player.dispatch('change:scale', d);
-	        }
+                //case Scale( d ):
+                    //player.dispatch('change:scale', d);
+			//}
+		//});
+
+	    appState.playback.on('change', function(property, delta:Delta<Dynamic>) {
+	        player.dispatch('change:$property', delta);
 	    });
 
 	    // on focusedTrack changing
@@ -743,20 +750,21 @@ class PlayerSession {
 	public var tab(get, never):Null<PlayerTab>;
 	private inline function get_tab() return activeTab;
 
+    @:deprecated('PlayerPlaybackProperties has been deprecated in favor of ApplicationState.PlaybackConfig')
 	public var pp(get, never):PlayerPlaybackProperties;
 	private inline function get_pp():PlayerPlaybackProperties return playbackProperties;
 
 	public var shuffle(get, set):Bool;
-	private inline function get_shuffle():Bool return pp.shuffle;
-	private inline function set_shuffle(v : Bool):Bool return (pp.shuffle = v);
+	private inline function get_shuffle():Bool return appState.playback.shuffle;
+	private inline function set_shuffle(v : Bool):Bool return (appState.playback.shuffle = v);
 
 	public var muted(get, set):Bool;
-	private inline function get_muted():Bool return pp.muted;
-	private inline function set_muted(v : Bool):Bool return (pp.muted = v);
+	private inline function get_muted():Bool return appState.playback.muted;
+	private inline function set_muted(v : Bool):Bool return (appState.playback.muted = v);
 
 	public var repeat(get, set):RepeatType;
-	private inline function get_repeat():RepeatType return pp.repeat;
-	private inline function set_repeat(v : RepeatType):RepeatType return (pp.repeat = v);
+	private inline function get_repeat():RepeatType return appState.playback.repeat;
+	private inline function set_repeat(v : RepeatType):RepeatType return (appState.playback.repeat = v);
 
 	public var mediaProvider(get, never):Null<MediaProvider>;
 	private inline function get_mediaProvider():Null<MediaProvider> return mft.ternary(_.provider, null);
