@@ -105,6 +105,12 @@ class ApplicationState {
                 for (key in ports.keys()) {
                     add(cb -> ports[key].initialize( cb ));
                 }
+
+                // load [this] from memory
+                add(load.bind(null, null).toAsync());
+
+                // execute the sequence we've built
+                exec();
             },
             function(?error) {
                 if (error != null) {
@@ -115,6 +121,15 @@ class ApplicationState {
                 }
             }
         );
+    }
+
+    /**
+      initialize a given Model
+     **/
+    inline function _init_model_(m: Model):Void {
+        m.on('change', function(property, x, y) {
+            save(m, IO_Update);
+        });
     }
 
     /**
@@ -145,6 +160,7 @@ class ApplicationState {
         else {
             player.putData(state = Model.deserialize( u ));
         }
+        //addModel('player', player);
 
         if (playback == null) {
             playback = Model.deserializeToModel( u );
@@ -152,6 +168,7 @@ class ApplicationState {
         else {
             playback.putData(state = Model.deserialize( u ));
         }
+        //addModel('playback', playback);
 
         if (sessMan == null) {
             sessMan = Model.deserializeToModel( u );
@@ -159,6 +176,7 @@ class ApplicationState {
         else {
             sessMan.putData(state = Model.deserialize( u ));
         }
+        //addModel('sessMan', sessMan);
 
         if (rendering == null) {
             rendering = Model.deserializeToModel( u );
@@ -166,6 +184,26 @@ class ApplicationState {
         else {
             rendering.putData(state = Model.deserialize( u ));
         }
+        //addModel('rendering', rendering);
+    }
+
+    /**
+      serialize [this] object into a String
+     **/
+    public function serialize():String {
+        var s = new Serializer();
+        s.useCache = true;
+        hxSerialize( s );
+        return s.toString();
+    }
+
+    /**
+      unserialize the given [data] String onto [this] object
+     **/
+    public function unserialize(data: String):Void {
+        var u = new Unserializer( data );
+        hxUnserialize( u );
+        return ;
     }
 
     /**
@@ -175,32 +213,68 @@ class ApplicationState {
         return models.copy();
     }
 
-    /**
-      save [this] state
-     **/
-    public function save(?reason:AppStateIOReason) {
+    public function clearModels():Void {
+        for (name in models.keys()) {
+            models.remove( name );
+        }
+    }
+
+    public function save(?model:Model, ?reason:AppStateIOReason):VoidPromise {
+        return write(model, reason).unless( report );
+    }
+
+    public function load(?model:Model, ?reason:AppStateIOReason):VoidPromise {
         if (reason == null) {
             reason = IO_Update;
         }
-
-        switch reason {
-            case IO_Update:
-                return save_update.toPromise();
-
-            case IO_Finalize|IO_Initialize:
-                throw 'Fuck Ass';
-        } 
+        
+        if (model != null) {
+            return read_model.bind(model, _).toPromise();
+        }
+        else {
+            switch reason {
+                case IO_Update, IO_Finalize, IO_Initialize:
+                    return read_all.toPromise();
+            }
+        }
     }
 
-    function save_update(done: VoidCb) {
+    /**
+      save [this] state
+     **/
+    public function write(?model:Model, ?reason:AppStateIOReason):VoidPromise {
+        if (reason == null) {
+            reason = IO_Update;
+        }
+        if (model != null) {
+            return update_write_model.bind(model, _).toPromise();
+        }
+        else {
+            switch reason {
+                case IO_Update:
+                    return write_update.toPromise();
+
+                case IO_Finalize|IO_Initialize:
+                    return write_all.toPromise();
+            } 
+        }
+    }
+
+    function write_update(done: VoidCb) {
         [
         for (model in getModels())
-            update_save_model.bind(model, _)
+            update_write_model.bind(model, _)
         ]
-        .series( done );
+        .series(done.wrap(function(_, ?error) {
+            trace('save_update complete');
+            _( error );
+        }));
     }
 
-    function update_save_model(model:Model, done:VoidCb) {
+    /**
+      save the given Model's data
+     **/
+    inline function update_write_model(model:Model, done:VoidCb) {
         try {
             ports[_key(model)].write(model.serialize(), done);
         }
@@ -209,8 +283,58 @@ class ApplicationState {
         }
     }
 
+    /**
+      save [this] object's data
+     **/
+    inline function write_all(done: VoidCb):Void {
+        try {
+            ports[':all:'].write(serialize(), done);
+        }
+        catch (error: Dynamic) {
+            done( error );
+        }
+    }
+
+    /**
+      read the serialized data for [mode]
+     **/
+    inline function read_model(model:Model, done:VoidCb) {
+        try {
+            var dp = ports[_key(model)].read();
+            dp.then(function(data: String) {
+                if (data.empty()) {
+                    done();
+                }
+                else {
+                    var state = Model.deserializeString( data );
+                    model.putData( state );
+                    done();
+                }
+            }, done.raise());
+        }
+        catch (error: Dynamic) {
+            done( error );
+        }
+    }
+
+    /**
+      read the serialized data for [this] entire object, and unserialize it onto [this] object
+     **/
+    inline function read_all(done: VoidCb):Void {
+        try {
+            ports[':all:'].read().then(function(data: String) {
+                unserialize( data );
+                done();
+            }, done.raise());
+        }
+        catch (error: Dynamic) {
+            done( error );
+        }
+    }
+
     inline function addModel(name:String, model:Model) {
         models[name] = model;
+        _init_model_( model );
     }
 
     /**
@@ -252,22 +376,22 @@ typedef AppStateJsonProperty = {
     var value: Null<String>;
 };
 
-@saveName('state/cfg.player.dat')
+@saveName('player')
 class PlayerConfig extends ProxyModel<PlayerConfigType> {
 
 }
 
-@saveName('state/cfg.session.dat')
+@saveName('sessMan')
 class SessManConfig extends ProxyModel<SessManConfigType> {
 
 }
 
-@saveName('state/cfg.playback.dat')
+@saveName('playback')
 class PlaybackConfig extends ProxyModel<PlaybackConfigType> {
 
 }
 
-@saveName('state/cfg.render.dat')
+@saveName('rendering')
 class RenderingConfig extends ProxyModel<RenderingConfigType> {
 
 }
