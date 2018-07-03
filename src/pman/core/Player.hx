@@ -676,7 +676,7 @@ class Player extends EventDispatcher {
 	    // when [snapp] has completed
         snapp.then(function(item) {
             // if snapshot should be shown
-            if ( preferences.showSnapshot ) {
+            if ( appState.player.showSnapshot ) {
                 // create a snapshot view
                 var vu = new SnapshotView(this, item.getPath());
 
