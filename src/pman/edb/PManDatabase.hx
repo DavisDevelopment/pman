@@ -60,7 +60,7 @@ class PManDatabase extends Database {
     }
 
     /**
-      * do the stuff
+      * build out [this]'s requirements
       */
     override function _build():Void {
         super._build();
@@ -84,11 +84,14 @@ class PManDatabase extends Database {
         });
 
         require(function(next) {
-            defer(function() {
-                appState = new ApplicationState();
+            appState = new ApplicationState();
 
-                next();
-            });
+            appState.initialize(next.wrap(function(_, ?error) {
+                if (error != null) {
+                    report( error );
+                }
+                _( error );
+            }));
         });
     }
 
@@ -159,6 +162,7 @@ class PManDatabase extends Database {
     public var actorStore : ActorStore;
 
     public var configInfo : ConfigInfo;
+    @:deprecated('PManDatabase.preferences is deprecated in favor of ApplicationState')
     public var preferences : Preferences;
     public var appState : ApplicationState;
     
