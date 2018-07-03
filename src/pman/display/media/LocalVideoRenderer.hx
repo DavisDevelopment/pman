@@ -112,7 +112,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
         var vo = player.viewOptions;
         this.filter = vo.videoFilter;
         this.filterRaw = vo.videoFilterRaw;
-        this.directRender = (filterRaw || preferences.directRender);
+        this.directRender = (filterRaw || appState.rendering.directRender);
         //this.directRender = true;
 
         if ( directRender ) {
@@ -187,12 +187,12 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
                 vr = pv.mediaRect;
             }
 
-            if ( prefs.directRender ) {
+            if ( appState.rendering.directRender ) {
                 underlay = new VideoUnderlay( v );
                 underlay.appendTo( 'body' );
             }
 
-            if ( player.conf.videoShowVisualizer ) {
+            if ( appState.player.videoConfig.showVisualizer ) {
                 //var visualizer = new VideoAudioVisualizer(cast this);
                 //attachVisualizer(visualizer, done);
             }
@@ -232,7 +232,7 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
       * when the player gets reopened
       */
 	override function onReopen(p : Player):Void {
-		if ( prefs.directRender ) {
+		if ( appState.rendering.directRender ) {
             underlay = new VideoUnderlay( v );
             underlay.appendTo( 'body' );
         }
@@ -249,9 +249,6 @@ class LocalVideoRenderer extends LocalMediaObjectRenderer<Video> {
 
 	private var ovr(get, never):Rect<Float>;
 	private inline function get_ovr():Rect<Float> return new Rect(0.0, 0.0, v.width, v.height);
-
-    public var prefs(get, never):Preferences;
-    private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */
 
