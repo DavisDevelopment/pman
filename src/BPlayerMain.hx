@@ -56,6 +56,13 @@ class BPlayerMain extends Application {
 		});
 
 		closingEvent = new Signal2();
+		closingEvent.on(function(event, stack) {
+		    stack.push(function(next) {
+		        engine.db.appState.save().then(function() {
+		            next();
+		        }, report);
+		    });
+		});
 
 		win.expose('main', this);
 
