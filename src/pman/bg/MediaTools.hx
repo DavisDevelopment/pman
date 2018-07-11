@@ -26,16 +26,14 @@ class MediaTools {
 }
 
 class MediaRowTools {
-    /**
-      * convert a MediaRow to a Media object
-      */
-    //public static inline function toMedia(row: MediaRow):Media {
-        //return new Media(MediaSourceTools.toMediaSource( row.uri ), row);
-    //}
+
 }
 
 @:expose('MediaSourceTools')
 class MediaSourceTools {
+    /**
+      convert given MediaSource value to a URI string
+     **/
     public static function toUri(src: MediaSource):String {
         return (switch ( src ) {
             case MSLocalPath( path ): ('file://' + path.toString());
@@ -43,6 +41,9 @@ class MediaSourceTools {
         });
     }
 
+    /**
+      convert given MediaSource value to a Media instance
+     **/
     public static inline function toMedia(src: MediaSource):Media {
         return new Media( src );
     }
@@ -54,8 +55,8 @@ class MediaSourceTools {
 @:expose('UriTools2')
 class UriTools {
     /**
-      * convert a URI String into a Media instance
-      */
+      convert given Uri to Media instance
+     **/
     public static function toMedia(uri: String):Null<Media> {
         uri = uri.toUri();
         if (uri != null) {
@@ -105,7 +106,6 @@ class UriTools {
                         var uri_path:String = uri.toFilePath().toString();
                         handleFsPath( uri_path );
                         throw PManError.PMEFileSystemError(EMalformedPathError(uri_path));
-                        //throw 'Error: Malformed FileSystem path "${uri.toFilePath()}"';
 
                     default:
                         return MSUrl( uri );

@@ -40,14 +40,17 @@ using pman.bg.MediaTools;
 @:expose('MediaTools')
 class MediaTools {
     /**
-      * probe the given Directory for all openable files
-      */
+      probe the given Directory for all openable files
+     **/
     public static function getAllOpenableFiles(dir:Directory, done:Array<File>->Void):Void {
         var probe = new OpenableFileProbe();
         probe.setSources([dir]);
         probe.run( done );
     }
 
+    /**
+      probe many directories for all contained files that PMan can open
+     **/
     public static function igetAllOpenableFiles(idir:Iterable<Directory>, done:Array<File>->Void):Void {
         var coll = new Array();
         function collect(d:Directory, next:Void->Void) {
@@ -66,15 +69,15 @@ class MediaTools {
     }
 
     /**
-      * convert the given file list into a track list
-      */
+      convert the given list of File instances into a list of Track instances
+     **/
     public static inline function convertToTracks(files : Array<File>):Array<Track> {
         return (new FileListConverter().convert( files ).toArray());
     }
 
     /**
-      * initialize a list of Tracks all at once
-      */
+      initialize a list of Track instances all at once
+     **/
     public static function initAll(tracks:Array<Track>, done:Void->Void):Void {
         var initter = new TrackListInitializer();
         initter.initAll(tracks, function(count : Int) {
@@ -82,18 +85,17 @@ class MediaTools {
         });
     }
 
-    /**
-      * load data for a list of Tracks
-      */
+    /*
     @:deprecated
     public static function loadDataForAll(tracks:Array<Track>, ?done:Cb<TLDLResult>):Void {
         var loader = new TrackListDataLoader();
         loader.load(tracks, done);
     }
+    */
 
-	/**
-	  * get underlying media object from the given MediaObject
-	  */
+    /**
+      get underlying media object from the given MediaObject
+     **/
 	@:access( gryffin.display.Video )
 	@:access( gryffin.audio.Audio )
 	public static function getUnderlyingMediaObject(mo : MediaObject):NativeMediaObject {
@@ -108,14 +110,14 @@ class MediaTools {
         }
 	}
 
-	/**
-	  * load the MediaMetadata attached to the given MediaSource
-	  */
+    /**
+	  load the MediaMetadata attached to the given MediaSource
+     **/
 	public static function getMediaMetadata(src:MediaSource):Promise<Null<MediaMetadata>> {
-	    return Promise.create({
+	    return new Promise(function(yes, no) {
 	        switch ( src ) {
                 case MSLocalPath( path ):
-                    @forward new LoadMediaMetadata( path ).getMetadata();
+                    yes(cast new LoadMediaMetadata( path ).getMetadata());
 
                 default:
                     throw 'Error: Media metadata can only be loaded for media items located on the local filesystem';
@@ -129,6 +131,9 @@ class MediaTools {
 	public static inline function stripSlashSlash(s : String):String return s.withoutLeadingSlashes();
 }
 
+/**
+  mixins for Uri strings
+ **/
 class UriTools {
     //
     public static function toMediaProvider(uri: String):MediaProvider {

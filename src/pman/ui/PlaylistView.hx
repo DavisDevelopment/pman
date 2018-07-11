@@ -140,10 +140,6 @@ class PlaylistView extends Pane {
 		player.session.trackChanged.off( on_track_change );
 		//player.session.playlist.changeEvent.off( on_playlist_change );
 		unbindQueue( player.session.playlist );
-
-        // output to console so I can check if listeners are being properly unbound
-		echo( player.session.trackChanged );
-		echo( player.session.playlist.changeEvent );
 	}
 
 	public function bindQueue(q: Playlist):Void {
