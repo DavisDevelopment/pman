@@ -20,8 +20,8 @@ using pman.media.MediaTools;
 //abstract Playlist (LinkedPlaylist) from LinkedPlaylist to LinkedPlaylist {
 abstract Playlist (PlaylistClass) from PlaylistClass to PlaylistClass {
 	/* Constructor Function */
-	public inline function new(?tracks : Array<Track>):Void {
-		this = new Cpl( tracks );
+	public inline function new(?tracks:Array<Track>, ?parent:Playlist):Void {
+		this = new Cpl(tracks, parent);
 	}
 
 /* === Instance Methods === */

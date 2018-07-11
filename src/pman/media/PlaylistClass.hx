@@ -24,8 +24,10 @@ using pman.media.MediaTools;
   */
 class PlaylistClass {
 	/* Constructor Function */
-	public function new(?a : Array<Track>):Void {
+	public function new(?a:Array<Track>, ?parent:Playlist):Void {
 		l = (a != null ? a.copy() : new Array());
+		if (parent != null)
+		    this.parent = parent;
 
 		changeEvent = new Signal();
 	}
