@@ -80,7 +80,7 @@ class PlayerSession {
 	/**
 	  * remove a Media item from the queue
 	  */
-	public function removeItem(track : Track):Bool {
+	public inline function removeItem(track : Track):Bool {
 	    return tab.removeTrack( track );
 	}
 
@@ -282,8 +282,17 @@ class PlayerSession {
 	/**
 	  * reassign the playlist field
 	  */
-	public function setPlaylist(pl : Playlist):Void {
-	    playlist = pl;
+	public function setPlaylist(pl: Playlist):Playlist {
+		trace('(setPlaylist) betty');
+		var ret = tabs[activeTabIndex].setPlaylist( pl );
+		refreshPlv();
+		return ret;
+	}
+
+    /**
+      refresh PlaylistView
+     **/
+	inline function refreshPlv() {
 	    var plv = player.page.playlistView;
 	    if (plv != null && plv.isOpen) {
 	        plv.refresh();
