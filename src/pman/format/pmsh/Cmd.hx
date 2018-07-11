@@ -31,6 +31,7 @@ class Cmd {
     public function new():Void {
         name = 'cmd';
         stdio = _createStdIo();
+        outputValue = null;
     }
 
 /* === Instance Methods === */
@@ -40,7 +41,20 @@ class Cmd {
       TODO make this method final, and make a '_run' method
      **/
     public function execute(interp:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
+        _prep_(interp, args);
+
         done();
+    }
+
+    function _prep_(i:Interpreter, args:Array<CmdArg>) {
+        _init_();
+        this.interpreter = i;
+        this.argv = args;
+    }
+
+    function _init_() {
+        stdio = _createStdIo();
+        outputValue = null;
     }
 
     private function _destroy(error:Null<Dynamic>, callback:VoidCb):Void {
@@ -143,6 +157,7 @@ class Cmd {
 
     private var argv: Array<CmdArg>;
     private var interpreter: Interpreter;
+    private var outputValue: Null<Dynamic>;
 }
 
 @:structInit
