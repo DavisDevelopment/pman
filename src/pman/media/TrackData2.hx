@@ -165,17 +165,6 @@ class TrackData2 {
             }
         }
 
-        /**
-          debug info
-         **/
-        /*
-        echo({
-            all: _all_.copy(),
-            push: mk.copy(),
-            pop: rm.copy()
-        });
-        */
-
         unset( rm );
         expand(mk, done);
     }
