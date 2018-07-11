@@ -108,7 +108,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
      **/
     override function _createAudioVisualizer():Null<AudioVisualizer> {
         //return cast new LayeredCircleVisualizer(cast this);
-        switch ( database.configInfo.visualizer ) {
+        switch ( appState.player.audioConfig.visualizer ) {
             case 'spectograph', 'bars':
                 return cast new SpectographVisualizer(cast this);
 
@@ -135,7 +135,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
 
     // set up event listeners that may lead to getting album art
     private function _maybe_load_albumart(t : Track):Void {
-        if ( !prefs.showAlbumArt ) {
+        if (!appState.player.showAlbumArt) {
             return ;
         }
 
@@ -158,7 +158,7 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
                 var artProm = LoadAlbumArt.loadAlbumArt(t.getFsPath() + '');
                 artProm.then(function(art: Null<Image>) {
                     albumArt = art;
-                    if ( prefs.directRender ) {
+                    if ( appState.rendering.directRender ) {
                         underlay = new AlbumArtUnderlay( albumArt );
                         underlay.appendTo('body');
                     }
@@ -172,9 +172,6 @@ class LocalAudioRenderer extends LocalMediaObjectRenderer<Audio> {
         //window.setTimeout(_load_albumart, 2000);
         wait(2000, _load_albumart);
     }
-
-    public var prefs(get, never):Preferences;
-    private inline function get_prefs() return BPlayerMain.instance.db.preferences;
 
 /* === Instance Fields === */
 
