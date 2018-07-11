@@ -27,6 +27,9 @@ using Slambda;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
 
+/**
+  command for dealing with the current track
+ **/
 class TrackCommand extends Command {
     /**
       * execute [this] command
