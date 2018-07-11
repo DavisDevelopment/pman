@@ -7,10 +7,7 @@ import tannus.events.Key;
 import tannus.math.Random;
 import tannus.media.Duration;
 import tannus.math.Time;
-
-//import tannus.events.*;
-
-//import gryffin.Tools.*;
+import tannus.async.*;
 
 import pman.core.*;
 import pman.format.pmsh.*;
@@ -19,10 +16,6 @@ import pman.ui.*;
 import pman.events.*;
 import pman.sid.Clipboard as Clip;
 import pman.async.tasks.*;
-
-//import electron.ext.*;
-//import electron.ext.GlobalShortcut in Gs;
-//import electron.Tools.defer;
 
 import tannus.html.Win;
 import js.html.KeyboardEvent as NativeKbEvent;
@@ -44,6 +37,7 @@ using Slambda;
 using tannus.FunctionTools;
 using tannus.ds.AnonTools;
 using tannus.math.TMath;
+using tannus.async.Asyncs;
 
 /**
   models the system through which keyboard-input is (or isn't) interpreted to control the application
@@ -57,6 +51,7 @@ class KeyboardControls {
         //sequence_map = new Array();
         nextCount = 1;
         cnku = new Set();
+        nkucb = new Dict();
 
         var dm = createMode('default', {
             down: defaultKeyDown,
@@ -102,8 +97,7 @@ class KeyboardControls {
         switch event.key {
             /* create mark */
             case LetterM:
-                player.addBookmark();
-                cancelNextKeyUp(LetterM);
+                cancelNextKeyUp(LetterM).then(() -> player.addBookmark());
 
             case _:
                 return ;
@@ -276,15 +270,7 @@ class KeyboardControls {
 
             /* <= ... [key]> combos */
             case Equals:
-                enterModeSubcategory('=')
-                .nextKeyDown(function(m, evt) {
-                    if (m.isTimedOut()) {
-                        player.playbackRate = 0.0;
-                    }
-                    else {
-                        eq_cmd(m, evt);
-                    }
-                });
+                player.playbackRate = 1.0;
 
             /* M Key */
             case LetterM:
@@ -471,7 +457,12 @@ class KeyboardControls {
     private function defaultKeyUp(m:KbCtrlModeHandler, event:KeyboardEvent):Void {
         if (cnku.exists( event.key )) {
             event.preventDefault();
+            event.cancel();
             cnku.remove( event.key );
+            for (f in nkucb[event.key]) {
+                f();
+            }
+            nkucb.remove(event.key);
         }
         else {
             //
@@ -481,9 +472,13 @@ class KeyboardControls {
     /**
       schedule the .preventDefault() of the next 'keyup' event of a given type
      **/
-    private function cancelNextKeyUp(key: Key):KeyboardControls {
-        cnku.push( key );
-        return this;
+    private function cancelNextKeyUp(key: Key):VoidPromise {
+        return new VoidPromise(function(done, fail) {
+            cnku.push( key );
+            if (!nkucb.exists(key))
+                nkucb[key] = [];
+            nkucb[key].push(done.bind());
+        });
     }
 
     private function numkey(n:Int, e:KeyboardEvent) {
@@ -682,6 +677,7 @@ class KeyboardControls {
 
     var controlModeSubcategory:Null<String> = null;
     var cnku:Set<Key>;
+    var nkucb:Dict<Key, Array<Void->Void>>;
 
     public var mode: String;
 
