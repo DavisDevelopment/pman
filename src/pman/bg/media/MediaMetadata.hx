@@ -93,6 +93,9 @@ class MediaMetadata {
         }
     }
 
+    /**
+      create and return a clone of [this]
+     **/
     public function clone():MediaMetadata {
         return new MediaMetadata(toRaw());
     }

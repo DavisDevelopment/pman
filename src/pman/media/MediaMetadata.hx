@@ -24,7 +24,9 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using pman.media.MediaTools;
 
-class MediaMetadata {
+typedef MediaMetadata = pman.bg.media.MediaMetadata;
+
+private class OldMediaMetadata {
     /* Constructor Function */
     public function new():Void {
         duration = null;
@@ -94,7 +96,7 @@ class MediaMetadata {
 }
 
 @:structInit
-class VideoMetadata {
+private class VideoMetadata {
     public var width : Int;
     public var height : Int;
     @:optional public var frame_rate : String;
@@ -102,7 +104,7 @@ class VideoMetadata {
 }
 
 @:structInit
-class AudioMetadata {
+private class AudioMetadata {
     public var channels: Int;
     public var channel_layout: String;
 }
