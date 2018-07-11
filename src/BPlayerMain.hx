@@ -270,7 +270,8 @@ class BPlayerMain extends Application {
 			properties: (o.directory ? [OpenDirectory] : [OpenFile, MultiSelections])
 		};
 		if (res.defaultPath == null) {
-		    res.defaultPath = db.configInfo.lastDirectory;
+			//res.defaultPath = db.configInfo.lastDirectory;
+			res.defaultPath = appState.misc.lastDirectory;
 		}
 		return res;
 	}
@@ -286,7 +287,8 @@ class BPlayerMain extends Application {
             filters: o.filters
 	    };
 	    if (res.defaultPath == null) {
-	        res.defaultPath = db.configInfo.lastDirectory;
+			//res.defaultPath = db.configInfo.lastDirectory;
+			res.defaultPath = appState.misc.lastDirectory;
 	    }
 	    return res;
 	}
