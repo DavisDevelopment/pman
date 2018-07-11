@@ -24,9 +24,12 @@ import electron.ext.Dialog;
 import pman.core.*;
 import pman.bg.media.MediaSort;
 import pman.bg.media.MediaFilter;
+import pman.bg.media.MediaRow;
 import pman.media.*;
 import pman.search.TrackSearchEngine;
 import pman.search.FileSystemSearchEngine;
+
+import haxe.extern.EitherType as Either;
 
 import Slambda.fn;
 import tannus.ds.SortingTools.*;
@@ -43,6 +46,7 @@ using tannus.ds.SortingTools;
 using pman.media.MediaTools;
 using haxe.ds.ArraySort;
 using tannus.async.Asyncs;
+using tannus.FunctionTools;
 
 class SearchWidget extends Pane {
 	/* Constructor Function */
@@ -61,27 +65,33 @@ class SearchWidget extends Pane {
 	  * build [this]
 	  */
 	override function populate():Void {
+	    // add relevant classes
 	    addClass('search-widget');
 
+        // create input row
 		inputRow = new Pane();
 		inputRow.addClass('input-group');
 		append( inputRow );
 
+        // create search input
 		searchInput = new TextInput();
 		searchInput.addClass('input-group-field');
         inputRow.append( searchInput );
 
-        var igBtnPane:Element = new Element('<div class="input-group-button"/>');
+        // create input button group
+        var igBtnPane:Element = e('<div class="input-group-button"/>');
         inputRow.append( igBtnPane );
-        searchButton = new Element('<input type="submit" class="button" value="go"/>');
+        searchButton = e('<input type="submit" class="button" value="go"/>');
         igBtnPane.append( searchButton );
 
+        // create clear button
 		clear = pman.display.Icons.clearIcon(64, 64, function(path) {
 		    path.style.fill = player.theme.primary.toString();
 		}).toFoundationImage();
 		clear.addClass('clear');
 		append( clear );
 
+        // create options row
 		optionsRow = new FlexRow([6, 6]);
 		optionsRow.addClass('options-row');
 		append( optionsRow );
@@ -93,18 +103,23 @@ class SearchWidget extends Pane {
 		col.addClass('right');
 		col.append( srcSelect );
 
+        // create sort <select/>
 		sortSelect = new Select();
-		sortSelect.option('None', '');
-		sortSelect.option('Title (ascending)', 'aa');
-		sortSelect.option('Title (descending)', 'ad');
-		sortSelect.option('Longest', 'da');
-		sortSelect.option('Shortest', 'dd');
-		sortSelect.option('Newest', 'ta');
-		sortSelect.option('Oldest', 'td');
-		sortSelect.option('Rating (ascending)', 'ra');
-		sortSelect.option('Rating (descending)', 'rd');
-		sortSelect.option('Views (ascending)', 'va');
-		sortSelect.option('Views (descending)', 'vd');
+		options(sortSelect, [
+		    'None' => '',
+		    'Title (ascending)' => 'aa',
+		    'Title (descending)' => 'ad',
+		    'Shortest' => 'da',
+		    'Longest' => 'dd',
+		    'Newest' => 'ca',
+		    'Oldest' => 'cd',
+		    'Date Modified (ascending)' => 'md',
+		    'Date Modified (descending)' => 'ma',
+		    'Rating (ascending)' => 'ra',
+		    'Rating (descending)' => 'rd',
+		    'Views (ascending)' => 'va',
+		    'Views (descending)' => 'vd'
+		]);
 		col = optionsRow.pane( 0 );
 		col.addClass('left');
 		col.append( sortSelect );
@@ -156,72 +171,40 @@ class SearchWidget extends Pane {
 	/**
 	  * the search has been 'submit'ed
 	  */
-	private function submit(done: VoidCb):Void {
+	public function submit(?done: VoidCb):Void {
+	    done = done.nn();
+
+	    function end(q: Playlist) {
+	        player.session.setPlaylist( q );
+	        defer(function() {
+	            update();
+	            done();
+	        });
+	    }
+
 	    // get search data
 		var d:SearchData = getData();
-		var results : Playlist;
-
-		// if a search term was provided
-		if (d.term != null) {
-		    switch ( d.source ) {
-                case CurrentPlaylist:
-                    // create a search engine
-                    var engine = new TrackSearchEngine();
-                    // enable engine's strictness
-                    engine.strictness = 1;
-                    // set engine's context
-                    engine.setContext(player.session.playlist.getRootPlaylist().toArray());
-                    // set engine's search term
-                    engine.setSearch( d.term );
-                    // calculate search results
-                    var matches = engine.getMatches();
-                    // sort the results by relevancy
-                    matches.sort(function(x, y) {
-                        return -Reflect.compare(x.score, y.score);
-                    });
-                    // build playlist from results
-                    results = new Playlist(matches.map.fn( _.item ));
-                    results.parent = player.session.playlist.getRootPlaylist();
-                    player.session.setPlaylist( results );
-                    defer(function() {
-                        update();
-                        done();
-                    });
-
-                case AllMedia:
-                    var engine = new FileSystemSearchEngine();
-                    engine.strictness = 1;
-                    var amp = _getAllMediaPaths();
-                    amp.then(function(allPaths) {
-                        engine.setContext(allPaths.toArray());
-                        engine.setSearch( d.term );
-                        var matches = engine.getMatches();
-                        matches.sort((x,y)->-Reflect.compare(x.score,y.score));
-                        var flc = new FileListConverter();
-                        results = flc.convert(matches.map.fn(new File(_.item)));
-                        player.session.setPlaylist( results );
-                        defer(function() {
-                            update();
-                            done();
-                        });
-                    });
-                    amp.unless(done.raise());
-            }
-		    
-		}
-		// if search term was empty
-		else {
-		    // reset track list to root
-		    var pl = player.session.playlist;
-		    player.session.setPlaylist(pl.getRootPlaylist());
-		    defer(function() {
-		        update();
-                done();
-            });
-		}
+		ensure_loaded(player.session.playlist.toArray(), true, null).then(function() {
+            performSearch(d, null).then(
+                function(newQueue) {
+                    if (d.sort != null) {
+                        evalQueueSort(d.sort, newQueue).then(function(newQueue) {
+                            end( newQueue );
+                        }, done.raise());
+                    }
+                    else {
+                        end( newQueue );
+                    }
+                },
+                done.raise()
+            );
+        }, done.raise());
 	}
 
-	function performSearch(search:SearchData, ?queue:Playlist, ?done:VoidCb):Promise<Playlist> {
+    /**
+      perform a search operation
+     **/
+	function performSearch(search:SearchData, ?queue:Playlist):Promise<Playlist> {
 	    if (queue == null)
 	        queue = player.session.playlist;
 
@@ -229,31 +212,92 @@ class SearchWidget extends Pane {
 	        if (search.term.hasContent()) {
 	            switch search.source {
                     case CurrentPlaylist:
-                        //TODO
+                        var matches = searchCurrentPlaylist(search, queue);
+                        resolve( matches );
 
                     case AllMedia:
-                        //TODO
+                        searchAllMedia(search, queue).then(function(matches) {
+                            resolve( matches );
+                        }, reject);
 	            }
 	        }
             else {
                 resolve(queue.getRootPlaylist());
             }
-	    })
+	    });
+	}
+
+    /**
+      perform a search on the current media-queue
+     **/
+	function searchCurrentPlaylist(search:SearchData, queue:Playlist):Playlist {
+        // create a search engine
+        var engine = new TrackSearchEngine();
+        // enable engine's strictness
+        engine.strictness = 1;
+        // make search case-insensitive
+        engine.caseSensitive = false;
+        // set engine's context
+        engine.setContext(queue.getRootPlaylist().toArray());
+        // set engine's search term
+        engine.setSearch( search.term );
+        // calculate search results
+        var matches = engine.getMatches();
+        // sort the results by relevancy
+        matches.sort(function(x, y) {
+            return -Reflect.compare(x.score, y.score);
+        });
+        // build playlist from results
+        var results:Playlist = new Playlist(matches.map.fn( _.item ));
+        results.parent = queue.getRootPlaylist();
+        return results;
+	}
+
+	/**
+	  perform a search on all media files on the current machine
+	 **/
+	function searchAllMedia(search:SearchData, queue:Playlist):Promise<Playlist> {
+	    return new Promise(function(accept, reject) {
+	        // create and configure engine
+            var engine = new FileSystemSearchEngine();
+            engine.strictness = 1;
+            engine.caseSensitive = false;
+
+            // get all media paths
+            var amp = _getAllMediaPaths();
+            amp.then(function(allPaths: Set<Path>) {
+                // configure engine context
+                engine.setContext(allPaths.toArray());
+                engine.setSearch( search.term );
+
+                // get results
+                var matches = engine.getMatches();
+                matches.sort((x, y)-> -Reflect.compare(x.score, y.score));
+
+                // convert match-items to tracks
+                var flc = new FileListConverter();
+                var results:Playlist = flc.convert(matches.map.fn(new File(_.item)));
+                results.parent = queue.getRootPlaylist();
+
+                accept( results );
+            });
+            amp.unless( reject );
+        });
 	}
 
 	/**
 	  * apply [sort] to the currently active playlist
 	  */
-	private function apply_sorting(sort:MediaSort, ?tracks:Array<Track>, ?done:VoidCb):VoidPromise {
+	private function apply_sorting(sort:MediaSort, ?queue:Playlist, ?done:VoidCb):VoidPromise {
 	    done = done.nn();
-	    if (tracks == null)
-            tracks = player.session.playlist.toArray();
+	    if (queue == null)
+            queue = player.session.playlist;
 
         return new VoidPromise(function(resolve, reject) {
-            evalSort(sort, tracks)
-                .then(function(tracks) {
-                    var pl = new Playlist( tracks );
-                    player.session.setPlaylist( pl );
+            evalQueueSort(sort, queue)
+                .then(function(queue) {
+                    //var pl = new Playlist( tracks );
+                    player.session.setPlaylist( queue );
 
                     update();
                     resolve();
@@ -267,27 +311,30 @@ class SearchWidget extends Pane {
     /**
       perform the given sorting operation on the given list of Tracks
      **/
-	function evalSort(sort:MediaSort, ?tracks:Array<Track>, ?done:Cb<Array<Track>>):ArrayPromise<Track> {
+	function evalQueueSort(sort:MediaSort, ?queue:Playlist, ?done:Cb<Playlist>):Promise<Playlist> {
 	    done = done.nn();
-	    if (tracks == null)
-	        tracks = player.session.playlist.toArray();
+	    if (queue == null)
+	        queue = player.session.playlist;
 	    var sorter = sortLambda( sort );
+
 	    return new Promise(function(accept, reject) {
-	        ensure_loaded(tracks, function(?error) {
+	        ensure_loaded(queue.toArray(), true, function(?error) {
 	            if (error != null) {
 	                reject( error );
 	            }
                 else {
                     try {
-                        tracks.sort( sorter );
-                        accept( tracks );
+                        //tracks.sort( sorter );
+                        //accept( tracks );
+                        queue.sort( sorter );
+                        accept( queue );
                     }
                     catch (error: Dynamic) {
                         reject( error );
                     }
                 }
 	        });
-	    }).toAsync( done ).array();
+	    }).toAsync( done );
 	}
 
 	/**
@@ -322,48 +369,79 @@ class SearchWidget extends Pane {
         .toAsync(done));
 	}
 
+    /**
+      get all media rows in the database
+     **/
+	private function _getAllMediaRows(?on_row: MediaRow->Void):ArrayPromise<MediaRow> {
+	    if (on_row == null)
+	        on_row = untyped (row -> row._id);
+
+        return new Promise(function(accept, reject) {
+            var results:Array<MediaRow> = new Array();
+            database.mediaStore.eachRow(function(row: MediaRow) {
+                results.push( row );
+                on_row( row );
+            })
+            .then(
+                function() {
+                    accept( results );
+                },
+                function(error) {
+                    reject( error );
+                }
+            );
+        }).array();
+	}
+
 	/**
 	  * get the paths to all media files in the user's media libraries
 	  */
 	private function _getAllMediaPaths():Promise<Set<Path>> {
+	    // all paths
         var paths:Set<Path> = new Set();
-        var a = FileFilter.AUDIO, v = FileFilter.VIDEO, p = FileFilter.PLAYLIST;
+        var a:FileFilter = FileFilter.AUDIO,
+        v:FileFilter = FileFilter.VIDEO,
+        p:FileFilter = FileFilter.PLAYLIST,
+        i:FileFilter = FileFilter.IMAGE;
 
-        function _test_(path: Path):Bool {
-            var str = path.toString();
-            return (v.test( str ) || a.test( str ) || p.test( str ));
+        // check whether [path] matches any of the acceptible file-filters
+        inline function _test_(path: Path):Bool {
+            var str:String = path.toString();
+            return (v.test( str ) || a.test( str ) || p.test( str ) || i.test( str ));
         }
 
+        // descend through the given Directory
 	    function _walk_(dir: Directory):Void {
+	        // iterate over every entry in [dir]
 	        for (entry in dir) {
 	            switch ( entry.type ) {
-                    case File(file):
-                        var path:Path = file.path;
-                        if (_test_( path )) {
-                            paths.push( path );
+	                /* file entries */
+                    case File( file ):
+                        if (_test_( file.path )) {
+                            paths.push( file.path );
                         }
 
-                    case Folder(folder):
+                    /* directory entries */
+                    case Folder( folder ):
                         _walk_( folder );
 	            }
 	        }
 	    }
 
-	    return Promise.create({
-	        player.app.appDir.getMediaSources(function(?err, ?sources) {
-	            if (err != null) {
-	                throw err;
+        // promise results
+	    return new Promise(function(accept, reject) {
+            /* handle successful retrieval of [sources] */
+	        function on_sources(sources: Array<Path>) {
+	            for (src in sources) {
+	                _walk_(new Directory( src ));
 	            }
-                else if (sources != null) {
-                    for (src in sources) {
-                        _walk_(new Directory( src ));
-                    }
-                    return untyped paths;
-                }
-                else {
-                    throw 'butt monkey';
-                }
-	        });
+	            accept( paths );
+	        }
+
+	        player.app.appDir.getMediaSources.toPromise().then(
+                on_sources,
+                reject
+	        );
         });
 	}
 
@@ -458,9 +536,28 @@ class SearchWidget extends Pane {
             case 'a': MSTitle(bool());
             case 'd': MSDuration(bool());
             case 'r': MSRating(bool());
-            case 't': MSDate(bool());
+            case 'c': MSDate(MDCreated, bool());
+            case 'm': MSDate(MDModified, bool());
             case 'v': MSViews(bool());
             case ''|_: MSNone;
+	    };
+	}
+
+	static function mediaSortToString(ms: MediaSort):String {
+	    inline function bool(v: Bool):Char {
+	        return (v ? 'a' : 'd');
+	    }
+
+	    return switch ms {
+            case MSNone: '';
+            case MSTitle(v): ('a' + bool(v));
+            case MSDuration(v): ('d' + bool(v));
+            case MSRating(v): ('r' + bool(v));
+            case MSDate(d, v): ((switch d {
+                case MDCreated: 'c';
+                case MDModified: 'm';
+            }) + bool(v));
+            case MSViews(v): ('v' + bool(v));
 	    };
 	}
 
@@ -471,7 +568,7 @@ class SearchWidget extends Pane {
 	}
 
 	static inline function boolSort<T>(value:Bool, sort:(a:T, b:T)->Int):(a:T, b:T)->Int {
-	    return (value ? sort : invertSort( sort ));
+	    return (value ? invertSort( sort ) : sort);
 	}
 
 	static inline function trackDataSort(sort:(a:TrackData, b:TrackData)->Int):(a:Track, b:Track)->Int {
@@ -483,12 +580,17 @@ class SearchWidget extends Pane {
     /**
       convert a MediaSort value into a sorting function
      **/
-	static function sortLambda(sort: MediaSort):(a:Track, b:Track)->Int {
+	static dynamic function sortLambda(sort: MediaSort):(a:Track, b:Track)->Int {
 	    inline function bs(v, f) {
 	        return boolSort(v, f);
 	    }
+
 	    inline function tds(f)
 	        return trackDataSort( f );
+
+	    var tmr:Track->String = (t -> (t.uri + (t.mediaId != null ? ('|' + t.mediaId) : ''))),
+	    tmra:Array<Track>->String = (a -> a.map(tmr).join(',')),
+	    tmr2:Track->Track->String = fn(tmra([_1, _2]));
 
         switch sort {
             /* do not sort */
@@ -513,29 +615,45 @@ class SearchWidget extends Pane {
             case MSRating(asc):
                 /* get an abstracted rating value */
                 function rating(x: Track):Float {
-                    var res:Float = x.data.views;
+                    var res:Float = (x.data.views / 2);
                     if (x.data.rating != null) {
-                        res += x.data.rating;
+                        res += (x.data.rating * 5);
                     }
                     return res;
                 }
 
-                return bs(asc, function(a:Track, b:Track) {
-                    return Reflect.compare(rating(a), rating(b));
-                });
+                return (function(rating) {
+                    return bs(asc, function(a:Track, b:Track) {
+                        return Reflect.compare(rating(a), rating(b));
+                    });
+                }(rating.memoize(tmr)));
 
             /* sort by date */
-            case MSDate(asc):
-                return bs(asc, function(a:Track, b:Track) {
-                    var x = a.getFsPath(), y = b.getFsPath();
-                    if (x != null && y != null) {
-                        var as = Fs.stat( x ), bs = Fs.stat( y );
-                        return Reflect.compare(as.ctime.getTime(), bs.ctime.getTime());
-                    }
-                    else {
-                        return 0;
-                    }
-                });
+            case MSDate(type, asc):
+                function stat(track: Track):FileStat {
+                    return Fs.stat(track.getFsPath());
+                }
+                stat = stat.memoize( tmr );
+
+                var time:Track->Date = (function(stat:(track:Track)->FileStat):Track->Date {
+                    return (function(type: MediaDate):(stat:FileStat)->Date {
+                        return switch type {
+                            case MDCreated: (stat -> stat.ctime);
+                            case MDModified: (stat -> stat.mtime);
+                        };
+                    }(type))
+                    .wrap(function(_, track:Track) {
+                        return _(stat(track));
+                    })
+                    .memoize( tmr );
+                }(stat));
+                function ttime(track: Track):Float {
+                    return time(track).getTime();
+                }
+
+                return bs(asc, (function(a:Track, b:Track) {
+                    return Reflect.compare(ttime(a), ttime(b));
+                }));
 
             /* sort by views */
             case MSViews(asc):
@@ -547,6 +665,23 @@ class SearchWidget extends Pane {
             case _:
                 throw 'BETTY';
         }
+	}
+
+    /**
+      append many options to [select] at once
+     **/
+	static inline function options<T>(select:Select<T>, opts:Map<String, T>):Select<T> {
+	    for (text in opts.keys()) {
+	        select.option(text.trim(), opts[text]);
+	    }
+	    return select;
+	}
+
+    /**
+      initialize [this] class
+     **/
+	public static function __init__():Void {
+	    sortLambda = sortLambda.memoize();
 	}
 
 /* === Instance Fields === */
