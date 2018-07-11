@@ -1,10 +1,15 @@
 package pman.bg.media;
 
 enum MediaSort {
-    MSTitle(ascending : Bool);
+    MSTitle(ascending: Bool);
     MSDuration(ascending: Bool);
-    MSDate(adscending : Bool);
+    MSDate(type:MediaDate, adscending:Bool);
     MSViews(ascending : Bool);
     MSRating(ascending : Bool);
     MSNone;
+}
+
+enum MediaDate {
+    MDCreated;
+    MDModified;
 }
