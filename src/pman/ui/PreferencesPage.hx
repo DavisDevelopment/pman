@@ -19,11 +19,13 @@ import pman.media.*;
 import pman.edb.*;
 
 import Std.*;
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
-using Lambda;
 using Slambda;
+using tannus.async.Asyncs;
 
 class PreferencesPage extends Page {
     /* Constructor Function */
@@ -53,14 +55,24 @@ class PreferencesPage extends Page {
                 });
 
                 e('#save').click(function(ev) {
-                    var p = app.db.preferences;
-                    p.autoPlay = fields.autoPlay.prop('checked');
-                    p.autoRestore = fields.autoRestore.prop('checked');
-                    p.directRender = fields.directRender.prop('checked');
-                    p.showAlbumArt = fields.showAlbumArt.prop('checked');
-                    p.showSnapshot = fields.showSnapshot.prop('checked');
-                    p.push();
-                    back();
+                    //var p = app.db.preferences;
+                    appState.lock();
+                    appState.playback.autoPlay = fields.autoPlay.prop('checked');
+                    appState.sessMan.autoRestoreSession = fields.autoRestore.prop('checked');
+                    appState.rendering.directRender = fields.directRender.prop('checked');
+                    appState.player.showAlbumArt = fields.showAlbumArt.prop('checked');
+                    appState.player.showSnapshot = fields.showSnapshot.prop('checked');
+                    appState.unlock();
+                    function done_saving(?error) {
+                        if (error != null) {
+                            report( error );
+                            back();
+                        }
+                        else {
+                            back();
+                        }
+                    }
+                    appState.save(null, null).toAsync(done_saving);
                 });
             });
         });
@@ -76,13 +88,12 @@ class PreferencesPage extends Page {
             df[name] = e('#$name');
         }
         this.fields = df;
-        var p = app.db.preferences;
 
-        fields.autoPlay.prop('checked', p.autoPlay);
-        fields.autoRestore.prop('checked', p.autoRestore);
-        fields.directRender.prop('checked', p.directRender);
-        fields.showAlbumArt.prop('checked', p.showAlbumArt);
-        fields.showSnapshot.prop('checked', p.showSnapshot);
+        fields.autoPlay.prop('checked', appState.playback.autoPlay);
+        fields.autoRestore.prop('checked', appState.sessMan.autoRestoreSession);
+        fields.directRender.prop('checked', appState.rendering.directRender);
+        fields.showAlbumArt.prop('checked', appState.player.showAlbumArt);
+        fields.showSnapshot.prop('checked', appState.player.showSnapshot);
     }
 
     private static inline function e(x : Dynamic):Element return new Element( x );
