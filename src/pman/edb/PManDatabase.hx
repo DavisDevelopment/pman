@@ -76,44 +76,21 @@ class PManDatabase extends Database {
 
         require(function(next) {
             defer(function() {
-                configInfo = new ConfigInfo();
-                preferences = new Preferences();
-
-                next();
+                //appState = new ApplicationState();
+                vsequence(function(add, exec) {
+                    appState = new ApplicationState();
+                    add( appState.initialize );
+                    //add(cast appState.load(null, null).toAsync.bind(_));
+                    exec();
+                }, next.wrap(function(_, ?error) {
+                    if (error != null) {
+                        report( error );
+                    }
+                    _( error );
+                }));
             });
         });
-
-        require(function(next) {
-            appState = new ApplicationState();
-
-            appState.initialize(next.wrap(function(_, ?error) {
-                if (error != null) {
-                    report( error );
-                }
-                _( error );
-            }));
-        });
     }
-
-    /**
-      * create a TableWrapper
-      */
-    /*
-    private function wrap<T:TableWrapper>(name:String, ?type:Class<T>):T {
-        if (type == null) {
-            type = untyped TableWrapper;
-        }
-        if (!name.endsWith('.db')) {
-            name += '.db';
-        }
-        var store:DataStore = new DataStore({
-            filename: dsfilename( name ),
-            afterSerialization: afterSerialization,
-            beforeDeserialization: beforeDeserialization
-        });
-        return Type.createInstance(type, untyped [store]);
-    }
-    */
 
     /**
       * alter the serialization of documents
@@ -128,18 +105,6 @@ class PManDatabase extends Database {
     private function beforeDeserialization(data : String):String {
         return data;
     }
-
-    /**
-      * queue [action] for when [this] database has been declared 'ready'
-      */
-    //public function onready(action : Void->Void):Void rs.await( action );
-
-    /**
-      * get the full path to the DataStore file
-      */
-    //public function dsfilename(name : String):String {
-        //return Std.string(path.plusString( name ).normalize());
-    //}
 
     public static function get(?safeAction: PManDatabase->Void):PManDatabase {
         var res = instance;
@@ -161,9 +126,9 @@ class PManDatabase extends Database {
     public var mediaStore : MediaStore;
     public var actorStore : ActorStore;
 
-    public var configInfo : ConfigInfo;
-    @:deprecated('PManDatabase.preferences is deprecated in favor of ApplicationState')
-    public var preferences : Preferences;
+    //@:deprecated('PManDatabase.configInfo is deprecated in favor of ApplicationState')
+    //public var configInfo : ConfigInfo;
+    //public var preferences : Preferences;
     public var appState : ApplicationState;
     
     //private var rs : ReadySignal;
