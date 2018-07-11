@@ -10,7 +10,10 @@ import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
 import pman.pmbash.commands.*;
 
-import electron.Tools.*;
+import haxe.extern.EitherType as Either;
+
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -33,6 +36,7 @@ class Interp extends Interpreter {
     override function __initCommands():Void {
         function alias(code:String)
             return new AliasCommand( code );
+
         commands = [
             'exit' => new ExitCommand(),
             'relaunch' => new RestartCommand(),
