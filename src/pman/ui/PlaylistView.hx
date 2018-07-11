@@ -129,7 +129,8 @@ class PlaylistView extends Pane {
 	  */
 	public function bind():Void {
 		player.session.trackChanged.on( on_track_change );
-		player.session.playlist.changeEvent.on( on_playlist_change );
+		//player.session.playlist.changeEvent.on( on_playlist_change );
+		bindQueue( player.session.playlist );
 	}
 
 	/**
@@ -137,11 +138,20 @@ class PlaylistView extends Pane {
 	  */
 	public function unbind():Void {
 		player.session.trackChanged.off( on_track_change );
-		player.session.playlist.changeEvent.off( on_playlist_change );
+		//player.session.playlist.changeEvent.off( on_playlist_change );
+		unbindQueue( player.session.playlist );
 
         // output to console so I can check if listeners are being properly unbound
 		echo( player.session.trackChanged );
 		echo( player.session.playlist.changeEvent );
+	}
+
+	public function bindQueue(q: Playlist):Void {
+	    q.changeEvent.on( on_playlist_change );
+	}
+
+	public function unbindQueue(q: Playlist):Void {
+	    q.changeEvent.clear();
 	}
 
 	/**
@@ -150,6 +160,8 @@ class PlaylistView extends Pane {
 	private function __bind():Void {
 	    player.on('tabswitching', on_tab_changing);
 	    player.on('tabswitched', on_tab_changed);
+		//player.on('queueswitching', on_playlist_switching);
+		//player.on('queueswitched', on_playlist_switched);
 	}
 
 	/**
@@ -472,14 +484,18 @@ class PlaylistView extends Pane {
 	    defer(function() {
 	        refresh();
 	    });
+	}
 
-	    /*
-	    undoTrackList(function() {
-	        defer(function() {
-	            refresh();
-	        });
+    /**
+      switch [this] view from [oldQueue] to [newQueue]
+     **/
+	public function changePlaylist(oldQueue:Playlist, newQueue:Playlist):Void {
+	    unbindQueue( oldQueue );
+	    defer(function() {
+	        bindQueue( newQueue );
+
+	        refresh();
 	    });
-	    */
 	}
 
 	/**
