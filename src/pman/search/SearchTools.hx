@@ -23,8 +23,11 @@ using Slambda;
 using pman.media.MediaTools;
 using tannus.math.TMath;
 
+/**
+  mixin class providing methods for searching
+ **/
+@:expose
 class SearchTools {
-
     /**
       * get the 'score' of the given term
       */
@@ -45,12 +48,16 @@ class SearchTools {
       * scores [t] based on the number of times it occurs in [src]
       */
     public static function wordFindScore(src:String, t:String):Int {
-        var score:Int = 0, si:Int = 0, i:Int = src.indexOf(t, si);
+        var score:Int = 0,
+        si:Int = 0,
+        i:Int = src.indexOf(t, si);
+
         while (i != -1) {
             score++;
             si = (i + t.length);
             i = src.indexOf(t, si);
         }
+
         return score;
     }
 
