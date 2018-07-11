@@ -50,8 +50,8 @@ class Dialogs {
                         first = first.directory;
 
                     if (first.toString().hasContent()) {
-                        engine.db.configInfo.lastDirectory = first;
-                        engine.db.configInfo.push();
+                        appState.misc.lastDirectory = first;
+                        //engine.db.configInfo.push();
                     }
                 }
                 return paths;
@@ -141,7 +141,7 @@ class Dialogs {
 			properties: (o.directory ? [OpenDirectory] : fileOptions)
 		};
 		if (res.defaultPath == null) {
-		    res.defaultPath = database.configInfo.lastDirectory;
+		    res.defaultPath = appState.misc.lastDirectory;
 		}
 		return res;
 	}
@@ -156,8 +156,8 @@ class Dialogs {
 			o.title = 'PMan FileSystem Prompt';
 		if (o.multiple == null)
 		    o.multiple = true;
-		if (o.defaultPath == null && engine.db.configInfo.lastDirectory != null)
-		    o.defaultPath = engine.db.configInfo.lastDirectory.toString();
+		if (o.defaultPath == null && appState.misc.lastDirectory != null)
+		    o.defaultPath = appState.misc.lastDirectory.toString();
 		return o;
 	}
 
