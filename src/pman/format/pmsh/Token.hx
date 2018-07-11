@@ -14,10 +14,11 @@ enum Token {
     TSym(symbol : String);
 
     TDelimiter;
+    TEndOfInput;
 }
 
 enum Word {
     Ident(id:String);
     String(s:String, del:Int);
-    Ref(name:String);
+    Ref(name: String);
 }
