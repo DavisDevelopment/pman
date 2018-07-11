@@ -10,6 +10,7 @@ import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
 import tannus.sys.FSEntry;
 import tannus.async.*;
+import tannus.async.promises.*;
 
 import crayon.*;
 import foundation.*;
@@ -21,13 +22,16 @@ import electron.ext.*;
 import electron.ext.Dialog;
 
 import pman.core.*;
+import pman.bg.media.MediaSort;
+import pman.bg.media.MediaFilter;
 import pman.media.*;
 import pman.search.TrackSearchEngine;
 import pman.search.FileSystemSearchEngine;
 
 import Slambda.fn;
 import tannus.ds.SortingTools.*;
-import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using Lambda;
@@ -38,6 +42,7 @@ using Slambda;
 using tannus.ds.SortingTools;
 using pman.media.MediaTools;
 using haxe.ds.ArraySort;
+using tannus.async.Asyncs;
 
 class SearchWidget extends Pane {
 	/* Constructor Function */
@@ -79,23 +84,27 @@ class SearchWidget extends Pane {
 
 		optionsRow = new FlexRow([6, 6]);
 		optionsRow.addClass('options-row');
-		//optionsRow.css.set('display', 'none');
 		append( optionsRow );
 
 		srcSelect = new Select();
 		srcSelect.option('Current Playlist', 'pl');
 		srcSelect.option('All Media', 'all');
-		//srcSelect.addClass()
 		var col = optionsRow.pane( 1 );
 		col.addClass('right');
 		col.append( srcSelect );
 
 		sortSelect = new Select();
 		sortSelect.option('None', '');
-		sortSelect.option('Title', 'a');
-		sortSelect.option('Duration', 'd');
-		sortSelect.option('Most Recent', 't');
-		sortSelect.option('Top Rated', 'r');
+		sortSelect.option('Title (ascending)', 'aa');
+		sortSelect.option('Title (descending)', 'ad');
+		sortSelect.option('Longest', 'da');
+		sortSelect.option('Shortest', 'dd');
+		sortSelect.option('Newest', 'ta');
+		sortSelect.option('Oldest', 'td');
+		sortSelect.option('Rating (ascending)', 'ra');
+		sortSelect.option('Rating (descending)', 'rd');
+		sortSelect.option('Views (ascending)', 'va');
+		sortSelect.option('Views (descending)', 'vd');
 		col = optionsRow.pane( 0 );
 		col.addClass('left');
 		col.append( sortSelect );
@@ -151,6 +160,7 @@ class SearchWidget extends Pane {
 	    // get search data
 		var d:SearchData = getData();
 		var results : Playlist;
+
 		// if a search term was provided
 		if (d.term != null) {
 		    switch ( d.source ) {
@@ -175,7 +185,6 @@ class SearchWidget extends Pane {
                     player.session.setPlaylist( results );
                     defer(function() {
                         update();
-                        //apply_sorting(d.sort, done);
                         done();
                     });
 
@@ -190,25 +199,15 @@ class SearchWidget extends Pane {
                         matches.sort((x,y)->-Reflect.compare(x.score,y.score));
                         var flc = new FileListConverter();
                         results = flc.convert(matches.map.fn(new File(_.item)));
-                        //if (d.source != null && !d.source.match(AllMedia)) {
-                            //results.parent = player.session.playlist.getRootPlaylist();
-                        //}
                         player.session.setPlaylist( results );
                         defer(function() {
                             update();
-                            //apply_sorting(d.sort, done);
                             done();
                         });
                     });
                     amp.unless(done.raise());
             }
 		    
-            //results.parent = player.session.playlist.getRootPlaylist();
-            //player.session.setPlaylist( results );
-            //defer(function() {
-                //update();
-                //apply_sorting(d.sort, done);
-            //});
 		}
 		// if search term was empty
 		else {
@@ -217,71 +216,110 @@ class SearchWidget extends Pane {
 		    player.session.setPlaylist(pl.getRootPlaylist());
 		    defer(function() {
 		        update();
-                //apply_sorting(d.sort, done);
                 done();
             });
 		}
 	}
 
+	function performSearch(search:SearchData, ?queue:Playlist, ?done:VoidCb):Promise<Playlist> {
+	    if (queue == null)
+	        queue = player.session.playlist;
+
+	    return new Promise(function(resolve, reject) {
+	        if (search.term.hasContent()) {
+	            switch search.source {
+                    case CurrentPlaylist:
+                        //TODO
+
+                    case AllMedia:
+                        //TODO
+	            }
+	        }
+            else {
+                resolve(queue.getRootPlaylist());
+            }
+	    })
+	}
+
 	/**
 	  * apply [sort] to the currently active playlist
 	  */
-	private function apply_sorting(sort:SearchSort, done:VoidCb):Void {
-	    var tracks = player.session.playlist.toArray();
-	    var loader = new pman.async.tasks.EfficientTrackListDataLoader(tracks, player.app.db.mediaStore);
-	    loader.run(function(?error) {
-	        if (error != null) {
-	            done( error );
-	        }
-            else {
-                switch ( sort ) {
-                    case None:
-                        //
+	private function apply_sorting(sort:MediaSort, ?tracks:Array<Track>, ?done:VoidCb):VoidPromise {
+	    done = done.nn();
+	    if (tracks == null)
+            tracks = player.session.playlist.toArray();
 
-                    case Title:
-                        tracks.sort(function(a, b) {
-                            return Reflect.compare(a.title, b.title);
-                        });
+        return new VoidPromise(function(resolve, reject) {
+            evalSort(sort, tracks)
+                .then(function(tracks) {
+                    var pl = new Playlist( tracks );
+                    player.session.setPlaylist( pl );
 
-                    case Duration:
-                        tracks.sort(function(a, b) {
-                            return Reflect.compare(a.data.meta.duration, b.data.meta.duration);
-                        });
-
-                    case Rating:
-                        function rating(x:Track):Float {
-                            var res:Float = x.data.views;
-                            if (x.data.rating != null) {
-                                res += x.data.rating;
-                            }
-                            return res;
-                        }
-
-                        tracks.sort(function(a, b) {
-                            return Reflect.compare(rating(a), rating(b));
-                        });
-
-                    case MostRecent:
-                        tracks.sort(function(a, b) {
-                            var x = a.getFsPath(), y = b.getFsPath();
-                            if (x != null && y != null) {
-                                var as = Fs.stat( x ), bs = Fs.stat( y );
-                                return Reflect.compare(as.ctime.getTime(), bs.ctime.getTime());
-                            }
-                            else {
-                                return 0;
-                            }
-                        });
-                }
-
-                var pl = new Playlist( tracks );
-                player.session.setPlaylist( pl );
-                defer(function() {
                     update();
-                    done();
+                    resolve();
+                })
+                .unless(function(error) {
+                    reject( error );
                 });
-            }
-        });
+        }).toAsync( done );
+	}
+
+    /**
+      perform the given sorting operation on the given list of Tracks
+     **/
+	function evalSort(sort:MediaSort, ?tracks:Array<Track>, ?done:Cb<Array<Track>>):ArrayPromise<Track> {
+	    done = done.nn();
+	    if (tracks == null)
+	        tracks = player.session.playlist.toArray();
+	    var sorter = sortLambda( sort );
+	    return new Promise(function(accept, reject) {
+	        ensure_loaded(tracks, function(?error) {
+	            if (error != null) {
+	                reject( error );
+	            }
+                else {
+                    try {
+                        tracks.sort( sorter );
+                        accept( tracks );
+                    }
+                    catch (error: Dynamic) {
+                        reject( error );
+                    }
+                }
+	        });
+	    }).toAsync( done ).array();
+	}
+
+	/**
+	  ensure that all Track's data is loaded
+	 **/
+	function ensure_loaded(tracks:Array<Track>, all:Bool=false, ?done:VoidCb):VoidPromise {
+	    return (vsequence.bind(
+	        function(add, exec) {
+	            for (track in tracks) {
+	                if (track.data == null) {
+	                    add(function(next) {
+                            track.getData(function(?error, ?data) {
+                                if (error != null)
+                                    next(error);
+                                else
+                                    next();
+                            });
+                        });
+	                }
+
+	                if ( all ) {
+	                    add(function(next) {
+	                        track.data.fill( next );
+                        });
+	                }
+	            }
+
+	            exec();
+	        },
+	    _)
+        .toPromise()
+        .toAsync(done));
 	}
 
 	/**
@@ -341,19 +379,13 @@ class SearchWidget extends Pane {
 				inputText = null;
 			}
 		}
-		var _src:Null<String>, _sort:Null<String>, src:SearchSource, sort:SearchSort;
-		_src = srcSelect.getValue();
-        _sort = sortSelect.getValue();
+		var _src:Null<String> = srcSelect.getValue(),
+		_sort:Null<String> = sortSelect.getValue(),
+		src:SearchSource,
+		sort:MediaSort = stringToMediaSort( _sort );
         src = (switch ( _src ) {
             case 'all': AllMedia;
             case _: CurrentPlaylist;
-        });
-        sort = (switch ( _sort ) {
-            case 'a': Title;
-            case 'd': Duration;
-            case 'r': Rating;
-            case 't': MostRecent;
-            case '', null, _: None;
         });
 
 		return {
@@ -371,19 +403,22 @@ class SearchWidget extends Pane {
 			event.stopPropogation();
 		});
 		searchInput.on('keyup', onkeyup);
+
 		clear.el.on('click', function(e) {
 		    clearSearch();
 		});
-		//submitButton.on('click', function(event : MouseEvent) {
-			//submit();
-		//});
 
 		srcSelect.on('change', function(d:Delta<String>) {
 		    trace( d );
 		});
 
 		sortSelect.on('change', function(d:Delta<String>) {
-		    trace( d );
+		    var sort = stringToMediaSort( d.current );
+		    apply_sorting(sort, function(?error) {
+		        if (error != null) {
+		            throw error;
+		        }
+		    });
 		});
 	}
 
@@ -394,11 +429,124 @@ class SearchWidget extends Pane {
 	    searchInput.setValue( null );
 	    srcSelect.setValue( 'pl' );
 	    sortSelect.setValue( '' );
+
 	    submit(function(?error) {
 	        if (error != null) {
 	            throw error;
 	        }
 	    });
+	}
+
+    /**
+      convert the given String to a MediaSort value
+     **/
+	static function stringToMediaSort(s: String):MediaSort {
+	    if (s.empty()) {
+	        return MSNone;
+	    }
+
+	    s = s.toLowerCase();
+	    inline function bool() {
+	        return switch (s.characterAt(1)) {
+                case 'a': true;
+                case 'd': false;
+                case _: throw 'Wtf';
+	        };
+	    }
+
+	    return switch (s.characterAt(0)) {
+            case 'a': MSTitle(bool());
+            case 'd': MSDuration(bool());
+            case 'r': MSRating(bool());
+            case 't': MSDate(bool());
+            case 'v': MSViews(bool());
+            case ''|_: MSNone;
+	    };
+	}
+
+	static inline function invertSort<T>(sort: (a:T, b:T)->Int):(a:T, b:T)->Int {
+	    return (function(a:T, b:T):Int {
+	        return -sort(a, b);
+	    });
+	}
+
+	static inline function boolSort<T>(value:Bool, sort:(a:T, b:T)->Int):(a:T, b:T)->Int {
+	    return (value ? sort : invertSort( sort ));
+	}
+
+	static inline function trackDataSort(sort:(a:TrackData, b:TrackData)->Int):(a:Track, b:Track)->Int {
+	    return (function(a:Track, b:Track):Int {
+	        return sort(a.data, b.data);
+	    });
+	}
+
+    /**
+      convert a MediaSort value into a sorting function
+     **/
+	static function sortLambda(sort: MediaSort):(a:Track, b:Track)->Int {
+	    inline function bs(v, f) {
+	        return boolSort(v, f);
+	    }
+	    inline function tds(f)
+	        return trackDataSort( f );
+
+        switch sort {
+            /* do not sort */
+            case MSNone:
+                return (function(a, b) {
+                    return 0;
+                });
+
+            /* sort by title */
+            case MSTitle(asc):
+                return bs(asc, function(a:Track, b:Track) {
+                    return Reflect.compare(a.title, b.title);
+                });
+
+            /* sort by duration */
+            case MSDuration(asc):
+                return bs(asc, tds(function(a:TrackData, b:TrackData) {
+                    return Reflect.compare(a.meta.duration, b.meta.duration);
+                }));
+
+            /* sort by rating */
+            case MSRating(asc):
+                /* get an abstracted rating value */
+                function rating(x: Track):Float {
+                    var res:Float = x.data.views;
+                    if (x.data.rating != null) {
+                        res += x.data.rating;
+                    }
+                    return res;
+                }
+
+                return bs(asc, function(a:Track, b:Track) {
+                    return Reflect.compare(rating(a), rating(b));
+                });
+
+            /* sort by date */
+            case MSDate(asc):
+                return bs(asc, function(a:Track, b:Track) {
+                    var x = a.getFsPath(), y = b.getFsPath();
+                    if (x != null && y != null) {
+                        var as = Fs.stat( x ), bs = Fs.stat( y );
+                        return Reflect.compare(as.ctime.getTime(), bs.ctime.getTime());
+                    }
+                    else {
+                        return 0;
+                    }
+                });
+
+            /* sort by views */
+            case MSViews(asc):
+                return bs(asc, function(a:Track, b:Track) {
+                    return Reflect.compare(a.data.views, b.data.views);
+                });
+
+            /* unexpected value */
+            case _:
+                throw 'BETTY';
+        }
 	}
 
 /* === Instance Fields === */
@@ -412,6 +560,7 @@ class SearchWidget extends Pane {
 	public var optionsRow : FlexRow;
 	public var srcSelect : Select<String>;
 	public var sortSelect : Select<String>;
+	public var filterSelect : Select<MediaFilter>;
 	public var clear : foundation.Image;
 	//public var submitButton : Button;
 }
@@ -422,7 +571,7 @@ class SearchWidget extends Pane {
 typedef SearchData = {
 	?term : String,
 	?source : SearchSource,
-	?sort : SearchSort
+	?sort : MediaSort
 };
 
 enum SearchSource {
@@ -430,10 +579,3 @@ enum SearchSource {
     AllMedia;
 }
 
-enum SearchSort {
-    None;
-    Title;
-    Duration;
-    Rating;
-    MostRecent;
-}
