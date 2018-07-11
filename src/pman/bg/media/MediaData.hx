@@ -589,7 +589,11 @@ class MediaData {
     private var _susHasChanged: Bool = false;
 }
 
+/**
+  resolves type-names during deserialization
+ **/
 class PatchTypeResolver {
+    /* constructor function */
     public function new() {
         //
     }
