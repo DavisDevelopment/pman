@@ -16,6 +16,7 @@ import pman.display.media.*;
 import pman.ui.*;
 
 import tannus.math.TMath.*;
+import edis.Globals.*;
 import pman.Globals.*;
 import Slambda.fn;
 
@@ -39,12 +40,17 @@ class TrackControlsView extends Ent {
         iconSize = 25;
         padding = new Padding();
         padding.vertical = 3.0;
-        padding.horizontal = 4.0;
+        padding.horizontal = 6.5;
         layout = TcvLeft;
+        status = Minimized;
+        max_icon = Icons.plusIcon(iconSize, iconSize).toImage();
+        min_icon = Icons.minusIcon(iconSize, iconSize).toImage();
+        close_icon = Icons.closeIcon(iconSize, iconSize).toImage();
+        min_rect = null;
+
 
         // add all Buttons
         defer(function() {
-            //addButton(new TrackAddToPlaylistButton( this ));
             addButton(new TrackStarredButton( this ));
             //TODO separator
             addButton(new TrackShowInfoButton( this ));
@@ -52,6 +58,8 @@ class TrackControlsView extends Ent {
             //TODO separator
             addButton(new TrackMoveToTrashButton( this ));
         });
+
+        on('click', handleClick);
     }
 
 /* === Instance Methods === */
@@ -71,21 +79,34 @@ class TrackControlsView extends Ent {
         c.strokeStyle = colors[1];
         c.lineWidth = 1.5;
 
-        // function that builds a path around [this]'s content rectangle
-        inline function dr() {
-            c.beginPath();
-            c.drawRoundRect(rect, 3.0);
+        var path = new Path2D();
+        path.addRoundRect(rect, 3.0);
+
+        c.fill( path );
+        c.stroke( path );
+
+        switch status {
+            case Maximized:
+                super.render(stage, c);
+                // draw the 'window buttons'
+                c.fillStyle = colors[0];
+                c.strokeStyle = colors[1];
+                c.lineWidth = 0.75;
+                var path = new Path2D();
+                path.addRect(min_rect);
+                c.fill( path );
+                c.stroke( path );
+                c.drawComponent(min_icon, 
+                    0, 0, min_icon.width, min_icon.height,
+                    min_rect.x, min_rect.y, min_rect.width, min_rect.height
+                );
+
+            case Minimized:
+                c.drawComponent(max_icon,
+                    0, 0, max_icon.width, max_icon.height,
+                    x, y, max_icon.width, max_icon.height
+                );
         }
-
-        // draw the background
-        dr();
-        c.fill();
-
-        // draw the border
-        dr();
-        c.stroke();
-
-        super.render(stage, c);
         c.restore();
     }
 
@@ -99,19 +120,29 @@ class TrackControlsView extends Ent {
         hovered = (mp != null && containsPoint( mp ));
 
         if ( hovered ) {
-            var hoveredBtn = null;
-            for (b in buttons) {
-                b.hovered = false;
-                if (b.enabled && b.containsPoint( mp )) {
-                    hoveredBtn = b;
-                }
-            }
-            if (hoveredBtn != null) {
-                hoveredBtn.hovered = true;
-                stage.cursor = 'pointer';
-            }
-            else {
-                stage.cursor = 'default';
+            switch status {
+                case Minimized:
+                    stage.cursor = 'pointer';
+
+                case Maximized:
+                    var hoveredBtn = null;
+                    for (b in buttons) {
+                        b.hovered = false;
+                        if (b.enabled && b.containsPoint( mp )) {
+                            hoveredBtn = b;
+                        }
+                    }
+                    if (hoveredBtn != null) {
+                        hoveredBtn.hovered = true;
+                        stage.cursor = 'pointer';
+                    }
+                    else {
+                        if (min_rect != null && min_rect.containsPoint( mp )) {
+                            stage.cursor = 'pointer';
+                        }
+
+                        stage.cursor = 'default';
+                    }
             }
         }
     }
@@ -122,22 +153,52 @@ class TrackControlsView extends Ent {
     override function calculateGeometry(r : Rect<Float>):Void {
         r = playerView.rect;
 
-        __calculateHeight();
-        switch ( layout ) {
-            case TcvLeft:
-                x = (r.x + padding.horizontal);
-                w = (iconSize + padding.horizontal);
+        switch status {
+            /* minimized */
+            case Minimized:
+                min_rect = null;
+                h = 25;
+                w = 25;
                 y = (controls.y - h - padding.vertical);
 
-            case TcvRight:
-                w = (iconSize + padding.horizontal);
-                x = (r.x + r.w - w - padding.horizontal);
-                y = (controls.y - h - padding.vertical);
+                switch layout {
+                    case TcvLeft:
+                        x = (r.x + padding.horizontal);
+
+                    case TcvRight:
+                        x = (r.x + r.w - w - padding.horizontal);
+                }
+
+            /* maximized */
+            case Maximized:
+                __calculateHeight();
+                switch ( layout ) {
+                    case TcvLeft:
+                        x = (r.x + padding.horizontal);
+                        w = (iconSize + padding.horizontal);
+                        y = (controls.y - h - padding.vertical);
+
+                    case TcvRight:
+                        w = (iconSize + padding.horizontal);
+                        x = (r.x + r.w - w - padding.horizontal);
+                        y = (controls.y - h - padding.vertical);
+                }
+
+                var wis:Int = floor(iconSize / 2);
+                min_rect = new Rect((x - wis), y, wis, wis);
+
+                __positionButtons();
+
+            /* unexpected value */
+            default:
+                throw 'What the fuck?';
         }
 
-        __positionButtons();
-
         super.calculateGeometry( r );
+    }
+
+    override function containsPoint(p: Point<Float>):Bool {
+        return ((min_rect != null && min_rect.containsPoint( p )) || super.containsPoint( p ));
     }
 
     /**
@@ -202,6 +263,32 @@ class TrackControlsView extends Ent {
         }
     }
 
+    /**
+      handle 'click' events
+     **/
+    function handleClick(event: MouseEvent) {
+        switch status {
+            case Minimized:
+                maximize();
+                event.cancel();
+
+            case Maximized:
+                //TODO minimize button
+                if (min_rect.containsPoint( event.position )) {
+                    minimize();
+                    event.cancel();
+                }
+        }
+    }
+
+    public function maximize() {
+        status = Maximized;
+    }
+
+    public function minimize() {
+        status = Minimized;
+    }
+
 /* === Computed Instance Fields === */
 
     public var playerView(get, never):PlayerView;
@@ -216,6 +303,14 @@ class TrackControlsView extends Ent {
     public var uiEnabled(get, never):Bool;
     private inline function get_uiEnabled() return controls.uiEnabled;
 
+    public var status(default, set): TcvStatus;
+    function set_status(value: TcvStatus):TcvStatus {
+        var ret = (this.status = value);
+        if (playerView != null)
+            calculateGeometry( rect );
+        return ret;
+    }
+
 /* === Instance Fields === */
 
     public var buttons : Array<TrackControlButton>;
@@ -228,10 +323,19 @@ class TrackControlsView extends Ent {
 
     private var colors : Null<Array<Int>>=null;
     private var playingAnimation : Bool = false;
-    private var minimized : Bool = false;
+
+    var max_icon: Null<Image> = null;
+    var min_icon: Null<Image> = null;
+    var close_icon:Null<Image> = null;
+    var min_rect:Null<Rect<Float>> = null;
 }
 
 enum TcvLayout {
     TcvLeft;
     TcvRight;
+}
+
+enum TcvStatus {
+    Maximized;
+    Minimized;
 }
