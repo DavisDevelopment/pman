@@ -30,6 +30,9 @@ using Slambda;
 using tannus.FunctionTools;
 using tannus.async.Asyncs;
 
+/**
+  command for dealing with the current media
+ **/
 class MediaCommand extends Command {
     /**
       * execute [this] command
@@ -49,26 +52,66 @@ class MediaCommand extends Command {
                     player.track.unstar( done );
 
                 case 'rename':
-                    if (!args.empty()) {
-                        var curPath:Null<Path> = player.track.getFsPath();
-                        if (curPath == null) {
-                            return done('PMBashError: Cannot rename a non-local media');
-                        }
-                        var newName:String = args.shift();
-                        var newPath:Path = (curPath.directory.plusString( newName )).normalize();
-                        var task = new TrackRename(player.track, database.media, newPath);
-                        task.run( done );
-                    }
-                    else {
-                        return done('PMBashError: Missing argument [newPath]');
-                    }
+                    cmdRename(args, done);
 
                 case 'add':
+                    action = args.shift();
+                    if (action.empty()) {
+                        done('Error: Missing argument');
+                    }
+                    else {
+                        switch action {
+                            case 'mark', 'bookmark', 'bm':
+                                //TODO
+                                done();
+
+                            case 'actor', 'actress', 'cast', 'star', 'pornstar':
+                                //TODO
+                                done();
+
+                            case 'tag', 'category':
+                                //TODO
+                                done();
+
+                            case _:
+                                done('Error: Unsupported argument "$action"');
+                        }
+                    }
+
+                case 'mark'|'marks'|'bookmark'|'bookmarks':
+                    action = args.shift();
+                    if (action.empty()) {
+                        done('Error: Missing argument');
+                    }
+                    else {
+                        //TODO
+                        done();
+                    }
+
+                case 'actor'|'actress'|'cast'|'pornstar'|'actors'|'actresses'|'pornstars':
                     //TODO
+                    done();
 
                 default:
                     done();
             }
         }
+    }
+
+    function cmdRename(args:Array<Dynamic>, done:VoidCb):Void {
+        if (!args.empty()) {
+            var curPath = player.track.getFsPath();
+            var newName:String = args.shift();
+            var newPath:Path = (curPath.directory.plusString( newName )).normalize();
+            _renameTrack(newPath, done);
+        }
+        else {
+            _renameTrack(null, done);
+        }
+    }
+
+    function _renameTrack(newPath:Null<Path>, done:VoidCb):Void {
+        var task = new TrackRename(player.track, database.media, newPath);
+        task.run( done );
     }
 }
