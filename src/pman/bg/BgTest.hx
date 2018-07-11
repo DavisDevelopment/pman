@@ -4,16 +4,17 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.sys.FileSystem as Fs;
-import tannus.async.*;
 import tannus.math.*;
 import tannus.internal.CompileTime as Ct;
 import tannus.sys.Path;
 import tannus.http.Url;
+import tannus.async.*;
+import tannus.async.Result;
 
 import edis.concurrency.*;
+import edis.storage.db.*;
 
 import hscript.*;
-import hscript.plus.*;
 
 import Slambda.fn;
 import edis.Globals.*;
@@ -50,8 +51,37 @@ class BgTest extends Worker {
 
         // listen for packets on the 'exec' channel
         on('exec', function(packet) {
-            decodePacket( packet );
+            decodeQuery( packet );
         });
+    }
+
+    function decodeQuery(packet: WorkerIncomingPacket) {
+        if ((packet.data is String)) {
+            execNamedQuery(cast packet.data, packet);
+        }
+        else {
+            //TODO
+        }
+    }
+
+    function execNamedQuery(name:String, packet:WorkerIncomingPacket) {
+        switch name {
+            case ':favorited', ':favorites':
+                Promise.result(db.media.query(Query.where(function(row: MediaRow) {
+                    return (row.data != null && row.data.starred);
+                }))).then(function(result: Result<Array<MediaRow>, Dynamic>) {
+                    switch result {
+                        case ResFailure(err):
+                            throw err;
+
+                        case ResSuccess(rows):
+                            packet.reply(rows);
+                    }
+                });
+
+            case _:
+                trace('urinal');
+        }
     }
 
     /**
