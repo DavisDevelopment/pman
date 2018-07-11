@@ -67,32 +67,46 @@ class TrackSearchEngine extends SearchEngine<Track> {
 
 	    // add values from track's metadata
 	    if (track.data != null) {
-	        // add mark names
-	        for (m in track.data.marks) {
-	            // if [m] is a named Mark
-	            switch ( m.type ) {
-                    case MarkType.Named( markName ):
-                        // mark name
-                        cadd( markName );
+	        // assign track-data to a variable
+	        var data:TrackData = track.data;
 
-                    default:
-                        continue;
-	            }
-	        }
+            // if [marks] property is present
+	        if (data.checkProperty('marks')) {
+                // add mark names
+                for (m in data.marks) {
+                    // if [m] is a named Mark
+                    switch ( m.type ) {
+                        case MarkType.Named( markName ):
+                            // mark name
+                            cadd( markName );
 
-	        // add tag names
-	        for (t in track.data.tags) {
-	            // add tag name
-	            cadd( t.name );
-	        }
+                        default:
+                            continue;
+                    }
+                }
+            }
 
-	        // add actor names
-	        for (a in track.data.actors) {
-	            cadd( a.name );
-	        }
+            // if [tags] property is present
+            if (data.checkProperty('tags')) {
+                // add tag names
+                for (t in data.tags) {
+                    // add tag name
+                    cadd( t.name );
+                }
+            }
 
-	        nadd( track.data.description );
-	        nadd( track.data.channel );
+            if (data.checkProperty('actors')) {
+                // add actor names
+                for (a in data.actors) {
+                    cadd( a.name );
+                }
+            }
+
+            if (data.checkProperty('description'))
+                nadd( track.data.description );
+
+            if (data.checkProperty('channel'))
+                nadd( track.data.channel );
 	    }
 	    
 	    return values;
