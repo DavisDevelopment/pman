@@ -11,9 +11,15 @@ using tannus.ds.StringUtils;
 using tannus.ds.ArrayTools;
 using tannus.FunctionTools;
 
+/**
+  engine for searching Track instances
+ **/
 class TrackSearchEngine extends SearchEngine<Track> {
+    /**
+      get a singular value for a given Track
+     **/
 	override function getValue(track : Track):String {
-		return track.title;
+		return (caseSensitive ? track.title : track.title.toLowerCase());
 	}
 
 	/**
@@ -22,25 +28,41 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	override function getValues(track : Track):Array<String> {
 	    // create value list
 	    var values:Array<String> = new Array();
+
+	    // add [x] to [values]
 	    inline function add(x)
 	        values.push( x );
+
+	    // add [x] to [values], handling case-sensitivity and value-trimming
+	    inline function cadd(x: Dynamic) {
+	        var s:String = Std.string( x ).trim();
+	        if (!s.empty()) {
+	            add(caseSensitive ? s : s.toLowerCase());
+	        }
+	    }
+
+	    // add [x] to [values] if [x] is a non-null non-empty value
 	    inline function nadd(x:Null<String>)
 	        if (x.hasContent())
-	            add( x );
-	    inline function adds(x: Iterable<String>)
-	        x.iter.fn(add(_));
+	            cadd( x );
+
+	    // add every value in [x] to [values]
+	    inline function adds(x: Iterable<String>) {
+	        x.iter.fn(cadd(_));
+        }
 
 	    // add track title
-	    add( track.title );
+	    cadd( track.title );
 
 	    // add track source
-	    switch ( track.source ) {
+	    switch track.source {
 	        // local file system path
             case MSLocalPath( path ):
-                add(path.toString());
+                cadd( path );
+
             // uri
             case MSUrl( url ):
-                add( url );
+                cadd( url );
 	    }
 
 	    // add values from track's metadata
@@ -51,7 +73,7 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	            switch ( m.type ) {
                     case MarkType.Named( markName ):
                         // mark name
-                        add( markName );
+                        cadd( markName );
 
                     default:
                         continue;
@@ -61,12 +83,12 @@ class TrackSearchEngine extends SearchEngine<Track> {
 	        // add tag names
 	        for (t in track.data.tags) {
 	            // add tag name
-	            add( t.name );
+	            cadd( t.name );
 	        }
 
 	        // add actor names
 	        for (a in track.data.actors) {
-	            add( a.name );
+	            cadd( a.name );
 	        }
 
 	        nadd( track.data.description );
