@@ -27,6 +27,7 @@ using tannus.ds.ArrayTools;
 using tannus.math.TMath;
 using tannus.FunctionTools;
 using tannus.ds.AnonTools;
+using pman.media.MediaTools;
 
 /**
   models the dialog box used for time-jumps
@@ -326,6 +327,24 @@ class TimeJumpPrompt extends PromptBox {
                     event.preventDefault();
                 }
 
+            /* minus key */
+            case Minus:
+                var index = getCaretSegmentIndex();
+                if (index == 0) {
+                    value = '';
+                }
+                else {
+                    event.preventDefault();
+                }
+
+            /* percent key */
+            case Number5 if ( event.shiftKey ):
+                var index = caret();
+                value = value.substring(0, index);
+                value += '%';
+                event.preventDefault();
+
+            /* anything else */
             default:
                 super.keydown( event );
         }
@@ -337,44 +356,8 @@ class TimeJumpPrompt extends PromptBox {
     public function readTime(player:Player, ?done:VoidCb):Void {
         open();
         setTime( player.currentTime );
-        /*
-        once('time', function(type : TimeJumpType) {
-            switch type {
-                case TTAbsolute( time ):
-                    player.currentTime = time.toFloat();
 
-                case TTRelative( time ):
-                    player.currentTime += time.toFloat();
-            }
-        */
-        once('time', function(expr: TimeExpr) {
-            //trace(''+ expr);
-            switch expr {
-                case ETime(time):
-                    player.currentTime = time.toFloat();
-
-                case EPercent(perc):
-                    player.currentTime = perc.of( player.durationTime );
-
-                case ERel(op, expr):
-                    var seconds:Float = switch expr {
-                        case ETime(time): time.totalSeconds;
-                        case EPercent(perc): perc.of( player.durationTime );
-                        case _: 0.0;
-                    };
-                    switch op {
-                        case Minus:
-                            seconds = -seconds;
-
-                        case _:
-                            null;
-                    }
-                    player.currentTime += seconds;
-
-                case _:
-                    throw '$expr not supported';
-            }
-
+        function hide(cb: VoidCb) {
             // hide this view
             el.plugin('hide', untyped [
                 'drop',
@@ -382,16 +365,100 @@ class TimeJumpPrompt extends PromptBox {
                 300,
                 function() {
                     close();
-                    if (done != null) {
-                        done( null );
-                    }
+                    cb();
                 }
             ]);
+        }
+
+        function shake(cb: VoidCb) {
+            el.plugin('effect', untyped [
+                'shake',
+                null,
+                300,
+                function() {
+                    select();
+                    cb();
+                }
+            ]);
+        }
+
+        done = done.nn();
+        on('jump', function(jump: TimeJumpType) {
+            switch jump {
+                case TJT_Name(name):
+                    var status = evalNameJump(player, name);
+                    if ( status ) {
+                        hide(done);
+                    }
+                    else {
+                        shake(done);
+                    }
+
+                case TJT_Time(expr):
+                    evalTimeExpr(player, expr);
+                    hide(done);
+            }
         });
         focus();
         defer(function() {
             selectSegmentByIndex();
         });
+    }
+
+    /**
+      jump to a named time
+     **/
+    function evalNameJump(player:Player, name:String):Bool {
+        var track = player.track;
+        if (track != null && track.dataCheck(['marks'])) {
+            var data = track.data;
+            var marks = track.data.marks;
+
+            for (mark in marks) {
+                if (mark.hasName()) {
+                    var text:String = mark.format(marks);
+                    if (!text.empty()) {
+                        if (text.toLowerCase() == name.toLowerCase()) {
+                            player.currentTime = mark.time;
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+      evaluate a time expression
+     **/
+    function evalTimeExpr(player:Player, expr:TimeExpr) {
+        switch expr {
+            case ETime(time):
+                player.currentTime = time.toFloat();
+
+            case EPercent(perc):
+                player.currentTime = perc.of( player.durationTime );
+
+            case ERel(op, expr):
+                var seconds:Float = switch expr {
+                    case ETime(time): time.totalSeconds;
+                    case EPercent(perc): perc.of( player.durationTime );
+                    case _: 0.0;
+                };
+                switch op {
+                    case Minus:
+                        seconds = -seconds;
+
+                    case _:
+                        null;
+                }
+                player.currentTime += seconds;
+
+            case _:
+                throw '$expr not supported';
+        }
     }
 
     /**
@@ -405,24 +472,10 @@ class TimeJumpPrompt extends PromptBox {
       * the user has just attempted to 'submit'
       */
     public function attemptSubmit():Void {
-        //if (isValidInput()) {
-        if ( true ) {
-            //dispatch('time', getTime());
-            //var type = parse();
-            //trace( type );
-            //try {
-                var expr = TimeParser.run( value );
-                dispatch('time', expr);
-            //}
-            //catch (err: Dynamic) {
-                //report( err );
-                //close();
-            //}
-        }
-        else {
-            select();
-            el.plugin('effect', ['shake']);
-        }
+        var text:String = value;
+        var expr:TimeExpr = TimeParser.run( text );
+        dispatch('time', expr);
+        dispatch('jump', TJT_Time(expr));
     }
 
 /* === Instance Fields === */
@@ -433,3 +486,8 @@ private typedef SegmentBound = {
     x: Int,
     y: Int
 };
+
+enum TimeJumpType {
+    TJT_Time(time: TimeExpr);
+    TJT_Name(name: String);
+}
