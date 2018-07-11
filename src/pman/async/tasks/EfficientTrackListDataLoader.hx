@@ -34,6 +34,9 @@ using pman.async.Asyncs;
 using pman.async.VoidAsyncs;
 using pman.bg.DictTools;
 
+/**
+  load data for a list of Tracks as quickly as possible
+ **/
 @:access( pman.media.Track )
 class EfficientTrackListDataLoader extends Task1 {
     /* Constructor Function */
@@ -55,7 +58,7 @@ class EfficientTrackListDataLoader extends Task1 {
       * execute [this] Task
       */
     override function execute(done : VoidCb):Void {
-        trace('Starting EfficientTrackListDataLoader');
+        //trace('Starting EfficientTrackListDataLoader');
         var uris:Array<String> = new Array();
         for (track in tracks) {
             uris.push( track.uri );
@@ -126,6 +129,7 @@ class EfficientTrackListDataLoader extends Task1 {
 
         var track: Track;
         var data: TrackData;
+
         for (row in rows) {
             track = treg[row.uri];
             data = new TrackData( track );
@@ -159,9 +163,6 @@ class EfficientTrackListDataLoader extends Task1 {
       * perform database-writes
       */
     private function perform_writes(done : VoidCb):Void {
-        //writes.start(function() {
-            //done();
-        //});
         writes.series( done );
     }
 
@@ -211,17 +212,19 @@ class EfficientTrackListDataLoader extends Task1 {
             }
         }
 
-        var cpb = exec.createBatch();
-        for (create in creates)
-            cpb.asyncTask(cast create);
+        //var cpb = exec.createBatch();
+        //for (create in creates)
+            //cpb.asyncTask(cast create);
 
-        for (push in pushes)
-            cpb.asyncTask(cast push);
+        //for (push in pushes)
+            //cpb.asyncTask(cast push);
 
-        cpb.start(function() {
-            done();
-        });
-        //[creates.series, pushes.series].series( done );
+        //cpb.start(function() {
+            //done();
+        //});
+
+        /* run all created tasks */
+        creates.concat(pushes).series( done );
     }
 
     /**
@@ -300,30 +303,28 @@ class EfficientTrackListDataLoader extends Task1 {
         track._loadingData = true;
         track.data = data;
 
-        animFrame(function() {
-            var steps = new Array();
-            steps.push(function(nxt:VoidCb) {
-                pull_raw(row, data, function(?error) {
-                    if (error != null) {
-                        nxt( error );
-                    }
-                    else {
-                        ensure_track_data_completeness(data, function(?error) {
-                            track._loadingData = false;
-                            if (error != null) {
-                                return nxt( error );
-                            }
-                            else {
-                                nxt();
-                                track._dataLoaded.call( data );
-                            }
-                        });
-                    }
-                });
+        var steps = new Array();
+        steps.push(function(nxt: VoidCb) {
+            pull_raw(row, data, function(?error) {
+                if (error != null) {
+                    nxt( error );
+                }
+                else {
+                    ensure_track_data_completeness(data, function(?error) {
+                        track._loadingData = false;
+                        if (error != null) {
+                            return nxt( error );
+                        }
+                        else {
+                            nxt();
+                            track._dataLoaded.call( data );
+                        }
+                    });
+                }
             });
-            steps.push(data.initialize.bind(db, _));
-            VoidAsyncs.series(steps, next);
         });
+        steps.push(data.initialize.bind(db, _));
+        steps.series( next );
     }
 
     /**
@@ -376,8 +377,10 @@ class EfficientTrackListDataLoader extends Task1 {
         if (data.source.match(Create(_))) {
             return Complete;
         }
-        var decl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
-        return decl;
+        else {
+            var decl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
+            return decl;
+        }
     }
 
     /**
@@ -401,7 +404,8 @@ class EfficientTrackListDataLoader extends Task1 {
     private function autofill_data(data:TrackData, done:VoidCb):Void {
         //TODO fix auto-filler so that skipping it isn't beneficial
         //FIXME skip this step entirely
-        return defer(done.void());
+        return done();
+
         var autoFiller = new TrackDataAutoFill(data.track, data);
         autoFiller.giveCache( cache );
         autoFiller.run(function(?error) {
@@ -418,9 +422,6 @@ class EfficientTrackListDataLoader extends Task1 {
       * queue up the saving of the given TrackData
       */
     private function schedule_data_write(data : TrackData):Void {
-        //writes.task(@async {
-            //data.save(next, db);
-        //});
         writes.push(data.save.bind(_, db));
     }
 

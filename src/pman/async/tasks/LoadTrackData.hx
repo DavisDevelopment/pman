@@ -64,17 +64,24 @@ class LoadTrackData extends Task2<TrackData> {
       * execute [this] Task
       */
     override function execute(done : Cb<TrackData>):Void {
-        track._loadingData = true;
-        [tryto_load, fill_missing_info, init_data].series(function(?error:Dynamic) {
-            track._loadingData = false;
-            if (error != null) {
-                done(error, null);
-            }
-            else {
-                done(null, data);
-                track._dataLoaded.call( data );
-            }
-        });
+        if ( !track._loadingData ) {
+            track._loadingData = true;
+            [tryto_load, fill_missing_info, init_data].series(function(?error:Dynamic) {
+                track._loadingData = false;
+                if (error != null) {
+                    done(error, null);
+                }
+                else {
+                    done(null, data);
+                    track._dataLoaded.call( data );
+                }
+            });
+        }
+        else {
+            track._dataLoaded.once(function(dat) {
+                done(null, dat);
+            });
+        }
     }
 
     /**
@@ -149,7 +156,7 @@ class LoadTrackData extends Task2<TrackData> {
             }
             else {
                 data.meta = meta;
-                trace( data.meta );
+                //trace( data.meta );
                 push_data_to_db( done );
             }
         });
@@ -194,6 +201,7 @@ class LoadTrackData extends Task2<TrackData> {
         steps.push(function(next) {
             //FIXME skip over this step
             return next();
+            
             var filler = new TrackDataAutoFill(track, data);
             filler.giveCache( cache );
             filler.run( next );
@@ -233,8 +241,8 @@ class LoadTrackData extends Task2<TrackData> {
       * get the MediaDataSourceDecl for [properties]
       */
     private function src_decl(data: TrackData):MediaDataSourceDecl {
-        trace( data.source );
-        trace( properties );
+        //trace( data.source );
+        //trace( properties );
 
         // result is [Complete] if [Create(_)]
         if (data.source.match(Create(_))) {
@@ -242,7 +250,7 @@ class LoadTrackData extends Task2<TrackData> {
         }
         
         var decl:MediaDataSourceDecl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
-        trace( decl );
+        //trace( decl );
         return decl;
     }
 
