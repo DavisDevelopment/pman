@@ -482,23 +482,14 @@ class PlayerSession {
 	  * save the PlaypackProperties
 	  */
 	public inline function savePlaybackSettings():Void {
-		//Fs.write(psPath(), encodePlaybackSettings());
 		appState.save( appState.playback );
 	}
 
 	/**
 	  * load the PlaybackProperties
 	  */
-	public function loadPlaybackSettings():Void {
+	public inline function loadPlaybackSettings():Void {
 	    appState.load(appState.playback);
-		//try {
-			//var data = Fs.read(psPath());
-			//var props = decodePlaybackSettings( data );
-			//playbackProperties.rebase( props );
-		//}
-		//catch (error : Dynamic) {
-			//return ;
-		//}
 	}
 
 	/**
@@ -615,33 +606,7 @@ class PlayerSession {
 	  * listen for events
 	  */
 	private function _listen():Void {
-        //TODO convert this section to listening to events on the playback-config model
-         //on any change to the playback properties
-		//playbackProperties.changed.on(function( change ) {
-             //save the playback settings
-			//savePlaybackSettings();
-
-			//switch ( change ) {
-                //case Volume( d ):
-                    //player.dispatch('change:volume', d);
-
-                //case Speed( d ):
-                    //player.dispatch('change:speed', d);
-
-                //case Shuffle( nv ):
-                    //player.dispatch('change:shuffle', nv);
-
-                //case Muted( nv ):
-                    //player.dispatch('change:muted', nv);
-
-				//case Repeat( nv ):
-                    //player.dispatch('change:repeat', nv);
-
-                //case Scale( d ):
-                    //player.dispatch('change:scale', d);
-			//}
-		//});
-
+	    // on change to the playback config
 	    appState.playback.on('change', function(property, delta:Delta<Dynamic>) {
 	        player.dispatch('change:$property', delta);
 	    });
