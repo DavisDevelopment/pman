@@ -39,6 +39,12 @@ class SearchEngine<T> {
 
 /* === Instance Methods === */
 
+    public function perform(term:String, ctx:Array<T>):Array<Match<T>> {
+        setSearch( term );
+        setContext( ctx );
+        return getMatches();
+    }
+
 	/**
 	  * set the search term String
 	  */
@@ -59,6 +65,7 @@ class SearchEngine<T> {
 	  */
 	public function getMatches():Array<Match<T>> {
 		var matches:Array<Match<T>> = new Array();
+
 		for (item in context) {
 			var m = _match( item );
 			if (m != null) {
@@ -73,17 +80,21 @@ class SearchEngine<T> {
 	  * attempt a Match
 	  */
 	private function _match(item : T):Null<Match<T>> {
-		var values = getValues( item );
+		var values:Array<String> = getValues( item );
 		if ( !caseSensitive ) {
 		    values = values.map.fn(_.toLowerCase());
         }
-		var score:Int = 0;
-		var minScore = strictness;
+
+		var score:Int = 0,
+		minScore:Int = strictness;
+
 		for (term in terms) {
-		    var fion = term.getScore(values, strictness);
+		    var fion:Int = term.getScore(values, strictness);
+
 		    score += fion;
 		}
-		if (score > minScore) {
+
+		if (score >= minScore) {
 			return {
 				item: item,
 				score: score
