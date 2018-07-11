@@ -23,6 +23,7 @@ import haxe.Serializer;
 import haxe.Unserializer;
 
 import Slambda.fn;
+import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
 
@@ -52,8 +53,8 @@ class PlayerTab {
 /* === Instance Methods === */
 
 	/**
-	  * check whether there is any media attached to [this] Tab
-	  */
+	  check whether [this] Tab has any media
+	 **/
 	public inline function hasMedia():Bool {
 	    return track.exists;
 	}
@@ -98,14 +99,23 @@ class PlayerTab {
 
 /* === Playlist Methods === */
 
+    /**
+      get a Track by index
+     **/
     public inline function getTrack(index : Int):Maybe<Track> {
         return playlist[index];
     }
 
+    /**
+      get the index of a Track
+     **/
     public inline function getTrackIndex(track : Track):Int {
         return playlist.indexOf( track );
     }
 
+    /**
+      check whether [this] Tab has [track] in its queue
+     **/
     public inline function hasTrack(track : Track):Bool {
         return playlist.has( track );
     }
@@ -113,8 +123,8 @@ class PlayerTab {
     /**
       * remove the given Track
       */
-    public function removeTrack(track : Track):Bool {
-        var ret = playlist.remove( track );
+    public function removeTrack(track:Track, ?report:Bool, ?bubble:Bool):Bool {
+        var ret = playlist.remove(track, report, bubble);
         if (playlist.length == 0) {
             close();
         }
@@ -123,6 +133,23 @@ class PlayerTab {
 
     public inline function insertTrack(pos:Int, track:Track, ?report:Bool):Void {
         playlist.insert(pos, track, report);
+    }
+
+    /**
+      assign the playlist for [this] Tab
+     **/
+    public function setPlaylist(pl: Playlist):Playlist {
+        trace('(setPlaylist) Tab');
+        //var delta:Delta<Playlist> = new Delta(pl, playlist);
+        //session.player.dispatch('queueswitching', delta);
+        var old = playlist;
+        var ret = (playlist = pl);
+        //session.player.dispatch('queueswitched', delta.reverse());
+        var plv = session.player.app.playerPage.playlistView;
+        if (plv != null && plv.isOpen) {
+            plv.changePlaylist(old, playlist);
+        }
+        return ret;
     }
 
 /* === Serialization Methods === */
@@ -136,8 +163,15 @@ class PlayerTab {
 	    w( type );
 	    switch ( type ) {
             case Player:
-                w(playlist.toStrings());
-                w(indexOfCurrentMedia());
+                var root:Playlist = playlist.getRootPlaylist();
+                if (!root.empty()) {
+                    w(root.toStrings());
+                    w(max(root.indexOf(track), 0));
+                }
+                else {
+                    w([]);
+                    w(0);
+                }
 
             default:
                 w( null );
