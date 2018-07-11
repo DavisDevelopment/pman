@@ -553,7 +553,7 @@ class Player extends EventDispatcher {
 	  * save the Session, automatically
 	  */
 	public inline function saveStateAuto():Void {
-	    if ( engine.db.configInfo.autoSaveSession ) {
+	    if ( appState.sessMan.autoSaveSession ) {
 	        saveState();
 	    }
 	}
