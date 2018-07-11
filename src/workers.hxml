@@ -2,18 +2,12 @@
 -cp tannus/
 -cp gryffin/
 -cp edis/
-#-cp foundation/src/
-#-cp crayon/
-#-cp ida/
-#-cp vex/
-#-cp hxpress/src/
 -cp hscript/
 
 -lib slambda
-#-lib actuate
 -lib format
-#-lib electron
-#-lib closure
+-lib hxnodejs
+-lib haxe-crypto
 
 -D tannus
 -D node
@@ -24,10 +18,10 @@
 --each
 #--next
 
-#-main pman.bg.BgTest
-#-D worker
-#-D hscriptPos
-#-js ../dist/scripts/bgdb.worker.js
+-main pman.bg.BgTest
+-D worker
+-D hscriptPos
+-js ../dist/scripts/bgdb.worker.js
 
 #-main pman.ww.workers.TrackDataLoader
 #-D worker
