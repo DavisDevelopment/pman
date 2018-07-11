@@ -33,6 +33,9 @@ using Slambda;
 using tannus.ds.ArrayTools;
 using pman.core.ExecutorTools;
 
+/**
+  view for the current media queue
+ **/
 class PlaylistView extends Pane {
 	/* Constructor Function */
 	public function new(p : Player):Void {
@@ -40,10 +43,12 @@ class PlaylistView extends Pane {
 
 		addClasses([
 		    'right-panel',
-		    'playlist'
+		    'playlist',
+		    'media-queue'
 		]);
 
 		player = p;
+		source = PlvSrcQueue;
 		tracks = new Array();
 		_tc = new Map();
 
@@ -575,6 +580,11 @@ class PlaylistView extends Pane {
 	    return childOf( 'body' );
 	}
 
+	public var source(default, set): PlvSource;
+	function set_source(value: PlvSource):PlvSource {
+	    return (this.source = value);
+	}
+
 /* === Instance Fields === */
 
 	public var player : Player;
@@ -590,4 +600,9 @@ class PlaylistView extends Pane {
 
 	private var _tc : Map<String, TrackView>;
 	private var _locked : Bool = false;
+}
+
+enum PlvSource {
+    PlvSrcQueue();
+    PlvSrcDerived(queue:Playlist, from:Playlist);
 }
