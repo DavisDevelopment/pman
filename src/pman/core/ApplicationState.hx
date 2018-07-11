@@ -4,6 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 import tannus.async.*;
+import tannus.async.promises.*;
 import tannus.TSys as Sys;
 
 import edis.libs.localforage.LocalForage;
@@ -11,6 +12,7 @@ import edis.storage.kv.*;
 import edis.storage.fs.async.*;
 
 import pman.events.EventEmitter;
+import pman.ds.OnceSignal;
 import pman.ds.*;
 import pman.ds.Model;
 import pman.ds.io.*;
@@ -56,21 +58,27 @@ class ApplicationState {
 
         fs = engine.fileSystem;
         area = new LocalForageStorageArea(LocalForage.instance);
+        _rs = new OnceSignal();
 
         /**
           add a Model to [this]'s registry
          **/
-        inline function addModel(name:String, model:Model) {
+        inline function addModel(model: Model) {
+            var name = _key(model);
+            this.addModel(name, model);
             this.addModel(name, model);
             ports[name] = new EdisStoragePort(area, name);
         }
 
-        addModel('player', player = new PlayerConfig());
-        addModel('sessMan', sessMan = new SessManConfig());
-        addModel('playback', playback = new PlaybackConfig());
-        addModel('rendering', rendering = new RenderingConfig());
+        lock();
+        addModel(player = new PlayerConfig());
+        addModel(sessMan = new SessManConfig());
+        addModel(playback = new PlaybackConfig());
+        addModel(rendering = new RenderingConfig());
+        addModel(misc = new MiscData());
+        unlock();
 
-        var all_path:Path = Paths.appPath().plusString('appstate.dat');
+        var all_path:Path = (Paths.userData().plusString('/appstate.dat'));
         all_port = new FilePort(fs, all_path);
         ports[':all:'] = all_port.map((b -> b.toString()), (s -> ByteArray.ofString(s)));
     }
@@ -88,6 +96,7 @@ class ApplicationState {
         rm('playback');
         rm('rendering');
         rm('sessMan');
+        rm('misc');
         rm('fs');
         rm('ports');
     }
@@ -96,6 +105,11 @@ class ApplicationState {
       initialize [this] object's asynchronous resources
      **/
     public function initialize(done: VoidCb):Void {
+        //done = done.nn().wrap(function(_, ?error) {
+            //_rs.announce();
+            //_(error);
+        //});
+
         vsequence(
             function(add, exec) {
                 // initialize [this]'s storageArea
@@ -105,6 +119,10 @@ class ApplicationState {
                 for (key in ports.keys()) {
                     add(cb -> ports[key].initialize( cb ));
                 }
+
+                var raw = porti(':all:');
+                var cooked: String = '';
+                raw.then(d -> (cooked = d));
 
                 // load [this] from memory
                 add(load.bind(null, null).toAsync());
@@ -118,6 +136,7 @@ class ApplicationState {
                 }
                 else {
                     done();
+                    _rs.announce();
                 }
             }
         );
@@ -128,7 +147,8 @@ class ApplicationState {
      **/
     inline function _init_model_(m: Model):Void {
         m.on('change', function(property, x, y) {
-            save(m, IO_Update);
+            if (isReady() && !isIOLocked())
+                save(m, IO_Update);
         });
     }
 
@@ -144,6 +164,7 @@ class ApplicationState {
         playback.hxSerialize( s );
         sessMan.hxSerialize( s );
         rendering.hxSerialize( s );
+        misc.hxSerialize( s );
     }
 
     /**
@@ -153,6 +174,7 @@ class ApplicationState {
     function hxUnserialize(u: Unserializer):Void {
         inline function val():Dynamic return u.unserialize();
 
+        lock();
         var state: ModelDataState = null;
         if (player == null) {
             player = Model.deserializeToModel( u );
@@ -160,7 +182,6 @@ class ApplicationState {
         else {
             player.putData(state = Model.deserialize( u ));
         }
-        //addModel('player', player);
 
         if (playback == null) {
             playback = Model.deserializeToModel( u );
@@ -168,7 +189,6 @@ class ApplicationState {
         else {
             playback.putData(state = Model.deserialize( u ));
         }
-        //addModel('playback', playback);
 
         if (sessMan == null) {
             sessMan = Model.deserializeToModel( u );
@@ -176,7 +196,6 @@ class ApplicationState {
         else {
             sessMan.putData(state = Model.deserialize( u ));
         }
-        //addModel('sessMan', sessMan);
 
         if (rendering == null) {
             rendering = Model.deserializeToModel( u );
@@ -184,7 +203,18 @@ class ApplicationState {
         else {
             rendering.putData(state = Model.deserialize( u ));
         }
-        //addModel('rendering', rendering);
+
+        var ms = misc.getData();
+        try {
+            if (misc == null)
+                misc = Model.deserializeToModel( u );
+            else
+                misc.putData(state = Model.deserialize( u ));
+        }
+        catch (error: Dynamic) {
+            misc.putData( ms );
+        }
+        unlock();
     }
 
     /**
@@ -201,6 +231,9 @@ class ApplicationState {
       unserialize the given [data] String onto [this] object
      **/
     public function unserialize(data: String):Void {
+        if (data.empty())
+            return ;
+
         var u = new Unserializer( data );
         hxUnserialize( u );
         return ;
@@ -219,23 +252,47 @@ class ApplicationState {
         }
     }
 
-    public function save(?model:Model, ?reason:AppStateIOReason):VoidPromise {
-        return write(model, reason).unless( report );
+    public inline function isReady():Bool {
+        return _rs.v;
+    }
+    public inline function onReady(f: Void->Void) {
+        _rs.await( f );
     }
 
+    /**
+      persist [this] ApplicationState
+     **/
+    public function save(?model:Model, ?reason:AppStateIOReason):VoidPromise {
+        if (isReady() && !isIOLocked()) {
+            //echo('saving ApplicationState..');
+            return write(model, reason).unless( report );
+        }
+        else {
+            throw 'Invalid call to ApplicationState.save';
+        }
+    }
+
+    /**
+      restore [this] ApplicationState
+     **/
     public function load(?model:Model, ?reason:AppStateIOReason):VoidPromise {
         if (reason == null) {
             reason = IO_Update;
         }
         
-        if (model != null) {
-            return read_model.bind(model, _).toPromise();
+        if (!isIOLocked()) {
+            if (model != null) {
+                return read_model.bind(model, _).toPromise();
+            }
+            else {
+                switch reason {
+                    case IO_Update, IO_Finalize, IO_Initialize:
+                        return read_all.toPromise();
+                }
+            }
         }
         else {
-            switch reason {
-                case IO_Update, IO_Finalize, IO_Initialize:
-                    return read_all.toPromise();
-            }
+            throw 'Invalid call to ApplicationState.load';
         }
     }
 
@@ -266,7 +323,6 @@ class ApplicationState {
             update_write_model.bind(model, _)
         ]
         .series(done.wrap(function(_, ?error) {
-            trace('save_update complete');
             _( error );
         }));
     }
@@ -332,9 +388,47 @@ class ApplicationState {
         }
     }
 
+    function porti(k:String, ?dv:String):StringPromise {
+        var res:StringPromise = 
+            try ports[k].read(null).string() 
+            catch (err: Dynamic) Promise.raise(err).string();
+        if (dv != null) {
+            var dvp = Promise.resolve(dv);
+            res = Promise.either(res, dvp).string();
+        }
+        return res;
+    }
+
+    function porto(k:String, d:String):VoidPromise {
+        var res = 
+            try ports[k].write(d, null)
+            catch (err: Dynamic) VoidPromise.raise( err );
+        return res;
+    }
+
     inline function addModel(name:String, model:Model) {
         models[name] = model;
         _init_model_( model );
+    }
+
+    public inline function isIOLocked():Bool {
+        return io_locked;
+    }
+    public function lock(?type: AppStateLockType) {
+        if (type == null)
+            type = LtIO;
+        switch type {
+            case LtIO:
+                io_locked = true;
+        }
+    }
+    public function unlock(?type: AppStateLockType) {
+        if (type == null)
+            type = LtIO;
+        switch type {
+            case LtIO:
+                io_locked = false;
+        }
     }
 
     /**
@@ -356,6 +450,7 @@ class ApplicationState {
     public var sessMan:SessManConfig;
     public var playback:PlaybackConfig;
     public var rendering:RenderingConfig;
+    public var misc:MiscData;
 
     var models: Map<String, Model>;
     var ports: Map<String, Port<String>>;
@@ -363,6 +458,14 @@ class ApplicationState {
     var fs: FileSystem;
     var area: StorageArea;
     var all_port: Port<ByteArray>;
+
+    var io_locked: Bool = false;
+
+    var _rs: OnceSignal;
+}
+
+enum AppStateLockType {
+    LtIO;
 }
 
 enum AppStateIOReason {
@@ -393,6 +496,11 @@ class PlaybackConfig extends ProxyModel<PlaybackConfigType> {
 
 @saveName('rendering')
 class RenderingConfig extends ProxyModel<RenderingConfigType> {
+
+}
+
+@saveName('misc')
+class MiscData extends ProxyModel<MiscDataType> {
 
 }
 
@@ -466,4 +574,9 @@ private class PlaybackConfigType {
  **/
 private class RenderingConfigType {
     var directRender:Bool = true;
+}
+
+private class MiscDataType {
+    var lastDirectory: Null<Path> = {new Path('betty');};
+    var recentDocuments: Array<Path> = {new Array();};
 }
