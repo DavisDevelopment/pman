@@ -26,17 +26,32 @@ using tannus.FunctionTools;
 
 class FilePort extends FileSystemPort <ByteArray> {
     override function initialize(?done: VoidCb):VoidPromise {
+        /*
+        var dpath:Path = path.directory;
         return new VoidPromise(function(accept, reject) {
-            fs.exists( path )
+            fs.exists( dpath )
                 .then(function(doesExist) {
                     if ( doesExist ) {
                         accept();
                     }
                     else {
-                        fs.mkdirp( path ).then(accept, reject);
+                        fs.mkdirp( dpath ).then(function() {
+                            fs.write(path, '', {
+                                flags: 'w'
+                            }).then(accept, reject);
+                        }, reject);
                     }
                 }).unless( reject );
         }).toAsync( done );
+        */
+        return new VoidPromise(function(yes, no) {
+            fs.exists(path).yep(yes).nope(function() {
+                fs.write(path, '')
+                    .then(yes)
+                    .unless(no);
+            })
+            .unless(no);
+        }).toAsync(done);
     }
 
     override function read(?cb: Cb<ByteArray>):Promise<ByteArray> {
@@ -44,7 +59,7 @@ class FilePort extends FileSystemPort <ByteArray> {
     }
 
     override function write(data:ByteArray, ?cb:VoidCb):VoidPromise {
-        return fs.write(path, data, cb);
+        return fs.write(path, data, null, cb);
     }
 
     override function delete(?done: VoidCb):VoidPromise {
