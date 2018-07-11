@@ -15,5 +15,6 @@ enum Expr {
     ECommand(name:Word, params:Array<Expr>);
     ESetVar(name:Word, value:Word);
     EWord(word : Word);
+
     EBlock(body : Array<Expr>);
 }

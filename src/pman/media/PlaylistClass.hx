@@ -45,14 +45,14 @@ class PlaylistClass {
 	  * create and return a new Playlist by combining [this] one and [other]
 	  */
 	public function concat(other : Playlist):Playlist {
-		return new Playlist(l.concat( other.l ));
+		return new Playlist(l.concat( other.l ), this);
 	}
 
 	/**
 	  * create and return a copy of [this] Playlist
 	  */
-	public function copy():Playlist {
-		return new Playlist(l.copy());
+	public inline function copy():Playlist {
+		return new Playlist(l.copy(), this);
 	}
 
 	/**
@@ -67,9 +67,7 @@ class PlaylistClass {
 	  * filter [this] Playlist
 	  */
 	public function filter(f : Track -> Bool):Playlist {
-		var list = new Playlist(l.filter( f ));
-		list.parent = this;
-		return list;
+		return new Playlist(l.filter( f ), this);
 	}
 
 	/**
@@ -181,10 +179,13 @@ class PlaylistClass {
 	/**
 	  * delete [track] from [this] Playlist
 	  */
-	public function remove(track:Track, report:Bool=true):Bool {
+	public function remove(track:Track, report:Bool=true, bubble:Bool=true):Bool {
 		var status = l.remove( track );
 		if (status && report) {
 			change(PCRemove( track ));
+		}
+		if (parent != null && bubble) {
+		    parent.remove(track, report, bubble);
 		}
 		return status;
 	}
@@ -211,10 +212,8 @@ class PlaylistClass {
 	/**
 	  * get a slice of [this] Playlist
 	  */
-	public function slice(pos:Int, ?end:Int):Playlist {
-		var list = new Playlist(l.slice(pos, end));
-		list.parent = this;
-		return list;
+	public inline function slice(pos:Int, ?end:Int):Playlist {
+		return new Playlist(l.slice(pos, end), this);
 	}
 
 	/**
@@ -225,21 +224,25 @@ class PlaylistClass {
 		change(PCSort( f ));
 	}
 
+    /**
+      get a sorted copy of [this] Playlist
+     **/
+	public function sorted(f:Track->Track->Int):Playlist {
+	    return new Playlist(l.copy().isort(f), this);
+	}
+
 	/**
 	  * splice [this] Playlist
 	  */
-	public function splice(pos:Int, len:Int):Playlist {
-		var sub = l.splice(pos, len);
-		var list = new Playlist( sub );
-		list.parent = this;
-		return list;
+	public inline function splice(pos:Int, len:Int):Playlist {
+		return new Playlist(l.splice(pos, len), this);
 	}
 
 	/**
 	  * convert [this] Playlist to a String
 	  */
 	public function toString():String {
-		return 'Playlist';
+		return ('Playlist');
 	}
 
 	/**
@@ -262,10 +265,17 @@ class PlaylistClass {
 	public inline function isChildPlaylist():Bool {
 	    return (parent != null);
 	}
+
+	/**
+	  check whether [this] Playlist is a root playlist
+	 **/
 	public inline function isRootPlaylist():Bool {
 	    return !isChildPlaylist();
 	}
 
+    /**
+      get [this]'s parent playlist
+     **/
 	public inline function parentPlaylist():Null<PlaylistClass> {
 	    return parent;
 	}
@@ -342,7 +352,7 @@ class PlaylistClass {
       * create and return new Playlist containing no duplicate Tracks
       */
 	public function uniqueify():Playlist {
-	    return new Playlist(toSet().toArray());
+	    return new Playlist(toSet().toArray(), this);
 	}
 
 	/**
