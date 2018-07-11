@@ -24,6 +24,9 @@ using pman.media.MediaTools;
 using tannus.math.TMath;
 using pman.search.SearchTools;
 
+/**
+  engine for indexing a list of values based on a search term
+ **/
 class SearchEngine<T> {
 	/* Constructor Function */
 	public function new():Void {
@@ -42,7 +45,6 @@ class SearchEngine<T> {
 	public function setSearch(s : String):Void {
 		terms = new Array();
 		parseStringToTerms( s );
-		trace( terms );
 	}
 
 	/**
@@ -114,36 +116,6 @@ class SearchEngine<T> {
 	    input = __checkFirstChar(input.trim());
 	    terms = SearchTermParser.runString( input );
 	}
-	/*
-	private function parseStringToTerms_(input : String):Void {
-		input = __checkFirstChar(input.trim());
-		
-		var currentWord:String = '';
-		var lastWasBreaker:Bool = true;
-		var index:Int = 0;
-		inline function flush(){
-			if (currentWord.length > 0) {
-				terms.push( currentWord );
-				currentWord = '';
-			}
-		}
-
-		while (index < input.length) {
-			var c:Byte = input.byteAt( index );
-			if (c.isAlphaNumeric() || ACCEPTIBLE_SYMBOLS.has( c )) {
-				currentWord += c;
-			}
-			else if (c.isWhiteSpace()) {
-				if ( !lastWasBreaker ) {
-					flush();
-					lastWasBreaker = true;
-				}
-			}
-			index++;
-		}
-		flush();
-	}
-	*/
 
 	/**
 	  * interprets the search-term leader, if there is any
@@ -151,17 +123,6 @@ class SearchEngine<T> {
 	  */
 	private function __checkFirstChar(i : String):String {
 	    return i;
-	    /*
-		switch (i.charAt( 0 )) {
-			// regular expression search
-			case '~':
-				useEReg = true;
-				return i.slice( 1 );
-
-			default:
-				return i;
-		}
-		*/
 	}
 
 /* === Instance Fields === */
