@@ -42,11 +42,12 @@ class PlayerStartup extends Task1 {
       * execute [this] Task
       */
     override function execute(complete : VoidCb):Void {
-        [
-            restore_playbackProperties,
-            startup_loads
-        ]
-        .series( complete );
+        //[
+            //restore_playbackProperties,
+            //startup_loads
+        //]
+        //.series( complete );
+        startup_loads( complete );
     }
 
     /**
@@ -54,13 +55,7 @@ class PlayerStartup extends Task1 {
       */
     private function restore_playbackProperties(done : VoidCb):Void {
         defer(function() {
-            try {
-                player.session.loadPlaybackSettings();
-                done();
-            }
-            catch (err:Dynamic) {
-                done( err );
-            }
+            done();
         });
     }
 
@@ -72,9 +67,8 @@ class PlayerStartup extends Task1 {
         var cli:Bool = (launchInfo.argv.hasContent() || src == 'cli' || src == 'command-line-input');
 
         if ( cli ) {
-            cfg.restorePreviousSession = false;
-            cfg.autoSaveSession = true;
-            cfg.push();
+            appState.sessMan.restorePreviousSession = false;
+            appState.sessMan.autoSaveSession = true;
 
             //
             startup_load_cli( done );
@@ -89,7 +83,7 @@ class PlayerStartup extends Task1 {
       * perform session-loading startup tasks
       */
     private function startup_load_session(done : VoidCb):Void {
-        if ( player.app.db.preferences.autoRestore ) {
+        if ( appState.sessMan.autoRestoreSession ) {
             startup_load_default_session( done );
         }
         else {
@@ -102,7 +96,7 @@ class PlayerStartup extends Task1 {
       */
     private function startup_load_default_session(done : VoidCb):Void {
         // load the default session
-        if ( cfg.restorePreviousSession ) {
+        if ( appState.sessMan.restorePreviousSession ) {
             player.session.restore(function(?error) {
                 done.forward( error );
                 declareReady( done );
@@ -117,7 +111,7 @@ class PlayerStartup extends Task1 {
       * prompt the user whether to restore session
       */
     private function startup_confirm_load_session(done : VoidCb):Void {
-        if (cfg.restorePreviousSession && player.session.hasSavedState()) {
+        if (appState.sessMan.restorePreviousSession && player.session.hasSavedState()) {
             declareReady(function(?err) {
                 done.forward( err );
                 player.confirm('Restore Previous Session?', function(restore : Bool) {
@@ -162,9 +156,8 @@ class PlayerStartup extends Task1 {
                         done();
                     });
 
-                    cfg.restorePreviousSession = true;
-                    cfg.autoSaveSession = true;
-                    cfg.push();
+                    appState.sessMan.restorePreviousSession = true;
+                    appState.sessMan.autoSaveSession = true;
                 });
             });
         }
@@ -326,9 +319,6 @@ class PlayerStartup extends Task1 {
 
     private var appDir(get, never):AppDir;
     private inline function get_appDir() return player.app.appDir;
-
-    private var cfg(get, never):ConfigInfo;
-    private inline function get_cfg() return database.configInfo;
 
     private var launchInfo(get, never):LaunchInfo;
     private inline function get_launchInfo() return bpmain.launchInfo;
