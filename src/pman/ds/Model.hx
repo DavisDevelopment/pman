@@ -125,8 +125,8 @@ class Model extends EventEmitter {
         //try {
             ret = f();
             delta = new Delta(getAttr(key), prev);
-            scheduleDispatch('change:$key', delta.previous, delta.current);
-            scheduleDispatch('change', key, delta);
+            dispatch('change:$key', delta.previous, delta.current);
+            dispatch('change', key, delta);
         //}
         //catch (err: Dynamic) {
             //TODO?
@@ -141,8 +141,8 @@ class Model extends EventEmitter {
         var prev = getProp(key), delta, ret;
         ret = f();
         delta = new Delta(getProp(key), prev);
-        scheduleDispatch('change:$key', delta.previous, delta.current);
-        scheduleDispatch('change', key, delta);
+        dispatch('change:$key', delta.previous, delta.current);
+        dispatch('change', key, delta);
         return ret;
     }
 
@@ -152,11 +152,9 @@ class Model extends EventEmitter {
     inline function _init(k:String, v:Dynamic, announce:Bool=true) {
         initFieldEvents( k );
         if ( announce ) {
-            scheduleDispatch('create', k)
-                .then(function() {
-                    dispatch('change', k, new Delta(v, null));
-                    dispatch('change:$k', null, v);
-                }, report);
+            dispatch('create', k);
+            dispatch('change', k, new Delta(v, null));
+            dispatch('change:$k', null, v);
         }
     }
 
@@ -330,91 +328,6 @@ class Model extends EventEmitter {
     }
 
     /**
-      serializer method for [this] Model class
-     **/
-    @:keep
-    private function hxSerialize(s: Serializer) {
-        inline function put(x: Dynamic) s.serialize( x );
-
-        /* create manifest of all fields to be serialized */
-        var keys:Array<Array<String>> = [
-            //_fields_.keys(),
-            //[for (key in iterProps())
-                //if (!_props_[key].noSave)
-                    //key 
-            
-            //]
-            for (x in keyset_pair())
-                x.toArray()
-        ];
-
-        // filter keys to ensure that none that won't get serialized are included in the count;
-        keys[1] = keys[1].map.fn(new Pair(_, _props_[_])).filter.fn(_.right == null || _.right.noSave || isExpired(_.right)).map.fn(_.left);
-        keys[1].sort(untyped Reflect.compare);
-
-        // serialize the number of keys for each field-type respectively
-        put(keys[0].length);
-        put(keys[1].length);
-        
-        // serialize attributes
-        if (!keys[0].empty()) {
-            for (key in keys[0]) {
-                // key, value
-                put( key );
-                put(_fields_[key]);
-            }
-        }
-
-        // serialize properties
-        if (!keys[1].empty()) {
-            var node: ModelPropNode<Dynamic>;
-            for (key in keys[1]) {
-                // check whether 
-                node = _props_[key];
-                if (node.noSave || isExpired(node))
-                    continue;
-
-                // key, property-node (ModelPropNode)
-                put( key );
-                hxSerializePropertyNode(s, node);
-            }
-        }
-
-        // serialize [this]'s typename
-        try {
-            put(Type.getClassName(Type.getClass( this )));
-        }
-        catch (err: Dynamic) {
-            put(Type.getClassName(Model));
-        }
-
-        // serialize whether there are additional values
-        put( false );
-    }
-
-    /**
-      serialize a ModelPropNode object
-     **/
-    @:keep
-    function hxSerializePropertyNode(s:Serializer, node:ModelPropNode<Dynamic>) {
-        inline function put(x: Dynamic) s.serialize( x );
-        /*
-        var nv:ModelPropValue = node.value, nva = nv.getParameters();
-        put(nv.getName());
-        put( nva.length );
-        for (x in nva) {
-            put( x );
-        }
-        */
-
-        // do it, sha
-        put( node.value );
-
-        // should I serialize the order in which the properties are saved..?
-        put( node.expirationDate );
-    }
-
-    /**
       unserializer method for [this] Model class
      **/
     @:keep
@@ -507,7 +420,6 @@ class Model extends EventEmitter {
      **/
     public function restoreData(state: ModelDataState) {
         clear();
-        echo( this );
         putData( state );
     }
 
@@ -642,23 +554,16 @@ class Model extends EventEmitter {
             new Anon()
         ];
 
-        switch lens {
-            case [null|0, null|0]:
-                null;
+        for (i in 0...lens[0]) {
+            anons[0].set((val():String), val());
+        }
 
-            // valid numbers that require computations
-            case [nattrs, nprops]:
-                for (i in 0...nattrs)
-                    anons[0].set((val():String), val());
-
-                for (i in 0...nprops)
-                    anons[1].set((val():String), (val() : ModelPropNode<Any>));
-
-            case _:
-                null;
+        for (i in 0...lens[1]) {
+            anons[1].set((val():String), (val() : ModelPropNode<Any>));
         }
 
         var type_name:String = val();
+        var moreValues:Bool = val();
 
         return {
             f: anons[0],
@@ -666,6 +571,80 @@ class Model extends EventEmitter {
             t: type_name
         };
     }
+
+    /**
+      serializer method for [this] Model class
+     **/
+    @:keep
+    private function hxSerialize(s: Serializer) {
+        inline function put(x: Dynamic) s.serialize( x );
+
+        /* create manifest of all fields to be serialized */
+        var keys:Array<Array<String>> = [
+            //_fields_.keys(),
+            //[for (key in iterProps())
+                //if (!_props_[key].noSave)
+                    //key 
+            
+            //]
+            for (x in keyset_pair())
+                x.toArray()
+        ];
+
+        // filter keys to ensure that none that won't get serialized are included in the count;
+        keys[1] = keys[1].map.fn(new Pair(_, _props_[_])).filter.fn(_.right == null || _.right.noSave || isExpired(_.right)).map.fn(_.left);
+        keys[1].sort(untyped Reflect.compare);
+
+        // serialize the number of keys for each field-type respectively
+        put(keys[0].length);
+        put(keys[1].length);
+        
+        // serialize attributes
+        if (!keys[0].empty()) {
+            for (key in keys[0]) {
+                // key, value
+                put( key );
+                put(_fields_[key]);
+            }
+        }
+
+        // serialize properties
+        if (!keys[1].empty()) {
+            var node: ModelPropNode<Dynamic>;
+            for (key in keys[1]) {
+                // check whether 
+                node = _props_[key];
+                if (node.noSave || isExpired(node))
+                    continue;
+
+                // key, property-node (ModelPropNode)
+                put( key );
+                hxSerializePropertyNode(s, node);
+            }
+        }
+
+        // serialize [this]'s typename
+        put(Type.getClassName(Type.getClass( this )));
+
+        // serialize whether there are additional values
+        put( false );
+    }
+
+    /**
+      serialize a ModelPropNode object
+     **/
+    @:keep
+    function hxSerializePropertyNode(s:Serializer, node:ModelPropNode<Dynamic>) {
+        inline function put(x: Dynamic) s.serialize( x );
+
+        // do it, sha
+        put( node.value );
+
+        // should I serialize the order in which the properties are saved..?
+        put( node.expirationDate );
+    }
+
+
 
     @:keep
     public static function deserializeString(s: String):ModelDataState {
