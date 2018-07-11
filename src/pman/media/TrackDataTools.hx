@@ -196,7 +196,7 @@ class NmdsTools {
     public static function clone(d:NullableMediaDataState, depth:Int=1):NullableMediaDataState {
         depth = depth.clamp(0, 2);
         
-        var i:NullableMediaDataState = Reflect.copy( d );
+        var i:NullableMediaDataState = d.deepCopy(null, true);
 
         // purely shallow-copy
         if (depth == 0) {
@@ -205,7 +205,7 @@ class NmdsTools {
 
         // copy 'meta' field
         if (i.meta != null) {
-            i.meta = d.meta.clone();
+            i.meta = d.meta.deepCopy(null, true);
         }
 
         // copy 'attrs' field
@@ -243,6 +243,9 @@ class NmdsTools {
 }
 
 class MediaRowTools {
+    /**
+      create and return a deep-copy of the given [row]
+     **/
     public static function clone(row: MediaRow):MediaRow {
         var c:MediaRow = Reflect.copy( row );
         if (c.data != null)
