@@ -59,6 +59,22 @@ class TrackDataPullRaw extends Task1 {
 
 /* === Instance Methods === */
 
+    public static function pullRaw(data:TrackData2, row:MediaRow):Promise<MediaDataSource> {
+        var start = now();
+        return run_(data, {
+            row: row,
+            properties: TrackData2._all_,
+            db: database
+        }).always(function() {
+            trace('took ${now() - start}ms to build a MediaDataSource from a MediaDataRow');
+        });
+    }
+
+    public static function run_(data:TrackData2, options:TrackDataPullRawOptions):Promise<MediaDataSource> {
+        var x = new TrackDataPullRaw(data, options);
+        return x.pull();
+    }
+
     /**
       * load source
       */
