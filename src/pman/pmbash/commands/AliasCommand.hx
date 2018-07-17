@@ -21,7 +21,11 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
 using pman.async.VoidAsyncs;
+using pman.format.pmsh.ExprTools;
 
+/**
+  wrapper-class that allows for shorthand aliases
+ **/
 class AliasCommand extends Command {
     private var code : String;
     private var partial : PmshPartial;
@@ -38,7 +42,6 @@ class AliasCommand extends Command {
             this.code = code;
             this.partial = (new Interpreter().parsePartial( code ));
         }
-        //_boundPartial = null;
     }
 
     /**
@@ -46,10 +49,27 @@ class AliasCommand extends Command {
       * then executes that expression
       */
     override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
-        //if (_boundPartial == null) {
-            //_boundPartial = partial.bind();
+        //var nargs = [];
+        //for (e in partial.params) {
+            //switch e {
+                //case EWord(Ref(name)):
+                    //if (name.isNumeric()) {
+                        //var i = Std.parseInt(name);
+                        //if (args[i] != null)
+                            //nargs.push(args[i].expr);
+                    //}
+                    //else if (name == '@') {
+                        //nargs = nargs.concat(args.map.fn(_.expr));
+                    //}
+                    //else {
+                        //nargs.push( e );
+                    //}
+
+                //case _:
+                    //nargs.push( e );
+            //}
         //}
-        //_boundPartial(i, args, done);
+        
         i.execute(partial.toExpr(args.map.fn(_.expr)), done);
     }
 }
