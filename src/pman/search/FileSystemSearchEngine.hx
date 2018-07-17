@@ -34,6 +34,7 @@ class FileSystemSearchEngine extends SearchEngine<Path> {
         for (x in path.pieces) {
             vals.push( x );
         }
+        vals.push(path.name);
         return vals;
     }
 }
