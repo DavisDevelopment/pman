@@ -18,6 +18,7 @@ import pman.db.MediaStore;
 import pman.media.MediaType;
 import pman.bg.media.MediaFeature;
 import pman.bg.media.MediaDataSource;
+import pman.bg.media.MediaRow;
 import pman.ui.pl.TrackView;
 import pman.ui.*;
 import pman.media.info.Mark;
@@ -263,40 +264,45 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * load the TrackData for [this] Track
       */
-    public function getData(done : Cb<TrackData>):Void {
-        if (data == null) {
-            if ( !_loadingData ) {
-                var loader = new LoadTrackData(this, BPlayerMain.instance.db);
-                loader.run(function(?error, ?td) {
-                    if (error != null) {
-                        throw error;
-                        done( error );
-                    }
-                    else {
-                        if (td != null) {
-                            this.data = td;
-                            updateView();
+    public function getData(?done : Cb<TrackData>):Promise<TrackData> {
+        done = done.nn();
+        var promise:Promise<TrackData> = new Promise(function(resolve, reject) {
+            if (data == null) {
+                if ( !_loadingData ) {
+                    var loader = new LoadTrackData(this, BPlayerMain.instance.db);
+                    loader.run(function(?error, ?td) {
+                        if (error != null) {
+                            //done( error );
+                            reject( error );
                         }
                         else {
-                            throw 'Error: Loaded TrackData is null';
-                        }
+                            if (td != null) {
+                                this.data = td;
+                                updateView();
+                                resolve( data );
+                            }
+                            else {
+                                //throw 'Error: Loaded TrackData is null';
+                                reject('Error: Loaded TrackData is null');
+                            }
 
-                        done(null, td);
-                    }
-                });
+                            //done(null, td);
+                        }
+                    });
+                }
+                else {
+                    _dataLoaded.once(function( data ) {
+                        _loadingData = false;
+                        //done(null, data);
+                        resolve( data );
+                    });
+                }
             }
             else {
-                _dataLoaded.once(function( data ) {
-                    _loadingData = false;
-                    done(null, data);
-                });
+                resolve( data );
             }
-        }
-        else {
-            defer(function() {
-                done(null, data);
-            });
-        }
+        });
+        return promise.toAsync( done );
     }
 
     /**
