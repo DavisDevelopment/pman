@@ -51,7 +51,8 @@ class Interpreter {
     /**
       * set a variable
       */
-    private inline function setenv(k:String, v:String) return environment.set(k, v);
+    public inline function setenv(k:String, v:String) return environment.set(k, v);
+    public inline function getenv(k: String):String return environment[k].ifEmpty('');
 
     /**
       * write many variables, from any key->value data structure
@@ -98,7 +99,10 @@ class Interpreter {
       * execute the given String
       */
     public function executeString(s:String, complete:VoidCb):Void {
-        execute(Parser.runString(s), complete);
+        //var expr:Expr = Parser.runString( s );
+        var expr2:Expr = NewParser.runString( s );
+        trace('' + expr2);
+        execute(expr2, complete);
     }
 
     /**
@@ -106,9 +110,11 @@ class Interpreter {
       */
     private function async(expr : Expr):VoidAsync {
         switch ( expr ) {
+            /* multiple expressions in a block */
             case EBlock( body ):
                 return ((body.map( async )).series.bind());
 
+            /* variable assignment */
             case ESetVar(name, value):
                 return function(done:VoidCb):Void {
                     var sname = wordToString( name );
@@ -117,6 +123,7 @@ class Interpreter {
                     done();
                 };
 
+            /* basic command */
             case ECommand(nameWord, params):
                 var name = wordToString( nameWord );
                 return function(done : VoidCb):Void {
@@ -136,7 +143,10 @@ class Interpreter {
                                                 done( error );
                                             else {
                                                 var commandArgs = paramWords.zipmap(args, fn([word, value] => new CmdArg(EWord(word), value)));
-                                                command.execute(this, commandArgs, done);
+                                                command.execute(this, commandArgs, done.wrap(function(_, ?err) {
+                                                    trace('command exited');
+                                                    _( err );
+                                                }));
                                             }
                                         });
                                     }
@@ -204,7 +214,7 @@ class Interpreter {
             });
         }
         params.map.fn(p=>esp.bind(p,_)).series(function(?error) {
-            trace( result );
+            //trace( result );
             if (error != null)
                 done(error, null);
             else
