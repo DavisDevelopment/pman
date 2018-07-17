@@ -15,6 +15,8 @@ import pman.async.*;
 
 import Std.*;
 import haxe.ds.Either;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -22,6 +24,9 @@ using Lambda;
 using tannus.ds.ArrayTools;
 using tannus.math.TMath;
 
+/**
+  widget that acts as the "terminal" input
+ **/
 class PMBashTerminal extends PromptBox {
     /* Constructor Function */
     public function new(player : Player):Void {
@@ -63,7 +68,8 @@ class PMBashTerminal extends PromptBox {
         }
         else {
             try {
-                var expr = Parser.runString( line );
+                var expr = NewParser.runString( line );
+                trace('' + expr);
                 return Result.Value( expr );
             }
             catch (error : Dynamic) {
