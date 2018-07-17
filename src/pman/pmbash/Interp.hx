@@ -38,14 +38,18 @@ class Interp extends Interpreter {
             return new AliasCommand( code );
 
         commands = [
+            'builtin' => new Builtin(),
             'exit' => new ExitCommand(),
             'relaunch' => new RestartCommand(),
             'playlist' => new PlaylistCommand(),
             'pl' => new PlaylistCommand(),
+            'queue' => new QueueCommand(),
+            'q' => new QueueCommand(),
             'player' => new PlayerCommand(),
             'track' => new TrackCommand(),
             'media' => new MediaCommand(),
             'mark' => new BookmarkCommand(),
+
             'play' => alias('player play'),
             'pause' => alias('player pause'),
             'mute' => alias('player mute'),
