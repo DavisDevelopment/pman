@@ -14,6 +14,7 @@ import pman.pmbash.commands.*;
 
 import haxe.extern.EitherType as Either;
 import haxe.Constraints.Function;
+import haxe.rtti.Meta;
 
 import Slambda.fn;
 import edis.Globals.*;
@@ -37,6 +38,8 @@ class Command extends Cmd {
 
         //act('::main::', _main_);
         _register_();
+
+        _meta_();
     }
 
 /* === Instance Methods === */
@@ -53,8 +56,19 @@ class Command extends Cmd {
         super._prep_(i, args);
     }
 
+    function _meta_() {
+        var meta:Anon<Array<Dynamic>> = tm();
+        if (meta.exists('name')) {
+            this.name = meta['name'].join('');
+        }
+    }
+
     function _main_(done: VoidCb):Void {
         done();
+    }
+
+    inline function tm():Anon<Array<Dynamic>> {
+        return Anon.of(Meta.getType(Type.getClass(this)));
     }
 
     inline function _doAction_(name:String, argv:Array<CmdArg>, done:VoidCb):Void {
@@ -128,11 +142,8 @@ class Command extends Cmd {
 
 /* === Computed Instance Fields === */
 
-    public var main(get, never):BPlayerMain;
-    private inline function get_main():BPlayerMain return BPlayerMain.instance;
-
     public var player(get, never):Player;
-    private inline function get_player() return main.player;
+    private inline function get_player() return bpmain.player;
 
 /* === Instance Fields === */
 
