@@ -137,7 +137,8 @@ class BPlayerMain extends Application {
                 dragManager = new DragDropManager( this );
                 dragManager.init();
 
-                test_bdc();
+                //test_bdc();
+                test_streams();
             });
         });
 
@@ -151,6 +152,12 @@ class BPlayerMain extends Application {
                 _provideLaunchInfo( launchInfo );
             });
         });
+	}
+
+	function test_streams() {
+	    var out = new tannus.stream.StreamOutput();
+
+	    echo( out );
 	}
 
     /**
