@@ -46,12 +46,14 @@ import pman.pmbash.Interp as PMBashInterp;
 //== [TESTING IMPORTS]
 import pman.sys.FSWFilter;
 
+import haxe.extern.EitherType;
+import haxe.Constraints.Function;
+
 import Slambda.fn;
 import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
-import haxe.extern.EitherType;
-import haxe.Constraints.Function;
+import pman.GlobalMacros.*;
 
 using DateTools;
 using StringTools;
@@ -66,6 +68,7 @@ using pman.bg.URITools;
 using pman.core.PlayerTools;
 using pman.async.Asyncs;
 using tannus.FunctionTools;
+using tannus.math.TMath;
 
 class Player extends EventDispatcher {
 	/* Constructor Function */
@@ -132,7 +135,7 @@ class Player extends EventDispatcher {
             else {
                 #if (debug || !release)
                     //_test_tty(stage);
-                    _test_curses( stage );
+                    //_test_curses( stage );
                 #end
             }
 	    });
@@ -430,17 +433,52 @@ class Player extends EventDispatcher {
 	/**
 	  * save current playlist to the filesystem
 	  */
-	public function savePlaylist(saveAs:Bool=false, ?name:String, ?done:Void->Void):Void {
+	public function savePlaylist(saveAs:Bool=false, ?name:String, ?format:String, ?done:Void->Void):Void {
         var l:Playlist = session.playlist;
 
         if (name != null) {
             session.name = name;
         }
 
+        var data:Playlist->ByteArray;
+        if (format != null) {
+            switch (format.toLowerCase().trim()) {
+                case 'm3u':
+                    data = (l -> pman.format.m3u.Writer.run( l ));
+
+                case 'csv':
+                    data = (function(list: Playlist) {
+                        var labels:Array<String> = ['id', 'title', 'duration', 'uri'];
+                        var rows:Array<Array<String>> = [];
+                        var encode = (rows -> tannus.csv.Dsv.encode(rows, {delimiter:','}));
+                        for (t in list) {
+                            rows.push([
+                                t.mediaId.ifEmpty(''),
+                                t.title,
+                                (if (t.data != null && t.data.meta != null)
+                                    (''+t.data.meta.duration)
+                                else
+                                    'null'
+                                ),
+                                t.uri
+                            ]);
+                        }
+                        rows.unshift( labels );
+                        return ByteArray.ofString(encode( rows ));
+                    });
+
+                case 'xspf', 'xml', _:
+                    data = (l -> pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( l )));
+            }
+        }
+        else {
+            data = (l -> pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( l )));
+        }
+
 	    function finish():Void {
 	        var plf = app.appDir.playlistFile( session.name );
-	        var data = pman.format.xspf.Writer.run(pman.format.xspf.Tools.toXspfData( l ));
-	        plf.write( data );
+	        var fdata:ByteArray = data( l );
+	        plf.write( fdata );
 	        if (done != null) {
 	            defer( done );
 	        }
@@ -449,10 +487,9 @@ class Player extends EventDispatcher {
 	    if (session.name == null || saveAs) {
 	        prompt('playlist name', null, function( title ) {
 	            if (title == null) {
-	                savePlaylist(saveAs, done);
+	                savePlaylist(saveAs, "New Playlist", null, done);
 	            }
                 else {
-                    //l.title = title;
                     session.name = title;
                     finish();
                 }
@@ -505,7 +542,7 @@ class Player extends EventDispatcher {
 	/**
 	  * save the current playlist to a file
 	  */
-	public function exportPlaylist(?done : Void->Void):Void {
+	public function exportPlaylist(?done:Void->Void):Void {
 	    function cb(path : Path) {
 	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
 	        if (!supportedFormats.has(path.extension.toLowerCase())) {
@@ -659,7 +696,7 @@ class Player extends EventDispatcher {
 	/**
 	  * capture snapshot of media
 	  */
-	public function snapshot(?done : VoidCb):Void {
+	public function snapshot(?size:String, ?done:VoidCb):Void {
 	    done = done.nn().toss();
 
 		// return out if media isn't video
@@ -671,7 +708,7 @@ class Player extends EventDispatcher {
 	    var bundle = track.getBundle();
 
 	    // get the snapshot itself
-	    var snapp = bundle.getSnapshot(currentTime, '30%');
+	    var snapp = bundle.getSnapshot(currentTime, nullOr(size, '30%'));
 
 	    // when [snapp] has completed
         snapp.then(function(item) {
