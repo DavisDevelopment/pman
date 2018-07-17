@@ -21,6 +21,7 @@ import pman.bg.media.Mark;
 import pman.bg.media.Tag;
 import pman.bg.media.MediaRow;
 import pman.bg.media.MediaDataSource;
+import pman.bg.media.MediaDataSource.MediaDataSourceState;
 import pman.bg.media.MediaDataDelta;
 import pman.async.tasks.TrackDataPullRaw;
 
@@ -143,6 +144,26 @@ class TrackData2 {
         }
     }
 
+    public function ensureHasProperties(properties:Array<String>, ?callback:TrackData2->Void):Promise<TrackData2> {
+        var promise = new Promise(function(accept, reject) {
+            if (hasOwnPropertySet(properties, true)) {
+                return accept(this);
+            }
+            else {
+                expand(properties, function(?error) {
+                    if (error != null)
+                        reject( error );
+                    else
+                        accept( this );
+                });
+            }
+        });
+        if (callback != null) {
+            promise.then(callback, e->callback(this));
+        }
+        return promise;
+    }
+
     /**
       * reassign [this]'s property list
       */
@@ -183,6 +204,9 @@ class TrackData2 {
         //trace('[attempt #1]', nm);
         var nm2 = props.toSet().without(getPropertyNames().toSet()).toArray().propList();
         //trace('[attempt #2]', nm2);
+        if (nm2.empty()) {
+            return done();
+        }
 
         switch ( source ) {
             case Create(d), Complete(d), Partial(_, d):
@@ -1325,6 +1349,18 @@ class TrackData2 {
       */
     @:native('c')
     private static function organizePropertyList(names: Array<String>):Array<String> return names.propList();
+
+    public static function fromMediaRow(row:MediaRow, track:Track):Promise<TrackData2> {
+        var data = new TrackData2(track, null);
+        return new Promise(function(accept, reject) {
+            TrackDataPullRaw.pullRaw(data, row).then(function(source) {
+                data.dsource = Complete;
+                data.source = source;
+
+                accept( data );
+            }, reject);
+        });
+    }
 
 /* === Instance Methods === */
 
