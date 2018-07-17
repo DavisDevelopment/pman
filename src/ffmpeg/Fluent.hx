@@ -1,5 +1,7 @@
 package ffmpeg;
 
+import tannus.io.*;
+import tannus.ds.*;
 import tannus.node.*;
 
 import haxe.Constraints.Function;
@@ -14,6 +16,7 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
+using tannus.async.Asyncs;
 
 @:jsRequire( 'fluent-ffmpeg' )
 extern class Fluent extends EventEmitter {
@@ -32,7 +35,7 @@ extern class Fluent extends EventEmitter {
 
     public function inputFps(fps: Float):Void;
     public function nativeFrameRate():Void;
-    public function seekInput(time:Either<String, Float>):Void;
+    //public function seekInput(time:Either<String, Float>):Void;
     public function loop(duration: Either<String, Float>):Void;
     
     public function noAudio():Void;
@@ -51,6 +54,8 @@ extern class Fluent extends EventEmitter {
     public function inputOption(option : Either<String, Array<String>>):Void;
     public function inputOptions(options : Rest<String>):Void;
     public function addInputOption(option : Either<String, Array<String>>):Void;
+    public function setStartTime(time: Time):Void;
+    public function seekInput(time: Time):Void;
 
     public function size(size : String):Void;
     public function videoSize(size : String):Void;
@@ -124,6 +129,18 @@ extern class Fluent extends EventEmitter {
     public static function setFfprobePath(path:String):Void;
     public static function setFlvtoolPath(path:String):Void;
 
+    @:native('getAvailableFormats')
+    public static function _getAvailableFormats(callback: Cb<Dynamic<AvailFormatInfo>>):Void;
+    public static inline function getAvailableFormats():Promise<Anon<AvailFormatInfo>> {
+        return cast _getAvailableFormats.toPromise();
+    }
+
+    @:native('getAvailableCodecs')
+    public static function _getAvailableCodecs(callback: Cb<Dynamic<AvailCodecInfo>>):Void;
+    public static inline function getAvailableCodecs():Promise<Anon<AvailCodecInfo>> {
+        return cast _getAvailableCodecs.toPromise();
+    }
+
     @:native('ffprobe')
     public static function _ffprobe(src:String, callback:Null<Dynamic>->ProbeResults->Void):Void;
     public static inline function probe(src:String, done:Cb<ProbeResults>):Void {
@@ -136,6 +153,29 @@ extern class Fluent extends EventEmitter {
         FluentTools._gather();
         return new Fluent( src );
     }
+}
+
+typedef AvailFormatInfo = {
+    description: String,
+    canMux: Bool,
+    canDemux: Bool
+};
+typedef AvailCodecInfo = {
+    description: String,
+    canEncode: Bool,
+    canDecode: Bool,
+
+    type: CodecType,
+    intraFrameOnly: Bool,
+    isLossy: Bool,
+    isLossless: Bool
+};
+
+@:enum
+abstract CodecType (String) from String to String {
+    var AudioCodec = 'audio';
+    var VideoCodec = 'video';
+    var Subtitle = 'subtitle';
 }
 
 @:forward
