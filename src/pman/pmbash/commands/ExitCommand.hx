@@ -11,7 +11,8 @@ import pman.format.pmsh.Expr;
 import pman.format.pmsh.Cmd;
 import pman.pmbash.commands.*;
 
-import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
@@ -22,7 +23,7 @@ using pman.async.VoidAsyncs;
 
 class ExitCommand extends Command {
     override function execute(i:Interpreter, args:Array<CmdArg>, done:VoidCb):Void {
-        defer(main.quit);
+        defer(bpmain.quit);
         done();
     }
 }
