@@ -966,6 +966,33 @@ class Track extends EventDispatcher implements IComparable<Track> {
 	public static function fromUrl(url : String):Track {
 		return new Track(cast new HttpAddressMediaProvider( url ));
 	}
+
+    /**
+      blah blah
+     **/
+	public static function fromRow(row: MediaRow):Promise<Track> {
+	    var track = new Track(row.uri.toMediaProvider());
+	    track.mediaId = row._id;
+
+	    if (row.data != null) {
+            track._loadingData = true;
+
+            return new Promise(function(accept, reject) {
+                TrackData2.fromMediaRow(row, track).then(function(data) {
+                    track.data = data;
+                    track._dataLoaded.call( data );
+                    accept( track );
+                }, reject);
+            });
+        }
+        else {
+            return Promise.resolve( track ).derive(function(tp, yeah, nope) {
+                tp.then(function(track: Track) {
+                    track.getData.toPromise().void().then(yeah.bind(track), nope);
+                }, nope);
+            });
+        }
+	}
 }
 
 /**
