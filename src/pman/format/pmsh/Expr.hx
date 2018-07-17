@@ -16,5 +16,13 @@ enum Expr {
     ESetVar(name:Word, value:Word);
     EWord(word : Word);
 
+/* == Combinators == */
+
+    EBinaryOperator(operator:Binop, left:Expr, right:Expr);
     EBlock(body : Array<Expr>);
+}
+
+enum Binop {
+    OpAnd;
+    OpOr;
 }
