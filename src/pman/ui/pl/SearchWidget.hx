@@ -1,6 +1,7 @@
 package pman.ui.pl;
 
 import tannus.ds.*;
+import tannus.ds.tuples.Tup2;
 import tannus.io.*;
 import tannus.geom.*;
 import tannus.html.Element;
@@ -157,8 +158,18 @@ class SearchWidget extends Pane {
 	private function onkeyup(event : KeyboardEvent):Void {
 		switch ( event.key ) {
 			case Enter:
-				submit((?err) -> null);
-				searchInput.iel.blur();
+			    if ( event.ctrlKey ) {
+			        submitNewTab(null, null, function(?error) {
+			            if (error != null) {
+			                report( error );
+			            }
+			        });
+			        searchInput.iel.blur();
+			    }
+                else {
+                    submit((?err) -> null);
+                    searchInput.iel.blur();
+                }
 
 			case Esc:
 			    searchInput.iel.blur();
@@ -168,37 +179,108 @@ class SearchWidget extends Pane {
 		}
 	}
 
-	/**
-	  * the search has been 'submit'ed
-	  */
+    /**
+      perform the search
+     **/
 	public function submit(?done: VoidCb):Void {
-	    done = done.nn();
+	    run(null, null, null, done.nn());
+	}
 
-	    function end(q: Playlist) {
-	        player.session.setPlaylist( q );
+    /**
+      perform the search, get the results, and then open resulting queue in a new tab
+     **/
+	public function submitNewTab(?search:SearchData, ?mod_search:SearchData->SearchData, ?done:VoidCb):Void {
+	    function openInNewTab(queue:Playlist, next:VoidCb) {
+	        var nti:Int = player.session.newTab(function(tab: PlayerTab) {
+	            tab.setPlaylist( queue );
+	        });
+	        player.session.setTab( nti );
 	        defer(function() {
 	            update();
-	            done();
+	            next();
 	        });
 	    }
 
+	    run(search, mod_search, openInNewTab, done);
+	}
+
+	/**
+	  * the search has been 'submit'ed
+	  */
+	public function run(?search:SearchData, ?mod_search:SearchData->SearchData, ?out:(q:Playlist,cb:VoidCb)->Void, ?done:VoidCb):Void {
+	    done = done.nn();
+
+        if (out == null) {
+            out = (function(q:Playlist, cb:VoidCb) {
+                player.session.setPlaylist( q );
+                defer(function() {
+                    update();
+                    cb();
+                });
+            });
+        }
+
 	    // get search data
-		var d:SearchData = getData();
-		ensure_loaded(player.session.playlist.toArray(), true, null).then(function() {
-            performSearch(d, null).then(
-                function(newQueue) {
-                    if (d.sort != null) {
-                        evalQueueSort(d.sort, newQueue).then(function(newQueue) {
-                            end( newQueue );
-                        }, done.raise());
-                    }
-                    else {
-                        end( newQueue );
-                    }
-                },
-                done.raise()
-            );
-        }, done.raise());
+		if (search == null)
+            search = getData();
+        if (mod_search != null)
+            search = mod_search( search );
+
+        /**
+          pre-load track-data before initiating search operation, but only when the search being performed necessitates
+         **/
+        function maybeload(func: Void->Void) {
+            var needsLoad:Bool = false;
+            if (search.source != null) {
+                if (search.source.match(CurrentPlaylist)) {
+                    needsLoad = true;
+                }
+            }
+            else if (search.sort != null) {
+                if (!search.sort.match(MSNone|MSDate(_, _)|MSTitle(_))) {
+                    needsLoad = true;
+                }
+            }
+            if ( needsLoad ) {
+                ensure_loaded(player.session.playlist.toArray(), false, null).then(func, done.raise());
+            }
+            else {
+                func();
+            }
+        }
+
+        /* preload (or not) */
+		maybeload(function() {
+		    /* if a search-term was provided, perform search based on term first */
+		    if (search.term != null) {
+                performSearch(search, null).then(
+                    function(newQueue) {
+                        /* THEN, if result-ordering was specified, sort the results */
+                        if (search.sort != null) {
+                            evalQueueSort(search.sort, newQueue).then(function(newQueue) {
+                                out(newQueue, done);
+                            }, done.raise());
+                        }
+                        /* otherwise, output results */
+                        else {
+                            out(newQueue, done);
+                        }
+                    },
+                    done.raise()
+                );
+            }
+            /* if no term was given, but a new queue-order was specified, sort the queue */
+            else if (search.sort != null) {
+                evalQueueSort(search.sort, null).then(function(newQueue) {
+                    /* then output it */
+                    out(newQueue, done);
+                }, done.raise());
+            }
+            /* otherwise, do nothing */
+            else {
+                done();
+            }
+        });
 	}
 
     /**
@@ -285,6 +367,116 @@ class SearchWidget extends Pane {
         });
 	}
 
+	function _getAllMediaSearchData(search:SearchData, queue:Playlist, ?done:Cb<Playlist>) {
+	    var cache:Map<String, {?row:MediaRow, ?path:String}> = new Map();
+        var log = {
+            undocumentedMediaFiles: [],
+            rowCount: 0,
+            rowsWithData: []
+        };
+
+        /* register [row] into the cache */
+	    inline function addRow(row: MediaRow) {
+	        // by URI
+	        if (!cache.exists(row.uri)) {
+	            cache[row.uri] = {row:row, path:row.uri.toFilePath().toString()};
+	            if (!row._id.empty())
+	                cache[row._id] = cache[row.uri];
+	        }
+	        // by ID
+            else if (!cache.exists(row._id)) {
+                cache[row._id] = cache[row.uri];
+            }
+
+            // increment logging info
+            log.rowCount++;
+            if (row.data != null && row.data.meta != null)
+                log.rowsWithData.push( row );
+	    }
+
+        /* register [uri] into the cache */
+	    inline function addUri(uri: String) {
+	        if (!cache.exists(uri)) {
+	            cache[uri] = {
+	                path: uri.toFilePath().toString(),
+	                row: null
+	            };
+	        }
+
+	        if (!log.undocumentedMediaFiles.has( uri )) {
+	            log.undocumentedMediaFiles.push( uri );
+	        }
+	    }
+
+        /**
+          load/read data for this search
+         **/
+        function getseq(cb: VoidCb) {
+            vsequence(function(step, exec) {
+                /* media rows */
+                step(function(next: VoidCb) {
+                    _getAllMediaRows().then(function(rows) {
+                        for (row in rows) {
+                            addRow( row );
+                        }
+                        next();
+                    }, next.raise());
+                });
+
+                /* media-file paths */
+                step(function(next: VoidCb) {
+                    _getAllMediaPaths().transform.fn(
+                            _.toArray().map.fn(_.toString())
+                            .isort.fn(Reflect.compare(_1, _2))
+                            )
+                        .then(function(paths: Array<String>) {
+                            for (path in paths) {
+                                addUri(path.toUri());
+                            }
+                            next();
+                        }, next.raise());
+                });
+
+                /* execute queued steps */
+                exec();
+            },
+            function(?error) {
+                cb( error );
+            });
+        }
+
+        return new Promise(function(resolve, reject) {
+            /* load data */
+            getseq(function(?err) {
+                echo( log );
+
+                if (err != null) {
+                    reject( err );
+                }
+                else {
+                    /* create result tuple */
+                    var datas:Tup2<Array<Path>, Array<MediaRow>> = new Tup2([], []);
+
+                    /* handle each entry in [cache] */
+                    for (entry in cache) {
+                        switch entry {
+                            case {row:null, path:Path.fromString(_)=>path}:
+                                datas._0.push( path );
+
+                            case {row:row, path:_}:
+                                datas._1.push( row );
+
+                            case _:
+                                throw 'Unexpected $entry';
+                        }
+                    }
+
+                    resolve( datas );
+                }
+            });
+        });
+	}
+
 	/**
 	  * apply [sort] to the currently active playlist
 	  */
@@ -315,17 +507,33 @@ class SearchWidget extends Pane {
 	    done = done.nn();
 	    if (queue == null)
 	        queue = player.session.playlist;
+
+	    /* get the sorting function to be used */
 	    var sorter = sortLambda( sort );
 
+        /**
+          pre-load track-data before initiating search operation, but only when the sort-type necessitates access to track-data
+         **/
+        function maybeload(func: VoidCb):Void {
+            var needsLoad:Bool = (!sort.match(MSNone|MSDate(_,_)|MSTitle(_)));
+            if ( needsLoad ) {
+                ensure_loaded(queue.toArray(), false, func);
+            }
+            else {
+                func();
+            }
+        }
+
+        /**
+          build the promise
+         **/
 	    return new Promise(function(accept, reject) {
-	        ensure_loaded(queue.toArray(), true, function(?error) {
+	        maybeload(function(?error) {
 	            if (error != null) {
 	                reject( error );
 	            }
                 else {
                     try {
-                        //tracks.sort( sorter );
-                        //accept( tracks );
                         queue.sort( sorter );
                         accept( queue );
                     }
@@ -341,10 +549,15 @@ class SearchWidget extends Pane {
 	  ensure that all Track's data is loaded
 	 **/
 	function ensure_loaded(tracks:Array<Track>, all:Bool=false, ?done:VoidCb):VoidPromise {
-	    return (vsequence.bind(
+	    return (vbatch.bind(
 	        function(add, exec) {
 	            for (track in tracks) {
-	                if (track.data == null) {
+	                if ( all ) {
+	                    add(function(next) {
+	                        track.data.fill( next );
+                        });
+	                }
+                    else if (track.data == null) {
 	                    add(function(next) {
                             track.getData(function(?error, ?data) {
                                 if (error != null)
@@ -354,14 +567,10 @@ class SearchWidget extends Pane {
                             });
                         });
 	                }
-
-	                if ( all ) {
-	                    add(function(next) {
-	                        track.data.fill( next );
-                        });
-	                }
+                    else {
+                        continue;
+                    }
 	            }
-
 	            exec();
 	        },
 	    _)
@@ -396,10 +605,16 @@ class SearchWidget extends Pane {
 	/**
 	  * get the paths to all media files in the user's media libraries
 	  */
-	private function _getAllMediaPaths():Promise<Set<Path>> {
+	private function _getAllMediaPaths(?allowed: {?audio:Bool,?video:Bool,?image:Bool,?playlist:Bool}):Promise<Set<Path>> {
+	    if (allowed == null) allowed = {};
+	    if (allowed.audio == null) allowed.audio = true;
+	    if (allowed.video == null) allowed.video = true;
+	    if (allowed.image == null) allowed.image = false;
+	    if (allowed.playlist == null) allowed.playlist = false;
+
 	    // all paths
-        var paths:Set<Path> = new Set();
-        var a:FileFilter = FileFilter.AUDIO,
+        var paths:Set<Path> = new Set(),
+        a:FileFilter = FileFilter.AUDIO,
         v:FileFilter = FileFilter.VIDEO,
         p:FileFilter = FileFilter.PLAYLIST,
         i:FileFilter = FileFilter.IMAGE;
@@ -407,7 +622,13 @@ class SearchWidget extends Pane {
         // check whether [path] matches any of the acceptible file-filters
         inline function _test_(path: Path):Bool {
             var str:String = path.toString();
-            return (v.test( str ) || a.test( str ) || p.test( str ) || i.test( str ));
+            return (
+                (!str.empty()) ||
+                (allowed.audio ? a.test( str ) : false) ||
+                (allowed.video ? v.test( str ) : false) ||
+                (allowed.image ? i.test( str ) : false) ||
+                (allowed.playlist ? p.test( str ) : false)
+            );
         }
 
         // descend through the given Directory
