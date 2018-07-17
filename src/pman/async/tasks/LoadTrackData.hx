@@ -241,16 +241,12 @@ class LoadTrackData extends Task2<TrackData> {
       * get the MediaDataSourceDecl for [properties]
       */
     private function src_decl(data: TrackData):MediaDataSourceDecl {
-        //trace( data.source );
-        //trace( properties );
-
         // result is [Complete] if [Create(_)]
         if (data.source.match(Create(_))) {
             return Complete;
         }
         
         var decl:MediaDataSourceDecl = TrackData.getMediaDataSourceDeclFromPropertyList( properties );
-        //trace( decl );
         return decl;
     }
 
