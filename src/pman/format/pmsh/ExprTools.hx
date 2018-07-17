@@ -45,6 +45,7 @@ class ExprTools {
                 case ESetVar(name, value): ESetVar(f(name), f(value));
                 case ECommand(name, params): ECommand(f(name), params.map(p -> map(p, mapper)));
                 case EBlock(body): EBlock(body.map(child -> map(child, mapper)));
+                case EBinaryOperator(op, left, right): EBinaryOperator(op, map(left, mapper), map(right, mapper));
             };
         }
         return map(e, mapper);
