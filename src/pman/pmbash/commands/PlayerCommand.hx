@@ -32,32 +32,40 @@ class PlayerCommand extends Command {
             switch ( action ) {
                 case 'play':
                     player.play();
+                    done();
 
                 case 'pause':
                     player.pause();
+                    done();
 
                 case 'next':
                     player.gotoNext();
+                    done();
 
                 case 'previous', 'prev':
                     player.gotoPrevious();
+                    done();
 
                 case 'mute':
                     player.muted = true;
+                    done();
 
                 case 'unmute':
                     player.muted = false;
+                    done();
 
                 case 'volume':
                     var vol = Std.parseFloat(args.shift());
                     vol /= 100;
                     trace( vol );
                     player.volume = vol;
+                    done();
 
                 case 'speed':
                     var speed = Std.parseFloat(args.shift());
                     speed /= 100;
                     player.playbackRate = speed;
+                    done();
 
                 default:
                     done();
