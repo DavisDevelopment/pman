@@ -12,6 +12,8 @@ using Slambda;
 enum Token {
     TWord(word : Word);
     TSym(symbol : String);
+    // special contextual meaning
+    TSpecial(char: Byte);
 
     TDelimiter;
     TEndOfInput;
@@ -21,4 +23,10 @@ enum Word {
     Ident(id:String);
     String(s:String, del:Int);
     Ref(name: String);
+    Interpolate(expr: Expr);
+    Substitution(type:SubstitutionType, name:String, value:Expr);
+}
+
+enum SubstitutionType {
+
 }
