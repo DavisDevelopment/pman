@@ -21,11 +21,13 @@ using tannus.ds.AnonTools;
 using tannus.ds.SortingTools;
 using tannus.async.OptionTools;
 using tannus.FunctionTools;
+using pman.format.pmsh.ExprTools;
 
 class NewParser {
     /* Constructor Function */
     public function new() {
-        //betty
+        tkWordSymbols = '()[]:-+?';
+        tkSpecialChars = [];
     }
 
 /* === Instance Methods === */
@@ -50,6 +52,7 @@ class NewParser {
         _index = 0;
         chars = new Array();
         tks = new Array();
+        symbolsAreWords = true;
 
         var tk:Token, e:Expr, all:Array<Expr> = new Array();
         while ( true ) {
@@ -60,12 +63,12 @@ class NewParser {
 
                 default:
                     push( tk );
-                    e = expr();
+                    e = exprNext(expr());
                     all.push( e );
             }
         }
         
-        return EBlock( all );
+        return ERoot( all );
     }
 
     /**
@@ -74,9 +77,11 @@ class NewParser {
     function expr():Expr {
         var tk = token();
         switch tk {
+            /* delimiter */
             case TDelimiter:
                 return expr();
 
+            /* command-looking word */
             case TWord(Ident(name)):
                 var struct = parseStructure( name );
                 if (struct != null) {
@@ -87,11 +92,13 @@ class NewParser {
                     switch tk {
                         case TEndOfInput:
                             push( tk );
-                            return ECommand(Ident(name), []);
+                            return ECommand(new CommandExpr(Ident(name), []));
+                            //return ECommand(Ident(name), []);
 
                         case TDelimiter:
                             push( tk );
-                            return ECommand(Ident(name), []);
+                            return ECommand(new CommandExpr(Ident(name), []));
+                            //return ECommand(Ident(name), []);
 
                         case TSym('='):
                             return ESetVar(Ident(name), word());
@@ -104,7 +111,8 @@ class NewParser {
                 }
 
             case TWord(word):
-                return ECommand(word, cmdArgs());
+                return ECommand(new CommandExpr(word, cmdArgs()));
+                //return ECommand(word, cmdArgs());
 
             case TSym('{'):
                 push( tk );
@@ -115,6 +123,147 @@ class NewParser {
         }
     }
 
+    function exprNext(e: Expr):Expr {
+        var tk = token();
+        switch tk {
+            case TEndOfInput:
+                push( tk );
+                return e;
+
+            case TSym('|'):
+                return EBinaryOperator(OpPipe, e, fullExpr());
+
+            case TSym('&'):
+                tk = token();
+                switch tk {
+                    case TSym('>'):
+                        return exprNext(EUnaryOperator(OpRedirectIo(IorOut(IoStdAll, readIoPort())), e));
+
+                    case _:
+                        push( tk );
+                        push(TSym('&'));
+                        return e;
+                }
+
+            case TSym('||'):
+                return EBinaryOperator(OpOr, e, fullExpr());
+
+            case TSym('&&'):
+                return EBinaryOperator(OpAnd, e, fullExpr());
+
+            case TSym('>'):
+                push( tk );
+                return exprNext(EUnaryOperator(OpRedirectIo(readIoRedirect()), e));
+
+            case TSym('<'):
+                push( tk );
+                return exprNext(EUnaryOperator(OpRedirectIo(readIoRedirect()), e));
+
+            case _:
+                return e;
+        }
+    }
+
+    function fullExpr():Expr {
+        var e:Expr = exprNext(expr());
+        return e;
+    }
+
+    function readIoRedirect():IoRedirect {
+        var tk = token();
+        switch tk {
+            case TSym('>'):
+                tk = token();
+                switch tk {
+                    case TSym('>'):
+                        return IorOutAppend(IoStdOut, readIoPort());
+
+                    case _:
+                        push( tk );
+                        return IorOut(IoStdOut, readIoPort());
+                }
+
+            case TSym('&'):
+                tk = token();
+                switch tk {
+                    case TSym('>'):
+                        return IorOut(IoStdAll, readIoPort());
+
+                    case _:
+                        push( tk );
+                        throw EUnexpected(TSym('&'));
+                }
+
+            case TWord(Ident(id)|String(id,_)):
+                var pattern:RegEx = new RegEx(~/([0-9&])([<>&]{1,2})(.+)/gmi);
+                if (pattern.match( id )) {
+                    var src:IoPortType = (switch pattern.matched(1) {
+                        case '0': IoStdIn;
+                        case '1': IoStdOut;
+                        case '2': IoStdErr;
+                        case '&': IoStdAll;
+                        case other: IoFile(Ident(other));
+                    }),
+                    op:String = pattern.matched( 2 ),
+                    sright:String = pattern.matched( 3 ).ifEmpty('').trim(),
+                    dest:IoPortType = (switch sright {
+                        case '': throw EMissingRightValue;
+                        case '0' if (op.endsWith('&')): IoStdIn;
+                        case '1' if (op.endsWith('&')): IoStdOut;
+                        case '2' if (op.endsWith('&')): IoStdErr;
+                        case other: IoFile(Ident( other ));
+                    });
+
+                    return switch op {
+                        case '>', '>&': IorOut(src, dest);
+                        case '>>': IorOutAppend(src, dest);
+                        case '<': throw EUnexpected('<');
+                        case _: throw EUnexpected(op);
+                    };
+                }
+                else {
+                    push( tk );
+                    throw EUnexpected( tk );
+                }
+
+            case _:
+                push( tk );
+                throw EUnexpected( tk );
+        }
+    }
+
+    /**
+      read an IOPortType value
+     **/
+    function readIoPort():IoPortType {
+        var tk = token();
+        switch tk {
+            case TSym('&'):
+                tk = token();
+                switch tk {
+                    case TWord(Ident(id)) if (id.isNumeric()):
+                        return switch id {
+                            case '1': IoStdOut;
+                            case '2': IoStdErr;
+                            case _: throw EUnexpected( id );
+                        };
+
+                    case TWord(word):
+                        return IoFile( word );
+
+                    case _:
+                        push( tk );
+                        throw EUnexpected( tk );
+                }
+
+            case TWord(word):
+                return IoFile( word );
+
+            case _:
+                throw EUnexpected( tk );
+        }
+    }
+
     /**
       parse out a command expression
      **/
@@ -122,7 +271,8 @@ class NewParser {
         var tk = token();
         switch tk {
             case TWord(word):
-                return ECommand(word, cmdArgs());
+                //return ECommand(word, cmdArgs());
+                return ECommand(new CommandExpr(word, cmdArgs()));
 
             case _:
                 throw EUnexpected( tk );
@@ -136,7 +286,7 @@ class NewParser {
         var tk = token();
         switch tk {
             case TSym('{'):
-                var body = [];
+                var body:Array<Expr> = [];
                 while ( true ) {
                     tk = token();
                     switch tk {
@@ -150,9 +300,11 @@ class NewParser {
                             return EBlock(body);
 
                         case _:
+                            push( tk );
                             body.push(expr());
                     }
                 }
+
                 return EBlock(body);
 
             case _:
@@ -193,13 +345,16 @@ class NewParser {
                 case TDelimiter:
                     return args;
 
-                case TEndOfInput:
+                case TSym(_), TEndOfInput:
                     push( tk );
                     return args;
 
+                case TWord(word):
+                    args.push(EWord(word));
+
                 case _:
                     push( tk );
-                    args.push(wordExpr());
+                    throw EUnexpected( tk );
             }
         }
         return args;
@@ -210,6 +365,52 @@ class NewParser {
      **/
     function parseStructure(struct: String):Null<Expr> {
         switch struct {
+            case 'function':
+                var name:String,
+                namere:RegEx = new RegEx(~/([A-Z_][A-Z0-9_]*)\(\)/gi),
+                expr:Expr,
+                tk:Token = token();
+                switch tk {
+                    case TWord(Ident(fid)) if (namere.match( fid )):
+                        var l: String = namere.matchedLeft(),
+                        r: String = namere.matchedRight(),
+                        n: String = namere.matched(1);
+
+                        if (l.hasContent()) {
+                            throw EUnexpected('[$l]$n');
+                        }
+                        else if (r.hasContent()) {
+                            throw EUnexpected('$n[$r]');
+                        }
+                        else {
+                            name = n;
+                            expr = fullExpr();
+                            return EFunc(name, expr);
+                        }
+
+                    case _:
+                        throw EUnexpected( tk );
+                }
+
+            case 'for':
+                var name:String, iter:Expr, body:Expr;
+                var tk = token();
+                switch tk {
+                    case TWord(Ident(id)):
+                        name = id;
+                        expectIdent(x -> (x == 'in'));
+                        iter = expr();
+                        maybeToken(TDelimiter);
+                        expectIdent(x -> (x == 'do'));
+                        body = fullExpr();
+                        maybeToken(TDelimiter);
+                        expectIdent(x -> (x == 'done'));
+                        return EFor(name, iter, body);
+
+                    case _:
+                        throw EUnexpected( tk );
+                }
+
             default:
                 return null;
         }
@@ -225,6 +426,7 @@ class NewParser {
         else {
             var char:Byte = readChar();
             switch char {
+                /* end of input */
                 case 0:
                     return TEndOfInput;
 
@@ -245,6 +447,10 @@ class NewParser {
                         return token();
                     }
 
+                case _ if (tkSpecialChars.has( char )):
+                    return TSpecial( char );
+
+                /* strings */
                 case "'".code, '"'.code:
                     var word = readStr(char);
                     return TWord(String(word, switch char {
@@ -253,15 +459,41 @@ class NewParser {
                         default: throw 'Unexpected $char';
                     }));
 
+            
+                /* & stuff */
                 case '&'.code:
                     char = readChar();
                     switch char {
                         case '&'.code:
-                            return TDelimiter;
+                            return TSym('&&');
 
                         case _:
+                            unshiftByte( char );
                             return TSym('&');
                     }
+
+                case '|'.code:
+                    char = readChar();
+                    switch char {
+                        case '|'.code:
+                            return TSym('||');
+
+                        case _:
+                            unshiftByte( char );
+                            return TSym('|');
+                    }
+
+                case '>'.code:
+                    return TSym('>');
+
+                case '<'.code:
+                    return TSym('<');
+
+                case '{'.code:
+                    return TSym('{');
+
+                case '}'.code:
+                    return TSym('}');
 
                 case ';'.code:
                     return TDelimiter;
@@ -270,14 +502,45 @@ class NewParser {
                 case '='.code:
                     return TSym('=');
 
+                case '('.code if (!symbolsAreWords):
+                    return TSym('(');
+
+                case ')'.code if (!symbolsAreWords):
+                    return TSym(')');
+
+                case '['.code if (!symbolsAreWords):
+                    return TSym('[');
+
+                case ']'.code if (!symbolsAreWords):
+                    return TSym(']');
+
+                case '-'.code if (!symbolsAreWords):
+                    return TSym('-');
+
+                case '+'.code if (!symbolsAreWords):
+                    return TSym('+');
+
+                case ':'.code if (!symbolsAreWords):
+                    return TSym(':');
+
+                /* dollar sign */
                 case "$".code:
-                    switch token() {
+                    var prevSaw = this.symbolsAreWords;
+                    symbolsAreWords = false;
+                    var t = token();
+                    switch t {
                         case TWord(Ident(id)):
                             return TWord(Ref(id));
 
-                        case tk:
-                            push( tk );
-                            throw 'Error: Unexpected $tk';
+                        /* '(' | '{' */
+                        case TSym('('):
+                            var parent:Expr = readRegion('(', ')');
+                            trace('' + parent);
+                            return TWord(Interpolate(parent));
+
+                        case _:
+                            push( t );
+                            return TSym("$");
                     }
 
                 /* read out word tokens */
@@ -358,11 +621,79 @@ class NewParser {
         return res.toString();
     }
 
+    function readRegion(so:String, sc:String) {
+        var o:Byte = so.byteAt(0), c:Byte = sc.byteAt(0);
+        var scp = this.tkSpecialChars.copy();
+        inline function restore() {
+            this.tkSpecialChars = scp;
+        }
+
+        if (!tkSpecialChars.has( o ))
+            tkSpecialChars.push( o );
+        if (!tkSpecialChars.has( c ))
+            tkSpecialChars.push( c );
+        var t: Token;
+
+        switch (t = token()) {
+            case TSpecial(char) if (char == o || char == c):
+                push( t );
+
+            default:
+                push( t );
+                restore();
+                throw EWhatTheFuck('Region(start=$so end=$sc) not present', t);
+        }
+
+        var b = new StringBuf(),
+        level = 0,
+        tokenTree = [],
+        t: Token;
+
+        while ( true ) {
+            t = token();
+            switch t {
+                case TSpecial(special):
+                    if (special == o) {
+                        if (level > 0)
+                            tokenTree.push( t );
+                        ++level;
+                    }
+                    else if (special == c) {
+                        if (level > 1)
+                            tokenTree.push( t );
+                        --level;
+                        if (level == 0)
+                            break;
+                    }
+
+                case TEndOfInput:
+                    restore();
+                    throw EWhatTheFuck('betty', t);
+
+                case _:
+                    tokenTree.push( t );
+            }
+        }
+
+        for (ct in tokenTree)
+            b.add(ct.tokenString());
+        var ret = b.toString();
+        restore();
+
+        return runString( ret );
+    }
+
     /**
       check whether the given Byte is a Word character
      **/
-    inline function isWordChar(c:Byte):Bool {
-        return !(c.isAny("$", ';', '='));
+    function isWordChar(c:Byte):Bool {
+        return !(c.isAny("$", ';', '=') || (symbolsAreWords ? false : isSymWordChar(c)));
+    }
+    function isSymWordChar(c: Byte):Bool {
+        for (i in 0...tkWordSymbols.length)
+            if (tkWordSymbols[i] == c)
+                return true;
+        return false;
     }
 
     /**
@@ -376,6 +707,57 @@ class NewParser {
                 break;
             }
         }
+    }
+
+    /**
+      assert that the next token in the input will pass the given test
+     **/
+    function expect(test: Token->Bool):Token {
+        var tk = token();
+        if (test( tk )) {
+            return tk;
+        }
+        else {
+            push( tk );
+            throw EUnexpected( tk );
+        }
+    }
+    inline function expectToken(t: Token):Token {
+        return expect(x -> Type.enumEq(t, x));
+    }
+    inline function expectWord(test: String->Bool):Token {
+        return expect(function(tk: Token) {
+            return switch tk {
+                case TWord(Ident(s)|String(s,_)): test(s);
+                case _: false;
+            }
+        });
+    }
+    inline function expectIdent(test: String->Bool):Token {
+        return expect(function(tk: Token) {
+            return switch tk {
+                case TWord(Ident(id)): test( id );
+                case _: false;
+            }
+        });
+    }
+
+    function maybe(test: Token->Bool):Bool {
+        try {
+            return (expect( test ) != null);
+        }
+        catch (error: PmShError) {
+            if (error.match(EUnexpected(_))) {
+                return false;
+            }
+            else {
+                throw error;
+            }
+        }
+    }
+
+    function maybeToken(t: Token):Bool {
+        return maybe(x -> Type.enumEq(x, t));
     }
 
     /**
@@ -417,11 +799,23 @@ class NewParser {
 
     var chars: Null<Array<Byte>>;
     var tks: Null<Array<Token>>;
+    var symbolsAreWords: Bool;
+    var tkWordSymbols: ByteArray;
+    var tkSpecialChars: Array<Byte>;
 }
 
+/**
+  Error types for PmBash
+  TODO move this into its own module
+ **/
 enum PmShError {
     EUnexpected(x: Dynamic);
+    EWhatTheFuck(q:String, v:Dynamic);
+    ENameError(name:String, ?errorType:String);
+    ECommandNotFound(name: Word);
 
     EUnterminatedString;
     EUnterminatedBlock;
+    EMissingLeftValue;
+    EMissingRightValue;
 }
