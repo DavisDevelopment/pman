@@ -160,23 +160,3 @@ class Cmd {
     private var outputValue: Null<Dynamic>;
 }
 
-@:structInit
-class CmdArg {
-    public var expr : Expr;
-    public var value : Dynamic;
-
-    public inline function new(e:Expr, v:Dynamic) {
-        expr = e;
-        value = v;
-    }
-
-    public static inline function fromString(s:String, literal:Bool=true):CmdArg {
-        return new CmdArg(EWord(literal ? Ident(s) : String(s, 0)), s);
-    }
-}
-
-typedef CmdStdIo = {
-    var error: WritableStream<ByteArray>;
-    var output: WritableStream<ByteArray>;
-    var input: ReadableStream<ByteArray>;
-}
