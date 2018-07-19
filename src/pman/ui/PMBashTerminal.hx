@@ -1,11 +1,12 @@
 package pman.ui;
 
-import foundation.*;
-
 import tannus.html.Element;
 import tannus.ds.Memory;
 import tannus.events.*;
 import tannus.events.Key;
+
+//import foundation.*;
+import edis.dom.*;
 
 import pman.core.*;
 import pman.pmbash.*;
@@ -27,13 +28,12 @@ using tannus.math.TMath;
 /**
   widget that acts as the "terminal" input
  **/
-class PMBashTerminal extends PromptBox {
+class PMBashTerminal extends EdisDomComponentPromptBox {
     /* Constructor Function */
     public function new(player : Player):Void {
         super();
 
         addClass('pmbash');
-        titl.destroy();
 
         this.player = player;
     }
@@ -119,7 +119,7 @@ class PMBashTerminal extends PromptBox {
 
     override function open():Void {
         appendTo('body');
-        modal.open();
+        //modal.open();
         __center();
     }
 
