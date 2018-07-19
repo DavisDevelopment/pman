@@ -164,18 +164,18 @@ class BPlayerMain extends Application {
       test the BDC (Binary Delimited-Chunk) format
      **/
 	private function test_bdc() {
-	    function read() {
-            var binData:ByteArray = Ct.readFile('./testbdc.dat');
-            binData.bigEndian = !binData.bigEndian;
-            echo( binData );
+		//function read() {
+            //var binData:ByteArray = Ct.readFile('./testbdc.dat');
+            //binData.bigEndian = !binData.bigEndian;
+            //echo( binData );
 
-            var parsed = edis.format.bdc.Reader.run({}, binData);
-            echo( parsed );
-        }
+            //var parsed = edis.format.bdc.Reader.run({}, binData);
+            //echo( parsed );
+        //}
 
-        function write() {
-            //
-        }
+        //function write() {
+            
+        //}
 
         //TODO
 	}
