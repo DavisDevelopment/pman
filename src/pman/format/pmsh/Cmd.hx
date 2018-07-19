@@ -2,6 +2,7 @@ package pman.format.pmsh;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.async.*;
 import tannus.node.*;
 import tannus.node.WritableStream;
 import tannus.node.ReadableStream;
@@ -9,19 +10,26 @@ import tannus.node.Duplex;
 import tannus.node.Transform;
 
 import edis.streams.*;
+import haxe.io.*;
 
-import pman.async.*;
+import pman.format.pmsh.NewParser;
+import pman.format.pmsh.CmdIo;
+import pman.format.pmsh.io.CmdInput;
+import pman.format.pmsh.io.CmdOutput;
 import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
 
-import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
-using pman.async.VoidAsyncs;
+using tannus.async.Asyncs;
+using tannus.html.JSTools.JSFunctionTools;
+using tannus.FunctionTools;
 
 /**
   class to represent a PmSh (PMan Shell) command
@@ -30,8 +38,9 @@ class Cmd {
     /* Constructor Function */
     public function new():Void {
         name = 'cmd';
-        stdio = _createStdIo();
+        stdio = IOStream(_createStreamIo());
         outputValue = null;
+        exitCode = null;
     }
 
 /* === Instance Methods === */
@@ -46,15 +55,34 @@ class Cmd {
         done();
     }
 
+    /**
+      prepare [this] Cmd for execution
+     **/
     function _prep_(i:Interpreter, args:Array<CmdArg>) {
         _init_();
         this.interpreter = i;
         this.argv = args;
     }
 
+    /**
+      initialize [this] Cmd
+     **/
     function _init_() {
-        stdio = _createStdIo();
+        stdio = IOStream(_createStreamIo());
         outputValue = null;
+    }
+
+    /**
+      kill [this] Cmd process
+     **/
+    function kill(code:Int, callback:VoidCb) {
+        [
+            stdout.close.bind(_),
+            stderr.close.bind(_),
+            stdin.close.bind(_),
+            (next -> _terminate(code, next)),
+            _kill.bind(code, _)
+        ].series( callback );
     }
 
     private function _destroy(error:Null<Dynamic>, callback:VoidCb):Void {
@@ -63,16 +91,48 @@ class Cmd {
 
     private function _kill(code:Int, callback:VoidCb):Void {
         //TODO actually kill the Cmd
+        //[
+          //_terminate.bind(code, _),
+          //_destroy.bind(null, callback)
+        //].series( callback );
+        exitCode = code;
         _destroy(null, callback);
     }
 
-    public function print(x: Dynamic):Void {
-        stdout.write(bytes(x));
+    dynamic function _terminate(code:Int, callback:VoidCb):Void {
+        //TODO
+        // default implementation
+        callback();
     }
 
-    public function println(x: Dynamic):Void {
-        print( x );
-        print('\n');
+    /**
+      write the given data <code>x</code> onto the specified output (defaults to <code>stdout</code>)
+     **/
+    public function print(x:Dynamic, ?port:IoPortType, ?done:VoidCb):Void {
+        if (port == null) {
+            port = IoPortType.IoStdOut;
+        }
+        
+        var out:CmdOutput = (switch port {
+            case IoStdOut|IoStdAll: stdout;
+            case IoStdErr: stderr;
+            case _: throw EUnexpected( port );
+        });
+        out.write(bytes(x), done);
+    }
+    private function printer(x:Dynamic, ?port:IoPortType):VoidAsync return (cb -> print(x, port, cb));
+
+    /**
+      append a line of text to [this]
+     **/
+    public function println(x:Dynamic, ?port:IoPortType, ?done:VoidCb):Void {
+        if (done == null) {
+            print( x );
+            print('\n');
+        }
+        else {
+            [printer(x, port), printer('\n', port)].series( done );
+        }
     }
 
     /**
@@ -80,7 +140,7 @@ class Cmd {
      **/
     private function bytes(x: Dynamic):Null<ByteArray> {
         if (x == null) {
-            return null;
+            return ByteArray.alloc(0);
         }
         else if ((x is Binary)) {
             return cast x;
@@ -119,41 +179,113 @@ class Cmd {
         }
     }
 
-    private function _createStdOut():WritableStream<ByteArray> {
+    /* create new writable stream */
+    private function _createStreamOut():WritableStream<ByteArray> {
         return new WritableStream({});
     }
 
-    private function _createStdErr():WritableStream<ByteArray> {
+    /* create new writable stream */
+    private function _createStreamErr():WritableStream<ByteArray> {
         return new WritableStream({});
     }
 
-    private function _createStdIn():ReadableStream<ByteArray> {
+    /* create new writable stream */
+    private function _createStreamIn():ReadableStream<ByteArray> {
         return new ReadableStream({});
     }
 
-    private function _createStdIo():CmdStdIo {
+    /**
+      build a streamed STDIO
+     **/
+    private function _createStreamIo():CmdStreamIo {
         return {
-            input: _createStdIn(),
-            output: _createStdOut(),
-            error: _createStdErr()
+            input: _createStreamIn(),
+            output: _createStreamOut(),
+            error: _createStreamErr()
         };
+    }
+
+    /* create an input object */
+    function _createSyncIn():Input {
+        return new StringInput('');
+    }
+
+    /* create an output object */
+    function _createSyncOut():Output {
+        return new BytesOutput();
+    }
+
+    /* create an output object */
+    function _createSyncErr():Output {
+        return new BytesOutput();
+    }
+
+    /**
+      create a synchronous IO
+     **/
+    function _createSyncIo():CmdSyncIo {
+        return {
+            input: _createSyncIn(),
+            output: _createSyncOut(),
+            error: _createSyncErr()
+        };
+    }
+
+    /**
+      get the stdin value
+     **/
+    function _getInput():CmdInput {
+        return switch stdio {
+            case IOSync(io): ITInput(io.input, io);
+            case IOStream(io): ITReadableStream(io.input, io);
+        };
+    }
+
+    /**
+      get the stdout value
+     **/
+    function _getOutput():CmdOutput {
+        return switch stdio {
+            case IOSync(io): OTOutput(io.output, io, 1);
+            case IOStream(io): OTWritableStream(io.output, io);
+        }
+    }
+
+    /**
+      get the stderr value
+     **/
+    function _getError():CmdOutput {
+        return switch stdio {
+            case IOSync(io): OTOutput(io.error, io, 2);
+            case IOStream(io): OTWritableStream(io.error, io);
+        }
     }
 
 /* === Computed Instance Fields === */
 
-    public var stdout(get, never): WritableStream<ByteArray>;
-    private inline function get_stdout() return stdio.output;
+    public var stdout(get, never): CmdOutput;
+    private dynamic function get_stdout() return _getOutput();
 
-    public var stderr(get, never): WritableStream<ByteArray>;
-    private inline function get_stderr() return stdio.error;
+    public var stderr(get, never): CmdOutput;
+    private dynamic function get_stderr() return _getError();
 
-    public var stdin(get, never): ReadableStream<ByteArray>;
-    private inline function get_stdin() return stdio.input;
+    public var stdin(get, never): CmdInput;
+    private dynamic function get_stdin() return _getInput();
+
+    public var stdio(default, set): CmdIo;
+    private function set_stdio(v) {
+        var ret = (this.stdio = v);
+        get_stdout = _getOutput.memoize();
+        get_stderr = _getError.memoize();
+        get_stdin = _getInput.memoize();
+        return ret;
+    }
 
 /* === Instance Fields === */
 
     public var name : String;
-    public var stdio : CmdStdIo;
+    //public var stdio : CmdStdIo;
+    public var exitCode: Null<Int>;
 
     private var argv: Array<CmdArg>;
     private var interpreter: Interpreter;
