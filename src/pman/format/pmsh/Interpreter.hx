@@ -2,14 +2,16 @@ package pman.format.pmsh;
 
 import tannus.io.*;
 import tannus.ds.*;
+import tannus.async.*;
 import tannus.TSys as Sys;
 
-import pman.async.*;
+import pman.format.pmsh.NewParser;
 import pman.format.pmsh.Token;
 import pman.format.pmsh.Expr;
 import pman.format.pmsh.Cmd;
 
-import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 import Slambda.fn;
 
 using StringTools;
@@ -17,7 +19,8 @@ using tannus.ds.StringUtils;
 using Lambda;
 using tannus.ds.ArrayTools;
 using Slambda;
-using pman.async.VoidAsyncs;
+using tannus.async.Asyncs;
+using pman.format.pmsh.ExprTools;
 
 class Interpreter {
     /* Constructor Function */
@@ -92,7 +95,7 @@ class Interpreter {
       * execute the given expression
       */
     public function execute(e:Expr, complete:VoidCb):Void {
-        async( e )( complete );
+        eval(e, complete);
     }
 
     /**
@@ -106,62 +109,145 @@ class Interpreter {
     }
 
     /**
+      evaluate the given expression, and obtain its return-value
+     **/
+    function eval(expr:Expr, complete:VoidCb):Promise<ExprReturn> {
+        switch expr {
+            /* evaluate a word-expression */
+            case EWord(word):
+                //evalWord(word, complete);
+                complete();
+
+            /* evaluate a variable assignment */
+            case ESetVar(name, value):
+                environment[wordToString(name)] = wordToString(value);
+                complete();
+
+            /* binary operator */
+            case EBinaryOperator(op, leftExpr, rightExpr):
+                evalBinop(op, leftExpr, rightExpr, complete);
+
+            /* unary operator */
+            case EUnaryOperator(op, expr):
+                throw EUnexpected( expr );
+
+            /* block expression */
+            case EBlock(exprs), ERoot(exprs):
+                exprs.map(e -> (next -> eval(e, next))).series( complete );
+
+            /* basic command */
+            case ECommand(cmd):
+                evalCmd(cmd, complete);
+
+            /* function declaration */
+            case EFunc(name, expr):
+                commands[name] = new FuncCmd(this, name, expr);
+                complete();
+
+            /* for-loop statement */
+            case EFor(id, iter, expr):
+                complete();
+        }
+
+        return Promise.resolve(ERVoid);
+    }
+
+    function evalBinop(op:Binop, left:Expr, right:Expr, complete:VoidCb) {
+        switch op {
+            case OpAnd:
+                evalAndOp(left, right, complete);
+
+            case OpOr:
+                evalOrOp(left, right, complete);
+
+            case OpPipe:
+                evalPipeOp(left, right, complete);
+
+            case _:
+                throw PmShError.EUnexpected(op);
+        }
+    }
+
+    function evalPipeOp(left:Expr, right:Expr, complete:VoidCb) {
+        eval(left, function(?error) {
+            if (error != null)
+                complete( error );
+            else {
+                trace('TODO: Piping not yet working');
+                eval(right, complete);
+            }
+        });
+    }
+
+    function evalAndOp(left:Expr, right:Expr, complete:VoidCb) {
+        eval(left, function(?error) {
+            if (error != null)
+                complete( error );
+            else {
+                eval(right, complete);
+            }
+        });
+    }
+
+    function evalOrOp(left:Expr, right:Expr, complete:VoidCb) {
+        eval(left, function(?error) {
+            if (error == null)
+                complete();
+            else {
+                eval(right, complete);
+            }
+        });
+    }
+
+    /**
+      evaluate a Command expression
+     **/
+    function evalCmd(cmd:CommandExpr, complete:VoidCb) {
+        var name = resolve.bind(wordToString(cmd.command), _).toPromise();
+        name.then(function(cmd: Cmd) {
+            this.currentCmd = cmd;
+        });
+        var pwp:Promise<Array<Word>> = expand.bind(cmd.parameters, _).toPromise();
+        var pwvp:Promise<Array<Dynamic>> = pwp.derive(function(p, resolve, reject) {
+            p.then(function(words) {
+                resolveArgValues(words, function(?error, ?values) {
+                    if (error != null) {
+                        reject( error );
+                    }
+                    else {
+                        resolve( values );
+                    }
+                });
+            }, reject);
+        });
+        var pwpp:Promise<Pair<Array<Word>, Array<Dynamic>>> = Promise.pair(new Pair(pwvp, pwp));
+        var cap:Promise<Array<CmdArg>> = pwpp.transform(function(pair) {
+            return pair.left.zipmap(pair.right, fn([word, value] => new CmdArg(EWord(word), value)));
+        });
+        var cmdt:Promise<Pair<Cmd, Array<CmdArg>>> = Promise.pair(new Pair(cap, name));
+        var cmdExpr:CommandExpr = cmd;
+        cmdt.then(function(pair) {
+            var cmd:Null<Cmd> = pair.left,
+            argv:Array<CmdArg> = pair.right;
+
+            if (cmd == null) {
+                return complete(ECommandNotFound( cmdExpr.command ));
+            }
+            else {
+                cmd.execute(this, argv, complete.wrap(function(_, ?error) {
+                    _(error);
+
+                    currentCmd = null;
+                }));
+            }
+        }, complete.raise());
+    }
+
+    /**
       * build the given expression out into a VoidAsync
       */
     private function async(expr : Expr):VoidAsync {
-        switch ( expr ) {
-            /* multiple expressions in a block */
-            case EBlock( body ):
-                return ((body.map( async )).series.bind());
-
-            /* variable assignment */
-            case ESetVar(name, value):
-                return function(done:VoidCb):Void {
-                    var sname = wordToString( name );
-                    var svalue = wordToString( value );
-                    environment[sname] = svalue;
-                    done();
-                };
-
-            /* basic command */
-            case ECommand(nameWord, params):
-                var name = wordToString( nameWord );
-                return function(done : VoidCb):Void {
-                    expand(params, function(?error, ?paramWords) {
-                        if (error != null) {
-                            done( error );
-                        }
-                        else {
-                            resolve(name, function(?error, ?command) {
-                                if (error != null) {
-                                    done( error );
-                                }
-                                else {
-                                    if (command != null) {
-                                        resolveArgValues(paramWords, function(?error, ?args) {
-                                            if (error != null)
-                                                done( error );
-                                            else {
-                                                var commandArgs = paramWords.zipmap(args, fn([word, value] => new CmdArg(EWord(word), value)));
-                                                command.execute(this, commandArgs, done.wrap(function(_, ?err) {
-                                                    trace('command exited');
-                                                    _( err );
-                                                }));
-                                            }
-                                        });
-                                    }
-                                    else {
-                                        done('Error: No command "$name" found');
-                                    }
-                                }
-                            });
-                        }
-                    });
-                };
-
-            default:
-                throw 'Error: Unexpected $expr';
-        }
+        return eval.bind(expr, _);
     }
 
     /**
@@ -229,6 +315,7 @@ class Interpreter {
         switch ( word ) {
             case Ident(s), String(s, _):
                 return s;
+
             case Ref(name):
                 if (environment.exists( name )) {
                     return environment[name];
@@ -236,7 +323,48 @@ class Interpreter {
                 else {
                     return '';
                 }
+
+            case Interpolate(e):
+                throw EWhatTheFuck('aww, poor design, sha', e);
+
+            case Substitution(type, name, value):
+                return wordToString(Ref(name));
         }
+    }
+
+    /**
+      obtain a value from a Word instance
+     **/
+    function evalWord(word: Word):Promise<Dynamic> {
+        return new Promise(function(resolve, reject) {
+            switch word {
+                case Ident(ident):
+                    return resolve( ident );
+
+                case String(str, delimiter):
+                    switch delimiter {
+                        case 0, 1:
+                            return resolve( str );
+
+                        case _:
+                            return reject(EUnexpected( delimiter ));
+                    }
+
+                case Ref(name):
+                    return resolve(getenv(name));
+
+                case Interpolate(e):
+                    return reject(EWhatTheFuck('command return-values need to be implemented before interpolation can be', e));
+
+                case Substitution(type, name, valueExpr):
+                    return resolve(untyped evalSubstitution(type, evalWord(Ident(name)), valueExpr));
+            }
+        });
+    }
+
+    function evalSubstitution(type:SubstitutionType, left:Promise<Dynamic>, right:Expr):Promise<Dynamic> {
+        trace('TODO: properly implement value substitution in pmbash');
+        return left;
     }
 
     /**
@@ -244,8 +372,8 @@ class Interpreter {
       */
     public function createPartialFromExpr(e : Expr):PmshPartial {
         switch ( e ) {
-            case ECommand(nameWord, params), EBlock([ECommand(nameWord, params)]):
-                return new PmshPartial(nameWord, params);
+            case ECommand(cmd), EBlock([ECommand(cmd)]), ERoot([ECommand(cmd)]):
+                return new PmshPartial(cmd.command, cmd.parameters);
 
             default:
                 throw 'TypeError: partials may only be created from command-invokation expressions';
@@ -256,15 +384,20 @@ class Interpreter {
       * create a partial from a String
       */
     public function parsePartial(exprString : String):PmshPartial {
-        return createPartialFromExpr(Parser.runString( exprString ));
+        return createPartialFromExpr(NewParser.runString( exprString ));
     }
 
 /* === Instance Fields === */
 
     public var commands : Map<String, Cmd>;
     public var environment : Dict<String, String>;
+
+    var currentCmd: Null<Cmd> = null;
 }
 
+/**
+  betty
+ **/
 @:access( pman.format.pmsh.Interpreter )
 @:structInit
 class PmshPartial {
@@ -283,7 +416,7 @@ class PmshPartial {
         var fullParams = params;
         if (additionalParams != null)
             fullParams = fullParams.concat( additionalParams );
-        return ECommand(cmd, fullParams);
+        return ECommand(new CommandExpr(cmd, fullParams));
     }
 
     /**
@@ -336,4 +469,23 @@ class PmshPartial {
             }
         });
     }
+}
+
+/**
+  values that evaluating an expression can yield
+ **/
+enum ExprReturn {
+    // no return value
+    ERVoid;
+
+    // the 'return' value from executing a command
+    ERCommand(out: CmdReturn<Dynamic, Dynamic>);
+
+    // the 'return' value from evaluating a word-expression
+    ERWord(wval: EValue<Dynamic>);
+}
+
+enum CmdReturn<Val, Err> {
+    CRReturn(value:EValue<Val>, error:Err):CmdReturn<Val, Err>;
+    CROutput(stdOut:ByteArray, stdErr:ByteArray):CmdReturn<ByteArray, ByteArray>;
 }
