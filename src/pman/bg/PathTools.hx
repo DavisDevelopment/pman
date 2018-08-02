@@ -34,4 +34,9 @@ class PathTools {
     public static inline function toMediaSource(path: Path):MediaSource {
         return UriTools.toMediaSource(toUri( path ));
     }
+
+    public static inline function hasLeadingSlash(s:String):Bool {
+        return (slashre.match(s.ltrim()) && slashre.matchedPos().pos == 0);
+    }
+    
 }
