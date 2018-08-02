@@ -80,7 +80,7 @@ enum EValue<T> {
     EvBool(b: Bool):EValue<Bool>;
     EvNumber(n: Float):EValue<Float>;
     EvString(s: String):EValue<String>;
-    EvArray<Item>(a: Array<Item>):EValue<Array<Item>>;
+    EvArray<Item>(a: Array<EValue<Item>>):EValue<Array<Item>>;
     //EvInt(i: Int):EValue<Int>;
     //EvFloat(n: Float):EValue<Float>;
     //EvBytes(b: ByteArray):EValue<ByteArray>;
