@@ -832,10 +832,10 @@ class Track extends EventDispatcher implements IComparable<Track> {
       * get all snapshots attached to [this] Track
       */
     @:deprecated
-    public function getSnapshots():Dict<Float, Ref<Image>> {
+    public function getSnapshots():Dict<Float, Lazy<Image>> {
         var ssd = new Directory(player.app.appDir.snapshotPath(), true);
         var gs = new GlobStar('${title}@<time>.png', 'i');
-        var results:Dict<Float, Ref<Image>> = new Dict();
+        var results:Dict<Float, Lazy<Image>> = new Dict();
         for (entry in ssd.entries) {
             switch ( entry.type ) {
                 case File( file ):
@@ -843,7 +843,8 @@ class Track extends EventDispatcher implements IComparable<Track> {
                         var data:Dynamic = gs.match( file.path );
                         if (data.time != null) {
                             var time:Float = Std.parseFloat( data.time );
-                            results[time] = new Ref(new Getter(Image.load.bind('file://' + file.path)));
+                            //results[time] = new Ref(new Getter(Image.load.bind('file://' + file.path)));
+                            results.set(time, Lazy.ofFunc(Image.load.bind('file://' + file.path)));
                         }
                     }
 
