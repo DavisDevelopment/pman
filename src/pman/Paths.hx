@@ -16,6 +16,14 @@ using tannus.ds.ArrayTools;
 using Slambda;
 
 class Paths {
+
+    public static function subDataDir(?suffix: String):Path {
+        var dd:Path = userData();
+        if (suffix != null)
+            dd = dd.plusString( suffix );
+        return dd;
+    }
+
 /* === Static Methods === */
 
     public static function home():Path {
@@ -117,6 +125,41 @@ class Paths {
             }
         }
         return _app;
+    }
+
+    public static function substitute(path: String):String {
+        var divider:RegEx = new RegEx(~/(\/|\\)(?:\1*)/gmi),
+        named:RegEx = new RegEx(~/(%|::)([\w\d_]+)\1/gmi),
+        tilde:RegEx = new RegEx(~/~(+|-)?/gm);
+        
+        path = divider.replace(path, Path.separator);
+        path = named.map(path, function(e: RegEx) {
+            var name:String = e.matched(2).toUpperCase();
+            switch ( name ) {
+                case 'HOME':
+                    return (''+Paths.home());
+                case 'PWD':
+                    return (''+Sys.getCwd());
+                case _:
+                    throw 'Error: Unrecognized "$name"';
+            }
+            return '';
+        });
+        path = tilde.map(path, function(e: RegEx) {
+            var sub = e.matched(1).ifEmpty('=').slice(0, 1);
+            switch sub {
+                case '=':
+                    return ('' + Paths.home());
+
+                case '+'|'-':
+                    return ('' + Sys.getCwd());
+
+                case _:
+                    throw 'Error: Unexpected "$sub"';
+            }
+        });
+
+        return path;
     }
 
     private static function os():String {
