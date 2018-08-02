@@ -9,6 +9,7 @@
 -cp hscript/
 -cp hxelectron/src/
 -cp edis/
+-cp hre/src/
 
 -lib slambda
 -lib actuate
@@ -16,6 +17,8 @@
 -lib hxnodejs
 -lib haxe-crypto
 -lib hxjs-fengari
+#-lib tink_core
+#-lib hre
 
 -D tannus
 -D node
