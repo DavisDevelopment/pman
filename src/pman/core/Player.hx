@@ -577,12 +577,17 @@ class Player extends EventDispatcher {
 	/**
 	  * save the Session into a File
 	  */
-	public function saveState():Void {
-	    if (session.playlist.length == 0) {
+	@:deprecated('betty')
+	public function saveState(?location:Path):Void {
+	    // if configured to save session data even when the session data is empty
+	    if (appState.sessMan.saveEmptySession && !session.hasContent()) {
+	        // then, as there's nothing to save when the queue is completely empty, just delete the file
 	        session.deleteSavedState();
 	    }
         else {
-            session.save();
+            session.save({
+                location: location
+            });
         }
 	}
 
@@ -598,8 +603,8 @@ class Player extends EventDispatcher {
 	/**
 	  * restore previously saved Session
 	  */
-	public function restoreState(?done : VoidCb):Void {
-	    session.restore( done );
+	public function restoreState(?name:String, ?dir:String, ?done:VoidCb):Void {
+	    session.restore(name, dir, done);
 	}
 
 	/**
@@ -618,6 +623,7 @@ class Player extends EventDispatcher {
 		if (cb == null) {
 			cb = {};
 		}
+
 		// check whether we're actively playing
 		var playing:Bool = (!paused && session.hasMedia());
 
@@ -952,42 +958,44 @@ class Player extends EventDispatcher {
 	  */
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter(function(item) {
-	        echo( item.source );
+			//echo( item.source );
 	        return item.isRealFile();
 	    });
-	    echo( items );
+		//echo( items );
 	    var start = now();
 	    var plv = this.getPlaylistView();
-	    if (plv != null) {
-	        plv.lock();
-	    }
+	    if (plv != null) { plv.lock(); }
 
 	    function completeEfficient():Void {
-	        engine.executor.syncTask(function() {
-	            #if debug
-	            trace('took ${now() - start}ms for Player.addItemList(Track[${items.length}]) to complete');
-	            #end
+            if (plv != null) plv.unlock();
+            if (done != null) done();
 
-                if (plv != null) {
-                    plv.unlock();
+            var edl = new EfficientTrackListDataLoader(items, app.db.mediaStore);
+            edl.run(function(?error) {
+                if (error != null) {
+                    //report( error );
+                    #if debug 
+                    throw error; 
+                    #else 
+                    report( error ); 
+                    #end
                 }
-	            if (done != null) {
-	                done();
-	            }
-
-	            var edl = new EfficientTrackListDataLoader(items, app.db.mediaStore);
-	            edl.run(function(?error) {
-	                if (error != null) {
-						//report( error );
-					    #if debug throw error; #else report( error ); #end
-	                }
-	            });
-	        });
+                else {
+                    #if debug
+                    trace('took ${now() - start}ms for Player.addItemList(Track[${items.length}]) to complete');
+                    #end
+                    dispatch('track[]dataloaded', {
+                        time: (now() - start),
+                        items: items,
+                        data: items.map.fn(_.data)
+                    });
+                }
+            });
 	    }
 
 	    // initialize these items
 	    var initStart = now();
-	    items.initAll(function() {
+	    var begin = (() -> items.initAll(function() {
 	        trace('took ${now() - initStart}ms to "initialize" ${items.length} tracks');
 	        initStart = now();
             // if these are the first items added to the queue, autoLoad will be invoked once they are all added
@@ -1000,7 +1008,7 @@ class Player extends EventDispatcher {
             // shuffle the tracks
             if ( session.pp.shuffle ) {
                 var rand = new Random();
-                items = rand.shuffle( items );
+                items = rand.shuffle( items ).compact();
             }
 
             // add all the items
@@ -1021,6 +1029,17 @@ class Player extends EventDispatcher {
             else {
                 trace('took ${now() - initStart} to append ${items.length} tracks to queue');
                 completeEfficient();
+            }
+        }));
+        
+        /**
+          kick off the initialization of the item-list
+         **/
+        session.kickOff(function(?error) {
+            if (error != null)
+                throw error;
+            else {
+                begin();
             }
         });
 	}

@@ -88,22 +88,142 @@ class PlayerSession {
 	  * add a Media item onto the queue
 	  */
 	public function addItem(track:Track, ?done:Void->Void, autoLoad:Bool=true):Void {
-		if (autoLoad && playlist.empty()) {
-			plpush( track );
-			load(track, {
-				attached: function() {
-					if (done != null) {
-						done();
-					}
-				}
-			});
-		}
-		else {
-			plpush( track );
-			if (done != null) {
-				defer( done );
-			}
-		}
+        /* to be executed when session-naming issues have been cleaned up */
+        function _clean_() {
+            if (autoLoad && playlist.empty()) {
+                // push [track] onto the queue
+                plpush( track );
+
+                // load the [track] for playback
+                load(track, {
+                    // when it gets attached to [this] session
+                    attached: function() {
+                        // invoke callback
+                        if (done != null) {
+                            done();
+                        }
+                    }
+                });
+            }
+            else {
+                // push [track] onto the queue
+                plpush( track );
+
+                // invoke callback
+                if (done != null) {
+                    done();
+                }
+            }
+        }
+
+        /* kick it off */
+        kickOff(function(?error) {
+            if (error != null) {
+                //report( error );
+                throw error;
+            }
+            else {
+                _clean_();
+            }
+        });
+	}
+
+    inline function kickOff(cb:VoidCb) {
+	    if (hasContent()) {
+	        cb();
+	    }
+        else {
+            handleSanitizeSessionCreation( cb );
+        }
+	}
+
+	function handleSanitizeSessionCreation(callback:VoidCb, ?o:PSSaveOpts) {
+	    if (o == null)
+	        o = {};
+	    function mkSession() {
+	        save({
+                saveEmpty: true,
+                name: o.name,
+                dirname: o.dirname,
+                location: o.location
+	        });
+			//defer(callback.void());
+			callback();
+	    }
+
+	    if (!restoredSinceLastLaunch && !hasContent() && hasSavedState()) {
+	        userInputOverwriteOrRename(mkSession, o.location);
+	    }
+        else {
+            //defer(mkSession);
+            mkSession();
+        }
+	}
+
+    /**
+      create and control input dialog to ask user how to resolve the name conflict
+     **/
+	function userInputOverwriteOrRename(resume:Void->Void, ?sessPath:Path):Void {
+		//throw untyped {['betty', null, false, 'urinal custard'];};
+		if (sessPath == null)
+            sessPath = filePath();
+        var box = new pman.ui.MultiButtonSelectBox();
+
+        var overwrite_old:Void->Void = (() -> trace('foo'));
+
+        function rename_old() {
+            player.prompt('New Session-File Name', null, sessPath.name, function(newName:String) {
+                if (newName.empty()) {
+                    return userInputOverwriteOrRename(resume, sessPath);
+                }
+                else if (newName == sessPath.name) {
+                    return userInputOverwriteOrRename(resume, sessPath);
+                }
+                else if (!newName.endsWith('.dat')) {
+                    newName = '$newName.dat';
+                }
+
+                var newSessPath:Path = (sessPath.directory.normalize().plusString( newName ).normalize());
+                if (!Fs.exists( newSessPath )) {
+                    Fs.rename(sessPath, newSessPath);
+                    defer( overwrite_old );
+                }
+                else {
+                    //TODO handle the new naming conflict
+                    defer( overwrite_old );
+                }
+            });
+        }
+
+        /* actually initiate the save */
+        overwrite_old = (function() {
+            trace('Overwriting old session file..');
+            save();
+
+            return resume();
+        });
+
+        // whe
+        function on_inp(choice: String) {
+            switch choice {
+                case 'rnt':
+                    //TODO
+
+                case 'ros':
+                    defer( rename_old );
+
+                case 'owe', _:
+                    defer( overwrite_old );
+            }
+        }
+
+        box.button('Restore to New Tab', 'rnt');
+        box.button('Rename Old Session', 'ros');
+        box.button('Proceed (Overwrite)', 'owe');
+        box.prompt('
+        You already have a Session saved that you haven\'t restored yet.
+        '.trim(), on_inp);
+        box.open();
 	}
 
 	/**
@@ -236,6 +356,7 @@ class PlayerSession {
 
 		// shift focus to [t]
 		focus(t, function(?error) {
+		    // forward errors
 		    if (error != null) {
 		        if (cb.error != null) {
                     return cb.error( error );
@@ -245,7 +366,9 @@ class PlayerSession {
                 }
 		    }
             else if (cb.attached != null) {
-				defer( cb.attached );
+                _onMediaAttached( t );
+                defer( cb.attached );
+				//cb.attached();
 			}
 
 			var d = focusedTrack.driver;
@@ -448,18 +571,45 @@ class PlayerSession {
 	/**
 	  * save state
 	  */
-	public inline function save():Void {
-	    Fs.write(filePath(), encode());
+	public function save(?o: PSSaveOpts):Void {
+	    if (o == null) o = {};
+	    if (o.location == null)
+	        o.location = filePath();
+        else {
+            if (!o.location.absolute)
+                o.location = (filePath(o.location.name, o.location.directory));
+        }
+
+        if (o.saveEmpty == null)
+            o.saveEmpty = appState.sessMan.saveEmptySession;
+        if (!o.saveEmpty && !hasContent())
+            return ;
+
+        if (o.spec == null)
+            o.spec = [TAB_ALL, QUEUE_ALL, MEDIA_ALL];
+
+        var loc = safePath(o.location);
+	    Fs.write(loc, encode());
 	}
 
 	/**
 	  * load state
 	  */
-	public inline function restore(?done : VoidCb):Void {
+	public function restore(?name:String, ?dir:String, ?done:VoidCb):Void {
+	    done = done.nn();
 	    // if the File exists
-	    if (hasSavedState()) {
+	    if (hasSavedState(name, dir)) {
+	        // read the file
+	        var path = filePath(name, dir),
+	            data = Fs.read(path);
+
 	        // decode it
-			decode(Fs.read(filePath()), done);
+			decode(data.toString(), done.wrap(function(_, ?error) {
+			    if (error == null && !restoredSinceLastLaunch) {
+			        restoredSinceLastLaunch = true;
+			    }
+			    _( error );
+			}));
 	    }
         else {
             if (done != null) {
@@ -471,16 +621,16 @@ class PlayerSession {
 	/**
 	  * check whether there is a session.dat file
 	  */
-	public inline function hasSavedState():Bool {
-		return FileSystem.exists(filePath());
+	public inline function hasSavedState(?name:String, ?dir:String):Bool {
+		return FileSystem.exists(filePath(name, dir));
 	}
 
 	/**
 	  * delete the session.dat file
 	  */
-	public inline function deleteSavedState():Void {
+	public inline function deleteSavedState(?name:String, ?dir:String):Void {
 	    try {
-            FileSystem.deleteFile(filePath());
+            FileSystem.deleteFile(filePath(name, dir));
         }
         catch (error : Dynamic) {
             return ;
@@ -600,6 +750,17 @@ class PlayerSession {
 	    tabs = ntl;
 	}
 
+	public function hasContent():Bool {
+	    if (focusedTrack != null || playlist.length > 0)
+	        return true;
+        else if (tabs.length > 1) {
+            return tabs.any(tab -> (tab.track != null || tab.playlist.length > 0));
+        }
+        else {
+            return false;
+        }
+	}
+
 	/**
 	  * fill in a LoadCallbackOptions object
 	  */
@@ -624,14 +785,15 @@ class PlayerSession {
 	    trackChanged.on(function( d ) {
 	        // forward the event to the Player
 	        player.dispatch('change:nowPlaying', d);
+
 	        // save [this] Session
-	        player.saveState();
+	        player.saveStateAuto();
 	    });
 
 	    // when the Playlist changes
 	    playlist.changeEvent.on(function( change ) {
 	        // save [this] Session
-	        player.saveState();
+	        player.saveStateAuto();
 	    });
 
         // when the window is about to close
@@ -657,7 +819,7 @@ class PlayerSession {
 	        });
 	        stack.push(function(next) {
 	            defer(function() {
-	                player.saveState();
+	                player.saveStateAuto();
 	                next();
 	            });
 	        });
@@ -677,11 +839,48 @@ class PlayerSession {
 	    });
 	}
 
-	/**
-	  * get the Path to the session.dat file
-	  */
-	private static inline function filePath():Path {
-	    return BPlayerMain.instance.appDir.lastSessionPath();
+    /**
+      get the Path to the file in which [this] Session should store itself
+     **/
+	private static function filePath(?name:String, ?dir:String):Path {
+	    /* compute the filename for the Path */
+	    name = name.ifEmpty(appState.sessMan.sessionSaveName);
+	    // ensure extension name is there
+	    if (!name.endsWith('.dat'))
+	        name += '.dat';
+	    // add subdirectory-structure when present
+	    name = name.withoutLeadingSlashes();
+	    if (name.startsWith('sess/'))
+	        name = name.after('sess/');
+	    dir = (dir.ifEmpty('.').withoutLeadingSlashes().after('sess'));
+	    dir = ('/sess/$dir');
+	    name = '$dir/$name';
+			//name = ('/sess/' + name);
+		var p:Path = Paths.subDataDir( name );
+		trace('' + p);
+		//return (Paths.subDataDir( name ));
+		return p.normalize();
+	}
+
+	private static function safePath(v: Path):Path {
+	    safeDirPath( v.directory );
+	    return v;
+	}
+
+	private static function safeDirPath(v: Path):Path {
+	    #if !debug 
+	    try {
+        #end
+	        if (!Fs.exists(v)) {
+	            Fs.createDirectory( v );
+	        }
+	        return v;
+	    #if !debug
+	    }
+	    catch (err: Dynamic) {
+	        return v;
+	    }
+	    #end
 	}
 
     /**
@@ -689,6 +888,15 @@ class PlayerSession {
       */
 	private static inline function psPath():Path {
 	    return bpmain.appDir.playbackSettingsPath();
+	}
+
+	/**
+	  called each time a Media item is focused+mounted successfully
+	 **/
+	function _onMediaAttached(t: Track) {
+	    if (!hasContent()) {
+
+	    }
 	}
 
 	/**
@@ -780,6 +988,7 @@ class PlayerSession {
 
 	// session name, assigned when session is saved or loaded
 	public var name : Null<String>;
+	public var restoredSinceLastLaunch: Bool = false;
 	public var activeTabIndex : Int;
 	public var tabs : Array<PlayerTab>;
 
@@ -816,3 +1025,35 @@ typedef LoadCallbackOptions = {
 	@:optional function error(error : Dynamic):Void;
 };
 */
+
+typedef PSSaveOpts = {
+    ?location: Path,
+    ?name: String,
+    ?dirname: String,
+    ?saveEmpty: Bool,
+    ?spec: Array<SessionInfoCode>
+};
+
+@:enum
+abstract SessionInfoCode (Int) from Int to Int {
+    var TAB_ALL = 0x0000;
+    var TAB_BASIC = 0x0001;
+    var TAB_TYPE = 0x0002;
+    var TAB_TITLE = 0x0003;
+    var TAB_QUEUE = 0x0004;
+
+    var QUEUE_ALL = 0x0005;
+    var QUEUE_BASIC = 0x0006;
+
+    var MEDIA_ALL = 0x0007;
+    var MEDIA_BASIC = 0x0008;
+    var MEDIA_VERBOSE = 0x0009;
+    var MEDIA_URI = 0x000A;
+    var MEDIA_ID = 0x000B;
+    var MEDIA_TITLE = 0x000C;
+    var MEDIA_DURATION = 0x000D;
+    var MEDIA_STARRED = 0x000E;
+    var MEDIA_PTIME = 0x000F;
+    var MEDIA_THUMBNAIL = 0x0010;
+    var MEDIA_POSTER = 0x0011;
+}
