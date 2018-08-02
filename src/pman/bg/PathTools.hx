@@ -43,4 +43,11 @@ class PathTools {
         return s.rtrim().endsWith( Path.separator );
     }
 
+    public static inline function withoutTrailingSlash(s: String):String {
+        return 
+            if (s.trim().endsWith(Path.separator))
+                 (s.beforeLast(Path.separator));
+            else s;
+    }
+
 }
