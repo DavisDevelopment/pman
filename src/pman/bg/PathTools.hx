@@ -39,4 +39,8 @@ class PathTools {
         return (slashre.match(s.ltrim()) && slashre.matchedPos().pos == 0);
     }
     
+    public static inline function hasTrailingSlash(s: String):Bool {
+        return s.rtrim().endsWith( Path.separator );
+    }
+
 }
