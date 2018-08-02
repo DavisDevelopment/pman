@@ -48,6 +48,7 @@ class AppDir {
             res = res.plusString( sub ).normalize();
         return res;
     }
+
     public function path():Path return Paths.userData();
     public function dir():Directory return folder(path());
     public function subpath(sub:String):Path return path().plusString(sub).normalize();
@@ -84,6 +85,7 @@ class AppDir {
     }
     public function preferencesPath():Path return subpath('preferences.dat');
     public function preferencesFile():File return file(preferencesPath());
+
     public function lastSessionPath():Path return subpath('session.dat');
     public function getMediaSources(done : Cb<Array<Path>>):Void {
         defer(function() {

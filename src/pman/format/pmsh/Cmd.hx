@@ -38,7 +38,7 @@ class Cmd {
     /* Constructor Function */
     public function new():Void {
         name = 'cmd';
-        stdio = IOStream(_createStreamIo());
+        _stdio = IOStream(_createStreamIo());
         outputValue = null;
         exitCode = null;
     }
@@ -68,7 +68,7 @@ class Cmd {
       initialize [this] Cmd
      **/
     function _init_() {
-        stdio = IOStream(_createStreamIo());
+        _stdio = IOStream(_createStreamIo());
         outputValue = null;
     }
 
@@ -77,9 +77,9 @@ class Cmd {
      **/
     function kill(code:Int, callback:VoidCb) {
         [
-            stdout.close.bind(_),
-            stderr.close.bind(_),
-            stdin.close.bind(_),
+            _stdout.close.bind(_),
+            _stderr.close.bind(_),
+            _stdin.close.bind(_),
             (next -> _terminate(code, next)),
             _kill.bind(code, _)
         ].series( callback );
@@ -106,7 +106,7 @@ class Cmd {
     }
 
     /**
-      write the given data <code>x</code> onto the specified output (defaults to <code>stdout</code>)
+      write the given data <code>x</code> onto the specified output (defaults to <code>_stdout</code>)
      **/
     public function print(x:Dynamic, ?port:IoPortType, ?done:VoidCb):Void {
         if (port == null) {
@@ -114,8 +114,8 @@ class Cmd {
         }
         
         var out:CmdOutput = (switch port {
-            case IoStdOut|IoStdAll: stdout;
-            case IoStdErr: stderr;
+            case IoStdOut|IoStdAll: _stdout;
+            case IoStdErr: _stderr;
             case _: throw EUnexpected( port );
         });
         out.write(bytes(x), done);
@@ -232,30 +232,30 @@ class Cmd {
     }
 
     /**
-      get the stdin value
+      get the _stdin value
      **/
     function _getInput():CmdInput {
-        return switch stdio {
+        return switch _stdio {
             case IOSync(io): ITInput(io.input, io);
             case IOStream(io): ITReadableStream(io.input, io);
         };
     }
 
     /**
-      get the stdout value
+      get the _stdout value
      **/
     function _getOutput():CmdOutput {
-        return switch stdio {
+        return switch _stdio {
             case IOSync(io): OTOutput(io.output, io, 1);
             case IOStream(io): OTWritableStream(io.output, io);
         }
     }
 
     /**
-      get the stderr value
+      get the _stderr value
      **/
     function _getError():CmdOutput {
-        return switch stdio {
+        return switch _stdio {
             case IOSync(io): OTOutput(io.error, io, 2);
             case IOStream(io): OTWritableStream(io.error, io);
         }
@@ -263,28 +263,29 @@ class Cmd {
 
 /* === Computed Instance Fields === */
 
-    public var stdout(get, never): CmdOutput;
-    private dynamic function get_stdout() return _getOutput();
+    public var _stdout(get, never): CmdOutput;
+    private dynamic function get__stdout() return _getOutput();
 
-    public var stderr(get, never): CmdOutput;
-    private dynamic function get_stderr() return _getError();
+    public var _stderr(get, never): CmdOutput;
+    private dynamic function get__stderr() return _getError();
 
-    public var stdin(get, never): CmdInput;
-    private dynamic function get_stdin() return _getInput();
+    public var _stdin(get, never): CmdInput;
+    private dynamic function get__stdin() return _getInput();
 
-    public var stdio(default, set): CmdIo;
-    private function set_stdio(v) {
-        var ret = (this.stdio = v);
-        get_stdout = _getOutput.memoize();
-        get_stderr = _getError.memoize();
-        get_stdin = _getInput.memoize();
+    /* internally-used [_stdio] property */
+    public var _stdio(default, set): CmdIo;
+    private function set__stdio(v) {
+        var ret = (this._stdio = v);
+        get__stdout = _getOutput.memoize();
+        get__stderr = _getError.memoize();
+        get__stdin = _getInput.memoize();
         return ret;
     }
 
 /* === Instance Fields === */
 
     public var name : String;
-    //public var stdio : CmdStdIo;
+    //public var _stdio : CmdStdIo;
     public var exitCode: Null<Int>;
 
     private var argv: Array<CmdArg>;
