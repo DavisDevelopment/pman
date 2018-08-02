@@ -3,7 +3,12 @@ package pman.format.pmsh;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.async.*;
+import tannus.sys.FileSystem as Fs;
 import tannus.TSys as Sys;
+
+import haxe.ds.Option;
+import haxe.extern.EitherType as Either;
+import haxe.Constraints.Function;
 
 import pman.format.pmsh.NewParser;
 import pman.format.pmsh.Token;
@@ -253,84 +258,17 @@ class Interpreter {
     /**
       * resolve a Cmd from name
       */
-    private function resolve(name:String, done:Cb<Cmd>):Void {
-        defer(function() {
-            done(null, commands[name]);
-        });
+    private function resolve(name:String, ?done:Cb<Cmd>):Promise<Option<Cmd>> {
+        //done(null, commands[name]);
+        return pota(Promise.resolve(commands[name]), null, done);
     }
 
     /**
       * get a value from a Word
       */
-    private function resolveWordValue(word : Word):Dynamic {
-        return wordToString( word );
-    }
-
-    /**
-      * resolve parameter values
-      */
-    private function resolveArgValues(words:Array<Word>, done:Cb<Array<Dynamic>>):Void {
-        defer(function() {
-            var values = words.map( resolveWordValue );
-            defer(done.yield().bind(values));
-        });
-    }
-
-    /**
-      * expand command arguments
-      */
-    private function expand(params:Array<Expr>, done:Cb<Array<Word>>):Void {
-        var result:Array<Word> = new Array();
-        function esp(p:Expr, cb:VoidCb) {
-            defer(function() {
-                switch ( p ) {
-                    case EWord( word ):
-                        switch ( word ) {
-                            case Ref(name):
-                                var val = (environment.exists(name)?environment[name]:'');
-                                result.push(Ident(val));
-                            default:
-                                result.push( word );
-                        }
-
-                    default:
-                        null;
-                }
-                defer(cb.void());
-            });
-        }
-        params.map.fn(p=>esp.bind(p,_)).series(function(?error) {
-            //trace( result );
-            if (error != null)
-                done(error, null);
-            else
-                done(null, result);
-        });
-    }
-
-    /**
-      * convert a Word into a String
-      */
-    private function wordToString(word : Word):String {
-        switch ( word ) {
-            case Ident(s), String(s, _):
-                return s;
-
-            case Ref(name):
-                if (environment.exists( name )) {
-                    return environment[name];
-                }
-                else {
-                    return '';
-                }
-
-            case Interpolate(e):
-                throw EWhatTheFuck('aww, poor design, sha', e);
-
-            case Substitution(type, name, value):
-                return wordToString(Ref(name));
-        }
-    }
+    //private function resolveWordValue(word : Word):Dynamic {
+        //return wordToString( word );
+    //}
 
     /**
       obtain a value from a Word instance
@@ -368,6 +306,136 @@ class Interpreter {
     }
 
     /**
+      * resolve parameter values
+      */
+    function resolveArgValues(words:Array<Word>, ?done:Cb<Array<EValue<Dynamic>>>):Promise<Array<EValue<Dynamic>>> {
+        //defer(function() {
+            //var values = words.map( resolveWordValue );
+            //defer(done.yield().bind(values));
+        //});
+        var fanon:Void -> Promise<Array<EValue<Dynamic>>>;
+        var promres = ((fanon = function() {
+            // the number of [words] to evaluate
+            var length = words.length,
+            // [the number of values obtains thus far
+                numvals = 0,
+            // [new array of proper length, with values initialized to null
+                results = [for (i in 0...length) EvUntyped(null)];
+
+            // create the promise instance
+            return new Promise(function(accept, reject) {
+                /* convert each eval-promise into a promise for a value */
+                var promises:Array<Promise<EValue<Dynamic>>> = words.map(function(word: Word) {
+                    
+                    return ptop(evalWord( word )).transform(function(o: Option<Dynamic>) {
+                        switch o {
+                            case Some(x): return EvUntyped(x);
+                            case Some(null)|None: return EvUntyped(EvNil);
+                        }
+                    });
+                });
+
+                /* resolve the promise for the evaluated value of each [word] respectively */
+                promises.reducei(
+                    function(acc:Array<EValue<Dynamic>>, promise:Promise<EValue<Dynamic>>, index:Int):Array<EValue<Dynamic>> {
+                        /* resolve [promise] to a [value] and place [value] into [results] */
+                        promise.then(function(value: EValue<Dynamic>) {
+                            acc[index] = value;
+                            ++numvals;
+                            if (numvals == length) {
+                                accept( results );
+                                //accept()
+                            }
+                        }, reject);
+
+                        return acc;
+                    },
+                    results
+                );
+            });
+        })());
+        promres.toAsync( done );
+        return promres;
+    }
+
+    /**
+      * expand command arguments
+      */
+    private function expand(params:Array<Expr>, ?done:Cb<Array<Word>>):Promise<Array<Word>> {
+        var result:Array<Word> = new Array();
+        inline function add(a: Array<Word>) {
+            if ((a is Word)) {
+                result.push(cast(a, Word));
+            }
+            else if (a.length == 1) {
+                result.push(a[0]);
+            }
+            else {
+                result = result.concat( a );
+            }
+        }
+
+        function esp(p:Expr, cb:VoidCb) {
+            switch p {
+                case EWord(word):
+                    switch word {
+                        case Word.Interpolate(ipoExpr):
+                            // output generated shell-code to file on desktop
+                            Fs.write(Paths.desktop().plusString('pmbash(interpolate).sh'), ipoExpr.print());
+                            result.push(Interpolate(ipoExpr));
+
+                        case Ref(name):
+                            add([Ident(environment[name].ifEmpty(''))]);
+                            //result.push(Ident(val));
+
+                        default:
+                            result.push( word );
+                    }
+
+                default:
+                    null;
+            }
+
+            cb();
+        }
+
+        return new Promise(function(accept, reject) {
+            params.map.fn(p => esp.bind(p, _)).series(function(?error) {
+                if (error != null)
+                    reject( error );
+                else
+                    accept( result );
+            });
+        });
+    }
+
+    /**
+      * convert a Word into a String
+      */
+    private function wordToString(word : Word):String {
+        switch ( word ) {
+            case Ident(s), String(s, _):
+                return s;
+
+            case Ref(name):
+                if (environment.exists( name )) {
+                    return environment[name];
+                }
+                else {
+                    return '';
+                }
+
+            case Interpolate(e):
+                throw EWhatTheFuck('aww, poor design, sha', e);
+
+            case Substitution(type, name, value):
+                return wordToString(Ref(name));
+        }
+    }
+
+
+
+    /**
       * creates a 'partial'
       */
     public function createPartialFromExpr(e : Expr):PmshPartial {
@@ -385,6 +453,42 @@ class Interpreter {
       */
     public function parsePartial(exprString : String):PmshPartial {
         return createPartialFromExpr(NewParser.runString( exprString ));
+    }
+
+    inline static function pota<T>(promise:Promise<T>, ?isnil:T->Bool, ?callback:Cb<T>):Promise<Option<T>> {
+        return ota(ptop(promise, isnil), callback);
+    }
+
+    inline static function ota<T>(promise:Promise<Option<T>>, ?callback:Cb<T>):Promise<Option<T>> {
+        return cast callback != null ? promise.then(function(o: Option<T>) {
+            callback(null, switch o {
+                case None: null;
+                case Some(v): v;
+            });
+        }, callback.raise()) : promise;
+    }
+
+    static function ptop<T>(promise:Promise<T>, ?isnil:T->Bool):Promise<Option<T>> {
+        if (isnil == null)
+            isnil = (x -> true);
+        isnil = fn(_ != null && isnil(_));
+        return promise.transform(x -> (isnil( x ) ? Option.None : Option.Some(x)));
+    }
+
+    static function optp<T>(promise:Promise<Option<T>>, ?error:Lazy<Dynamic>):Promise<T> {
+        if (error == null)
+            error = PmShError.EWhatTheFuck('A value was expected, but none was provided', null);
+        return promise.derive(function(_, accept, reject) {
+            _.then(function(o: Option<T>) {
+                switch o {
+                    case Some(value): 
+                        accept(value);
+
+                    case None:
+                        reject(error.get());
+                }
+            }, reject);
+        });
     }
 
 /* === Instance Fields === */
