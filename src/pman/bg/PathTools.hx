@@ -50,4 +50,14 @@ class PathTools {
             else s;
     }
 
+    public static inline function withoutLeadingSlash(s: String):String {
+        return
+            if (s.ltrim().startsWith(Path.separator))
+                (s.after(Path.separator));
+            else s;
+    }
+
+    static var slashre:RegEx = new RegEx(~/(?:\/|\\)+/gm);
+    static var drivere:RegEx = new RegEx(~/^(?:([A-Za-z]{1,2}:))/gm);
+    //static var slashre:RegEx = new RegEx(~//gm);
 }
