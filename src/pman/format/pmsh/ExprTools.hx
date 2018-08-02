@@ -136,3 +136,16 @@ class TokenTools {
         };
     }
 }
+
+class EValues {
+    public static function check(e:EValue<Dynamic>, test:Dynamic->Bool):Bool {
+        return switch e {
+            case EvNil: test(null);
+            case EValue.EvBool(b): test(b);
+            case EValue.EvNumber(num): test(num);
+            case EvString(str): test(str);
+            case EvArray(values): values.any(ev -> check(cast ev, test));
+            case EvUntyped(value): test(value);
+        }
+    }
+}
