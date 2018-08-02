@@ -548,10 +548,15 @@ typedef PlayerVideoConfig = {
  **/
 private class SessManConfigType {
     var restorePreviousSession:Bool = true;
+    var autoRestoreSession:Bool = false;
     var autoSaveSession:Bool = true;
+    var saveEmptySession:Bool = false;
     var sessionToRestore:String = 'session.dat';
     var sessionSaveName:String = 'session.dat';
-    var autoRestoreSession:Bool = false;
+}
+
+private class SessionDataType {
+    var sessionWasRestored:Bool = false;
 }
 
 /**
