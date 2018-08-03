@@ -17,6 +17,7 @@
 -lib hxnodejs
 -lib haxe-crypto
 -lib hxjs-fengari
+#-lib overload
 #-lib tink_core
 #-lib hre
 
@@ -33,12 +34,12 @@
 --each
 
 -main BPlayerMain
-#-D debug
 -D renderer_process
 -D window
+-D debug
+
 -D js-es=6
 -D js-enums-as-objects
--D debug
 -js ../dist/scripts/content.js
 
 --next 
