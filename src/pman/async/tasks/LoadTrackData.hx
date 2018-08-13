@@ -13,6 +13,8 @@ import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.async.*;
 import pman.media.info.*;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 import pman.bg.media.MediaDataSource;
 
 import haxe.Unserializer;
