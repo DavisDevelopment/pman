@@ -155,9 +155,7 @@ class BPlayerMain extends Application {
 	}
 
 	function test_streams() {
-	    var out = new tannus.stream.StreamOutput();
 
-	    echo( out );
 	}
 
     /**
