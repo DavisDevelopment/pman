@@ -6,13 +6,14 @@ using StringTools;
 using tannus.ds.StringUtils;
 using Slambda;
 using tannus.ds.ArrayTools;
+using tannus.FunctionTools;
 
 @:structInit
 class FileFilter {
 	/* Constructor Function */
 	public function new(name:String, extensions:Array<String>, ?mimes:Array<String>):Void {
 		this.name = name;
-		this.extensions = extensions;
+		this.extensions = extensions.map(x -> x.toLowerCase().trim());
 		this.mimes = mimes;
 	}
 
@@ -63,7 +64,7 @@ class FileFilter {
       * perform basic extension-name check
       */
     public inline function test(path : String):Bool {
-        return extensions.has(path.afterLast( '.' ));
+        return extensions.has(path.afterLast('.').toLowerCase());
     }
 
 /* === Instance Fields === */
