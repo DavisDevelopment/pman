@@ -219,7 +219,7 @@ class ActorTable extends Table {
     }
 
     private inline function aprta(p : ArrayPromise<Maybe<ActorRow>>):ArrayPromise<Maybe<Actor>> {
-        return p.map( mrta );
+        return p.vmap( mrta );
     }
 
     private inline function mrta(row : Maybe<ActorRow>):Maybe<Actor> {
