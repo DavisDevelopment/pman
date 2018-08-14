@@ -23,6 +23,8 @@ import pman.ui.*;
 import pman.db.*;
 import pman.edb.*;
 import pman.events.*;
+import pman.bg.media.MediaSource;
+import pman.bg.media.MediaType;
 import pman.media.*;
 import pman.ipc.RendererIpcCommands;
 import pman.async.*;
@@ -72,6 +74,8 @@ class BPlayerMain extends Application {
         else {
             throw 'Error: Only one instance of BPlayerMain can be constructed';
         }
+
+        onready(expose_globals.bind(win));
 	}
 
 /* === Instance Methods === */
@@ -156,6 +160,77 @@ class BPlayerMain extends Application {
 
 	function test_streams() {
 
+	}
+
+    /**
+      expose global variables and functions
+     **/
+	function expose_globals(window: tannus.html.Win) {
+	    var described:Anon<js.Object.ObjectPropertyDescriptor> = {
+
+	    };
+
+        function createMediaSource(x: Dynamic):MediaSource {
+            if ((x is MediaSource)) {
+                return cast(x, MediaSource);
+            }
+            else if ((x is String)) {
+                return cast(x, String).toMediaSource();
+            }
+            else if ((x is tannus.sys.CPath)) {
+                return Std.string( x ).toMediaSource();
+            }
+            else {
+                var sx:String = Std.string( x );
+                return sx.toMediaSource();
+            }
+        }
+
+        function createMediaType(x: Dynamic):MediaType {
+            if ((x is String)) {
+                switch (cast(x, String).toLowerCase()) {
+                    case 'image'|'picture'|'img'|'pic':
+                        return MTImage;
+
+                    case 'audio'|'music':
+                        return MTAudio;
+
+                    case 'video'|'movie':
+                        return MTVideo;
+
+                    case _:
+                        return MTUnknown;
+                }
+            }
+            else if ((x is MediaType)) {
+                return cast(x, MediaType);
+            }
+            else {
+                return null;
+            }
+        }
+
+	    var pmExposed:Anon<Dynamic> = Anon.of(untyped {
+            mediaSource: createMediaSource,
+            mediaType: createMediaType
+	    });
+
+	    var exposed:Anon<Dynamic> = Anon.of({
+            pm: pmExposed
+	    });
+
+	    function exposeDescribed(o: Anon<js.Object.ObjectPropertyDescriptor>) {
+	        js.Object.defineProperties(window, cast o);
+	    }
+
+	    function expose(o: Anon<Dynamic>) {
+	        for (k in o.keys()) {
+	            window.expose(k, o[k]);
+	        }
+	    }
+
+	    exposeDescribed( described );
+	    expose( exposed );
 	}
 
     /**
