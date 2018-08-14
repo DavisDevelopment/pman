@@ -67,6 +67,15 @@ class URITools {
         return path_pattern().match( s );
     }
 
+    public static function isPathUri(s: String):Bool {
+        return (isUri(s) && (switch protocol( s ) {
+            case 'file': true;
+            case null: false;
+            case (_.toLowerCase().trim() => proto) if (proto == 'file'): true;
+            case _: false;
+        }));
+    }
+
     /**
       * convert (if possible) [s] into a valid URI
       */
