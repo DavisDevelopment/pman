@@ -55,7 +55,7 @@ class PlayerSession {
 	public function new(p : Player):Void {
 		player = p;
 
-		playbackProperties = new PlayerPlaybackProperties(1.0, 1.0, false);
+		//playbackProperties = new PlayerPlaybackProperties(1.0, 1.0, false);
 
 		trackChanging = new Signal();
 		trackChanged = new Signal();
@@ -655,11 +655,11 @@ class PlayerSession {
 	/**
 	  * encode PlaybackProperties
 	  */
-	public function encodePlaybackSettings():ByteArray {
-	    var s = new Serializer();
-	    playbackProperties.hxSerialize( s );
-	    return ByteArray.ofString(s.toString());
-	}
+	//public function encodePlaybackSettings():ByteArray {
+		//var s = new Serializer();
+		//playbackProperties.hxSerialize( s );
+		//return ByteArray.ofString(s.toString());
+	//}
 
 	/**
 	  * decode PlaybackProperties
@@ -933,9 +933,9 @@ class PlayerSession {
 	public var tab(get, never):Null<PlayerTab>;
 	private inline function get_tab() return activeTab;
 
-    @:deprecated('PlayerPlaybackProperties has been deprecated in favor of ApplicationState.PlaybackConfig')
-	public var pp(get, never):PlayerPlaybackProperties;
-	private inline function get_pp():PlayerPlaybackProperties return playbackProperties;
+    //@:deprecated('PlayerPlaybackProperties has been deprecated in favor of ApplicationState.PlaybackConfig')
+	//public var pp(get, never):PlayerPlaybackProperties;
+	//private inline function get_pp():PlayerPlaybackProperties return playbackProperties;
 
 	public var shuffle(get, set):Bool;
 	private inline function get_shuffle():Bool return appState.playback.shuffle;
@@ -984,7 +984,7 @@ class PlayerSession {
 /* === Instance Fields === */
 
 	public var player : Player;
-	public var playbackProperties : PlayerPlaybackProperties;
+	//public var playbackProperties : PlayerPlaybackProperties;
 	//public var playlist : Playlist;
 
 	// session name, assigned when session is saved or loaded
