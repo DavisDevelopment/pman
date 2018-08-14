@@ -80,6 +80,9 @@ using pman.core.PlayerTools;
 using tannus.math.RandomTools;
 using pman.core.ExecutorTools;
 
+/**
+  model/controller for player functionality
+ **/
 class Player extends EventDispatcher {
 	/* Constructor Function */
 	public function new(main:BPlayerMain, page:PlayerPage):Void {
