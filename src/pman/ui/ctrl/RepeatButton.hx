@@ -14,6 +14,8 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.ui.*;
 
+import pman.bg.media.RepeatType;
+
 import tannus.math.TMath.*;
 import foundation.Tools.*;
 

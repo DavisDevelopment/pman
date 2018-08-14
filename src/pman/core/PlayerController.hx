@@ -18,6 +18,7 @@ import pman.core.PlayerPlaybackProperties;
 import pman.core.PlaybackTarget;
 import pman.core.PlayerStatus;
 import pman.bg.media.MediaFeature;
+import pman.bg.media.RepeatType;
 import pman.media.*;
 import pman.async.*;
 

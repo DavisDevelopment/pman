@@ -15,6 +15,7 @@ import gryffin.display.*;
 import electron.ext.FileFilter;
 
 import pman.media.*;
+import pman.bg.media.RepeatType;
 import pman.display.*;
 import pman.display.media.*;
 import pman.core.history.PlayerHistoryItem;
