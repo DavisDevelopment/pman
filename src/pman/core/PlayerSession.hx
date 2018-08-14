@@ -1,6 +1,5 @@
 package pman.core;
 
-import haxe.extern.EitherType;
 
 import tannus.io.*;
 import tannus.ds.*;
@@ -23,27 +22,30 @@ import pman.core.history.PlayerHistoryItem as PHItem;
 import pman.core.PlayerPlaybackProperties;
 import pman.core.JsonData;
 import pman.core.PlaybackTarget;
+
 import pman.async.*;
 import tannus.async.*;
 
-import edis.Globals.*;
-import pman.Globals.*;
-import Slambda.fn;
-
 import haxe.Serializer;
 import haxe.Unserializer;
+import haxe.ds.Option;
+import haxe.extern.EitherType;
 
-using Std;
+import Slambda.fn;
+import edis.Globals.*;
+import pman.Globals.*;
+
+using Slambda;
+using tannus.ds.ArrayTools;
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
-using tannus.ds.ArrayTools;
-using Slambda;
 using pman.media.MediaTools;
-using tannus.math.RandomTools;
 using tannus.async.Asyncs;
 using tannus.FunctionTools;
 using tannus.html.JSTools;
+
+using Std;
+using tannus.math.RandomTools;
 
 /**
   * Object used to represent the current media Playback context
