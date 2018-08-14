@@ -4,4 +4,6 @@ enum MediaType {
     MTAudio;
     MTVideo;
     MTImage;
+
+    MTUnknown;
 }
