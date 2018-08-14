@@ -26,6 +26,7 @@ using tannus.ds.ArrayTools;
 using Slambda;
 using tannus.async.Asyncs;
 using pman.format.pmsh.ExprTools;
+using tannus.FunctionTools;
 
 class Interpreter {
     /* Constructor Function */
@@ -471,7 +472,10 @@ class Interpreter {
     static function ptop<T>(promise:Promise<T>, ?isnil:T->Bool):Promise<Option<T>> {
         if (isnil == null)
             isnil = (x -> true);
-        isnil = fn(_ != null && isnil(_));
+        //isnil = fn(_ != null && isnil(_));
+        isnil = isnil.wrap(function(_, x:T):Bool {
+            return (x != null && _( x ));
+        });
         return promise.transform(x -> (isnil( x ) ? Option.None : Option.Some(x)));
     }
 
