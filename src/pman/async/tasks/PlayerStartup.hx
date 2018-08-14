@@ -27,6 +27,9 @@ using pman.async.VoidAsyncs;
 using pman.async.Asyncs;
 using pman.bg.URITools;
 
+/**
+  task for handling the Player's "boot-cycle"
+ **/
 @:access( pman.core.Player )
 class PlayerStartup extends Task1 {
     /* Constructor Function */
@@ -34,34 +37,23 @@ class PlayerStartup extends Task1 {
         super();
 
         player = p;
+
+        progress = 0.0;
+        statusMessage = '';
     }
 
 /* === Instance Methods === */
 
     /**
-      * execute [this] Task
-      */
+      execute [this] Task
+     **/
     override function execute(complete : VoidCb):Void {
-        //[
-            //restore_playbackProperties,
-            //startup_loads
-        //]
-        //.series( complete );
         startup_loads( complete );
     }
 
     /**
-      * restore playback properties if there are any saved
-      */
-    private function restore_playbackProperties(done : VoidCb):Void {
-        defer(function() {
-            done();
-        });
-    }
-
-    /**
-      * perform startup media loading
-      */
+      perform startup media loading
+     **/
     private function startup_loads(done : VoidCb):Void {
         var src:String = (player.flag('src') : String);
         var cli:Bool = (launchInfo.argv.hasContent() || src == 'cli' || src == 'command-line-input');
@@ -80,8 +72,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * perform session-loading startup tasks
-      */
+      perform session-loading startup tasks
+     **/
     private function startup_load_session(done : VoidCb):Void {
         if ( appState.sessMan.autoRestoreSession ) {
             startup_load_default_session( done );
@@ -92,8 +84,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * load default saved player session
-      */
+      load default saved player session
+     **/
     private function startup_load_default_session(done : VoidCb):Void {
         // load the default session
         if ( appState.sessMan.restorePreviousSession ) {
@@ -108,8 +100,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * prompt the user whether to restore session
-      */
+      prompt the user whether to restore session
+     **/
     private function startup_confirm_load_session(done : VoidCb):Void {
         if (appState.sessMan.restorePreviousSession && player.session.hasSavedState()) {
             declareReady(function(?err) {
@@ -130,8 +122,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * load media from command-line input
-      */
+      load media from command-line input
+     **/
     private function startup_load_cli(done : VoidCb):Void {
         // parse the launch info
         parseLaunchInfo();
@@ -167,22 +159,22 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * convert list of arbitrary paths to a list of paths that all point to openable media files that actually exist
-      */
+      convert list of arbitrary paths to a list of paths that all point to openable media files that actually exist
+     **/
     private inline function expand_paths(a : Array<Path>):Array<Path> {
         return new PathListConverter().convert(a.filter.fn(Fs.exists(_)));
     }
 
     /**
-      * convert list of Paths into a list of Tracks
-      */
+      convert list of paths into a list of Tracks
+     **/
     private function resolve_tracks(a : Array<Path>):Array<Track> {
         return new FileListConverter().convert(a.map.fn(new File( _ ))).toArray();
     }
 
     /**
-      * parse out the launchInfo
-      */
+      parse out launch info
+     **/
     private function parseLaunchInfo(?i: LaunchInfo):Void {
         if (i == null) {
             i = launchInfo;
@@ -237,8 +229,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * resolve a list of Strings to a list of absolute paths
-      */
+      resolve a list of strings to a list of absolute paths
+     **/
     private function absolutes(array:Array<String>, ?cwd:Path, ?env:Map<String, String>):Array<Path> {
         if (array.empty()) {
             return [];
@@ -263,8 +255,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * resolve the given String to an absolute Path
-      */
+      resolve the String to an absolute path
+     **/
     private function absolute(s:String, ?cwd:Path, ?env:Map<String, String>):Null<Path> {
         if (cwd == null) {
             cwd = Sys.getCwd();
@@ -308,8 +300,8 @@ class PlayerStartup extends Task1 {
     }
 
     /**
-      * announce Player's readiness
-      */
+      announce player's readiness
+     **/
     private function declareReady(done : VoidCb):Void {
         player._rs.announce();
         defer(done.void());
