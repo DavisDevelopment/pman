@@ -131,8 +131,8 @@ class Player extends EventDispatcher {
 /* === Instance Methods === */
 
 	/**
-	  * attach [this] Player to the given Stage
-	  */
+	  attach [this] Player to the given Stage
+	 **/
 	public function attachToStage(stage : Stage):Void {
 		stage.addChild( view );
 
@@ -140,8 +140,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * initialize [this] Player, once it has been given a view
-	  */
+	  initialize [this] Player, once it has been given a view
+	 **/
 	private function initialize(stage : Stage):Void {
 	    var startup = new PlayerStartup( this );
 	    startup.run(function(?error : Dynamic) {
@@ -157,9 +157,9 @@ class Player extends EventDispatcher {
 	    });
 	}
 
-	/**
-	  * test the 'curses' shit
-	  */
+    /**
+      test the 'curses' shit
+     **/
 	private function _test_curses(stage: Stage):Void {
 	    /* prepare grid */
 	    var grid = new CellGrid(100, 100);
@@ -183,8 +183,8 @@ class Player extends EventDispatcher {
 	}
 
     /**
-      * test the character matrix class
-      */
+      test the character matrix class
+     **/
 	private function _test_tty(stage: Stage):Void {
 	    // create the character-matrix view
 	    var matrix = new pman.ui.views.CharacterMatrixView({
@@ -221,7 +221,6 @@ class Player extends EventDispatcher {
                 bold: true
             };
 
-            //c.etch(fn(_.write('[== ')), boldred)
             c.write('[== ', null, null, boldred);
             c.write('this should now be the last line of text');
             c.write(' ==]', null, null, boldred);
@@ -244,12 +243,11 @@ class Player extends EventDispatcher {
             view.addSibling( ttyr );
         }
         window.expose('renderMatrix', attachR);
-        //wait(5000, attachR);
 	}
 
-	/**
-	  * a frame has passed
-	  */
+    /**
+      'tick' is called every frame
+     **/
 	public function tick():Void {
 	    dispatch('tick', null);
 	    controller.tick();
@@ -260,9 +258,9 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * attach a component to [this] Player
-	  */
+    /**
+      attach a component to [this] Player
+     **/
 	public function attachComponent(c : PlayerComponent):Void {
 	    if (!components.has( c )) {
 	        components.push( c );
@@ -278,9 +276,9 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * detach a component from [this] Player
-	  */
+    /**
+      detach the given component from [this] Player
+     **/
 	public function detachComponent(c : PlayerComponent):Bool {
 	    var res = components.remove( c );
 	    if ( res ) {
@@ -290,8 +288,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * 'skim' the current media
-	  */
+	  skim the current media
+	 **/
 	public function skim():Void {
 	    if (!components.any.fn(Std.is(_, pman.core.comp.Skimmer))) {
 	        var skimr = new pman.core.comp.Skimmer();
@@ -299,16 +297,16 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * post a Message to the message board
-	  */
+    /**
+      post a message to the Message Board
+     **/
 	public inline function message(msg : EitherType<String, MessageOptions>):Void {
 		view.messageBoard.post( msg );
 	}
 
-	/**
-	  * Create a PromptBox, to prompt the user for information
-	  */
+    /**
+      create a prompt box, to prompt the user for information
+     **/
 	public function prompt(msg:String, ?placeholder:String, ?value:String, callback:Null<String>->Void):PromptBox {
 		var box = new PromptBox();
 		box.title = msg;
@@ -336,9 +334,9 @@ class Player extends EventDispatcher {
 		return box;
 	}
 
-	/**
-	  * prompt the user to confirm a something
-	  */
+    /**
+      prompt the user to confirm something
+     **/
 	public function confirm(msg:String, callback:Bool->Void):ConfirmBox {
 	    var box = new ConfirmBox();
 	    box.prompt(msg, function(v) {
@@ -352,14 +350,14 @@ class Player extends EventDispatcher {
 	/**
 	  * open and initiate a QuickOpen prompt
 	  */
-	public function qoprompt():Void {
-	    var box = new QuickOpenPrompt();
-	    box.init(function() {
-	        box.prompt(function() {
+	//public function qoprompt():Void {
+		//var box = new QuickOpenPrompt();
+		//box.init(function() {
+			//box.prompt(function() {
 
-	        });
-	    });
-	}
+			//});
+		//});
+	//}
 
 	/**
 	  parse the given Launch Info
@@ -368,42 +366,42 @@ class Player extends EventDispatcher {
 	    //TODO
 	}
 
-	/**
-	  * show playlist view
-	  */
+    /**
+      show the Playlist view
+     **/
 	public inline function showPlaylist():Void {
 		page.openPlaylistView();
 	}
 
-	/**
-	  * hide playlist view
-	  */
+    /**
+      hide the Playlist view
+     **/
 	public inline function hidePlaylist():Void {
 		page.closePlaylistView();
 	}
 
-	/**
-	  * test whether the playlist view is open
-	  */
+    /**
+      check whether the Playlist view is open
+     **/
 	public inline function isPlaylistOpen():Bool {
 		return page.isPlaylistViewOpen();
 	}
 
-	/**
-	  * toggle the playlist view
-	  */
+    /**
+      toggle the Playlist view
+     **/
 	public inline function togglePlaylist():Void {
 	    page.togglePlaylistView();
 	}
 
-	/**
-	  * obtain reference to playlist view
-	  */
+    /**
+      obtain a reference to the playlist view
+     **/
 	public inline function getPlaylistView():Null<PlaylistView> return page.playlistView;
 
-	/**
-	  * open the Bookmark editor
-	  */
+    /**
+      open the Bookmark Editor
+     **/
 	public function editBookmarks():Void {
 	    if (track == null)
 	        return ;
@@ -415,9 +413,9 @@ class Player extends EventDispatcher {
 	    });
 	}
 
-	/**
-	  * open the Preferences editor
-	  */
+    /**
+      open the preferences editor
+     **/
 	public function editPreferences():Void {
 	    if (app.body.currentPage == page) {
 	        var pp = new PreferencesPage( app );
@@ -425,9 +423,9 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * handle the closing of the Player page
-	  */
+    /**
+      handle the closing of the PlayerPage
+     **/
 	public function close():Void {
 	    dispatch('close', null);
 	    pause();
@@ -436,9 +434,9 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * handle the player page reopening
-	  */
+    /**
+      handle the re-opening of the PlayerPage
+     **/
 	public function reopen():Void {
 	    dispatch('reopen', null);
 	    if (track != null && track.renderer != null) {
@@ -446,9 +444,9 @@ class Player extends EventDispatcher {
 	    }
 	}
 
-	/**
-	  * save current playlist to the filesystem
-	  */
+    /**
+      save the current playlist to the filesystem
+     **/
 	public function savePlaylist(saveAs:Bool=false, ?name:String, ?format:String, ?done:Void->Void):Void {
         var l:Playlist = session.playlist;
 
@@ -516,9 +514,9 @@ class Player extends EventDispatcher {
         }
 	}
 
-	/**
-	  * load the saved playlist by the given name
-	  */
+    /**
+      restore a saved playlist
+     **/
 	public function loadPlaylist(name:String, ?done:Void->Void):Void {
 	    if (app.appDir.playlistExists( name )) {
 	        var plf = app.appDir.playlistFile( name );
@@ -555,9 +553,9 @@ class Player extends EventDispatcher {
         }
 	}
 
-	/**
-	  * save the current playlist to a file
-	  */
+    /**
+      export the current playlist to a file
+     **/
 	public function exportPlaylist(?done:Void->Void):Void {
 	    function cb(path : Path) {
 	        var supportedFormats:Array<String> = ['m3u', 'xspf'];
@@ -590,9 +588,6 @@ class Player extends EventDispatcher {
 	    });
 	}
 
-	/**
-	  * save the Session into a File
-	  */
 	@:deprecated('betty')
 	public function saveState(?location:Path):Void {
 	    // if configured to save session data even when the session data is empty
@@ -607,34 +602,34 @@ class Player extends EventDispatcher {
         }
 	}
 
-	/**
-	  * save the Session, automatically
-	  */
+    /**
+      save the session, automatically
+     **/
 	public inline function saveStateAuto():Void {
 	    if ( appState.sessMan.autoSaveSession ) {
 	        saveState();
 	    }
 	}
 
-	/**
-	  * restore previously saved Session
-	  */
+    /**
+      restore previously saved session
+     **/
 	public function restoreState(?name:String, ?dir:String, ?done:VoidCb):Void {
 	    session.restore(name, dir, done);
 	}
 
-	/**
-	  * get the current player status
-	  */
+    /**
+      get the current player status
+     **/
 	public function getStatus():PlayerStatus {
 	    return c.getStatus();
 	}
 
 /* === Media Methods === */
 
-	/**
-	  * load, switch to, and play the given Track
-	  */
+    /**
+      load, switch to, and play the given track
+     **/
 	public function openTrack(track:Track, ?cb:OpenCbOpts):Void {
 		if (cb == null) {
 			cb = {};
@@ -693,31 +688,32 @@ class Player extends EventDispatcher {
 	}
 
     /**
-      * open some Media
-      */
+      open some media
+     **/
 	public inline function openMedia(provider:MediaProvider, ?cb:OpenCbOpts):Void {
 		openTrack(new Track( provider ), cb);
 	}
 
 /* === System Methods === */
 
-	/**
-	  * wait until Player is ready
-	  */
+    /**
+      wait until the Player is ready
+     **/
 	public inline function onReady(callback : Void->Void):Void {
-	    _rs.await( callback );
+	    _rs.on( callback );
 	}
 
-	/**
-	  * add the Media referred to by the given paths to the Session
-	  */
+    /**
+      add the Media items referred to by [paths] to [this]'s queue
+     **/
+    @:deprecated
 	public inline function addPathsToSession(paths : Array<String>):Void {
 	    addItemList(paths.map(s->s.toTrack()));
 	}
 
-	/**
-	  * capture snapshot of media
-	  */
+    /**
+      capture a snapshot of media
+     **/
 	public function snapshot(?size:String, ?done:VoidCb):Void {
 	    done = done.nn().toss();
 
@@ -750,9 +746,9 @@ class Player extends EventDispatcher {
         });
 	}
 
-	/**
-	  * add a bookmark to the current time
-	  */
+    /**
+      add a bookmark
+     **/
 	public function addBookmark(?done:VoidCb):Void {
 	    // check whether we're currently playing
         var wasPlaying:Bool = getStatus().equals( Playing );
@@ -807,9 +803,9 @@ class Player extends EventDispatcher {
         }
 	}
 
-	/**
-	  * prompt the user to select media files
-	  */
+    /**
+      prompt the user to select media files
+     **/
 	public function selectFiles(callback : Array<File> -> Void):Void {
 		// middle-man callback to map the paths to File objects
 		function _callback(?error, ?paths:Array<Path>):Void {
@@ -830,9 +826,9 @@ class Player extends EventDispatcher {
 		}, _callback);
 	}
 
-	/**
-	  * prompt the user to select a directory
-	  */
+    /**
+      prompt the user to select a directory
+     **/
 	public function selectDirectory(callback : Array<Directory> -> Void):Void {
 		function _callback(?error, ?paths:Array<Path>):Void {
 			var dirs = [];
@@ -851,9 +847,9 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * prompt the user to select a Directory, extract all Media files from that directory, and
-	  * build a Playlist from them
-	  */
+	  prompt the user to select a Directory, extract all Media files from that directory, and
+	  build a Playlist from them
+	 **/
 	public function selectDirectoryToPlaylist(callback : Array<Track>->Void):Void {
 		selectDirectory(function( dirs ) {
 			if (dirs.empty()) {
@@ -868,30 +864,30 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * prompt user to select some files, and build Playlist out of results
-	  */
+	  prompt user to select some files, and build Playlist out of results
+	 **/
 	public function selectFilesToPlaylist(callback : Array<Track>->Void):Void {
 		selectFiles(function( files ) {
 		    callback(files.convertToTracks());
 		});
 	}
 
-	/**
-	  * prompt the user to input one or more Urls
-	  */
+    /**
+      prompt the user to input one or more urls
+     **/
 	public function promptForAddresses(callback : Array<String> -> Void):Void {
 		prompt('Enter Address:', 'http://www.website.com/path/to/video.mp4', function(text : String) {
 			text = text.trim();
 			var url:Url = Url.fromString( text );
-			url = _map_address( url );
+			//url = _map_address( url );
 			callback([url]);
 		});
 	}
 	public inline function selectAddresses(f : Array<String> -> Void):Void promptForAddresses( f );
 
 	/**
-	  * prompt the user for media addresses, and create a Playlist from them
-	  */
+	  prompt the user for media addresses, and create a Playlist from them
+	 **/
 	public function selectAddressesToPlaylist(callback : Array<Track>->Void):Void {
 		selectAddresses(function(urls) {
 			callback(urls.map.fn(Track.fromUrl( _ )));
@@ -899,8 +895,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * select files and add them to the queue
-	  */
+	  select files and add them to the queue
+	 **/
 	public function selectAndOpenFiles(?done : Array<Track>->Void):Void {
 		selectFilesToPlaylist(function( tracks ) {
 			addItemList(tracks, function() {
@@ -912,8 +908,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * select entirety of a Directory and add them to the queue
-	  */
+	  select entirety of a Directory and add them to the queue
+	 **/
 	public function selectAndOpenDirectory(?done : Array<Track>->Void):Void {
 		selectDirectoryToPlaylist(function( tracks ) {
 			addItemList(tracks, function() {
@@ -925,8 +921,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * select urls, and add them to the queue
-	  */
+	  select urls, and add them to the queue
+	 **/
 	public function selectAndOpenAddresses(?done : Array<Track>->Void):Void {
 		selectAddressesToPlaylist(function( tracks ) {
 			addItemList(tracks, function() {
@@ -937,41 +933,23 @@ class Player extends EventDispatcher {
 		});
 	}
 
-	/**
-	  * create route to the current media on the http server
-	  */
-	public function httpRouteTo(?t : Track):Null<String> {
-	    if (t == null) {
-	        if (track == null)
-	            return null;
-            else
-                t = track;
-        }
-        var path = t.getFsPath();
-        if (path == null)
-            return null;
-        else {
-            return app.httpServe( path );
-        }
+    /**
+      resolve the given MediaSource to a MediaProvider instance
+     **/
+	public function resolveMediaSourceToMediaProvider(src: MediaSource):Promise<MediaProvider> {
+	    return mediaResolutionContext.resolve( src );
 	}
 
 	/**
-	  * transforms common urls that do not point to media files directly into urls that do
-	  */
-	private function _map_address(url : Url):Url {
-		return url;
-	}
-
-	/**
-	  * add a single media item to the queue
-	  */
+	  add a single media item to the queue
+	 **/
 	public inline function addItem(item : Track):Void {
 		session.addItem( item );
 	}
 
 	/**
-	  * add a batch of media items to the queue
-	  */
+	  add a batch of media items to the queue
+	 **/
 	public function addItemList(items:Array<Track>, ?done:Void->Void):Void {
 	    items = items.filter(function(item) {
 			//echo( item.source );
@@ -1022,7 +1000,7 @@ class Player extends EventDispatcher {
             }
 
             // shuffle the tracks
-            if ( session.pp.shuffle ) {
+            if ( session.shuffle ) {
                 var rand = new Random();
                 items = rand.shuffle( items ).compact();
             }
@@ -1061,8 +1039,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * clear the playlist
-	  */
+	  clear the playlist
+	 **/
 	public function clearPlaylist():Void {
 		if (session.hasMedia()) {
 			session.blur();
@@ -1080,8 +1058,8 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * shuffle the playlist
-	  */
+	  shuffle the playlist
+	 **/
 	public function shufflePlaylist():Void {
         var pl = session.playlist.toArray();
         clearPlaylist();
@@ -1090,37 +1068,37 @@ class Player extends EventDispatcher {
         addItemList( pl );
 	}
 
-	/**
-	  * get a media item by it's index in the playlist
-	  */
+    /**
+      get a Track instance by its index in the queue
+     **/
 	public inline function getTrack(index : Int):Null<Track> {
 		return session.playlist[index];
 	}
 
 	/**
-	  * get the media item by offset from current media item
-	  */
+	  get the media item by offset from current media item
+	 **/
 	public inline function getTrackByOffset(offset : Int):Null<Track> {
         return getTrack(session.indexOfCurrentMedia() + offset);
 	}
 
 	/**
-	  * get the media item after the current one in the queue
-	  */
+	  get the media item after the current one in the queue
+	 **/
 	public inline function getNextTrack():Null<Track> {
 		return getTrackByOffset( 1 );
 	}
 	
 	/**
-	  * get the media item before the current one in the queue
-	  */
+	  get the media item before the current one in the queue
+	 **/
 	public inline function getPreviousTrack():Null<Track> {
 		return getTrackByOffset( -1 );
 	}
 
 	/**
-	  * when the focus has just changed
-	  */
+	  when the focus has just changed
+	 **/
 	private function _onTrackChanged(delta : Delta<Null<Track>>):Void {
 		if (delta.current == null) {
 			app.title = 'PMan';
@@ -1195,8 +1173,8 @@ class Player extends EventDispatcher {
 	}
 
     /**
-      * current Track is about to lose focus and be replaced by a new one
-      */
+      current Track is about to lose focus and be replaced by a new one
+     **/
 	private function _onTrackChanging(delta : Delta<Null<Track>>):Void {
 		if (delta.previous == null) {
 			null;
@@ -1221,20 +1199,16 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * current Track has been 'prepared' and is fully ready for playback
-	  */
+	  current Track has been 'prepared' and is fully ready for playback
+	 **/
 	private function _onTrackReady(t : Track):Void {
 	    dispatch('track-ready', t);
 	    components.iter.fn(_.onTrackReady( t ));
 	}
 
 	/**
-	  *
-	  */
-
-	/**
-	  * build [this] context Menu
-	  */
+	  build [this] context Menu
+	 **/
 	public function buildMenu(callback : MenuTemplate->Void):Void {
 	    defer(function() {
 	        var stack = new AsyncStack();
@@ -1292,50 +1266,50 @@ class Player extends EventDispatcher {
 /* === Playback Methods === */
 
 	/**
-	  * start playback of media
-	  */
+	  start playback of media
+	 **/
 	public function play():Void {
 		c.play();
 	}
 	
 	/**
-	  * pause playback of media
-	  */
+	  pause playback of media
+	 **/
 	public function pause():Void {
 		c.pause();
 	}
 
 	/**
-	  * stop playback of media; this cannot be undone
-	  */
+	  stop playback of media; this cannot be undone
+	 **/
 	public function stop():Void {
         sim(_.stop());
 	}
 
 	/**
-	  * toggle the media's playback
-	  */
+	  toggle the media's playback
+	 **/
 	public function togglePlayback():Void {
 		c.togglePlayback();
 	}
 
 	/**
-	  * query the fullscreen status of [this] Player's window
-	  */
+	  query the fullscreen status of [this] Player's window
+	 **/
 	public inline function isFullscreen():Bool {
 		return app.browserWindow.isFullScreen();
 	}
 
 	/**
-	  * set the fullscreen status of [this] Player's window
-	  */
+	  set the fullscreen status of [this] Player's window
+	 **/
 	public inline function setFullscreen(flag : Bool):Void {
 		app.browserWindow.setFullScreen( flag );
 	}
 
-	/**
-	  * goto a Track
-	  */
+    /**
+      goto a Track by index
+     **/
 	public function gotoTrack(index:Int, ?cb:OpenCbOpts):Void {
 		// handle empty Player
 		if (!session.hasMedia()) {
@@ -1348,9 +1322,9 @@ class Player extends EventDispatcher {
 		openTrack(track, cb);
 	}
 
-	/**
-	  * goto a Track
-	  */
+    /**
+      goto a Track by offset
+     **/
 	public function gotoByOffset(offset:Int, ?cb:OpenCbOpts):Void {
 		// handle empty Player
 		if (!session.hasMedia()) {
@@ -1384,16 +1358,16 @@ class Player extends EventDispatcher {
 		openTrack(track, cb);
 	}
 
-	/**
-	  * goto the next track
-	  */
+    /**
+      goto the next Track
+     **/
 	public inline function gotoNext(?cb : OpenCbOpts):Void {
 		gotoByOffset(1, cb);
 	}
 	
 	/**
-	  * goto the previous track, or the beginning of the Track
-	  */
+	  goto the previous Track
+	 **/
 	public function gotoPrevious(?cb : OpenCbOpts):Void {
 	    if (currentTime >= 5.0) {
 	        currentTime = 0.0;
@@ -1404,8 +1378,8 @@ class Player extends EventDispatcher {
 	}
 	
 	/**
-	  * start current track over, erasing previous playback progress if present
-	  */
+	  start current track over, erasing previous playback progress if present
+	 **/
 	public function startOver(?cb : Void->Void):Void {
 	    inline function done() {
 	        if (cb != null)
@@ -1428,32 +1402,31 @@ class Player extends EventDispatcher {
 	}
 
 	/**
-	  * override [this] Player's dispatch method
-	  */
+	  override [this] Player's dispatch method
+	 **/
 	override function dispatch<T>(name:String, data:T):Void {
 	    super.dispatch(name, data);
 
-	    var now:Date = Date.now();
-	    eventTimes[name] = now;
+	    eventTimes[name] = Date.now();
 	}
 
 	/**
-	  * get most recent recent occurrence time (if any) for the given event
-	  */
+	  get most recent recent occurrence time (if any) for the given event
+	 **/
 	public inline function getMostRecentOccurrenceTime(event : String):Maybe<Date> {
 	    return eventTimes[event];
 	}
 
-	/**
-	  * execute a String of pmbash code
-	  */
+    /**
+      execute a String of pmbash code
+     **/
 	public function exec(code:String, done:VoidCb):Void {
 	    pmbashInterp.executeString(code, done);
 	}
 
 	/**
-	  * open a pmbash terminal
-	  */
+      open a pmbash terminal
+	 **/
 	public function terminal(?complete:VoidCb, ?code:String):Void {
 	    if (complete == null) {
 	        complete = (function(?e) null);
@@ -1478,8 +1451,8 @@ class Player extends EventDispatcher {
 	}
 
     /**
-      * get or set the value of a flag
-      */
+      get or set the value of a flag
+     **/
 	public function flag<T>(key:String, ?value:T):Null<T> {
 	    if (value == js.Lib.undefined) {
 	        return flags[key];
@@ -1489,80 +1462,95 @@ class Player extends EventDispatcher {
         }
 	}
 
-	/**
-	  * verify existence of a flag
-	  */
+    /**
+      verify the existence of a flag
+     **/
 	public function hasFlag(flag : String):Bool {
 	    return flags.exists( flag );
 	}
 
     /**
-      * delete a flag
-      */
+      delete a flag
+     **/
 	public function removeFlag(flag : String):Bool {
 	    return flags.remove( flag );
 	}
 
-	/**
-	  * add a flag
-	  */
+    /**
+      add a flag
+     **/
 	public inline function addFlag(flag : String):Void {
 	    this.flag(flag, true);
 	}
 
 /* === Computed Instance Fields === */
 
+    /* current media's duration */
 	public var duration(get, never):Duration;
 	private inline function get_duration() return c.duration;
 
+    /* current media's duration */
 	public var durationTime(get, never):Float;
 	private inline function get_durationTime() return c.durationTime;
 
+    /* whether [this] Player is currently paused */
 	public var paused(get, never):Bool;
 	private inline function get_paused() return c.paused;
 
+    /* the current playback-time */
 	public var currentTime(get, set):Float;
 	private inline function get_currentTime() return c.currentTime;
 	private inline function set_currentTime(v) return (c.currentTime = v);
 
+    /* player's current volume */
 	public var volume(get, set):Float;
 	private inline function get_volume():Float return c.volume;
 	private inline function set_volume(v : Float):Float return (c.volume = v);
 
+    /* player's current playback-speed coefficient */
 	public var playbackRate(get, set):Float;
 	private inline function get_playbackRate():Float return c.playbackRate;
 	private inline function set_playbackRate(v : Float):Float return (c.playbackRate = v);
 
+    /* whether to shuffle [this]'s queue */
 	public var shuffle(get, set):Bool;
 	private inline function get_shuffle():Bool return c.shuffle;
 	private inline function set_shuffle(v : Bool):Bool return (c.shuffle = v);
 
+    /* whether [this]'s playback is currently muted */
 	public var muted(get, set):Bool;
 	private inline function get_muted() return c.muted;
 	private inline function set_muted(v) return (c.muted = v);
 
+    /* whether (and how) to repeat the current track or queue */
 	public var repeat(get, set):RepeatType;
 	private inline function get_repeat() return c.repeat;
 	private inline function set_repeat(v) return (c.repeat = v);
 
+    /* the scale at which to display visual media */
 	public var scale(get, set):Float;
 	private inline function get_scale() return c.scale;
 	private inline function set_scale(v) return (c.scale = v);
 
+    /* whether the current media has ended */
 	public var ended(get, never):Bool;
 	private inline function get_ended() return c.ended;
 
+    /* the current Track */
 	public var track(get, never):Null<Track>;
 	private inline function get_track():Null<Track> return session.focusedTrack;
 
+    /* the current playback target */
 	public var target(get, never):PlaybackTarget;
 	private inline function get_target() return session.target;
 
+    /* the current player-controller */
 	public var c(get, never):PlayerController;
 	private inline function get_c() return controller;
 
+    /* whether [this] player is ready */
 	public var isReady(get, never): Bool;
-	private inline function get_isReady() return _rs.v;
+	private inline function get_isReady() return _rs.isReady();
 
 /* === Instance Fields === */
 
