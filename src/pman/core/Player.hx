@@ -1550,22 +1550,44 @@ class Player extends EventDispatcher {
 
 /* === Instance Fields === */
 
+    // the app's main class
 	public var app : BPlayerMain;
+
+	// the page on which [this] Player is displayed
 	public var page : PlayerPage;
+
+	// the current color palette
 	public var theme : ColorScheme;
+
+	// the view used for displaying the player
 	public var view : PlayerView;
+
+	// player-view options
 	public var viewOptions : PlayerViewOptions;
+
+	// the current session
 	public var session : PlayerSession;
+
+	// player-components that have been attached
 	public var components : Array<PlayerComponent>;
+
+	// 'controller' used for low-level nitty-gritty playback-stuff
 	public var controller : PlayerController;
+
+	// dynamic-value player-flags
 	public var flags : Dict<String, Dynamic>;
+
+	// user interface configuration stuff
 	public var conf: PlayerInterfaceConfiguration;
 
+    // interpreter for PMBash language
 	public var pmbashInterp : PMBashInterp;
 
 	//private var readyEvent : VoidSignal;
 	// ready signal
 	private var _rs : OnceSignal;
+
+	// Datetimes for all events
 	private var eventTimes : Dict<String, Date> = {new Dict();};
 }
 
