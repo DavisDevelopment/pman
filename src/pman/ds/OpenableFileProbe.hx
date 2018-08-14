@@ -10,10 +10,13 @@ import pman.media.*;
 import pman.display.*;
 import pman.display.media.*;
 import pman.db.*;
-import pman.media.MediaType;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 
 import electron.ext.FileFilter;
-import electron.Tools.defer;
+//import electron.Tools.defer;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;

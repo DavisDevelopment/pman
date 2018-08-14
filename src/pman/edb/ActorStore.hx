@@ -9,7 +9,7 @@ import tannus.sys.FileSystem as Fs;
 
 import pman.Paths;
 import pman.ds.OnceSignal as ReadySignal;
-import pman.media.info.Actor;
+import pman.bg.media.Actor;
 
 import edis.libs.nedb.DataStore;
 import edis.storage.db.Query;

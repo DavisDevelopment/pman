@@ -45,7 +45,7 @@ class MediaStore extends TableWrapper {
       * get an array of all media items
       */
     public function getAllMediaItems():ArrayPromise<MediaItem> {
-        return getAllMediaItemRows().map(function(row) {
+        return getAllMediaItemRows().vmap(function(row) {
             return mediaItem( row );
         });
     }

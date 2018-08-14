@@ -32,7 +32,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.media.*;
 import pman.media.info.*;
-import pman.media.info.Mark;
+import pman.bg.media.Mark;
 import pman.ui.*;
 import pman.ui.views.curses.models.*;
 import pman.ui.views.curses.*;

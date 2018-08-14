@@ -6,6 +6,8 @@ import tannus.sys.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.bg.media.MediaSource;
+import pman.bg.media.MediaType;
 
 import Slambda.fn;
 

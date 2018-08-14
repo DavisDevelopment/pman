@@ -12,7 +12,7 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.edb.*;
 import pman.edb.MediaStore;
-import pman.media.MediaType;
+import pman.bg.media.MediaType;
 import pman.async.*;
 import pman.async.tasks.TrackBatchCache;
 
@@ -23,6 +23,7 @@ import pman.bg.media.MediaRow;
 import pman.bg.media.MediaDataSource;
 import pman.bg.media.MediaDataSource.MediaDataSourceState;
 import pman.bg.media.MediaDataDelta;
+import pman.bg.media.Actor;
 import pman.async.tasks.TrackDataPullRaw;
 
 import haxe.Serializer;
