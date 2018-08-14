@@ -36,19 +36,22 @@ import pman.display.media.*;
 import pman.media.*;
 import pman.media.info.*;
 import pman.bg.media.Mark;
+import pman.bg.media.MediaSource;
+import pman.bg.media.MediaType;
 import pman.bg.media.RepeatType;
 import pman.ui.*;
-import pman.ui.views.curses.models.*;
-import pman.ui.views.curses.*;
 import pman.ui.PlayerMessageBoard;
 import pman.db.PManDatabase;
 import pman.ds.*;
 import pman.async.*;
+import tannus.async.*;
 import pman.async.tasks.*;
 import pman.pmbash.Interp as PMBashInterp;
 
 //[= Testing Imports =]
 import pman.sys.FSWFilter;
+import pman.ui.views.curses.models.*;
+import pman.ui.views.curses.*;
 
 //[= haxe Imports =]
 import haxe.extern.EitherType;
@@ -62,19 +65,20 @@ import pman.Globals.*;
 import pman.GlobalMacros.*;
 
 using DateTools;
+using Slambda;
+using tannus.ds.ArrayTools;
 using StringTools;
 using tannus.ds.StringUtils;
-using Lambda;
-using tannus.ds.ArrayTools;
-using Slambda;
+using tannus.math.TMath;
+using tannus.FunctionTools;
+using tannus.async.Asyncs;
+using pman.bg.URITools;
+using pman.media.MediaTools;
+using pman.core.PlayerTools;
+
+//[= probably unnecessary mixins =]
 using tannus.math.RandomTools;
 using pman.core.ExecutorTools;
-using pman.media.MediaTools;
-using pman.bg.URITools;
-using pman.core.PlayerTools;
-using pman.async.Asyncs;
-using tannus.FunctionTools;
-using tannus.math.TMath;
 
 class Player extends EventDispatcher {
 	/* Constructor Function */
