@@ -1,5 +1,6 @@
 package pman.core;
 
+//[= tannus Imports =]
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.events.*;
@@ -13,9 +14,11 @@ import tannus.media.TimeRanges;
 import tannus.math.Random;
 import tannus.graphics.Color;
 
+//[= gryffin Imports =]
 import gryffin.core.*;
 import gryffin.display.*;
 
+//[= electron Imports =]
 import electron.ext.App;
 import electron.ext.Dialog;
 import electron.ext.FileFilter;
@@ -23,6 +26,7 @@ import electron.ext.NativeImage;
 import electron.MenuTemplate;
 import electron.ext.Menu;
 
+//[= pman Imports =]
 import pman.core.PlayerSession;
 import pman.core.PlayerMediaContext;
 import pman.core.PlayerStatus;
@@ -43,12 +47,14 @@ import pman.async.*;
 import pman.async.tasks.*;
 import pman.pmbash.Interp as PMBashInterp;
 
-//== [TESTING IMPORTS]
+//[= Testing Imports =]
 import pman.sys.FSWFilter;
 
+//[= haxe Imports =]
 import haxe.extern.EitherType;
 import haxe.Constraints.Function;
 
+//[= field-level Imports =]
 import Slambda.fn;
 import tannus.math.TMath.*;
 import edis.Globals.*;
