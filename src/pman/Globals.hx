@@ -192,6 +192,9 @@ class Globals {
     public static var theme(get, never):ColorScheme;
     private static inline function get_theme() return player.theme;
 
+    public static var mediaResCtx(get, never):MediaResolutionContext;
+    private static inline function get_mediaResCtx() return player.mediaResolutionContext;
+
     public static var database(get, never):PManDatabase;
     private static inline function get_database() return engine.db;
 
