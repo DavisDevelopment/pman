@@ -319,3 +319,7 @@ typedef GridStyle = {
     fontSize: Float,
     fontSizeUnit: String
 };
+
+enum CellGridError {
+    EOutOfBounds(value:Int, min:Int, max:Int);
+}
