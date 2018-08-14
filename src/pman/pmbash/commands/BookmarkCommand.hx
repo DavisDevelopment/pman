@@ -43,7 +43,7 @@ class BookmarkCommand extends Command {
                     var name:Null<String> = args.shift();
                     var time:Null<Float> = args.shift();
                     if (time == null) time = player.currentTime;
-                    player.track.addMark(new pman.media.info.Mark(Named(name), time));
+                    player.track.addMark(new pman.bg.media.Mark(Named(name), time));
                     player.track.data.save( done );
 
                 case 'rename':

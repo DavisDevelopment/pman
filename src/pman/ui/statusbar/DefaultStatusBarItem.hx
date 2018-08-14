@@ -11,6 +11,7 @@ import gryffin.display.*;
 
 import pman.core.*;
 import pman.media.*;
+import pman.bg.media.MediaSource;
 import pman.display.*;
 import pman.display.media.*;
 import pman.ui.ctrl.*;

@@ -2,8 +2,8 @@ package pman.search;
 
 import pman.media.*;
 import pman.media.info.*;
-import pman.media.info.Mark;
-import pman.media.MediaSource;
+import pman.bg.media.Mark;
+import pman.bg.media.MediaSource;
 
 using Slambda;
 using StringTools;

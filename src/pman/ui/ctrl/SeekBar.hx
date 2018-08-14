@@ -21,7 +21,7 @@ import electron.ext.MenuItem;
 
 import pman.core.*;
 import pman.media.*;
-import pman.media.info.Mark;
+import pman.bg.media.Mark;
 import pman.media.info.*;
 import pman.display.*;
 import pman.display.media.*;

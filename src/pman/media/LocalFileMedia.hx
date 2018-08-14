@@ -13,11 +13,14 @@ import gryffin.audio.Audio;
 
 import pman.display.*;
 import pman.display.media.*;
-import pman.media.MediaType;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 
 import electron.ext.FileFilter;
 
-import foundation.Tools.defer;
+//import foundation.Tools.defer;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;

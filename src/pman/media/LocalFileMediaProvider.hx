@@ -13,6 +13,8 @@ import gryffin.audio.Audio;
 import electron.ext.FileFilter;
 
 import pman.bg.media.MediaFeature;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 
 import haxe.Serializer;
 import haxe.Unserializer;
@@ -35,30 +37,42 @@ class LocalFileMediaProvider extends MediaProvider {
 		super();
 
 		src = MediaSource.MSLocalPath( file.path );
-		var _sp = file.path.toString();
-		if (FileFilter.VIDEO.test(_sp))
+
+		var _sp:String = file.path.toString();
+		
+		if (FileFilter.VIDEO.test( _sp ))
 		    type = MediaType.MTVideo;
-        else if (FileFilter.AUDIO.test(_sp))
+
+        else if (FileFilter.AUDIO.test( _sp ))
             type = MediaType.MTAudio;
-        else if (FileFilter.IMAGE.test(_sp))
+
+        else if (FileFilter.IMAGE.test( _sp ))
             type = MediaType.MTImage;
+
 		this.file = file;
-		switch ( type ) {
+
+		switch type {
+		    /* video media has all features */
             case MTVideo:
                 addFeatures(MediaFeature.createAll());
 
+            /* audio media features */
             case MTAudio:
                 addFeatures([
-                    Playback, PlaybackSpeed,
-                    Duration, Volume, CurrentTime,
-                    FutureTime, RecordAudio, End,
-                    Mute, LoadEvent, CanPlayEvent,
-                    PlayEvent, PauseEvent, LoadedMetadataEvent,
+                    Playback,
+                    PlaybackSpeed,
+                    Duration, Volume, CurrentTime, FutureTime,
+                    RecordAudio,
+                    End,
+                    Mute,
+                    LoadEvent, CanPlayEvent, PlayEvent, PauseEvent,
+                    LoadedMetadataEvent,
                     ErrorEvent, EndEvent, ProgressEvent,
                     DurationChangeEvent, VolumeChangeEvent,
                     SpeedChangeEvent
                 ]);
 
+            /* image media */
             case MTImage:
                 addFeatures([
                     CanvasDisplay,
@@ -69,6 +83,8 @@ class LocalFileMediaProvider extends MediaProvider {
                     LoadEvent
                 ]);
 
+            /* unknown media-type */
+            case MTUnknown:
 
             case null:
                 //betty

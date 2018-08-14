@@ -7,6 +7,8 @@ import tannus.sys.*;
 import pman.core.*;
 import pman.media.*;
 import pman.media.info.Bundles;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 import pman.edb.*;
 import pman.edb.MediaStore;
 import pman.edb.Modification;

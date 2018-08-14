@@ -10,9 +10,11 @@ import foundation.*;
 
 import pman.core.*;
 import pman.media.*;
-import pman.media.info.Mark;
+import pman.bg.media.Mark;
 
-import electron.Tools.*;
+//import electron.Tools.*;
+import edis.Globals.*;
+import pman.Globals.*;
 
 using StringTools;
 using tannus.ds.StringUtils;

@@ -6,7 +6,7 @@ import tannus.sys.*;
 
 import pman.db.AppDir;
 import pman.search.QuickOpenItem;
-import pman.media.MediaSource;
+import pman.bg.media.MediaSource;
 
 import electron.ext.App;
 import electron.Tools.*;

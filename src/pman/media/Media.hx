@@ -10,6 +10,8 @@ import gryffin.media.MediaObject;
 
 import pman.display.*;
 import pman.display.media.*;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 import pman.bg.media.MediaFeature;
 
 import edis.Globals.*;
@@ -98,15 +100,23 @@ class Media {
 	public inline function isReady():Bool {
 		return _ready.value;
 	}
+
 	private inline function declareReady():Void {
 		_ready.signal.fire();
 	}
 
 /* === Instance Fields === */
 
+    /* the 'source' for [this] Media */
 	public var src(default, null):MediaSource;
+
+	/* the 'type' of Media that [this] is */
 	public var type(default, null):MediaType;
+
+	/* the features that [this] Media has */
 	public var features(default, null):Dict<MediaFeature, Bool>;
+
+	/* [this]'s Media provider */
 	public var provider : MediaProvider;
 
 	private var _ready : ReadyInfo;

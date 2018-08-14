@@ -15,13 +15,16 @@ import pman.display.*;
 import pman.display.media.*;
 import pman.db.*;
 import pman.db.MediaStore;
-import pman.media.MediaType;
+import pman.bg.media.MediaType;
+import pman.bg.media.MediaSource;
 import pman.bg.media.MediaFeature;
 import pman.bg.media.MediaDataSource;
 import pman.bg.media.MediaRow;
 import pman.ui.pl.TrackView;
 import pman.ui.*;
-import pman.media.info.Mark;
+import pman.bg.media.Mark;
+import pman.bg.media.Actor;
+import pman.bg.media.Tag;
 import pman.media.info.*;
 import pman.async.*;
 import pman.async.tasks.*;
@@ -29,6 +32,7 @@ import pman.events.EventEmitter;
 
 import haxe.Serializer;
 import haxe.Unserializer;
+import haxe.ds.Option;
 import haxe.extern.EitherType as Either;
 
 import electron.*;
@@ -231,15 +235,26 @@ class Track extends EventDispatcher implements IComparable<Track> {
     /**
       * check for equality
       */
-    public inline function equals(other : Track):Bool {
-        return (compareTo( other ) == 0);
+    public function equals(other : Track):Bool {
+        if (this == other)
+            return true;
+        else if (provider == other.provider)
+            return true;
+        else {
+            return (compareTo( other ) == 0);
+        }
     }
 
     /**
       * perform 'icompare' operation between [this] and [other]
       */
     public function compareTo(other : Track):Int {
-        return (source.compareEnumValues( other.source ));
+        //return (source.compareEnumValues( other.source ));
+        return [
+            title.comparison( other.title ),
+            source.comparison( other.source ),
+        ]
+        .drillDown();
     }
 
     /**

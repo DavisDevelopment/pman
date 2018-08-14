@@ -1,7 +1,7 @@
 package pman.search;
 
 import pman.media.*;
-import pman.media.MediaSource;
+import pman.bg.media.MediaSource;
 import pman.search.QuickOpenItem;
 
 class QoSearchEngine extends SearchEngine<QuickOpenItem> {

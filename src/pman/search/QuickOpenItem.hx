@@ -4,7 +4,7 @@ import tannus.io.*;
 import tannus.ds.*;
 import tannus.sys.*;
 
-import pman.media.MediaSource;
+import pman.bg.media.MediaSource;
 
 enum QuickOpenItem {
     QOMedia(src : MediaSource);
