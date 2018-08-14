@@ -106,6 +106,9 @@ class Player extends EventDispatcher {
         // pmbash interpreter
 		pmbashInterp = new PMBashInterp();
 
+		// create the media resolution context
+		mediaResolutionContext = new MediaResolutionContext( this );
+
 		// listen for 'trackChange' events
 		session.trackChanged.on( _onTrackChanged );
 		session.trackChanging.on( _onTrackChanging );
@@ -1583,7 +1586,9 @@ class Player extends EventDispatcher {
     // interpreter for PMBash language
 	public var pmbashInterp : PMBashInterp;
 
-	//private var readyEvent : VoidSignal;
+	// the media-resolution context
+	public var mediaResolutionContext : MediaResolutionContext;
+
 	// ready signal
 	private var _rs : OnceSignal;
 
