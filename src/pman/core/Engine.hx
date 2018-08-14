@@ -19,6 +19,9 @@ using tannus.ds.StringUtils;
 using Slambda;
 using tannus.ds.ArrayTools;
 
+/**
+  app's main engine
+ **/
 class Engine {
     /* Constructor Function */
     public function new():Void {
@@ -58,8 +61,19 @@ class Engine {
         });
     }
 
-    public inline function isReady():Bool { return rs.isReady(); }
-    public inline function onReady(f: Void->Void):Void return rs.on( f );
+    /**
+      check whether [this] Engine is 'ready'
+     **/
+    public inline function isReady():Bool { 
+        return rs.isReady(); 
+    }
+
+    /**
+      delay [f]'s invokation until [this] Engine is ready
+     **/
+    public inline function onReady(f: Void->Void):Void {
+        return rs.on( f );
+    }
 
 /* === Computed Instance Fields === */
 
@@ -87,5 +101,6 @@ class Engine {
      **/
     public var fileSystem : AsyncFs;
 
+    // signal for marking when [this] Engine is ready
     private var rs: OnceSignal;
 }
