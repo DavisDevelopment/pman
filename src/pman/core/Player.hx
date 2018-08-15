@@ -588,7 +588,6 @@ class Player extends EventDispatcher {
 	    });
 	}
 
-	@:deprecated('betty')
 	public function saveState(?location:Path):Void {
 	    // if configured to save session data even when the session data is empty
 	    if (appState.sessMan.saveEmptySession && !session.hasContent()) {

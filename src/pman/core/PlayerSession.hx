@@ -233,7 +233,6 @@ class PlayerSession {
 	  * add a Media item onto the queue
 	  */
 	private function plpush(track : Track):Void {
-		//(shuffle ? playlist.shuffledPush : playlist.push)( track );
 	    playlist.callprop((shuffle ? 'shuffledPush' : 'push'), [track]);
 	}
 
@@ -652,25 +651,6 @@ class PlayerSession {
 	  */
 	public inline function loadPlaybackSettings():Void {
 	    appState.load(appState.playback);
-	}
-
-	/**
-	  * encode PlaybackProperties
-	  */
-	//public function encodePlaybackSettings():ByteArray {
-		//var s = new Serializer();
-		//playbackProperties.hxSerialize( s );
-		//return ByteArray.ofString(s.toString());
-	//}
-
-	/**
-	  * decode PlaybackProperties
-	  */
-	public function decodePlaybackSettings(data : ByteArray):PlayerPlaybackProperties {
-	    var u = new Unserializer(data.toString());
-	    var i = Type.createEmptyInstance( PlayerPlaybackProperties );
-	    i.hxUnserialize( u );
-	    return i;
 	}
 
 	/**
