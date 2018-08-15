@@ -131,6 +131,9 @@ class PlayerTab {
         return ret;
     }
 
+    /**
+      insert the given Track at the given [pos]
+     **/
     public inline function insertTrack(pos:Int, track:Track, ?report:Bool):Void {
         playlist.insert(pos, track, report);
     }
