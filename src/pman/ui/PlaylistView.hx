@@ -50,7 +50,7 @@ class PlaylistView extends Pane {
 		player = p;
 		source = PlvSrcQueue;
 		tracks = new Array();
-		_tc = new Map();
+		trackViewCache = new Map();
 
         __bind();
 		build();
@@ -341,16 +341,6 @@ class PlaylistView extends Pane {
 		    _views.remove(nodes[index]);
 		}
 
-		/*
-		//= old, slower implementation of same algorithm
-		nodes.reverse();
-	    for (node in nodes) {
-	        list.prependItem( node );
-	        _views.remove( node );
-	    }
-	    nodes.reverse();
-	    */
-
 	    // set [nodes] as the new value for [this.tracks]
 	    this.tracks = nodes;
 
@@ -382,20 +372,21 @@ class PlaylistView extends Pane {
 	/**
 	  * create or get a TrackView for the given Track
 	  */
-	private function tview(t : Track):TrackView {
-	    var view:Null<TrackView> = viewFor( t );
-	    if (view == null) {
-	        return (_tc[tkey(t)] = new TrackView(this, t));
-	    }
-	    return view;
+	private inline function tview(t : Track):TrackView {
+	    return viewFor(t, true);
+		//var view:Null<TrackView> = viewFor( t );
+		//if (view == null) {
+			//return (trackViewCache[tkey(t)] = new TrackView(this, t));
+		//}
+		//return view;
 
 	    /*
-	    if (_tc.exists( t.uri )) {
-	        return _tc[t.uri];
+	    if (trackViewCache.exists( t.uri )) {
+	        return trackViewCache[t.uri];
 	    }
         else {
             var view = new TrackView(this, t);
-            _tc[t.uri] = view;
+            trackViewCache[t.uri] = view;
             return view;
         }
         */
@@ -404,20 +395,43 @@ class PlaylistView extends Pane {
     /**
       * get the TrackView associated with the given Track
       */
-    public function viewFor(track : Track):Null<TrackView> {
-        var _key:String = tkey( track );
-        if (!_tc.exists( _key ) && _tc.exists( track.uri )) {
-            var tmp = _tc[_key] = _tc[track.uri];
-            _tc.remove( track.uri );
+    public function viewFor(track:Track, create:Bool=false):Null<TrackView> {
+        /*[=NOTE=] this commented-out chunk was for handling the (now nonexistent) situation where a Track was registered using its URI, but has since acquired an ID
+        
+          if (!trackViewCache.exists(tkey( track )) && trackViewCache.exists( track.uri )) {
+            var tmp = trackViewCache[tkey( track )] = trackViewCache[track.uri];
+            trackViewCache.remove( track.uri );
             return tmp;
         }
-        return _tc[_key];
+        */
+
+        return 
+            if (trackViewCache.exists(tkey( track )))
+                trackViewCache[tkey( track )];
+            //else if ( create )
+                //trackViewCache[tkey( track )] = new TrackView(this, track);
+            else if ( create )
+                addTrackViewToCache(new TrackView(this, track));
+            else null;
+    }
+
+    private function addTrackViewToCache(view: TrackView):TrackView {
+        // store key to use for [view]
+        var lookup = tkey( view.track );
+
+        // if the TrackView is already registered in the cache, call is ignored
+        if (trackViewCache.exists( lookup ))
+            return view;
+
+        trackViewCache[lookup] = view;
+        //maybe emit an event of some sort here?
+        return view;
     }
 
     /**
       * compute what 'key' will be used for the given Track
       */
-    private inline function tkey(t: Track):String {
+    private static inline function tkey(t: Track):String {
         // [mediaId] is preferred when available because, at least in theory, shorter object keys have better performance
         return t.uri;
         //return (t.mediaId != null ? t.mediaId : t.uri);
@@ -610,7 +624,8 @@ class PlaylistView extends Pane {
 	public var list : Null<List> = null;
 	public var focused(default, null): Bool = false;
 
-	private var _tc : Map<String, TrackView>;
+    @:allow( pman.media.Track )
+	private var trackViewCache : Map<String, TrackView>;
 	private var _locked : Bool = false;
 }
 
