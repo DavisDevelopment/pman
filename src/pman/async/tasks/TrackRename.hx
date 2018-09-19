@@ -247,7 +247,7 @@ class TrackRename extends Task1 {
             var plv = track.player.page.playlistView;
             if (plv != null) {
                 // get reference to the PlaylistView's internal cache of TrackViews
-                var tc = @:privateAccess plv._tc;
+                var tc = @:privateAccess plv.trackViewCache;
                 var tv = tc[oldUri];
                 if (tv != null) {
                     tc.remove( oldUri );
