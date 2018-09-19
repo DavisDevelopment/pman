@@ -103,18 +103,35 @@ class PlayerPage extends Page {
 	    stage.pause();
 	}
 
+    /**
+      guarantees the return of a non-null PlaylistView object
+      ...
+      by simply erroring out when obtaining such an object isn't possible
+     **/
+	public function ensurePlaylistView():PlaylistView {
+	    if (playlistView == null) {
+	        if (player == null)
+				//throw new Errors.WTFError();
+	            throw new Errors.NullError('PlayerPage.player');
+	        return buildNewPlaylistView();
+	    }
+        
+        return playlistView;
+	}
+
 	/**
 	  * open the PlaylistView
 	  */
 	public function openPlaylistView():Bool {
-		if (playlistView == null) {
-			playlistView = new PlaylistView( player );
-		}
+		if (playlistView == null) 
+		    buildNewPlaylistView();
+		
 		if ( !playlistView.isOpen ) {
 		    playlistView.open();
 		    stage.calculateGeometry();
 		    return true;
 		}
+
 		return false;
 	}
 
@@ -126,6 +143,13 @@ class PlayerPage extends Page {
 			playlistView.close();
 			stage.calculateGeometry();
 		}
+	}
+
+    /**
+      creates, links, and returns a new PlaylistView instance
+     **/
+	private function buildNewPlaylistView() {
+	    return this.playlistView = new PlaylistView( player );
 	}
 
 	/**
