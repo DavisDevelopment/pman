@@ -375,7 +375,7 @@ class KeyboardControls {
 
             // numpad . key
             case NumpadDot:
-                if (nextCount > 1) {
+                if (getNextCount() > 1) {
                     var locked = nextCountLocked;
                     lockNextCount( !nextCountLocked );
                     if ( locked )
@@ -481,6 +481,10 @@ class KeyboardControls {
         });
     }
 
+
+    /**
+      handle the numerical keys
+     **/
     private function numkey(n:Int, e:KeyboardEvent) {
         if ( e.altKey ) {
             player.session.setTab(n - 1);
@@ -490,21 +494,51 @@ class KeyboardControls {
         }
     }
 
+    /**
+      modify the [nextCount] property
+     **/
     private function appendToNextCount(n: Int):Int {
         if ( nextCountLocked )
             return nextCount;
-        else
-            return nextCount = ((nextCount * 10) + n);
+        //return nextCount = ((nextCount * 10) + n);
+        return nextCount = switch nextCount {
+            case -1: n;
+            case _: (nextCount * 10) + n;
+        }
     }
-    private inline function mncc(n: Int):Int return appendToNextCount(n);
+
+    /**
+      shorthand for the modification of the [nextCount] property
+     **/
+    private inline function mncc(n: Int):Int {
+        return appendToNextCount(n);
+    }
+
+    /**
+      lock [nextCount] to its current value
+     **/
     private inline function lockNextCount(locked:Bool=true):Bool return (nextCountLocked = locked);
+
+    /**
+      reset and return [nextCount]
+     **/
     public function flushNextCount():Int {
-        if (nextCountLocked) return nextCount;
-        var ret = nextCount;
-        nextCount = 1;
+        if ( nextCountLocked )
+            return getNextCount();
+        var ret = getNextCount();
+        nextCount = -1;
         return ret;
     }
-    public function getNextCount():Int return nextCount;
+
+    /**
+      get the value of [nextCount]
+     **/
+    public function getNextCount():Int {
+        return switch nextCount {
+            case null | -1: 1;
+            case _: nextCount;
+        }
+    }
 
     /**
       bind [this] to keyboard events
@@ -672,7 +706,7 @@ class KeyboardControls {
     var modeHandlers: Map<String, KbCtrlModeHandler>;
     var __bound_hke:Null<NativeKbEvent->Void> = null;
 
-    var nextCount: Int = 1;
+    var nextCount: Int = -1;
     var nextCountLocked: Bool = false;
 
     var controlModeSubcategory:Null<String> = null;
