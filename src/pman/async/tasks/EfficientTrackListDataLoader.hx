@@ -171,16 +171,19 @@ class EfficientTrackListDataLoader extends Task1 {
       */
     private function update_views(done : VoidCb):Void {
         defer(function() {
-            if (tracks.length < 50) {
-                for (t in tracks)
+            var page = bpmain.player.page;
+
+            if (tracks.length < 500000) {
+                for (t in tracks) {
                     t.updateView();
+                }
             }
             else {
-                var gf = ((t:Track) -> t.updateView.bind());
-                var ca = ((a:Array<Void->Void>) -> a.iter.fn(_()));
-                for (ta in tracks.chunk( 5 )) {
-                    ca(ta.map( gf ));
-                }
+                //var gf = ((t:Track) -> t.updateView.bind());
+                //var ca = ((a:Array<Void->Void>) -> a.iter.fn(_()));
+                //for (ta in tracks.chunk( 5 )) {
+                    //ca(ta.map( gf ));
+                //}
             }
             done();
         });
@@ -204,27 +207,33 @@ class EfficientTrackListDataLoader extends Task1 {
                         }
                         else {
                             track.data = data;
-                            next();
-                            track._dataLoaded.call( data );
+                            //next();
+                            //track._dataLoaded.call( data );
+                            itemLoaded(track, data, next);
                         }
                     });
                 });
             }
         }
 
-        //var cpb = exec.createBatch();
-        //for (create in creates)
-            //cpb.asyncTask(cast create);
-
-        //for (push in pushes)
-            //cpb.asyncTask(cast push);
-
-        //cpb.start(function() {
-            //done();
-        //});
-
         /* run all created tasks */
         creates.concat(pushes).series( done );
+    }
+
+    /**
+      to be called on each [track] once the loading for its data is complete
+     **/
+    function itemLoaded(track:Track, data:TrackData, next:VoidCb) {
+        // [track.data] will usually already have been assigned by the time [itemLoaded] is called
+        if (data != track.data) {
+            track.data = data;
+        }
+
+        track._dataLoaded.call( data );
+
+        track.updateView();
+
+        next();
     }
 
     /**
@@ -316,8 +325,9 @@ class EfficientTrackListDataLoader extends Task1 {
                             return nxt( error );
                         }
                         else {
-                            nxt();
-                            track._dataLoaded.call( data );
+                            //nxt();
+                            //track._dataLoaded.call( data );
+                            itemLoaded(track, data, nxt);
                         }
                     });
                 }
