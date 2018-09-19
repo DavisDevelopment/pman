@@ -97,7 +97,18 @@ class KeyboardControls {
         switch event.key {
             /* create mark */
             case LetterM:
-                cancelNextKeyUp(LetterM).then(() -> player.addBookmark());
+                //cancelNextKeyUp(LetterM).then(() -> player.addBookmark());
+                cancelNku(LetterM, function() {
+                    player.addBookmark();
+                });
+
+            /* open the media-metadata editor window */
+            case LetterW:
+                cancelNku(LetterW, function() {
+                    if (player.track != null) {
+                        @:privateAccess player.track._edit();
+                    }
+                });
 
             case _:
                 return ;
@@ -481,6 +492,9 @@ class KeyboardControls {
         });
     }
 
+    private inline function cancelNku(keyCode:Key, fn:Void->Void) {
+        cancelNextKeyUp( keyCode ).then( fn );
+    }
 
     /**
       handle the numerical keys
