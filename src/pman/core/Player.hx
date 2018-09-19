@@ -1428,7 +1428,10 @@ class Player extends EventDispatcher {
 	 **/
 	public function terminal(?complete:VoidCb, ?code:String):Void {
 	    if (complete == null) {
-	        complete = (function(?e) null);
+	        complete = (function(?error) {
+	            if (error != null)
+	                throw error;
+	        });
 	    }
 	    if (code == null) {
 	        code = '';
