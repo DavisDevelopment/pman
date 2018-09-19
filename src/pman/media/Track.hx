@@ -361,15 +361,25 @@ class Track extends EventDispatcher implements IComparable<Track> {
         }
     }
 
+    function freeView() {
+        if (player.page.playlistView != null) {
+            var m = player.page.playlistView.trackViewCache;
+            if (m.remove( uri )) {
+                // some post-deallocation cleanup..
+            }
+        }
+    }
+
     /**
       * get the TrackView associated with [this] Track
       */
     public function getView():Null<TrackView> {
-        var p = BPlayerMain.instance.playerPage;
-        if (p.playlistView != null) {
-            return p.playlistView.viewFor( this );
-        }
-        else return null;
+        return player.page.ensurePlaylistView().viewFor( this );
+        //var p = player.page;
+        //if (p.playlistView != null) {
+            //return p.playlistView.viewFor( this );
+        //}
+        //else return null;
     }
 
     /**

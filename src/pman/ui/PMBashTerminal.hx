@@ -69,7 +69,7 @@ class PMBashTerminal extends EdisDomComponentPromptBox {
         else {
             try {
                 var expr = NewParser.runString( line );
-                trace('' + expr);
+                window.console.log( expr );
                 return Result.Value( expr );
             }
             catch (error : Dynamic) {
