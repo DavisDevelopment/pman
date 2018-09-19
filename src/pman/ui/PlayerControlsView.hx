@@ -183,6 +183,9 @@ class PlayerControlsView extends Ent {
             playingAnimation = false;
             uiEnabled = false;
             calculateGeometry( rect );
+            //[=NOTE=] this feels like a hack and can probably be done more elegantly, but it should fix the problem
+            this.trackControls.calculateGeometry( rect );
+
             if (done != null)
                 done();
         })
@@ -204,6 +207,9 @@ class PlayerControlsView extends Ent {
         .onComplete(function() {
             playingAnimation = false;
             calculateGeometry( rect );
+            //[=NOTE=] this feels like a hack and can probably be done more elegantly, but it should fix the problem
+            this.trackControls.calculateGeometry( rect );
+
             if (done != null)
                 done();
         })
@@ -228,6 +234,9 @@ class PlayerControlsView extends Ent {
 		}
 
 		__positionButtons();
+
+		//if (trackControls != null)
+			//trackControls.calculateGeometry( r );
 
 		super.calculateGeometry(cast r);
 	}

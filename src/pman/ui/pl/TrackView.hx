@@ -37,6 +37,9 @@ using tannus.math.TMath;
 using pman.Tools;
 using pman.core.ExecutorTools;
 
+/**
+  models the GUI component which displays a Track in the Queue
+ **/
 class TrackView extends Pane {
 	/* Constructor Function */
 	public function new(v:PlaylistView, t:Track):Void {
