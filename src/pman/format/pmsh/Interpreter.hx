@@ -3,6 +3,7 @@ package pman.format.pmsh;
 import tannus.io.*;
 import tannus.ds.*;
 import tannus.async.*;
+import tannus.async.promises.*;
 import tannus.sys.FileSystem as Fs;
 import tannus.TSys as Sys;
 
@@ -101,14 +102,13 @@ class Interpreter {
       * execute the given expression
       */
     public function execute(e:Expr, complete:VoidCb):Void {
-        eval(e, complete);
+        echo(eval(e, complete));
     }
 
     /**
       * execute the given String
       */
     public function executeString(s:String, complete:VoidCb):Void {
-        //var expr:Expr = Parser.runString( s );
         var expr2:Expr = NewParser.runString( s );
         trace('' + expr2);
         execute(expr2, complete);
@@ -117,7 +117,17 @@ class Interpreter {
     /**
       evaluate the given expression, and obtain its return-value
      **/
-    function eval(expr:Expr, complete:VoidCb):Promise<ExprReturn> {
+    public function eval(expr:Expr, complete:VoidCb):Promise<ExprReturn> {
+        var res:UnscopedPromise<ExprReturn> = new UnscopedPromise();
+        complete = complete.wrap(function(_, ?error) {
+            if (error != null)
+                res.reject( error );
+            else
+                res.accept( ERVoid );
+            _( error );
+        });
+
+        trace( expr );
         switch expr {
             /* evaluate a word-expression */
             case EWord(word):
@@ -135,14 +145,19 @@ class Interpreter {
 
             /* unary operator */
             case EUnaryOperator(op, expr):
-                throw EUnexpected( expr );
+                //throw EUnexpected( expr );
+                complete();
 
             /* block expression */
             case EBlock(exprs), ERoot(exprs):
-                exprs.map(e -> (next -> eval(e, next))).series( complete );
+                //exprs.map(e -> (next -> eval(e, next))).series( complete );
+                exprs.map(function(e: Expr) {
+                    return (next -> eval(e, next));
+                }).series( complete );
 
             /* basic command */
             case ECommand(cmd):
+                trace("CMD");
                 evalCmd(cmd, complete);
 
             /* function declaration */
@@ -155,7 +170,7 @@ class Interpreter {
                 complete();
         }
 
-        return Promise.resolve(ERVoid);
+        return res;
     }
 
     function evalBinop(op:Binop, left:Expr, right:Expr, complete:VoidCb) {
@@ -211,11 +226,38 @@ class Interpreter {
     function evalCmd(cmd:CommandExpr, complete:VoidCb) {
         var name = resolve.bind(wordToString(cmd.command), _).toPromise();
         name.then(function(cmd: Cmd) {
+            window.console.log( cmd );
             this.currentCmd = cmd;
         });
-        var pwp:Promise<Array<Word>> = expand.bind(cmd.parameters, _).toPromise();
+
+        var cap = getCmdArgs( cmd.parameters );
+        var cmdt:Promise<Pair<Cmd, Array<CmdArg>>> = Promise.pair(new Pair(name, cap).swap());
+        echo( cmdt );
+
+        var cmdExpr:CommandExpr = cmd;
+        cmdt.then(function(pair) {
+            var cmd:Null<Cmd> = pair.left,
+            argv:Array<CmdArg> = pair.right;
+
+            if (cmd == null) {
+                return complete(ECommandNotFound( cmdExpr.command ));
+            }
+            else {
+                //trace( cmd );
+                cmd.execute(this, argv, complete.wrap(function(_, ?error) {
+                    _(error);
+
+                    currentCmd = null;
+                }));
+            }
+        }, complete.raise());
+    }
+
+    private function getCmdArgs(words: Array<Expr>):Promise<Array<CmdArg>> {
+        var pwp:Promise<Array<Word>> = expand.bind(words, _).toPromise();
         var pwvp:Promise<Array<Dynamic>> = pwp.derive(function(p, resolve, reject) {
             p.then(function(words) {
+                trace('Words: $words');
                 resolveArgValues(words, function(?error, ?values) {
                     if (error != null) {
                         reject( error );
@@ -226,27 +268,12 @@ class Interpreter {
                 });
             }, reject);
         });
-        var pwpp:Promise<Pair<Array<Word>, Array<Dynamic>>> = Promise.pair(new Pair(pwvp, pwp));
+        var pwpp:Promise<Pair<Array<Word>, Array<Dynamic>>> = echo(Promise.pair(new Pair(pwvp, pwp)));
         var cap:Promise<Array<CmdArg>> = pwpp.transform(function(pair) {
             return pair.left.zipmap(pair.right, fn([word, value] => new CmdArg(EWord(word), value)));
         });
-        var cmdt:Promise<Pair<Cmd, Array<CmdArg>>> = Promise.pair(new Pair(cap, name));
-        var cmdExpr:CommandExpr = cmd;
-        cmdt.then(function(pair) {
-            var cmd:Null<Cmd> = pair.left,
-            argv:Array<CmdArg> = pair.right;
-
-            if (cmd == null) {
-                return complete(ECommandNotFound( cmdExpr.command ));
-            }
-            else {
-                cmd.execute(this, argv, complete.wrap(function(_, ?error) {
-                    _(error);
-
-                    currentCmd = null;
-                }));
-            }
-        }, complete.raise());
+        cap = echo( cap );
+        return cap.array();
     }
 
     /**
@@ -259,9 +286,10 @@ class Interpreter {
     /**
       * resolve a Cmd from name
       */
-    private function resolve(name:String, ?done:Cb<Cmd>):Promise<Option<Cmd>> {
+    private function resolve(name:String, ?done:Cb<Cmd>):Promise<Null<Cmd>> {
         //done(null, commands[name]);
-        return pota(Promise.resolve(commands[name]), null, done);
+        //return pota(Promise.resolve(commands[name]), null, done);
+        return Promise.resolve(commands[name]).toAsync( done );
     }
 
     /**
@@ -275,7 +303,7 @@ class Interpreter {
       obtain a value from a Word instance
      **/
     function evalWord(word: Word):Promise<Dynamic> {
-        return new Promise(function(resolve, reject) {
+        return echo(new Promise(function(resolve, reject) {
             switch word {
                 case Ident(ident):
                     return resolve( ident );
@@ -298,7 +326,7 @@ class Interpreter {
                 case Substitution(type, name, valueExpr):
                     return resolve(untyped evalSubstitution(type, evalWord(Ident(name)), valueExpr));
             }
-        });
+        }));
     }
 
     function evalSubstitution(type:SubstitutionType, left:Promise<Dynamic>, right:Expr):Promise<Dynamic> {
@@ -331,7 +359,7 @@ class Interpreter {
                     return ptop(evalWord( word )).transform(function(o: Option<Dynamic>) {
                         switch o {
                             case Some(x): return EvUntyped(x);
-                            case Some(null)|None: return EvUntyped(EvNil);
+                            case None: return EvUntyped(EvNil);
                         }
                     });
                 });
@@ -454,6 +482,14 @@ class Interpreter {
       */
     public function parsePartial(exprString : String):PmshPartial {
         return createPartialFromExpr(NewParser.runString( exprString ));
+    }
+
+    static function echo<T>(promise: Promise<T>):Promise<T> {
+        return promise.then(function(v) {
+            trace( v );
+        }, function(e) {
+            trace( e );
+        });
     }
 
     inline static function pota<T>(promise:Promise<T>, ?isnil:T->Bool, ?callback:Cb<T>):Promise<Option<T>> {
