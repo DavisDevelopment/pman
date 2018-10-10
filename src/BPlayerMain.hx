@@ -29,16 +29,20 @@ import pman.media.*;
 import pman.ipc.RendererIpcCommands;
 import pman.async.*;
 
+import tannus.ds.AVLTree;
+
 import Std.*;
+import tannus.math.TMath.*;
 import edis.Globals.*;
 import pman.Globals.*;
 import pman.GlobalMacros.*;
 
 using StringTools;
 using tannus.ds.StringUtils;
-using tannus.ds.ArrayTools;
-using Lambda;
 using Slambda;
+using tannus.ds.ArrayTools;
+using tannus.ds.IteratorTools;
+using tannus.math.TMath;
 using pman.media.MediaTools;
 using pman.bg.URITools;
 using tannus.async.Asyncs;
